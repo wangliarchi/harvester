@@ -5,6 +5,7 @@ if not exist C:\Harvester\Harvester.exe (
 	exit
 )
 cd /d C:\Harvester
+rem It may also be enhanced to check whether Harvester is running or not first using wmic
 if exist "app-data\customize\harvester-config.json" (
 	start Harvester.exe
 	echo Harvester was started successfully.
