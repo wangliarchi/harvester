@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<exe4j version="5.1" transformSequenceNumber="2">
+    <directoryPresets config="C:/OURnD/Workspace/harvester/script/exe4j"/>
+    <application name="Harvester: Automated Fulfillment Solution" distributionSourceDir="C:/Harvester">
+        <languages>
+            <principalLanguage id="en" customLocalizationFile=""/>
+        </languages>
+    </application>
+    <executable name="Harvester" type="1" iconSet="true" iconFile="C:/OURnD/Workspace/harvester/script/harvester.ico"
+                executableDir="." redirectStderr="true" stderrFile="app-data/logs/error.log" stderrMode="overwrite" redirectStdout="false"
+                stdoutFile="output.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="1" changeWorkingDirectory="false"
+                workingDirectory="." singleInstance="true" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation=""
+                executionLevel="asInvoker" checkConsoleParameter="false" globalSingleInstance="false" singleInstanceActivate="true"
+                dpiAware="false" amd64="false">
+        <messageSet/>
+        <versionInfo include="true" fileVersion="1.0.0.0" fileDescription="Automated Fulfillment Solution" legalCopyright="2017, Olivet University RnD"
+                     internalName="Harvester V1.0" productName="" companyName="Olivet University RnD" productVersion="1.0.0.0"/>
+    </executable>
+    <splashScreen show="true" width="640" height="425" bitmapFile="C:/OURnD/Workspace/harvester/script/harvester.png"
+                  windowsNative="false" textOverlay="false">
+        <text>
+            <statusLine x="40" y="550" text="Loading application ..." fontSize="8" fontColor="0,0,0" bold="true"/>
+            <versionLine x="700" y="550" text="Version 1.0" fontSize="8" fontColor="0,0,0" bold="true"/>
+        </text>
+    </splashScreen>
+    <java mainClass="edu.olivet.harvester.ui.Harvester" vmParameters="" arguments="" allowVMPassthroughParameters="true" preferredVM=""
+          bundleRuntime="true" minVersion="1.8" maxVersion="1.8" allowBetaVM="false" jdkOnly="false">
+        <searchSequence>
+            <registry/>
+            <envVar name="JAVA_HOME"/>
+            <envVar name="JDK_HOME"/>
+        </searchSequence>
+        <classPath>
+            <archive location="./lib/harvester.jar" failOnError="false"/>
+            <scanDirectory location="./lib/deps" failOnError="false"/>
+        </classPath>
+        <nativeLibraryDirectories/>
+        <vmOptions/>
+    </java>
+    <includedFiles/>
+    <unextractableFiles/>
+</exe4j>

@@ -1,0 +1,61 @@
+<configuration>
+    <consolePlugin/>
+    <property name="LOG_ROOT" value="app-data/logs"/>
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{2}:%L - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="harvester" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_ROOT}/harvester.%d{yyyy-M-d}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{2}:%L - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="usages" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_ROOT}/usages.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="console" additivity="false" level="debug">
+        <appender-ref ref="console"/>
+    </logger>
+
+    <logger name="usage.track" additivity="false" level="info">
+        <appender-ref ref="usages"/>
+    </logger>
+
+    <logger name="edu.olivet" additivity="false" level="info">
+        <appender-ref ref="harvester"/>
+        <appender-ref ref="console"/>
+    </logger>
+
+    <logger name="org.nutz" additivity="false" level="error">
+        <appender-ref ref="harvester"/>
+        <appender-ref ref="console"/>
+    </logger>
+
+    <logger name="org.quartz" additivity="false" level="error">
+        <appender-ref ref="harvester"/>
+        <appender-ref ref="console"/>
+    </logger>
+
+    <logger name="edu.olivet.foundations.aop.ProfileInterceptor" additivity="false" level="debug">
+        <appender-ref ref="harvester"/>
+        <appender-ref ref="console"/>
+    </logger>
+
+    <root level="info">
+        <appender-ref ref="console"/>
+    </root>
+</configuration>
