@@ -1,6 +1,7 @@
-package edu.olivet.harvester.fulfill;
+package edu.olivet.harvester.spreadsheet;
 
 import com.google.inject.Inject;
+import edu.olivet.harvester.spreadsheet.service.OrderHelper;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 

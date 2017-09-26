@@ -4,12 +4,17 @@ import com.alibaba.fastjson.JSON;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
+import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Tools;
+import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.ui.Harvester;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sun.plugin.dom.exception.InvalidStateException;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -25,6 +30,8 @@ import java.util.List;
 @NoArgsConstructor
 public class Settings {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Settings.class);
+
     public static Settings load() {
         File file = new File(Harvester.CONFIG_FILE_PATH);
         if (file.exists() && file.isFile()) {
@@ -37,6 +44,45 @@ public class Settings {
     private String sid;
 
     private List<Configuration> configs;
+
+    public Configuration getConfigByCountry(Country country) {
+        for(Configuration config : configs) {
+            if (config.country.equals(country)) {
+                return config;
+            }
+        }
+
+        throw new BusinessException("Configuration for country "+country.name()+" is not found.");
+    }
+
+
+    /**
+     * @return
+     */
+    public List<String> listAllSpreadsheets() {
+
+        List<String> spreadIds = new ArrayList<>();
+
+        for (Configuration config : configs) {
+            if (!config.getBookDataSourceUrl().isEmpty()) {
+                if (!spreadIds.contains(config.getBookDataSourceUrl())) {
+                    spreadIds.add(config.getBookDataSourceUrl());
+                }
+            }
+            if (!config.getProductDataSourceUrl().isEmpty()) {
+                if (!spreadIds.contains(config.getProductDataSourceUrl())) {
+                    spreadIds.add(config.getProductDataSourceUrl());
+                }
+            }
+        }
+
+        if (spreadIds.isEmpty()) {
+            LOGGER.error("No valid sheet ids found when confirming shipment");
+            throw new BusinessException("No googlesheet entered yet.");
+        }
+
+        return spreadIds;
+    }
 
     /**
      * Configuration for a certain marketplace
@@ -121,6 +167,23 @@ public class Settings {
             boolean primeValid = primeBuyer != null && primeBuyer.valid();
             boolean valid = buyer != null && buyer.valid();
             return primeValid == valid;
+        }
+
+
+        /**
+         * get configed spreadsheet id by type: book or product
+         * @param type
+         * @return
+         */
+        public String getSpreadId(OrderEnums.OrderItemType type) {
+
+            String spreadId = this.getBookDataSourceUrl();
+
+            if (type == OrderEnums.OrderItemType.PRODUCT) {
+                spreadId = this.getProductDataSourceUrl();
+            }
+
+            return spreadId;
         }
     }
 

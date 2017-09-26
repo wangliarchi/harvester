@@ -264,4 +264,10 @@ public class OrderEnums {
             return this == Pt || this == ImagePt;
         }
     }
+
+
+    public enum OrderItemType {
+        BOOK,
+        PRODUCT
+    }
 }

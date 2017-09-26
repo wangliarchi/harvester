@@ -33,8 +33,11 @@ public class Harvester {
         }
 
         new AutoUpgradeJob().execute();
+
+
         UIHarvester uiHarvester = ApplicationContext.getBean(UIHarvester.class);
         UITools.setIconAndPosition(uiHarvester);
+
         uiHarvester.setVisible(true);
         uiHarvester.startBackgroundJobs();
     }

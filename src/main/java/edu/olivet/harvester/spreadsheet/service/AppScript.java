@@ -1,4 +1,4 @@
-package edu.olivet.harvester.fulfill;
+package edu.olivet.harvester.spreadsheet.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -13,8 +13,12 @@ import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums.OrderColor;
 import edu.olivet.harvester.model.OrderEnums.OrderColumn;
-import edu.olivet.harvester.model.Spreadsheet;
+import edu.olivet.harvester.spreadsheet.Spreadsheet;
+import edu.olivet.harvester.spreadsheet.Worksheet;
+import edu.olivet.harvester.spreadsheet.exceptions.NoOrdersFoundInWorksheetException;
+import edu.olivet.harvester.spreadsheet.exceptions.NoWorksheetFoundException;
 import lombok.Data;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -31,8 +35,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 @Singleton
-class AppsScript {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AppsScript.class);
+public class AppScript {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AppScript.class);
     private static final String APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3oR8IH5Z7uaTi-i_GPUfWeeFV96ejxfyo3dlq8tXZivpW51F0/exec";
     private static final String SUCCESS = "Success";
     private static final String PARAM_SHEET_NAME = "sn";
@@ -40,14 +44,50 @@ class AppsScript {
     private static final String PARAM_METHOD = "method";
     private static final String PARAM_ROW = "row";
 
+    private static Map<String, Spreadsheet> SPREADSHEET_CLIENT_CACHE = new HashMap<>();
+
     @Repeat(expectedExceptions = {BusinessException.class, JSONException.class})
-    Spreadsheet getSpreadsheet(String spreadId) {
+    public Spreadsheet getSpreadsheet(String spreadId) {
+
+        return SPREADSHEET_CLIENT_CACHE.computeIfAbsent(spreadId, k->{
+            Spreadsheet spreadsheet =  this.reloadSpreadsheet(spreadId);
+            return spreadsheet;
+        });
+
+    }
+
+
+    public Spreadsheet reloadSpreadsheet(String spreadId) {
         Map<String, String> params = new HashMap<>();
         params.put(PARAM_SPREAD_ID, spreadId);
         params.put(PARAM_METHOD, "GETSPREADMETADATA");
         String json = this.processResult(this.get(params));
-        return JSON.parseObject(json, Spreadsheet.class);
+        Spreadsheet spreadsheet =  JSON.parseObject(json, Spreadsheet.class);
+
+        SPREADSHEET_CLIENT_CACHE.put(spreadId,spreadsheet);
+        return spreadsheet;
+
     }
+    public  void clearCache(){
+        SPREADSHEET_CLIENT_CACHE.clear();
+    }
+
+//    /**
+//     * valid spreadsheet Id, fetch spreadsheet meta info
+//     */
+//    public void validSpreadsheetId() {
+//
+//        try{
+//            appScript.getSpreadsheetMeta(spreadsheetId);
+//
+//            this.title = spreadsheetMeta.getTitle();
+//            this.sheetNames = spreadsheetMeta.getSheetNames();
+//
+//        }catch (Exception e) {
+//            throw new BusinessException(e.getMessage());
+//        }
+//
+//    }
 
     /**
      * <pre>
@@ -61,7 +101,7 @@ class AppsScript {
     private static final String URL_PREFIX =
         "https?://(spreadsheets.google.com/feeds/(cells|spreadsheets)/|docs.google.com/spreadsheets/d/|drive.google.com/open[?]id=)";
 
-    String getSpreadId(String url) {
+    public String getSpreadId(String url) {
         String str = StringUtils.defaultString(url).replaceFirst(URL_PREFIX, StringUtils.EMPTY);
         return str.contains("/") ? str.substring(0, str.indexOf("/")) : str;
     }
@@ -89,7 +129,7 @@ class AppsScript {
     /**
      * @see #markColor(String, String, int, String, OrderColor)
      */
-    boolean markColor(String sheetUrl, String sheetName, int row, OrderColor color) {
+    public boolean markColor(String sheetUrl, String sheetName, int row, OrderColor color) {
         return this.markColor(sheetUrl, sheetName, row, String.format("A%d:AO%d", row, row), color);
     }
 
@@ -105,7 +145,7 @@ class AppsScript {
     private static final String DEFAULT_RANGE = "A-AO";
 
     @Repeat
-    List<Order> readOrders(String spreadId, String sheetName) {
+    public List<Order> readOrders(String spreadId, String sheetName) {
         Map<String, String> params = new HashMap<>();
         params.put(PARAM_SPREAD_ID, getSpreadId(spreadId));
         params.put(PARAM_SHEET_NAME, sheetName);
@@ -202,5 +242,30 @@ class AppsScript {
             }
         }
         return sb.toString();
+    }
+
+
+    public List<Order> getOrdersFromWorksheet(Worksheet worksheet) {
+
+        List<Order> orders = new ArrayList<>();
+
+
+        try{
+            orders =  this.readOrders(worksheet.getSpreadsheet().getSpreadsheetId(),worksheet.getSheetName());
+        }catch (Exception e){
+            LOGGER.error("读取订单数据失败: {} - {}", worksheet.getSheetName(), e.getMessage());
+
+            if(e.getMessage().contains("Cannot read sheet according to provided sheet id and name")) {
+                throw new NoWorksheetFoundException(e.getMessage());
+            }
+
+            throw new BusinessException(e.getMessage());
+        }
+
+        if(CollectionUtils.isEmpty(orders)) {
+            throw new NoOrdersFoundInWorksheetException("No valid orders found for sheet name "+worksheet.getSheetName()+" found in "+worksheet.getSpreadsheet().getTitle()+".");
+        }
+
+        return orders;
     }
 }

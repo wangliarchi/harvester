@@ -3,7 +3,11 @@ package edu.olivet.harvester.ui;
 import edu.olivet.foundations.ui.AbstractUIContainer;
 import edu.olivet.foundations.ui.Action;
 import edu.olivet.foundations.ui.Menu;
+import edu.olivet.foundations.ui.UIText;
 
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -76,4 +80,47 @@ public class UIElements extends AbstractUIContainer {
     public Action getAction(String command) {
         return this.getActionByCommand(command, Action.class, Actions.class);
     }
+
+    public JTextArea createLogTextArea(Color foregroundColor) {
+        JTextArea logTextArea = new JTextArea();
+        logTextArea.setColumns(20);
+        logTextArea.setRows(8);
+        logTextArea.setLineWrap(true);
+        logTextArea.setEditable(false);
+
+        if(foregroundColor != null) {
+            logTextArea.setForeground(foregroundColor);
+        }
+
+        return logTextArea;
+
+    }
+    public JPanel createLogPanel(String panelTitle, int height,JTextArea logTextArea) {
+        JPanel logAreaPanel = new JPanel();
+        logAreaPanel.setBorder(new TitledBorder(null, panelTitle, TitledBorder.LEADING, TitledBorder.TOP, null, null));
+
+        JScrollPane logAreaScrollPane = new JScrollPane();
+
+        GroupLayout logAreaLayout = new GroupLayout(logAreaPanel);
+        logAreaLayout.setHorizontalGroup(
+                logAreaLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(logAreaLayout.createSequentialGroup()
+                                .addComponent(logAreaScrollPane, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
+        );
+        logAreaLayout.setVerticalGroup(
+                logAreaLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(GroupLayout.Alignment.TRAILING, logAreaLayout.createSequentialGroup()
+                                .addComponent(logAreaScrollPane, GroupLayout.PREFERRED_SIZE, height, GroupLayout.PREFERRED_SIZE))
+        );
+
+
+        logAreaScrollPane.setViewportView(logTextArea);
+        logAreaPanel.setLayout(logAreaLayout);
+
+
+        return logAreaPanel;
+    }
+
+
+
 }

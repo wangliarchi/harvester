@@ -1,4 +1,4 @@
-package edu.olivet.harvester.fulfill;
+package edu.olivet.harvester.spreadsheet.service;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
@@ -31,7 +31,7 @@ public class OrderHelper {
         countryNames = Configs.load("country-names");
     }
 
-    String correctUSState(String shipState) {
+    public String correctUSState(String shipState) {
         if (!shipState.contains(".")) {
             return shipState;
         }
@@ -46,7 +46,7 @@ public class OrderHelper {
         return shipState;
     }
 
-    String getCountryCode(String countryName) {
+    public String getCountryCode(String countryName) {
         if (StringUtils.isBlank(countryName) || Country.US.name().equals(countryName)) {
             return Country.US.name();
         }
@@ -63,7 +63,7 @@ public class OrderHelper {
         return countryCode;
     }
 
-    String getCountryName(String countryCode) {
+    public String getCountryName(String countryCode) {
         Preconditions.checkArgument(StringUtils.isNotBlank(countryCode), "Country code cannot be null or blank.");
         String countryName = countryNames.get(countryCode.toUpperCase());
         if (countryName == null) {
@@ -75,7 +75,7 @@ public class OrderHelper {
     /**
      * 字符类field去null，对isbn自动补齐，对condition自动修正
      */
-    void autoCorrect(Order order) {
+    public void autoCorrect(Order order) {
         order.status = StringUtils.defaultString(order.status).toLowerCase();
 
         order.order_id = StringUtils.defaultString(order.order_id);
@@ -126,7 +126,7 @@ public class OrderHelper {
 
     private static final Map<String, Field> ORDER_FIELDS_CACHE = new HashMap<>();
 
-    void setColumnValue(int col, String value, Order order) {
+    public void setColumnValue(int col, String value, Order order) {
         OrderColumn orderColumn = OrderColumn.get(col);
         if (orderColumn != null) {
             String fieldName = orderColumn.name().toLowerCase();

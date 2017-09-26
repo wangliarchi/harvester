@@ -1,11 +1,11 @@
-package edu.olivet.harvester.fulfill;
+package edu.olivet.harvester.spreadsheet;
 
 import com.google.inject.Inject;
 import edu.olivet.foundations.aop.RepeatModule;
 import edu.olivet.foundations.utils.DateModule;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums.OrderColor;
-import edu.olivet.harvester.model.Spreadsheet;
+import edu.olivet.harvester.spreadsheet.service.AppScript;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
@@ -15,15 +15,15 @@ import java.util.List;
 import static org.testng.Assert.*;
 
 @Guice(modules = {RepeatModule.class, DateModule.class})
-public class AppsScriptTest {
-    @Inject private AppsScript appsScript;
+public class AppScriptTest {
+    @Inject private AppScript appsScript;
     private static final String SAMPLE_SPREAD_ID = "1LEU2GXvfEXEkbQS42FeUPPLkpbI4iBqU9OWDV13KsO8";
 
     @Test
     public void getSpreadsheet() {
-        Spreadsheet sp = appsScript.getSpreadsheet(SAMPLE_SPREAD_ID);
-        assertEquals(sp.getTitle(), "Harvester Prototype Sheet 2017");
-        assertTrue(sp.getSheetNames().containsAll(Arrays.asList("Daily Cost", "confirm", "Individual Orders", "09/21", "09/14")));
+        Spreadsheet spreadsheet = appsScript.getSpreadsheet(SAMPLE_SPREAD_ID);
+        assertEquals(spreadsheet.getTitle(), "Harvester Prototype Sheet 2017");
+        assertTrue(spreadsheet.getSheetNames().containsAll(Arrays.asList("Daily Cost", "confirm", "Individual Orders", "09/21", "09/14")));
     }
 
     @Test

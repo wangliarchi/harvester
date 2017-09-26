@@ -198,6 +198,15 @@ public class Order implements Keyable {
         return Strings.startsWithAnyIgnoreCase(seller, Country.JP.name());
     }
 
+//    public String expectedShipDate() {
+//        if(!this.expected_ship_date.isEmpty()) {
+//            return this.expected_ship_date.split(" ")[0];
+//        }
+//
+//        //parse purchase-date
+//
+//
+//    }
     public String shippingCountryCode;
 
     @Override
