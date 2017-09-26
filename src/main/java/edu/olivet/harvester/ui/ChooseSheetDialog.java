@@ -9,23 +9,21 @@ import edu.olivet.foundations.google.SpreadService;
 import edu.olivet.foundations.ui.BaseDialog;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
-import edu.olivet.foundations.utils.ApplicationContext;
-import edu.olivet.foundations.utils.Constants;
-import edu.olivet.foundations.utils.Dates;
-import edu.olivet.foundations.utils.Strings;
+import edu.olivet.foundations.utils.*;
 import edu.olivet.harvester.model.Spreadsheet;
+import lombok.Getter;
 
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.IOException;
 import java.util.List;
 
 /**
  * Data source spreadsheet selection dialog
- * @author <a href="mailto:nathanael4ever@gmail.com">Nathanael Yang</a> 2014年10月14日 下午4:51:29
+ *
+ * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 9/26/2017 8:51 AM
  */
 public class ChooseSheetDialog extends BaseDialog {
     private static final long serialVersionUID = -1L;
@@ -33,10 +31,10 @@ public class ChooseSheetDialog extends BaseDialog {
     private final List<File> spreads;
     private final SpreadService spreadService;
 
-    private JList<String> jSpreadList;
-    private JList<String> jSheetList;
+    private JList<String> spreadList;
+    private JList<String> sheetNameList;
 
-    private Spreadsheet selectedSheets;
+    @Getter private Spreadsheet selectedSheets;
 
     public ChooseSheetDialog(List<File> spreads, SpreadService spreadService) {
         super(null, true);
@@ -49,8 +47,8 @@ public class ChooseSheetDialog extends BaseDialog {
     private void initComponents() {
         final JPanel spreadPane = new JPanel();
         final JScrollPane spreadScrollPane = new JScrollPane();
-        jSpreadList = new JList<>();
-        jSheetList = new JList<>();
+        spreadList = new JList<>();
+        sheetNameList = new JList<>();
 
         final JPanel sheetPane = new JPanel();
         final JScrollPane sheetScrollPane = new JScrollPane();
@@ -58,13 +56,17 @@ public class ChooseSheetDialog extends BaseDialog {
 
         JButton clearCacheBtn = new JButton(UIText.label("datasource.clear"));
         clearCacheBtn.setToolTipText(UIText.tooltip("tooltip.clear.sheetcache"));
-        clearCacheBtn.addActionListener(e -> spreadService.clearCache());
+        clearCacheBtn.addActionListener(e -> {
+            // Clear cache and reload
+            spreadService.clearCache();
+            formsValueChanged();
+        });
 
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setTitle(UIText.title("title.select.sheet"));
         spreadPane.setBorder(BorderFactory.createTitledBorder(UIText.title("title.spread")));
 
-        jSpreadList.addListSelectionListener(evt -> {
+        spreadList.addListSelectionListener(evt -> {
             if (evt.getValueIsAdjusting()) {
                 formsValueChanged();
             }
@@ -75,8 +77,8 @@ public class ChooseSheetDialog extends BaseDialog {
             strings[i] = spread.getName() + "(Last Update: " + Dates.toDateTime(spread.getModifiedTime().getValue()) + ")";
         }
 
-        this.jSpreadList.setListData(strings);
-        this.jSpreadList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        this.spreadList.setListData(strings);
+        this.spreadList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         MouseListener mouseListener = new MouseAdapter() {
             public void mouseClicked(MouseEvent mouseEvent) {
@@ -85,8 +87,8 @@ public class ChooseSheetDialog extends BaseDialog {
                 }
             }
         };
-        jSheetList.addMouseListener(mouseListener);
-        spreadScrollPane.setViewportView(jSpreadList);
+        sheetNameList.addMouseListener(mouseListener);
+        spreadScrollPane.setViewportView(spreadList);
 
         GroupLayout spreadLayout = new GroupLayout(spreadPane);
         spreadPane.setLayout(spreadLayout);
@@ -98,7 +100,7 @@ public class ChooseSheetDialog extends BaseDialog {
                 .addComponent(spreadScrollPane));
 
         sheetPane.setBorder(BorderFactory.createTitledBorder(UIText.title("title.sheet")));
-        sheetScrollPane.setViewportView(jSheetList);
+        sheetScrollPane.setViewportView(sheetNameList);
         GroupLayout sheetLayout = new GroupLayout(sheetPane);
         sheetPane.setLayout(sheetLayout);
         sheetLayout.setHorizontalGroup(
@@ -132,43 +134,38 @@ public class ChooseSheetDialog extends BaseDialog {
     }
 
     private void formsValueChanged() {
-        int selected = jSpreadList.getSelectedIndex();
+        int selected = spreadList.getSelectedIndex();
         if (selected < 0) {
             return;
         }
 
         try {
             File spread = this.spreads.get(selected);
-            List<String> sheetNames = spreadService.getSheetNames(spread, Constants.RND_EMAIL);
+            List<String> sheetNames = spreadService.getSheetNames(spread.getId(), Constants.RND_EMAIL);
             int count = sheetNames.size();
             if (count == 0) {
-                this.jSheetList.setListData(new String[0]);
+                this.sheetNameList.setListData(new String[0]);
                 return;
             }
 
-            this.jSheetList.setListData(sheetNames.toArray(new String[sheetNames.size()]));
-            this.jSheetList.setSelectionInterval(0, count - 1);
-        } catch (IOException e) {
+            this.sheetNameList.setListData(sheetNames.toArray(new String[sheetNames.size()]));
+        } catch (IllegalStateException | BusinessException e) {
             UITools.error(UIText.message("message.error.readsheet", Strings.getExceptionMsg(e)));
         }
     }
 
     @Override
     public void ok() {
-        int spreadIndex = this.jSpreadList.getSelectedIndex();
-        int sheetIndex = this.jSheetList.getSelectedIndex();
+        int spreadIndex = this.spreadList.getSelectedIndex();
+        int sheetIndex = this.sheetNameList.getSelectedIndex();
         if (spreadIndex >= 0 && sheetIndex >= 0) {
             File spread = spreads.get(spreadIndex);
-            List<String> sheetNames = this.jSheetList.getSelectedValuesList();
+            List<String> sheetNames = this.sheetNameList.getSelectedValuesList();
             selectedSheets = new Spreadsheet(spread.getId(), spread.getName(), sheetNames);
             this.setVisible(false);
         } else {
             UITools.error(UIText.message("message.error.nosheetselected"), UIText.title("title.conf_error"));
         }
-    }
-
-    public Spreadsheet getSelectedSheets() {
-        return this.selectedSheets;
     }
 
     public static void main(String[] args) {

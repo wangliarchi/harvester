@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
+ * Spreadsheet header that has basic information only
+ *
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 9/21/2017 1:29 PM
  */
 @Data
