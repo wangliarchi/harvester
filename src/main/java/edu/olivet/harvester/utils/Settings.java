@@ -34,10 +34,18 @@ public class Settings {
 
     public static Settings load() {
         File file = new File(Harvester.CONFIG_FILE_PATH);
+        return Settings.load(file);
+    }
+
+    public static Settings load(String filePath) {
+        File file = new File(filePath);
+        return Settings.load(file);
+    }
+    public static Settings load(File file) {
         if (file.exists() && file.isFile()) {
             return JSON.parseObject(Tools.readFileToString(file), Settings.class);
         } else {
-            throw new IllegalStateException("Cannot find expected configuration file " + Harvester.CONFIG_FILE_PATH);
+            throw new IllegalStateException("Cannot find expected configuration file " + file.getAbsolutePath());
         }
     }
 
@@ -177,13 +185,20 @@ public class Settings {
          */
         public String getSpreadId(OrderEnums.OrderItemType type) {
 
-            String spreadId = this.getBookDataSourceUrl();
+
 
             if (type == OrderEnums.OrderItemType.PRODUCT) {
-                spreadId = this.getProductDataSourceUrl();
+                return this.getProductDataSourceUrl();
             }
 
-            return spreadId;
+            return this.getBookDataSourceUrl();
+
+
+
+        }
+
+        public String  getAccountCode() {
+            return Settings.load().getSid() + this.getCountry().code();
         }
     }
 

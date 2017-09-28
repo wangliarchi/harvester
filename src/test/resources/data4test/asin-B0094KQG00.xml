@@ -1,0 +1,61 @@
+<Product xmlns="http://mws.amazonservices.com/schema/Products/2011-10-01" xmlns:ns2="http://mws.amazonservices.com/schema/Products/2011-10-01/default.xsd">
+    <Identifiers>
+        <MarketplaceASIN>
+            <MarketplaceId>ATVPDKIKX0DER</MarketplaceId>
+            <ASIN>B0094KQG00</ASIN>
+        </MarketplaceASIN>
+    </Identifiers>
+    <AttributeSets>
+        <ns2:ItemAttributes xml:lang="en-US">
+            <ns2:Binding>Electronics</ns2:Binding>
+            <ns2:Brand>Manufacturers Direct</ns2:Brand>
+            <ns2:Color>Yellow</ns2:Color>
+            <ns2:Creator Role="Designer">POWERZONE</ns2:Creator>
+            <ns2:Department>N/A</ns2:Department>
+            <ns2:Feature>Splits the feed from a 30 amp power source to two 30 amp inlets on the boat. Features heavy duty marine grade twist-to-lock plug and two connectors with water proof seal. Cord is flexible in temperatures from -40 F up to 140 F (-40 C up to 60 C). Heavy duty, super abrasion resistant, flame retardant and water resistant cable. Oversized strain reliefs prevent the plug and connector from separating from the wire. Yellow.</ns2:Feature>
+            <ns2:Feature>MARINE Y-ADAPTERS, EA</ns2:Feature>
+            <ns2:ItemDimensions>
+                <ns2:Height Units="inches">9.00</ns2:Height>
+                <ns2:Length Units="inches">7.00</ns2:Length>
+                <ns2:Width Units="inches">11.00</ns2:Width>
+            </ns2:ItemDimensions>
+            <ns2:Label>Mintcraft</ns2:Label>
+            <ns2:ListPrice>
+                <ns2:Amount>136.49</ns2:Amount>
+                <ns2:CurrencyCode>USD</ns2:CurrencyCode>
+            </ns2:ListPrice>
+            <ns2:Manufacturer>Mintcraft</ns2:Manufacturer>
+            <ns2:Model>ORMAD30Y</ns2:Model>
+            <ns2:NumberOfItems>1</ns2:NumberOfItems>
+            <ns2:PackageDimensions>
+                <ns2:Height Units="inches">4.10</ns2:Height>
+                <ns2:Length Units="inches">12.70</ns2:Length>
+                <ns2:Width Units="inches">10.30</ns2:Width>
+                <ns2:Weight Units="pounds">3.40</ns2:Weight>
+            </ns2:PackageDimensions>
+            <ns2:PackageQuantity>1</ns2:PackageQuantity>
+            <ns2:PartNumber>ORMAD30Y</ns2:PartNumber>
+            <ns2:ProductGroup>CE</ns2:ProductGroup>
+            <ns2:ProductTypeName>POWER_SUPPLIES_OR_PROTECTION</ns2:ProductTypeName>
+            <ns2:Publisher>Mintcraft</ns2:Publisher>
+            <ns2:SmallImage>
+                <ns2:URL>http://ecx.images-amazon.com/images/I/51WmmDe6C6L._SL75_.jpg</ns2:URL>
+                <ns2:Height Units="pixels">75</ns2:Height>
+                <ns2:Width Units="pixels">75</ns2:Width>
+            </ns2:SmallImage>
+            <ns2:Studio>Mintcraft</ns2:Studio>
+            <ns2:Title>Adaptor "Y" Marine 30a/2-30a Yellow</ns2:Title>
+        </ns2:ItemAttributes>
+    </AttributeSets>
+    <Relationships/>
+    <SalesRankings>
+        <SalesRank>
+            <ProductCategoryId>ce_display_on_website</ProductCategoryId>
+            <Rank>422422</Rank>
+        </SalesRank>
+        <SalesRank>
+            <ProductCategoryId>552808</ProductCategoryId>
+            <Rank>12029</Rank>
+        </SalesRank>
+    </SalesRankings>
+</Product>

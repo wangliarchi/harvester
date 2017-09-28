@@ -1,26 +1,18 @@
-package edu.olivet.harvester.model.service.mws;
+package edu.olivet.harvester.service.mws;
 
-import com.amazonservices.mws.products.MarketplaceWebServiceProductsClient;
-import com.amazonservices.mws.products.MarketplaceWebServiceProductsConfig;
-import com.amazonservices.mws.products.model.GetMatchingProductRequest;
 import com.amazonservices.mws.products.model.Product;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import edu.olivet.foundations.amazon.Country;
-import edu.olivet.foundations.amazon.MWSUtils;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.amazon.ProductFetcher;
 import edu.olivet.foundations.utils.BusinessException;
-import edu.olivet.foundations.utils.Constants;
 import edu.olivet.harvester.utils.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Singleton
 public class ProductClient {
@@ -36,13 +28,9 @@ public class ProductClient {
      *
      * including PurchaseDate, OrderStatus, FulfillmentChannel, and LastUpdateDate.
      * @param country
-     * @param asins
+     * @param asin
      */
-
-    @Inject
-    private ProductFetcher productFetcher;
-
-    public  Product getProductsByASIN(Country country, String asin) {
+   public  Product getProductByASIN(Country country, String asin) {
         List<String> asins = new ArrayList<String>();
         asins.add(asin);
 
@@ -61,14 +49,14 @@ public class ProductClient {
         return product;
 
     }
+
+    @Inject
+    private ProductFetcher productFetcher;
+
     public  List<Product> getProductsByASINs(Country country, List<String> asins) {
 
         MarketWebServiceIdentity credential = Settings.load().getConfigByCountry(country).getMwsCredential();
-
         List<Product> result = productFetcher.read(asins,credential);
-
-
-
 
         return result;
 

@@ -3,6 +3,8 @@ package edu.olivet.harvester.spreadsheet.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
+import com.google.api.client.http.HttpStatusCodes;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import edu.olivet.foundations.aop.Repeat;
@@ -18,20 +20,21 @@ import edu.olivet.harvester.spreadsheet.Worksheet;
 import edu.olivet.harvester.spreadsheet.exceptions.NoOrdersFoundInWorksheetException;
 import edu.olivet.harvester.spreadsheet.exceptions.NoWorksheetFoundException;
 import lombok.Data;
+import lombok.Getter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.nutz.dao.Chain;
+import org.nutz.dao.Cnd;
 import org.nutz.lang.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 @Singleton
@@ -62,6 +65,8 @@ public class AppScript {
         params.put(PARAM_SPREAD_ID, spreadId);
         params.put(PARAM_METHOD, "GETSPREADMETADATA");
         String json = this.processResult(this.get(params));
+
+
         Spreadsheet spreadsheet =  JSON.parseObject(json, Spreadsheet.class);
 
         SPREADSHEET_CLIENT_CACHE.put(spreadId,spreadsheet);
@@ -72,22 +77,6 @@ public class AppScript {
         SPREADSHEET_CLIENT_CACHE.clear();
     }
 
-//    /**
-//     * valid spreadsheet Id, fetch spreadsheet meta info
-//     */
-//    public void validSpreadsheetId() {
-//
-//        try{
-//            appScript.getSpreadsheetMeta(spreadsheetId);
-//
-//            this.title = spreadsheetMeta.getTitle();
-//            this.sheetNames = spreadsheetMeta.getSheetNames();
-//
-//        }catch (Exception e) {
-//            throw new BusinessException(e.getMessage());
-//        }
-//
-//    }
 
     /**
      * <pre>
@@ -126,11 +115,26 @@ public class AppScript {
         return SUCCESS.equals(result);
     }
 
+
     /**
      * @see #markColor(String, String, int, String, OrderColor)
      */
     public boolean markColor(String sheetUrl, String sheetName, int row, OrderColor color) {
         return this.markColor(sheetUrl, sheetName, row, String.format("A%d:AO%d", row, row), color);
+    }
+
+
+    public void commitShippingConfirmationLog(String spreadId, String sheetName, int row, String log) {
+        Map<String, String> params = new HashMap<>();
+        params.put(PARAM_SPREAD_ID, spreadId);
+        params.put(PARAM_SHEET_NAME, sheetName);
+        params.put(PARAM_ROW, String.valueOf(row));
+        params.put("log", log);
+        params.put(PARAM_METHOD, "CommitShippingConfirmationLog");
+        String result = this.processResult(this.get(params));
+        if (!SUCCESS.equals(result)) {
+            throw new BusinessException(String.format("Failed to commit shipping confirmation log to row %d of sheet %s: %s", row, sheetName, result));
+        }
     }
 
     private String processResult(String result) {
@@ -154,24 +158,25 @@ public class AppScript {
 
         final long start = System.currentTimeMillis();
         String json = this.processResult(this.get(params));
+        System.out.println(json.toString());
         List<Order> orders = this.parse(json);
         LOGGER.info("Read {} orders from sheet {} via in {}", orders.size(), sheetName, Strings.formatElapsedTime(start));
         return orders;
     }
 
     @Data
-    private static class ReadResult {
-        boolean valid() {
+    public static class ReadResult {
+        public boolean valid() {
             return ArrayUtils.isNotEmpty(orders) && ArrayUtils.isNotEmpty(colors);
         }
 
-        private int startRow;
-        private int endRow;
-        private String[][] orders;
-        private String[][] colors;
+        @Getter private int startRow;
+        @Getter private int endRow;
+        @Getter private String[][] orders;
+        @Getter private String[][] colors;
     }
 
-    private List<Order> parse(String json) {
+    public List<Order> parse(String json) {
         ReadResult result;
         try {
             result = JSONArray.parseObject(json, ReadResult.class);

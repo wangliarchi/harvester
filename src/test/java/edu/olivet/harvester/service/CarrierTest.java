@@ -1,4 +1,4 @@
-package edu.olivet.harvester.model.service;
+package edu.olivet.harvester.service;
 
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;

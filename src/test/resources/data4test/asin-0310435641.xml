@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+        <Product xmlns="http://mws.amazonservices.com/schema/Products/2011-10-01" xmlns:ns2="http://mws.amazonservices.com/schema/Products/2011-10-01/default.xsd">
+            <Identifiers>
+                <MarketplaceASIN>
+                    <MarketplaceId>ATVPDKIKX0DER</MarketplaceId>
+                    <ASIN>0310435641</ASIN>
+                </MarketplaceASIN>
+            </Identifiers>
+            <AttributeSets>
+                <ns2:ItemAttributes xml:lang="en-US">
+                    <ns2:Author>Zondervan</ns2:Author>
+                    <ns2:Binding>Bonded Leather</ns2:Binding>
+                    <ns2:Brand>HarperCollins Christian Pub.</ns2:Brand>
+                    <ns2:Edition>Lea</ns2:Edition>
+                    <ns2:Feature>ISBN13: 9780310435648</ns2:Feature>
+                    <ns2:Feature>Condition: New</ns2:Feature>
+                    <ns2:Feature>Notes: BRAND NEW FROM PUBLISHER! 100% Satisfaction Guarantee. Tracking provided on most orders. Buy with Confidence! Millions of books sold!</ns2:Feature>
+                    <ns2:ItemDimensions>
+                        <ns2:Height Units="inches">8.74</ns2:Height>
+                        <ns2:Length Units="inches">5.79</ns2:Length>
+                        <ns2:Width Units="inches">0.87</ns2:Width>
+                        <ns2:Weight Units="pounds">1.34</ns2:Weight>
+                    </ns2:ItemDimensions>
+                    <ns2:IsEligibleForTradeIn>true</ns2:IsEligibleForTradeIn>
+                    <ns2:Label>Zondervan</ns2:Label>
+                    <ns2:Languages>
+                        <ns2:Language>
+                            <ns2:Name>english</ns2:Name>
+                            <ns2:Type>Published</ns2:Type>
+                        </ns2:Language>
+                        <ns2:Language>
+                            <ns2:Name>english</ns2:Name>
+                            <ns2:Type>Original Language</ns2:Type>
+                        </ns2:Language>
+                        <ns2:Language>
+                            <ns2:Name>english</ns2:Name>
+                            <ns2:Type>Unknown</ns2:Type>
+                        </ns2:Language>
+                    </ns2:Languages>
+                    <ns2:ListPrice>
+                        <ns2:Amount>29.99</ns2:Amount>
+                        <ns2:CurrencyCode>USD</ns2:CurrencyCode>
+                    </ns2:ListPrice>
+                    <ns2:Manufacturer>Zondervan</ns2:Manufacturer>
+                    <ns2:NumberOfItems>1</ns2:NumberOfItems>
+                    <ns2:NumberOfPages>1152</ns2:NumberOfPages>
+                    <ns2:PackageDimensions>
+                        <ns2:Height Units="inches">1.20</ns2:Height>
+                        <ns2:Length Units="inches">8.70</ns2:Length>
+                        <ns2:Width Units="inches">5.40</ns2:Width>
+                        <ns2:Weight Units="pounds">1.30</ns2:Weight>
+                    </ns2:PackageDimensions>
+                    <ns2:PackageQuantity>1</ns2:PackageQuantity>
+                    <ns2:PartNumber>04999X</ns2:PartNumber>
+                    <ns2:ProductGroup>Book</ns2:ProductGroup>
+                    <ns2:ProductTypeName>ABIS_BOOK</ns2:ProductTypeName>
+                    <ns2:PublicationDate>2011-03-12</ns2:PublicationDate>
+                    <ns2:Publisher>Zondervan</ns2:Publisher>
+                    <ns2:ReleaseDate>2011-03-12</ns2:ReleaseDate>
+                    <ns2:SmallImage>
+                        <ns2:URL>http://ecx.images-amazon.com/images/I/51fXSpd7RIL._SL75_.jpg</ns2:URL>
+                        <ns2:Height Units="pixels">75</ns2:Height>
+                        <ns2:Width Units="pixels">50</ns2:Width>
+                    </ns2:SmallImage>
+                    <ns2:Studio>Zondervan</ns2:Studio>
+                    <ns2:Title>NIV, Thinline Bible, Bonded Leather, Black, Red Letter Edition</ns2:Title>
+                </ns2:ItemAttributes>
+            </AttributeSets>
+            <Relationships/>
+            <SalesRankings>
+                <SalesRank>
+                    <ProductCategoryId>book_display_on_website</ProductCategoryId>
+                    <Rank>2689</Rank>
+                </SalesRank>
+                <SalesRank>
+                    <ProductCategoryId>12059</ProductCategoryId>
+                    <Rank>10</Rank>
+                </SalesRank>
+                <SalesRank>
+                    <ProductCategoryId>22</ProductCategoryId>
+                    <Rank>585</Rank>
+                </SalesRank>
+            </SalesRankings>
+        </Product>

@@ -1,4 +1,4 @@
-package edu.olivet.harvester.model.service.mws;
+package edu.olivet.harvester.service.mws;
 
 import com.amazonservices.mws.orders._2013_09_01.model.Order;
 import com.google.inject.Inject;
@@ -8,8 +8,6 @@ import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.testng.Assert.*;
 
 @Guice
 public class OrderClientTest {

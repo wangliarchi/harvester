@@ -1,0 +1,42 @@
+<Order>
+    <LatestShipDate>2017-09-26T06:59:59Z</LatestShipDate>
+    <OrderType>StandardOrder</OrderType>
+    <PurchaseDate>2017-09-21T16:02:48Z</PurchaseDate>
+    <AmazonOrderId>113-4995659-8661810</AmazonOrderId>
+    <BuyerEmail>q81xc7qrd652rq8@marketplace.amazon.com</BuyerEmail>
+    <IsReplacementOrder>false</IsReplacementOrder>
+    <LastUpdateDate>2017-09-22T22:35:49Z</LastUpdateDate>
+    <NumberOfItemsShipped>1</NumberOfItemsShipped>
+    <ShipServiceLevel>Std US D2D Dom</ShipServiceLevel>
+    <OrderStatus>Unshipped</OrderStatus>
+    <SalesChannel>Amazon.com</SalesChannel>
+    <ShippedByAmazonTFM>false</ShippedByAmazonTFM>
+    <IsBusinessOrder>false</IsBusinessOrder>
+    <LatestDeliveryDate>2017-10-17T06:59:59Z</LatestDeliveryDate>
+    <NumberOfItemsUnshipped>0</NumberOfItemsUnshipped>
+    <PaymentMethodDetails>
+        <PaymentMethodDetail>Standard</PaymentMethodDetail>
+    </PaymentMethodDetails>
+    <BuyerName>Aaron McKeown</BuyerName>
+    <EarliestDeliveryDate>2017-10-03T07:00:00Z</EarliestDeliveryDate>
+    <OrderTotal>
+        <CurrencyCode>USD</CurrencyCode>
+        <Amount>40.33</Amount>
+    </OrderTotal>
+    <IsPremiumOrder>false</IsPremiumOrder>
+    <EarliestShipDate>2017-09-22T07:00:00Z</EarliestShipDate>
+    <MarketplaceId>ATVPDKIKX0DER</MarketplaceId>
+    <FulfillmentChannel>MFN</FulfillmentChannel>
+    <PaymentMethod>Other</PaymentMethod>
+    <ShippingAddress>
+        <StateOrRegion>IL</StateOrRegion>
+        <City>DEKALB</City>
+        <Phone>3097911501</Phone>
+        <CountryCode>US</CountryCode>
+        <PostalCode>60115-8942</PostalCode>
+        <Name>Aaron McKeown</Name>
+        <AddressLine1>303 DEERPATH LN E</AddressLine1>
+    </ShippingAddress>
+    <IsPrime>false</IsPrime>
+    <ShipmentServiceLevelCategory>Standard</ShipmentServiceLevelCategory>
+</Order>

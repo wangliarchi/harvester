@@ -6,6 +6,7 @@ import edu.olivet.deploy.Language;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.job.TaskScheduler;
 import edu.olivet.foundations.ui.*;
+import edu.olivet.foundations.ui.Action;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Strings;
@@ -24,6 +25,7 @@ import javax.swing.GroupLayout.Alignment;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 9/20/2017 11:59 AM
@@ -32,10 +34,10 @@ public class UIHarvester extends AbstractApplicationUI {
     private static final Logger LOGGER = LoggerFactory.getLogger(UIHarvester.class);
     private JTextPane statusPane;
 
-    @Getter
-    private JTextArea successLogTextArea;
+//    @Getter
+//    private JTextArea successLogTextArea;
 
-    private static final int DEFAULT_HEIGHT = 820;
+    //private static final int DEFAULT_HEIGHT = 820;
 
     public UIHarvester() {
         this.initComponents();
@@ -54,14 +56,14 @@ public class UIHarvester extends AbstractApplicationUI {
         this.setJMenuBar(menuBar);
         final JToolBar toolbar = UIElements.getInstance().createToolBar();
 
-        int screenHeight = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds().height;
-        int height = screenHeight >= DEFAULT_HEIGHT ? DEFAULT_HEIGHT : screenHeight;
-        int sucHeight = height < DEFAULT_HEIGHT ? 180 : 220;
-        int logLayoutHeight = height < DEFAULT_HEIGHT ? 210 : 250;
+//        int screenHeight = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds().height;
+//        int height = screenHeight >= DEFAULT_HEIGHT ? DEFAULT_HEIGHT : screenHeight;
+//        int sucHeight = height < DEFAULT_HEIGHT ? 180 : 220;
+//        int logLayoutHeight = height < DEFAULT_HEIGHT ? 210 : 250;
 
-        successLogTextArea = UIElements.getInstance().createLogTextArea(Color.BLACK);
-        successLogTextArea.append("Welcome to Harvester!"+Constants.NEW_LINE);
-        final JPanel successLogPanel = UIElements.getInstance().createLogPanel(UIText.title("title.record.success"),sucHeight,successLogTextArea);
+//        successLogTextArea = UIElements.getInstance().createLogTextArea(Color.BLACK);
+//        successLogTextArea.append("Welcome to Harvester!"+Constants.NEW_LINE);
+//        final JPanel successLogPanel = UIElements.getInstance().createLogPanel(UIText.title("title.record.success"),sucHeight,successLogTextArea);
 
         final MemoryUsageBar memoryUsageBar = new MemoryUsageBar();
         statusPane = new JTextPane();
@@ -74,10 +76,10 @@ public class UIHarvester extends AbstractApplicationUI {
             layout.createParallelGroup(Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
                     .addComponent(toolbar))
-//                .addGroup(layout.createSequentialGroup()
-//                    .addComponent(icon))
                 .addGroup(layout.createSequentialGroup()
-                        .addComponent(successLogPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
+                    .addComponent(icon))
+//                .addGroup(layout.createSequentialGroup()
+//                        .addComponent(successLogPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
                 .addGroup(layout.createSequentialGroup()
                     .addComponent(statusPane, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
 
@@ -87,8 +89,8 @@ public class UIHarvester extends AbstractApplicationUI {
             layout.createParallelGroup(Alignment.CENTER)
                 .addGroup(layout.createSequentialGroup()
                     .addComponent(toolbar, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-                    //.addComponent(icon, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
-                    .addComponent(successLogPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                    .addComponent(icon, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+//                    .addComponent(successLogPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createParallelGroup(Alignment.BASELINE)
 
                         .addComponent(memoryUsageBar, 24, 24, 24).addComponent(statusPane))
@@ -108,7 +110,9 @@ public class UIHarvester extends AbstractApplicationUI {
     private ConfirmShipments confirmShipments;
     @Inject
     private AppScript appScript;
-    @UIEvent public void confirmShipment() {
+
+    @UIEvent
+    public void confirmShipment() {
 
         long start = System.currentTimeMillis();
 
@@ -116,6 +120,7 @@ public class UIHarvester extends AbstractApplicationUI {
 
         List<String> spreadsheetIds = Settings.load().listAllSpreadsheets();
         List<edu.olivet.harvester.spreadsheet.Spreadsheet> spreadsheets = new ArrayList<>();
+
         for(String spreadsheetId : spreadsheetIds) {
             try {
                 Spreadsheet spreadsheet = appScript.getSpreadsheet(spreadsheetId);
@@ -133,16 +138,18 @@ public class UIHarvester extends AbstractApplicationUI {
         long start1 = System.currentTimeMillis();
 
         if (dialog.isOk()) {
+
+            confirmShipments.setMessagePanel(new ProgressDetail(Actions.ConfirmShipment));
+
             List<Worksheet> selectedWorksheets = dialog.getSelectedSheets();
             List<String> sheetNames = new ArrayList<>();
             selectedWorksheets.forEach(it -> {sheetNames.add(it.getSheetName());});
 
-            LOGGER.info("{} worksheets selected to confirm shipment in {}. {}", selectedWorksheets.size(), Strings.formatElapsedTime(start1),String.join(",", sheetNames));
-
-            //output to log area
-            this.getSuccessLogTextArea().append(selectedWorksheets.size()+" worksheets from "+selectedWorksheets.get(0).getSpreadsheet().getTitle()
+            confirmShipments.getMessagePanel().displayMsg(selectedWorksheets.size()+" worksheets from "+selectedWorksheets.get(0).getSpreadsheet().getTitle()
                     +" selected to confirm shipments - "
-                    + String.join(",", sheetNames)+Constants.NEW_LINE);
+                    + String.join(",", sheetNames), LOGGER,InformationLevel.Information);
+
+
             confirmShipments.confirmShipmentForWorksheets(selectedWorksheets);
         }
     }

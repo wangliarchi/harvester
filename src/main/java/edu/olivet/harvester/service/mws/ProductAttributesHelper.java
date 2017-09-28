@@ -1,4 +1,4 @@
-package edu.olivet.harvester.model.service.mws;
+package edu.olivet.harvester.service.mws;
 
 import com.amazonaws.util.json.JSONException;
 import com.amazonaws.util.json.JSONObject;
@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class ProductAttributes {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProductAttributes.class);
+public class ProductAttributesHelper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProductAttributesHelper.class);
 
     public static JSONObject parse(Product product) {
         JSONObject jsonProduct = new JSONObject();
@@ -42,7 +42,7 @@ public class ProductAttributes {
 
      public static String getProductGroup(Product product) {
         try{
-            return ProductAttributes.parse(product).get("ProductGroup").toString();
+            return ProductAttributesHelper.parse(product).get("ProductGroup").toString();
         }catch (JSONException e) {
             throw new BusinessException("No product group information returned from mws product api.");
         }

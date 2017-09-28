@@ -1,0 +1,56 @@
+<Product xmlns="http://mws.amazonservices.com/schema/Products/2011-10-01" xmlns:ns2="http://mws.amazonservices.com/schema/Products/2011-10-01/default.xsd">
+    <Identifiers>
+        <MarketplaceASIN>
+            <MarketplaceId>ATVPDKIKX0DER</MarketplaceId>
+            <ASIN>B000FAGGWQ</ASIN>
+        </MarketplaceASIN>
+    </Identifiers>
+    <AttributeSets>
+        <ns2:ItemAttributes xml:lang="en-US">
+            <ns2:AudienceRating>Unrated (Not Rated)</ns2:AudienceRating>
+            <ns2:Binding>DVD</ns2:Binding>
+            <ns2:Director>George Lucas</ns2:Director>
+            <ns2:Format>THX</ns2:Format>
+            <ns2:Format>Color</ns2:Format>
+            <ns2:Genre>science_fiction</ns2:Genre>
+            <ns2:IsAdultProduct>false</ns2:IsAdultProduct>
+            <ns2:IsEligibleForTradeIn>true</ns2:IsEligibleForTradeIn>
+            <ns2:Languages>
+                <ns2:Language>
+                    <ns2:Name>english</ns2:Name>
+                    <ns2:Type>Published</ns2:Type>
+                </ns2:Language>
+            </ns2:Languages>
+            <ns2:NumberOfDiscs>1</ns2:NumberOfDiscs>
+            <ns2:NumberOfItems>1</ns2:NumberOfItems>
+            <ns2:PackageDimensions>
+                <ns2:Height Units="inches">0.58</ns2:Height>
+                <ns2:Length Units="inches">7.10</ns2:Length>
+                <ns2:Width Units="inches">5.42</ns2:Width>
+                <ns2:Weight Units="pounds">0.18</ns2:Weight>
+            </ns2:PackageDimensions>
+            <ns2:PackageQuantity>1</ns2:PackageQuantity>
+            <ns2:ProductGroup>DVD</ns2:ProductGroup>
+            <ns2:ProductTypeName>VIDEO_DVD</ns2:ProductTypeName>
+            <ns2:RegionCode>1</ns2:RegionCode>
+            <ns2:SmallImage>
+                <ns2:URL>http://ecx.images-amazon.com/images/I/41uCWq%2B5BYL._SL75_.jpg</ns2:URL>
+                <ns2:Height Units="pixels">75</ns2:Height>
+                <ns2:Width Units="pixels">52</ns2:Width>
+            </ns2:SmallImage>
+            <ns2:TheatricalReleaseDate>2004-01-01</ns2:TheatricalReleaseDate>
+            <ns2:Title>Star Wars Trilogy Bonus Disc (2004)</ns2:Title>
+        </ns2:ItemAttributes>
+    </AttributeSets>
+    <Relationships/>
+    <SalesRankings>
+        <SalesRank>
+            <ProductCategoryId>dvd_display_on_website</ProductCategoryId>
+            <Rank>71465</Rank>
+        </SalesRank>
+        <SalesRank>
+            <ProductCategoryId>2959110011</ProductCategoryId>
+            <Rank>2278</Rank>
+        </SalesRank>
+    </SalesRankings>
+</Product>

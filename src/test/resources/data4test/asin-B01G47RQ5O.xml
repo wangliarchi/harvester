@@ -1,0 +1,24 @@
+<Product xmlns="http://mws.amazonservices.com/schema/Products/2011-10-01" xmlns:ns2="http://mws.amazonservices.com/schema/Products/2011-10-01/default.xsd">
+    <Identifiers>
+        <MarketplaceASIN>
+            <MarketplaceId>ATVPDKIKX0DER</MarketplaceId>
+            <ASIN>B01G47RQ5O</ASIN>
+        </MarketplaceASIN>
+    </Identifiers>
+    <AttributeSets>
+        <ns2:ItemAttributes xml:lang="en-US">
+            <ns2:Binding>Audio CD</ns2:Binding>
+            <ns2:PartNumber>3O</ns2:PartNumber>
+            <ns2:ProductGroup>Music</ns2:ProductGroup>
+            <ns2:ProductTypeName>MUSIC_POPULAR</ns2:ProductTypeName>
+            <ns2:SmallImage>
+                <ns2:URL>http://ecx.images-amazon.com/images/I/61HJCRW%2BZ3L._SL75_.jpg</ns2:URL>
+                <ns2:Height Units="pixels">75</ns2:Height>
+                <ns2:Width Units="pixels">75</ns2:Width>
+            </ns2:SmallImage>
+            <ns2:Title>Benedetto Marcello: Il Pianto e il Riso by Mauro Borgioni (2015-05-03)</ns2:Title>
+        </ns2:ItemAttributes>
+    </AttributeSets>
+    <Relationships/>
+    <SalesRankings/>
+</Product>

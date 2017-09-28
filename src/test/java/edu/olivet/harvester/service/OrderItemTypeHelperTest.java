@@ -1,19 +1,43 @@
-package edu.olivet.harvester.model.service;
+package edu.olivet.harvester.service;
 
+import com.amazonservices.mws.products.model.Product;
 import com.google.inject.Inject;
+import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.amazon.MWSUtils;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
+import edu.olivet.harvester.service.mws.ProductClient;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
+
+import java.io.File;
 
 import static org.testng.Assert.*;
 
 @Guice
-public class OrderItemTypeHelperTest {
+public class OrderItemTypeHelperTest extends BaseTest {
 
     @Inject private OrderItemTypeHelper helper;
+
+    @BeforeClass
+    public void init() {
+        ProductClient productClient = new ProductClient(){
+            @Override
+            public Product getProductByASIN(Country country, String asin) {
+                File localProductXMLFile = new File(TEST_DATA_ROOT+File.separator+"asin-"+asin+".xml");
+                String xmlFragment = Tools.readFileToString(localProductXMLFile);
+
+                Product product = MWSUtils.buildMwsObject(xmlFragment, Product.class);
+                return product;
+            }
+        };
+
+        helper.setProductClient(productClient);
+    }
 
     @Test(expectedExceptions = BusinessException.class)
     public void testNoValidASIN() {
@@ -143,9 +167,16 @@ public class OrderItemTypeHelperTest {
         order.sku = "new701CAusubanP160805ZD-P030969";
         assertEquals(helper.getItemTypeBySku(order), OrderEnums.OrderItemType.PRODUCT);
 
-        //B008KTVD90 -> book
+
+    }
+
+    @Test(expectedExceptions = BusinessException.class)
+    public  void  testGetItemTypeBySkuNoResult() {
+        Order order = BaseTest.prepareOrder();
+
+        //B008KTVD90 -> exception
         order.sku = "usedAcptc-c0311201713941";
-        assertEquals(helper.getItemTypeBySku(order), OrderEnums.OrderItemType.BOOK);
+        helper.getItemTypeBySku(order);
 
     }
 

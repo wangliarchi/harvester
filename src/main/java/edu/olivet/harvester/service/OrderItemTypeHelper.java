@@ -1,4 +1,4 @@
-package edu.olivet.harvester.model.service;
+package edu.olivet.harvester.service;
 
 
 import com.amazonservices.mws.products.model.Product;
@@ -9,17 +9,13 @@ import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
-import edu.olivet.harvester.model.service.mws.ProductAttributes;
-import edu.olivet.harvester.model.service.mws.ProductClient;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
+import edu.olivet.harvester.service.mws.ProductAttributesHelper;
+import edu.olivet.harvester.service.mws.ProductClient;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * helper class to determine order item type, either book or product
@@ -29,6 +25,7 @@ public class OrderItemTypeHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderItemTypeHelper.class);
 
     @Inject
+    @Setter
     private ProductClient productClient;
 
     @Profile
@@ -119,6 +116,7 @@ public class OrderItemTypeHelper {
             asin = order.getIsbn();
         }
 
+
         if (asin.isEmpty()) {
             //LOGGER.error("No valid ASIN found for order {} on row {}",order.order_id,order.getRow());
             throw new BusinessException("No valid ASIN found for order " + order.order_id);
@@ -126,14 +124,15 @@ public class OrderItemTypeHelper {
 
         String productGroup;
         try {
-            Product product = productClient.getProductsByASIN(Country.fromSalesChanel(order.getSales_chanel()), asin);
-            productGroup = ProductAttributes.getProductGroup(product);
+            Product product = productClient.getProductByASIN(Country.fromSalesChanel(order.getSales_chanel()), asin);
+            productGroup = ProductAttributesHelper.getProductGroup(product);
+
             if (productGroup.isEmpty()) {
                 throw new BusinessException("No product group info found from mws product api.");
             }
 
-        } catch (BusinessException e) {
-            throw e;
+        } catch (Exception e) {
+            throw new BusinessException("No product group info found from mws product api.");
         }
 
 

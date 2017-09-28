@@ -50,7 +50,7 @@ public class ConfigurationPanel extends JPanel {
         sellerFld.setToolTipText("Input seller account. Example: user@gmail.com/password");
         sellerEmailFld.setToolTipText("Input seller email. Example: user@gmail.com/password");
         storeNameFld.setToolTipText("Input your store front name");
-        signatureFld.setToolTipText("Input your customer service email signature");
+        signatureFld.setToolTipText("Input your customer helper email signature");
 
         bookDataSourceUrlFld.setToolTipText("Input book order update spreadsheet url");
         primeBuyerFld.setToolTipText("Input prime buyer account that will fulfill book orders");
