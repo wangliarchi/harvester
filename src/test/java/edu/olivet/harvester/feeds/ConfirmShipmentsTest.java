@@ -21,6 +21,8 @@ import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.testng.Assert.*;
@@ -89,7 +91,8 @@ public class ConfirmShipmentsTest extends  BaseTest {
 
     }
 
-    @Test void testWriteLogToWorksheet() {
+    @Test
+    public void testWriteLogToWorksheet() {
         Worksheet worksheet = new Worksheet(spreadsheet, "09/22");
         List<Order> orders = confirmShipments.getOrdersFromWorksheet(worksheet);
 
@@ -102,6 +105,23 @@ public class ConfirmShipmentsTest extends  BaseTest {
         confirmShipments.writeLogToWorksheet(worksheet,submissionResult);
     }
 
+    @Test
+    public void testGetSheetNameByDate() throws ParseException {
+        SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+        long date;
+
+        date = formatter.parse("09/28/2017").getTime();
+        assertEquals(confirmShipments.getSheetNameByDate(date),"09/28");
+
+        date = formatter.parse("09/08/2017").getTime();
+        assertEquals(confirmShipments.getSheetNameByDate(date),"09/08");
+
+        date = formatter.parse("10/28/2017").getTime();
+        assertEquals(confirmShipments.getSheetNameByDate(date),"10/28");
+
+        date = formatter.parse("10/08/2017").getTime();
+        assertEquals(confirmShipments.getSheetNameByDate(date),"10/08");
+    }
     @Test
     public void testGenerateFeedFile() throws Exception {
     }

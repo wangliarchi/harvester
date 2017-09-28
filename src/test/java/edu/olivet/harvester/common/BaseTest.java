@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import edu.olivet.deploy.Language;
 import edu.olivet.foundations.db.DataBaseModule;
+import edu.olivet.foundations.mock.MockDateModule;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils;
@@ -33,7 +34,7 @@ import java.util.List;
  * 单元测试基类，提供基本的订单样例，系统、程序参数样本
  * @author <a href="mailto:rnd@olivetuniversity.edu>OURnD</a> Sep 23, 2017 1:48:45 PM
  */
-@Guice(modules = {DataBaseModule.class})
+@Guice(modules = {DataBaseModule.class, MockDateModule.class})
 public class BaseTest {
 
 	public static String basePath;

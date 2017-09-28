@@ -38,6 +38,7 @@ import sun.plugin.dom.exception.InvalidStateException;
 import java.io.File;
 import java.text.DateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -347,6 +348,12 @@ public class ConfirmShipments {
     }
 
 
+    public String getSheetNameByDate(long millis) {
+        String sheetName = FastDateFormat.getInstance("MM/dd").format(millis);
+
+        return sheetName;
+    }
+
     public void execute() {
 
 
@@ -360,9 +367,7 @@ public class ConfirmShipments {
         }
 
         //default to select today's sheet
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("MM/d");
-        LocalDate localDate = LocalDate.now();
-        String sheetName = df.format(localDate);
+        String sheetName = getSheetNameByDate(System.currentTimeMillis());
 
         //then confirm shipment for each spreadsheet
         for (String spreadId : spreadIds) {
