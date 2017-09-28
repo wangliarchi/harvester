@@ -178,14 +178,9 @@ public class ConfirmShipments {
 
 
         //submit feed to amazon via MWS Feed API
+        String result;
         try {
-            String result = submitFeed(feedFile, worksheet);
-
-            //send email
-            confirmShipmentEmailSender.sendSuccessEmail(result, feedFile, worksheet.getSpreadsheet().getSpreadsheetCountry());
-
-            //write result to googlesheet
-
+            result = submitFeed(feedFile, worksheet);
         } catch (Exception e) {
             messagePanel.displayMsg("Error when submitting feed file. " + e.getMessage(), InformationLevel.Negative);
             if (messagePanel instanceof VirtualMessagePanel) {
@@ -195,8 +190,16 @@ public class ConfirmShipments {
                         worksheet.getSpreadsheet().getSpreadsheetCountry());
             }
 
+            return;
+
 
         }
+
+        //write log to worksheet
+        writeLogToWorksheet(worksheet,result);
+        //send email
+        confirmShipmentEmailSender.sendSuccessEmail(result, feedFile, worksheet.getSpreadsheet().getSpreadsheetCountry());
+
 
 
     }
