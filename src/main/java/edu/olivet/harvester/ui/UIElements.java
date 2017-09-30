@@ -43,7 +43,8 @@ public class UIElements extends AbstractUIContainer {
             Action.Separator,
             Actions.FindSupplier,
             Action.Separator,
-            Actions.ConfirmShipment
+            Actions.ConfirmShipment,
+            Actions.OrderConfirmationHistory
         });
         map.put(Menu.Settings, new Action[] {
             Action.Settings,

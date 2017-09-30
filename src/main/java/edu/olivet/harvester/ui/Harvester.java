@@ -5,6 +5,8 @@ import edu.olivet.foundations.job.AutoUpgradeJob;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Directory;
+import edu.olivet.harvester.spreadsheet.service.AppScript;
+
 
 import java.io.File;
 
@@ -40,6 +42,13 @@ public class Harvester {
 
         uiHarvester.setVisible(true);
         uiHarvester.startBackgroundJobs();
+
+        //
+        try {
+            new AppScript().preloadAllSpreadsheets();
+        }catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
 }

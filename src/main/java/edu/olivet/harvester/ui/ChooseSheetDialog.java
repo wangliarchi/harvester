@@ -52,7 +52,7 @@ public class ChooseSheetDialog extends BaseDialog {
 
     private AppScript appScript;
 
-    public ChooseSheetDialog(List<Spreadsheet> spreadsheets,AppScript appScript) {
+    ChooseSheetDialog(List<Spreadsheet> spreadsheets,AppScript appScript) {
         super(null, true);
 
         this.spreadsheets = spreadsheets;
@@ -117,7 +117,6 @@ public class ChooseSheetDialog extends BaseDialog {
 
         MouseListener mouseListener = new MouseAdapter() {
             public void mouseClicked(MouseEvent mouseEvent) {
-                System.out.println(mouseEvent.getClickCount());
                 if (mouseEvent.getClickCount() == 2) {
                     ok();
                 }
@@ -157,10 +156,10 @@ public class ChooseSheetDialog extends BaseDialog {
                 .addComponent(spreadPane, 400, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
                 .addComponent(sheetPane, 400, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createSequentialGroup()
-                        .addComponent(clearCacheBtn, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH)
-                        .addGap(10)
+                        .addComponent(clearCacheBtn, UITools.BUTTON_WIDTH + 10, UITools.BUTTON_WIDTH + 10, UITools.BUTTON_WIDTH + 10)
+                        .addGap(1)
                         .addComponent(okBtn, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH)
-                        .addGap(10)
+                        .addGap(1)
                         .addComponent(cancelBtn, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH)));
 
 
@@ -239,7 +238,7 @@ public class ChooseSheetDialog extends BaseDialog {
         }
     }
 
-    public List<Worksheet> getSelectedSheets() {
+    List<Worksheet> getSelectedSheets() {
         return this.selectedWorksheets;
     }
 

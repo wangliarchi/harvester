@@ -7,6 +7,9 @@ import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.FeedUploader;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
+import edu.olivet.foundations.mock.MockDBModule;
+import edu.olivet.foundations.mock.MockDateModule;
+import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.Tools;
@@ -32,19 +35,20 @@ import java.util.*;
 
 import static org.testng.Assert.*;
 
-@Guice
+@Guice(modules = {MockDateModule.class,MockDBModule.class})
 public class ConfirmShipmentsTest extends  BaseTest {
 
     @Inject private ConfirmShipments confirmShipments;
 
-    String spreadsheetId = "1qxcCkAPvvBaR3KHa2MZv1V39m2E1IMytVDn1yXDaVEM";
+    private String spreadsheetId = "1qxcCkAPvvBaR3KHa2MZv1V39m2E1IMytVDn1yXDaVEM";
 
-    Spreadsheet spreadsheet;
+    private Spreadsheet spreadsheet;
 
     @BeforeClass
     public  void  init(){
         confirmShipments.setAppScript(appScript);
         spreadsheet = appScript.getSpreadsheet(spreadsheetId);
+
     }
 
 
@@ -64,24 +68,7 @@ public class ConfirmShipmentsTest extends  BaseTest {
 
     }
 
-    @Test(expectedExceptions = NoWorksheetFoundException.class)
-    public void testGetOrdersFromWorksheetInValidSheetName() throws Exception {
 
-        Worksheet worksheet = new Worksheet(spreadsheet, "09/222");
-
-        List<Order> orders = confirmShipments.getOrdersFromWorksheet(worksheet);
-    }
-
-    @Test(expectedExceptions = NoOrdersFoundInWorksheetException.class)
-    public void testGetOrdersFromWorksheetNoData() throws Exception {
-        String spreadsheetId = "1IMbmaLUjqvZ7w8OdPd59fpTuad8U__5PAyKg3yR0DjY";
-        Spreadsheet spreadsheet = appScript.getSpreadsheet(spreadsheetId);
-
-
-        Worksheet worksheet = new Worksheet(spreadsheet, "template");
-
-        List<Order> orders = confirmShipments.getOrdersFromWorksheet(worksheet);
-    }
 
 
     @Test
@@ -130,7 +117,7 @@ public class ConfirmShipmentsTest extends  BaseTest {
 
     @Inject private FeedUploader feedUploader;
 
-    @Test
+    @Test(expectedExceptions = BusinessException.class)
     public void testSubmitFeed() {
 
         Settings.Configuration config = Settings.load(basePath+File.separator+"conf/harvester-test-invalidmws.json").getConfigByCountry(Country.US);

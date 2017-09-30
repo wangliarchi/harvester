@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 
 public class ConfirmShipmentEmailSender extends EmailService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfirmShipmentEmailSender.class);
 
     public void sendErrorFoundEmail(String summary, String errorDescription, Country country) {
@@ -26,10 +27,8 @@ public class ConfirmShipmentEmailSender extends EmailService {
         String subject = String.format("%s %s Confirm Shipment Report: %s",
                 config.getAccountCode(), Dates.today(),summary);
 
-        String content = errorDescription;
-
         try {
-            this.sendMessage(subject, content, new Destination().withToAddresses(config.getSellerEmail().getEmail()));
+            this.sendMessage(subject, errorDescription, new Destination().withToAddresses(config.getSellerEmail().getEmail()));
         }catch (BusinessException e) {
             LOGGER.error("Failed to send shipment confirmation success email.{} - {}",subject,e.getMessage());
         }

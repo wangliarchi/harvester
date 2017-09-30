@@ -45,7 +45,7 @@ public class ConfigurationPanel extends JPanel {
         final JLabel prodPrimeBuyerLbl = new JLabel("Product Prime Buyer:");
         final JLabel prodBuyerLbl = new JLabel("Product Buyer:");
 
-        final JLabel ebayBuyerLbl = new JLabel("Ebay Buyer:");
+        final JLabel ebatesBuyerLbl = new JLabel("Ebates Buyer:");
 
         sellerFld.setToolTipText("Input seller account. Example: user@gmail.com/password");
         sellerEmailFld.setToolTipText("Input seller email. Example: user@gmail.com/password");
@@ -61,7 +61,7 @@ public class ConfigurationPanel extends JPanel {
         prodBuyerFld.setToolTipText("Input non-prime buyer account that will fulfill product orders");
 
         userCodeFld.setToolTipText("Input user code for validation usage");
-        ebayBuyerFld.setToolTipText("Input ebay buyer account for product order fulfillment benefit");
+        ebatesBuyerFld.setToolTipText("Input ebay buyer account for product order fulfillment benefit");
 
         GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);
@@ -86,7 +86,7 @@ public class ConfigurationPanel extends JPanel {
                         .addComponent(buyerLbl)
                         .addComponent(prodPrimeBuyerLbl)
                         .addComponent(prodBuyerLbl)
-                        .addComponent(ebayBuyerLbl))
+                        .addComponent(ebatesBuyerLbl))
                     .addGap(20)
                     .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(layout.createSequentialGroup().addComponent(sellerFld, width, width, width))
@@ -103,7 +103,7 @@ public class ConfigurationPanel extends JPanel {
                         .addGroup(layout.createSequentialGroup().addComponent(buyerFld, width, width, width))
                         .addGroup(layout.createSequentialGroup().addComponent(prodPrimeBuyerFld, width, width, width))
                         .addGroup(layout.createSequentialGroup().addComponent(prodBuyerFld, width, width, width))
-                        .addGroup(layout.createSequentialGroup().addComponent(ebayBuyerFld, width, width, width))
+                        .addGroup(layout.createSequentialGroup().addComponent(ebatesBuyerFld, width, width, width))
                     .addGap(20)
                     )));
 
@@ -152,7 +152,7 @@ public class ConfigurationPanel extends JPanel {
                         .addComponent(prodBuyerLbl).addComponent(prodBuyerFld, height, height, height))
                     .addGap(vGap)
                     .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(ebayBuyerLbl).addComponent(ebayBuyerFld, height, height, height))
+                        .addComponent(ebatesBuyerLbl).addComponent(ebatesBuyerFld, height, height, height))
                     .addGap(vGap)
                     .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(userCodeLbl).addComponent(userCodeFld, height, height, height))
@@ -175,7 +175,7 @@ public class ConfigurationPanel extends JPanel {
     private JTextField buyerFld = new JTextField();
     private JTextField prodPrimeBuyerFld = new JTextField();
     private JTextField prodBuyerFld = new JTextField();
-    private JTextField ebayBuyerFld = new JTextField();
+    private JTextField ebatesBuyerFld = new JTextField();
 
     Configuration collect() {
         Configuration cfg = new Configuration();
@@ -198,7 +198,7 @@ public class ConfigurationPanel extends JPanel {
         cfg.setProductDataSourceUrl(productDataSourceUrlFld.getText().trim());
         cfg.setProdPrimeBuyer(new Account(prodPrimeBuyerFld.getText(), AccountType.PrimeBuyer));
         cfg.setProdBuyer(new Account(prodBuyerFld.getText(), AccountType.Buyer));
-        cfg.setEbayBuyer(new Account(ebayBuyerFld.getText(), AccountType.Buyer));
+        cfg.setEbatesBuyer(new Account(ebatesBuyerFld.getText(), AccountType.Buyer));
 
         cfg.setUserCode(userCodeFld.getText().trim());
         return cfg;
@@ -230,7 +230,7 @@ public class ConfigurationPanel extends JPanel {
         prodPrimeBuyerFld.setText(this.abbrevAccount(cfg.getProdPrimeBuyer()));
         prodBuyerFld.setText(this.abbrevAccount(cfg.getProdBuyer()));
 
-        ebayBuyerFld.setText(this.abbrevAccount(cfg.getEbayBuyer()));
+        ebatesBuyerFld.setText(this.abbrevAccount(cfg.getEbatesBuyer()));
         userCodeFld.setText(cfg.getUserCode());
     }
     

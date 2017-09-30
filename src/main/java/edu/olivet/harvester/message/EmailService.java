@@ -19,20 +19,20 @@ public class EmailService implements MessageService {
     private GmailSender gmailSender;
 
     @Setter
-    private Account senderAccount;
+    protected Account senderAccount;
 
     @Setter
-    private boolean testMode = false;
+    protected boolean testMode = false;
 
     @Setter
-    private Destination testDestination = new Destination().withToAddresses(Constants.RND_EMAIL);
+    protected Destination testDestination = new Destination().withToAddresses(Constants.RND_EMAIL);
 
     @Inject
     public void init() {
         senderAccount = Settings.load().getConfigs().get(0).getSellerEmail();
     }
 
-    public boolean sendMessage(String subject, String content, Destination destination)  {
+    public void sendMessage(String subject, String content, Destination destination)  {
         try {
             if(testMode) {
                 destination = testDestination;
@@ -42,11 +42,11 @@ public class EmailService implements MessageService {
             throw new BusinessException(e);
         }
 
-        return true;
+
     }
 
 
-    public boolean sendMessage(Destination destination, String subject, String content,
+    public void sendMessage(Destination destination, String subject, String content,
                                EmailContentType contentType, File... attachments) {
         try {
             if(testMode) {
@@ -57,7 +57,7 @@ public class EmailService implements MessageService {
             throw new BusinessException(e);
         }
 
-        return true;
+
     }
 
 }

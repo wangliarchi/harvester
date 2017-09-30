@@ -1,27 +1,51 @@
 package edu.olivet.harvester.feeds.helper;
 
 
+import com.alibaba.fastjson.JSON;
+import com.amazonservices.mws.orders._2013_09_01.model.Order;
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.amazon.MWSUtils;
+import edu.olivet.foundations.mock.MockDBModule;
+import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.common.BaseTest;
+import edu.olivet.harvester.service.mws.OrderClient;
 import edu.olivet.harvester.spreadsheet.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
+
+import java.io.File;
 import java.util.*;
 
 import static org.testng.Assert.*;
 
-@Guice
+@Guice(modules = {MockDBModule.class})
 public class ShipmentOrderFilterTest extends BaseTest {
 
     @Inject private ShipmentOrderFilter shipmentOrderFilter;
 
+    @BeforeClass
+    public void init() {
 
-    @Inject private AppScript appScript;
+        OrderClient orderClient = new OrderClient() {
+            @Override
+            public List<Order> getOrders(Country country, List<String> amazonOrderIds) {
+                List<com.amazonservices.mws.orders._2013_09_01.model.Order> result = new ArrayList<>();
+                for (String amazonOrderId : amazonOrderIds) {
+                    File localOrderXMLFile = new File(TEST_DATA_ROOT + File.separator + "order-" + amazonOrderId + ".xml");
+                    String xmlFragment = Tools.readFileToString(localOrderXMLFile);
+                    result.add(MWSUtils.buildMwsObject(xmlFragment, com.amazonservices.mws.orders._2013_09_01.model.Order.class));
+                }
+                return result;
+            }
 
+        };
 
+        shipmentOrderFilter.setMwsOrderClient(orderClient);
+    }
 
     @Test
     public void testRemoveDulicatedOrders() {
@@ -53,7 +77,7 @@ public class ShipmentOrderFilterTest extends BaseTest {
         edu.olivet.harvester.model.Order order = BaseTest.prepareOrder();
         order.status = "wc";
 
-        Map<String, edu.olivet.harvester.model.Order> orders = new HashMap<String, edu.olivet.harvester.model.Order>();
+        Map<String, edu.olivet.harvester.model.Order> orders = new HashMap<>();
         orders.put(order.order_id,order);
 
         Map<String, edu.olivet.harvester.model.Order> filtered = shipmentOrderFilter.removeWCGrayLabelOrders(orders);
@@ -77,7 +101,7 @@ public class ShipmentOrderFilterTest extends BaseTest {
 
         //canceled
         order.order_id = "113-3520286-4229806";
-        Map<String, edu.olivet.harvester.model.Order> orders = new HashMap<String, edu.olivet.harvester.model.Order>();
+        Map<String, edu.olivet.harvester.model.Order> orders = new HashMap<>();
         orders.put(order.order_id,order);
 
 

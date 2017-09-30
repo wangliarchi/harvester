@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
@@ -19,6 +20,7 @@ import edu.olivet.harvester.spreadsheet.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.Worksheet;
 import edu.olivet.harvester.spreadsheet.exceptions.NoOrdersFoundInWorksheetException;
 import edu.olivet.harvester.spreadsheet.exceptions.NoWorksheetFoundException;
+import edu.olivet.harvester.utils.Settings;
 import lombok.Data;
 import lombok.Getter;
 import org.apache.commons.collections4.CollectionUtils;
@@ -52,9 +54,8 @@ public class AppScript {
     @Repeat(expectedExceptions = {BusinessException.class, JSONException.class})
     public Spreadsheet getSpreadsheet(String spreadId) {
 
-        return SPREADSHEET_CLIENT_CACHE.computeIfAbsent(spreadId, k->{
-            Spreadsheet spreadsheet =  this.reloadSpreadsheet(spreadId);
-            return spreadsheet;
+        return SPREADSHEET_CLIENT_CACHE.computeIfAbsent(spreadId, k -> {
+            return this.reloadSpreadsheet(spreadId);
         });
 
     }
@@ -67,16 +68,41 @@ public class AppScript {
         String json = this.processResult(this.get(params));
 
 
-        Spreadsheet spreadsheet =  JSON.parseObject(json, Spreadsheet.class);
+        Spreadsheet spreadsheet = JSON.parseObject(json, Spreadsheet.class);
+        spreadsheet = afterSpreadsheetLoaded(spreadsheet);
 
-        SPREADSHEET_CLIENT_CACHE.put(spreadId,spreadsheet);
+
+        SPREADSHEET_CLIENT_CACHE.put(spreadId, spreadsheet);
         return spreadsheet;
 
     }
-    public  void clearCache(){
+
+    public Spreadsheet afterSpreadsheetLoaded(Spreadsheet spreadsheet) {
+        spreadsheet.setSpreadsheetCountry(Settings.load().getSpreadsheetCountry(spreadsheet.getSpreadsheetId()));
+        spreadsheet.setSpreadsheetType(Settings.load().getSpreadsheetType(spreadsheet.getSpreadsheetId()));
+
+        return spreadsheet;
+    }
+
+    public void clearCache() {
         SPREADSHEET_CLIENT_CACHE.clear();
     }
 
+
+    public void preloadAllSpreadsheets() {
+        try {
+            List<String> spreadsheetIds = Settings.load().listAllSpreadsheets();
+            for (String spreadsheetId : spreadsheetIds) {
+                try {
+                    Spreadsheet spreadsheet = reloadSpreadsheet(spreadsheetId);
+                } catch (Exception e) {
+                    LOGGER.warn("{} is invalid. {}", spreadsheetId, e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            //ignore
+        }
+    }
 
     /**
      * <pre>
@@ -88,9 +114,9 @@ public class AppScript {
      * </pre>
      */
     private static final String URL_PREFIX =
-        "https?://(spreadsheets.google.com/feeds/(cells|spreadsheets)/|docs.google.com/spreadsheets/d/|drive.google.com/open[?]id=)";
+            "https?://(spreadsheets.google.com/feeds/(cells|spreadsheets)/|docs.google.com/spreadsheets/d/|drive.google.com/open[?]id=)";
 
-    public String getSpreadId(String url) {
+    public static String getSpreadId(String url) {
         String str = StringUtils.defaultString(url).replaceFirst(URL_PREFIX, StringUtils.EMPTY);
         return str.contains("/") ? str.substring(0, str.indexOf("/")) : str;
     }
@@ -145,7 +171,8 @@ public class AppScript {
         return StringUtils.defaultString(result).trim();
     }
 
-    @Inject private OrderHelper orderHelper;
+    @Inject
+    private OrderHelper orderHelper;
     private static final String DEFAULT_RANGE = "A-AO";
 
     @Repeat
@@ -158,7 +185,7 @@ public class AppScript {
 
         final long start = System.currentTimeMillis();
         String json = this.processResult(this.get(params));
-        System.out.println(json.toString());
+
         List<Order> orders = this.parse(json);
         LOGGER.info("Read {} orders from sheet {} via in {}", orders.size(), sheetName, Strings.formatElapsedTime(start));
         return orders;
@@ -170,10 +197,14 @@ public class AppScript {
             return ArrayUtils.isNotEmpty(orders) && ArrayUtils.isNotEmpty(colors);
         }
 
-        @Getter private int startRow;
-        @Getter private int endRow;
-        @Getter private String[][] orders;
-        @Getter private String[][] colors;
+        @Getter
+        private int startRow;
+        @Getter
+        private int endRow;
+        @Getter
+        private String[][] orders;
+        @Getter
+        private String[][] colors;
     }
 
     public List<Order> parse(String json) {
@@ -252,23 +283,23 @@ public class AppScript {
 
     public List<Order> getOrdersFromWorksheet(Worksheet worksheet) {
 
-        List<Order> orders = new ArrayList<>();
+        List<Order> orders;
 
 
-        try{
-            orders =  this.readOrders(worksheet.getSpreadsheet().getSpreadsheetId(),worksheet.getSheetName());
-        }catch (Exception e){
+        try {
+            orders = this.readOrders(worksheet.getSpreadsheet().getSpreadsheetId(), worksheet.getSheetName());
+        } catch (Exception e) {
             LOGGER.error("读取订单数据失败: {} - {}", worksheet.getSheetName(), e.getMessage());
 
-            if(e.getMessage().contains("Cannot read sheet according to provided sheet id and name")) {
+            if (e.getMessage().contains("Cannot read sheet according to provided sheet id and name")) {
                 throw new NoWorksheetFoundException(e.getMessage());
             }
 
             throw new BusinessException(e.getMessage());
         }
 
-        if(CollectionUtils.isEmpty(orders)) {
-            throw new NoOrdersFoundInWorksheetException("No valid orders found for sheet name "+worksheet.getSheetName()+" found in "+worksheet.getSpreadsheet().getTitle()+".");
+        if (CollectionUtils.isEmpty(orders)) {
+            throw new NoOrdersFoundInWorksheetException("No valid orders found for sheet name " + worksheet.getSheetName() + " found in " + worksheet.getSpreadsheet().getTitle() + ".");
         }
 
         return orders;

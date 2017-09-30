@@ -1,7 +1,7 @@
 {
 	"configs":[
 		{
-			"bookDataSourceUrl":"1qxcCkAPvvBaR3KHa2MZv1V39m2E1IMytVDn1yXDaVEM",
+			"bookDataSourceUrl":"1IMbmaLUjqvZ7w8OdPd59fpTuad8U__5PAyKg3yR0DjY",
 			"buyer":{
 				"email":"acc@gmail.com",
 				"password":"1",
@@ -34,15 +34,15 @@
 				"password":"1",
 				"type":"PrimeBuyer"
 			},
-			"productDataSourceUrl":"",
+			"productDataSourceUrl":"1qxcCkAPvvBaR3KHa2MZv1V39m2E1IMytVDn1yXDaVEM",
 			"seller":{
 				"email":"acc@gmail.com",
 				"password":"1",
 				"type":"Seller"
 			},
 			"sellerEmail":{
-				"email":"acc@gmail.com",
-				"password":"1",
+				"email":"johnnyxiang2017@gmail.com",
+				"password":"q1w2e3AA",
 				"type":"Seller"
 			},
 			"signature":"Mike",

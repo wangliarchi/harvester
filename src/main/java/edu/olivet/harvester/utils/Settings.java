@@ -14,11 +14,11 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.plugin.dom.exception.InvalidStateException;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Configuration of Harvester, usually consisting of seller account, buyer accounts and etc.
@@ -49,6 +49,8 @@ public class Settings {
         }
     }
 
+
+
     private String sid;
 
     private List<Configuration> configs;
@@ -64,9 +66,7 @@ public class Settings {
     }
 
 
-    /**
-     * @return
-     */
+
     public List<String> listAllSpreadsheets() {
 
         List<String> spreadIds = new ArrayList<>();
@@ -92,6 +92,43 @@ public class Settings {
         return spreadIds;
     }
 
+
+    /**
+     * each spreadsheet holds certain type of order items: BOOK, PRODUCT or both
+     * @return OrderItemType
+     */
+    public OrderEnums.OrderItemType getSpreadsheetType(String spreadsheetId) {
+
+        for (Settings.Configuration config : configs) {
+            if (config.getSpreadId(OrderEnums.OrderItemType.BOOK) .equals( spreadsheetId) ) {
+                return OrderEnums.OrderItemType.BOOK;
+            }
+
+            if (config.getSpreadId(OrderEnums.OrderItemType.PRODUCT).equals(spreadsheetId)) {
+                return OrderEnums.OrderItemType.PRODUCT;
+            }
+        }
+
+        throw new BusinessException("Spreadsheet id "+spreadsheetId+" is not in configuration file.");
+
+    }
+
+
+    public Country getSpreadsheetCountry(String spreadsheetId) {
+        for (Settings.Configuration config : configs) {
+            if (config.getSpreadId(OrderEnums.OrderItemType.BOOK).equals(spreadsheetId) ) {
+                return config.getCountry();
+            }
+
+            if (config.getSpreadId(OrderEnums.OrderItemType.PRODUCT).equals(spreadsheetId)) {
+                return config.getCountry();
+            }
+        }
+
+        throw new BusinessException("Spreadsheet id "+spreadsheetId+" is not in configuration file. No country info found.");
+
+    }
+
     /**
      * Configuration for a certain marketplace
      */
@@ -105,13 +142,15 @@ public class Settings {
 
         private Account prodPrimeBuyer, prodBuyer;
 
-        private Account ebayBuyer;
+        private Account ebatesBuyer;
 
         private String bookDataSourceUrl, productDataSourceUrl;
 
         private String storeName, signature;
 
         private String userCode;
+
+        private String accountCode;
 
         private MarketWebServiceIdentity mwsCredential;
 
@@ -161,8 +200,8 @@ public class Settings {
                 list.add("User code not provided");
             }
 
-            if (StringUtils.isNotBlank(productDataSourceUrl) && (ebayBuyer == null || !ebayBuyer.valid())) {
-                list.add("Ebay buyer account must be provided as product order fulfillment requires it");
+            if ( (ebatesBuyer == null || !ebatesBuyer.valid())) {
+                list.add("Ebates buyer account must be provided.");
             }
 
             return list;
@@ -183,7 +222,7 @@ public class Settings {
          * @param type
          * @return
          */
-        public String getSpreadId(OrderEnums.OrderItemType type) {
+        String getSpreadId(OrderEnums.OrderItemType type) {
 
 
 
@@ -197,9 +236,7 @@ public class Settings {
 
         }
 
-        public String  getAccountCode() {
-            return Settings.load().getSid() + this.getCountry().code();
-        }
+
     }
 
 }

@@ -4,6 +4,7 @@ import com.amazonservices.mws.products.model.Product;
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.MWSUtils;
+import edu.olivet.foundations.mock.MockDBModule;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.common.BaseTest;
 import org.testng.annotations.BeforeClass;
@@ -16,13 +17,12 @@ import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
 
-@Guice
+@Guice(modules = {MockDBModule.class})
 public class ProductAttributesHelperTest extends BaseTest {
 
     private ProductClient productClient;
     private Product product;
 
-    @Inject private ProductAttributesHelper productAttributesHelper;
 
     @BeforeClass
     public void init() {
@@ -32,8 +32,7 @@ public class ProductAttributesHelperTest extends BaseTest {
                 File localProductXMLFile = new File(TEST_DATA_ROOT+File.separator+"asin-"+asin+".xml");
                 String xmlFragment = Tools.readFileToString(localProductXMLFile);
 
-                Product product = MWSUtils.buildMwsObject(xmlFragment, Product.class);
-                return product;
+                return MWSUtils.buildMwsObject(xmlFragment, Product.class);
             }
         };
 
@@ -51,7 +50,7 @@ public class ProductAttributesHelperTest extends BaseTest {
 
         productGroupsMap.forEach((asin,group)->{
             product = productClient.getProductByASIN(Country.US,asin);
-            assertEquals(productAttributesHelper.getProductGroup(product), group);
+            assertEquals(ProductAttributesHelper.getProductGroup(product), group);
         });
 
 

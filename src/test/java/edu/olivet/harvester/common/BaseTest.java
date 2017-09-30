@@ -4,8 +4,11 @@ package edu.olivet.harvester.common;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
+import com.google.inject.Inject;
 import edu.olivet.deploy.Language;
+import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.db.DataBaseModule;
+import edu.olivet.foundations.mock.MockDBModule;
 import edu.olivet.foundations.mock.MockDateModule;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.utils.BusinessException;
@@ -16,6 +19,7 @@ import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.spreadsheet.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.service.OrderHelper;
+import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -34,19 +38,22 @@ import java.util.List;
  * 单元测试基类，提供基本的订单样例，系统、程序参数样本
  * @author <a href="mailto:rnd@olivetuniversity.edu>OURnD</a> Sep 23, 2017 1:48:45 PM
  */
-@Guice(modules = {DataBaseModule.class, MockDateModule.class})
+@Guice(modules = {MockDateModule.class,MockDBModule.class})
 public class BaseTest {
 
-	public static String basePath;
-	public static final String TEST_RES_ROOT = "src/test/resources";
-	public static final String TEST_CONFIG = "harvester-test.json";
-	public static final String TEST_DATA_ROOT = TEST_RES_ROOT + "/data4test";
-	public static String testConfigFilePath ;
+	protected static String basePath;
+	private static final String TEST_RES_ROOT = "src/test/resources";
+	private static final String TEST_CONFIG = "harvester-test.json";
+	protected static final String TEST_DATA_ROOT = TEST_RES_ROOT + "/data4test";
+	protected static String testConfigFilePath ;
 
 	protected static Order order;
 
 
-	public AppScript appScript;
+	protected AppScript appScript;
+
+	@Inject
+	protected DBManager dbManager;
 
 	@BeforeClass
 	public void setUp() throws IOException, BusinessException {
@@ -67,10 +74,19 @@ public class BaseTest {
 
 				Spreadsheet spreadsheet =  JSON.parseObject(Tools.readFileToString(localJsonFile), Spreadsheet.class);
 
+				spreadsheet = afterSpreadsheetLoaded(spreadsheet);
+
 				return  spreadsheet;
 
 			}
 
+			@Override
+			public Spreadsheet afterSpreadsheetLoaded(Spreadsheet spreadsheet) {
+				spreadsheet.setSpreadsheetCountry(Settings.load(testConfigFilePath).getSpreadsheetCountry(spreadsheet.getSpreadsheetId()));
+				spreadsheet.setSpreadsheetType(Settings.load(testConfigFilePath).getSpreadsheetType(spreadsheet.getSpreadsheetId()));
+
+				return spreadsheet;
+			}
 			@Override
 			public Spreadsheet getSpreadsheet(String spreadId) {
 				return reloadSpreadsheet(spreadId);
@@ -86,8 +102,7 @@ public class BaseTest {
 				}
 
 				String json = Tools.readFileToString(localJsonFile);
-				List<Order> orders = this.parse(json);
-				return orders;
+				return this.parse(json);
 			}
 
 			@Override

@@ -4,6 +4,7 @@ import com.amazonservices.mws.products.model.Product;
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.MWSUtils;
+import edu.olivet.foundations.mock.MockDBModule;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.common.BaseTest;
@@ -18,7 +19,7 @@ import java.io.File;
 
 import static org.testng.Assert.*;
 
-@Guice
+@Guice(modules = {MockDBModule.class})
 public class OrderItemTypeHelperTest extends BaseTest {
 
     @Inject private OrderItemTypeHelper helper;
@@ -31,8 +32,7 @@ public class OrderItemTypeHelperTest extends BaseTest {
                 File localProductXMLFile = new File(TEST_DATA_ROOT+File.separator+"asin-"+asin+".xml");
                 String xmlFragment = Tools.readFileToString(localProductXMLFile);
 
-                Product product = MWSUtils.buildMwsObject(xmlFragment, Product.class);
-                return product;
+                return MWSUtils.buildMwsObject(xmlFragment, Product.class);
             }
         };
 

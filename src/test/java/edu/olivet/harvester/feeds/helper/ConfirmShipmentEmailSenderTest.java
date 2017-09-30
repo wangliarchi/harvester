@@ -4,6 +4,7 @@ import com.amazonaws.services.simpleemail.model.Destination;
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.mock.MockDBModule;
 import edu.olivet.harvester.common.BaseTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Guice;
@@ -13,7 +14,7 @@ import java.io.File;
 
 import static org.testng.Assert.*;
 
-@Guice
+@Guice(modules = {MockDBModule.class})
 public class ConfirmShipmentEmailSenderTest extends BaseTest {
 
     private String testEmailAddress = "johnnyxiang2017@gmail.com";

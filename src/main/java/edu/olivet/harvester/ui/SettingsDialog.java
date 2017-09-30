@@ -6,8 +6,11 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.BaseDialog;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
+import edu.olivet.foundations.utils.Configs;
+import edu.olivet.foundations.utils.Directory;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.foundations.utils.Tools;
+import edu.olivet.harvester.utils.Migration;
 import edu.olivet.harvester.utils.Settings;
 import edu.olivet.harvester.utils.Settings.Configuration;
 import lombok.Getter;
@@ -29,7 +32,8 @@ import java.util.List;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 9/20/2017 9:41 PM
  */
 public class SettingsDialog extends BaseDialog {
-    @Getter private Settings settings;
+    @Getter
+    private Settings settings;
 
     private final List<Country> marketplaces = Arrays.asList(Country.US, Country.CA, Country.UK, Country.JP, Country.IN, Country.MX);
     private Map<Country, JCheckBox> checkBoxes = new HashMap<>();
@@ -47,15 +51,22 @@ public class SettingsDialog extends BaseDialog {
         Map<Country, Configuration> map = new HashMap<>();
         try {
             settings = Settings.load();
-            if (CollectionUtils.isNotEmpty(settings.getConfigs())) {
-                for (Configuration config : settings.getConfigs()) {
-                    map.put(config.getCountry(), config);
-                }
-                this.sidFld.setText(settings.getSid());
-            }
         } catch (IllegalStateException e) {
-            // -> Ignore
+            try {
+                //load setting migrated from orderman
+                settings = Migration.loadSettings();
+            } catch (Exception e1) {
+                // -> Ignore
+            }
         }
+
+        if (settings != null && CollectionUtils.isNotEmpty(settings.getConfigs())) {
+            for (Configuration config : settings.getConfigs()) {
+                map.put(config.getCountry(), config);
+            }
+            this.sidFld.setText(settings.getSid());
+        }
+
 
         this.tabbedPane = new JTabbedPane();
         this.initButtons();
@@ -97,22 +108,22 @@ public class SettingsDialog extends BaseDialog {
         getContentPane().setLayout(layout);
         final int buttonHeight = 30;
         layout.setHorizontalGroup(layout.createParallelGroup(Alignment.LEADING)
-            .addComponent(panel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
-            .addGroup(Alignment.LEADING, layout.createSequentialGroup().addGap(20).addComponent(aboutBtn))
-            .addGroup(Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(okBtn, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH)
-                .addPreferredGap(ComponentPlacement.RELATED)
-                .addComponent(cancelBtn, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH))
-            .addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE));
+                .addComponent(panel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                .addGroup(Alignment.LEADING, layout.createSequentialGroup().addGap(20).addComponent(aboutBtn))
+                .addGroup(Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(okBtn, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH)
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addComponent(cancelBtn, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH))
+                .addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE));
 
         layout.setVerticalGroup(layout.createParallelGroup(Alignment.LEADING)
-            .addGroup(Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(panel).addComponent(tabbedPane)
-                .addGap(5)
-                .addGroup(layout.createParallelGroup(Alignment.BASELINE)
-                    .addComponent(aboutBtn, buttonHeight, buttonHeight, buttonHeight)
-                    .addComponent(cancelBtn, buttonHeight, buttonHeight, buttonHeight)
-                    .addComponent(okBtn, buttonHeight, buttonHeight, buttonHeight))));
+                .addGroup(Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(panel).addComponent(tabbedPane)
+                        .addGap(5)
+                        .addGroup(layout.createParallelGroup(Alignment.BASELINE)
+                                .addComponent(aboutBtn, buttonHeight, buttonHeight, buttonHeight)
+                                .addComponent(cancelBtn, buttonHeight, buttonHeight, buttonHeight)
+                                .addComponent(okBtn, buttonHeight, buttonHeight, buttonHeight))));
 
         getRootPane().setDefaultButton(okBtn);
         pack();
@@ -132,24 +143,24 @@ public class SettingsDialog extends BaseDialog {
         GroupLayout layout = new GroupLayout(pane);
         pane.setLayout(layout);
         layout.setHorizontalGroup(layout.createParallelGroup(Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup().addContainerGap()
-                .addGroup(layout.createParallelGroup(Alignment.TRAILING)
-                    .addComponent(sidLbl)
-                    .addComponent(checkboxLbl))
-                .addGap(28)
-                .addGroup(layout.createParallelGroup(Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(sidFld, 240, 240, 240))
-                    .addGroup(this.addCheckBoxesHorizontally(layout.createSequentialGroup())))));
+                .addGroup(layout.createSequentialGroup().addContainerGap()
+                        .addGroup(layout.createParallelGroup(Alignment.TRAILING)
+                                .addComponent(sidLbl)
+                                .addComponent(checkboxLbl))
+                        .addGap(28)
+                        .addGroup(layout.createParallelGroup(Alignment.LEADING)
+                                .addGroup(layout.createSequentialGroup()
+                                        .addComponent(sidFld, 240, 240, 240))
+                                .addGroup(this.addCheckBoxesHorizontally(layout.createSequentialGroup())))));
 
         layout.setVerticalGroup(layout.createParallelGroup(Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(5)
-                .addGroup(layout.createParallelGroup(Alignment.BASELINE)
-                    .addComponent(sidLbl).addComponent(sidFld, 28, 28, 28))
-                .addGap(5)
-                .addGroup(this.addCheckBoxesVertically(layout.createParallelGroup(Alignment.BASELINE)
-                    .addComponent(checkboxLbl)))));
+                .addGroup(layout.createSequentialGroup()
+                        .addGap(5)
+                        .addGroup(layout.createParallelGroup(Alignment.BASELINE)
+                                .addComponent(sidLbl).addComponent(sidFld, 28, 28, 28))
+                        .addGap(5)
+                        .addGroup(this.addCheckBoxesVertically(layout.createParallelGroup(Alignment.BASELINE)
+                                .addComponent(checkboxLbl)))));
         return pane;
     }
 
@@ -192,10 +203,11 @@ public class SettingsDialog extends BaseDialog {
                 Configuration config = cfgPanel.collect();
                 List<String> errors = config.validate();
                 if (CollectionUtils.isEmpty(errors)) {
+                    config.setAccountCode(sid + config.getCountry().code());
                     configs.add(config);
                 } else {
                     UITools.error(String.format("Please fix %d configuration error(s) of %s marketplace:%n%n%s",
-                        errors.size(), config.getCountry().name(), concatErrorMessages(errors)));
+                            errors.size(), config.getCountry().name(), concatErrorMessages(errors)));
                     return;
                 }
             }
@@ -207,7 +219,9 @@ public class SettingsDialog extends BaseDialog {
         this.settings = new Settings(sid, configs);
         File file = new File(Harvester.CONFIG_FILE_PATH);
         Tools.writeStringToFile(file, JSON.toJSONString(this.settings, true));
-        UITools.info(String.format("Congratulations! Harvester configuration successfully saved into%n%s", file.getAbsolutePath()));
+
+        //UITools.info(String.format("Congratulations! Harvester configuration successfully saved into%n%s", file.getAbsolutePath()));
+        UITools.info("Configuration has been saved successfully.");
         ok = true;
         doClose();
     }

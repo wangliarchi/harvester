@@ -4,19 +4,25 @@ import com.google.api.services.drive.model.File;
 import com.google.inject.Inject;
 import edu.olivet.deploy.Language;
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.job.TaskScheduler;
 import edu.olivet.foundations.ui.*;
 import edu.olivet.foundations.ui.Action;
+import edu.olivet.foundations.ui.ListModel;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.feeds.ConfirmShipments;
 import edu.olivet.harvester.job.BackgroundJob;
+import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.model.feeds.OrderConfirmationLog;
 import edu.olivet.harvester.spreadsheet.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Getter;
+import org.nutz.dao.Cnd;
+import org.nutz.dao.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +39,8 @@ import java.util.Random;
 public class UIHarvester extends AbstractApplicationUI {
     private static final Logger LOGGER = LoggerFactory.getLogger(UIHarvester.class);
     private JTextPane statusPane;
+    @Inject
+    private DBManager dbManager;
 
 //    @Getter
 //    private JTextArea successLogTextArea;
@@ -73,36 +81,38 @@ public class UIHarvester extends AbstractApplicationUI {
         GroupLayout layout = new GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup()
-                    .addComponent(toolbar))
-                .addGroup(layout.createSequentialGroup()
-                    .addComponent(icon))
+                layout.createParallelGroup(Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(toolbar))
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(icon))
 //                .addGroup(layout.createSequentialGroup()
 //                        .addComponent(successLogPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
-                .addGroup(layout.createSequentialGroup()
-                    .addComponent(statusPane, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(statusPane, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
 
-                    .addComponent(memoryUsageBar, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, 200))
+                                .addComponent(memoryUsageBar, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, 200))
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(Alignment.CENTER)
-                .addGroup(layout.createSequentialGroup()
-                    .addComponent(toolbar, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-                    .addComponent(icon, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                layout.createParallelGroup(Alignment.CENTER)
+                        .addGroup(layout.createSequentialGroup()
+                                        .addComponent(toolbar, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(icon, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
 //                    .addComponent(successLogPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createParallelGroup(Alignment.BASELINE)
+                                        .addGroup(layout.createParallelGroup(Alignment.BASELINE)
 
-                        .addComponent(memoryUsageBar, 24, 24, 24).addComponent(statusPane))
-                ));
+                                                .addComponent(memoryUsageBar, 24, 24, 24).addComponent(statusPane))
+                        ));
         pack();
     }
 
-    @UIEvent public void submitOrder() {
+    @UIEvent
+    public void submitOrder() {
 
     }
 
-    @UIEvent public void findSupplier() {
+    @UIEvent
+    public void findSupplier() {
 
     }
 
@@ -116,26 +126,23 @@ public class UIHarvester extends AbstractApplicationUI {
 
         long start = System.currentTimeMillis();
 
-        LOGGER.info("Confirm shipment button clicked at {}",start);
+        LOGGER.info("Confirm shipment button clicked at {}", start);
 
         List<String> spreadsheetIds = Settings.load().listAllSpreadsheets();
         List<edu.olivet.harvester.spreadsheet.Spreadsheet> spreadsheets = new ArrayList<>();
 
-        for(String spreadsheetId : spreadsheetIds) {
+        for (String spreadsheetId : spreadsheetIds) {
             try {
                 Spreadsheet spreadsheet = appScript.getSpreadsheet(spreadsheetId);
                 spreadsheets.add(spreadsheet);
             } catch (Exception e) {
-                LOGGER.warn( "{} is invalid. {}",spreadsheetId,e.getMessage());
+                LOGGER.warn("{} is invalid. {}", spreadsheetId, e.getMessage());
             }
         }
 
         LOGGER.info("All spreadsheets loaded in {}", Strings.formatElapsedTime(start));
 
-        ChooseSheetDialog dialog = UITools.setDialogAttr(new ChooseSheetDialog(spreadsheets,appScript));
-
-
-        long start1 = System.currentTimeMillis();
+        ChooseSheetDialog dialog = UITools.setDialogAttr(new ChooseSheetDialog(spreadsheets, appScript));
 
         if (dialog.isOk()) {
 
@@ -143,20 +150,31 @@ public class UIHarvester extends AbstractApplicationUI {
 
             List<Worksheet> selectedWorksheets = dialog.getSelectedSheets();
             List<String> sheetNames = new ArrayList<>();
-            selectedWorksheets.forEach(it -> {sheetNames.add(it.getSheetName());});
+            selectedWorksheets.forEach(it -> {
+                sheetNames.add(it.getSheetName());
+            });
 
-            confirmShipments.getMessagePanel().displayMsg(selectedWorksheets.size()+" worksheets from "+selectedWorksheets.get(0).getSpreadsheet().getTitle()
-                    +" selected to confirm shipments - "
-                    + String.join(",", sheetNames), LOGGER,InformationLevel.Information);
+            confirmShipments.getMessagePanel().displayMsg(selectedWorksheets.size() + " worksheets from " + selectedWorksheets.get(0).getSpreadsheet().getTitle()
+                    + " selected to confirm shipments - "
+                    + String.join(",", sheetNames), LOGGER, InformationLevel.Information);
 
 
             confirmShipments.confirmShipmentForWorksheets(selectedWorksheets);
         }
     }
 
+
+    @UIEvent
+    public void OrderConfirmationHistory() {
+        List<OrderConfirmationLog> list = dbManager.query(OrderConfirmationLog.class, Cnd.where("context", "!=", "").desc("uploadTime"));
+        UITools.displayListDialog(new ListModel<>(Actions.OrderConfirmationHistory.label(), list, OrderConfirmationLog.COLUMNS, null, OrderConfirmationLog.WIDTHS));
+    }
+
+
     private Settings settings;
 
-    @UIEvent public void settings() {
+    @UIEvent
+    public void settings() {
         SettingsDialog dialog = UITools.setDialogAttr(new SettingsDialog());
         if (dialog.isOk()) {
             this.settings = dialog.getSettings();
@@ -173,7 +191,8 @@ public class UIHarvester extends AbstractApplicationUI {
 
     }
 
-    @Inject private TaskScheduler taskScheduler;
+    @Inject
+    private TaskScheduler taskScheduler;
 
     void startBackgroundJobs() {
         for (BackgroundJob job : BackgroundJob.values()) {
