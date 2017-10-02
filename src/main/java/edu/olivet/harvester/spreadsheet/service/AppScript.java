@@ -3,11 +3,8 @@ package edu.olivet.harvester.spreadsheet.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
-import com.google.api.client.http.HttpStatusCodes;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
@@ -26,17 +23,17 @@ import lombok.Getter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.nutz.dao.Chain;
-import org.nutz.dao.Cnd;
 import org.nutz.lang.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 @Singleton
@@ -54,9 +51,7 @@ public class AppScript {
     @Repeat(expectedExceptions = {BusinessException.class, JSONException.class})
     public Spreadsheet getSpreadsheet(String spreadId) {
 
-        return SPREADSHEET_CLIENT_CACHE.computeIfAbsent(spreadId, k -> {
-            return this.reloadSpreadsheet(spreadId);
-        });
+        return SPREADSHEET_CLIENT_CACHE.computeIfAbsent(spreadId, k -> this.reloadSpreadsheet(spreadId));
 
     }
 
@@ -78,8 +73,12 @@ public class AppScript {
     }
 
     public Spreadsheet afterSpreadsheetLoaded(Spreadsheet spreadsheet) {
-        spreadsheet.setSpreadsheetCountry(Settings.load().getSpreadsheetCountry(spreadsheet.getSpreadsheetId()));
-        spreadsheet.setSpreadsheetType(Settings.load().getSpreadsheetType(spreadsheet.getSpreadsheetId()));
+        try {
+            spreadsheet.setSpreadsheetCountry(Settings.load().getSpreadsheetCountry(spreadsheet.getSpreadsheetId()));
+            spreadsheet.setSpreadsheetType(Settings.load().getSpreadsheetType(spreadsheet.getSpreadsheetId()));
+        } catch (BusinessException e) {
+            //ignore
+        }
 
         return spreadsheet;
     }

@@ -27,23 +27,24 @@ public class ProductClient {
      * https://docs.developer.amazonservices.com/en_UK/products/Products_GetMatchingProduct.html
      *
      * including PurchaseDate, OrderStatus, FulfillmentChannel, and LastUpdateDate.
+     *
      * @param country
      * @param asin
      */
-   public  Product getProductByASIN(Country country, String asin) {
-        List<String> asins = new ArrayList<String>();
+    public Product getProductByASIN(Country country, String asin) {
+        List<String> asins = new ArrayList<>();
         asins.add(asin);
 
-        List<Product> products =  getProductsByASINs(country,asins);
+        List<Product> products = getProductsByASINs(country, asins);
 
-        if(products.isEmpty()) {
-            throw  new BusinessException("No product info returned from MWS Product API for asin "+asin);
+        if (products.isEmpty()) {
+            throw new BusinessException("No product info returned from MWS Product API for asin " + asin);
         }
 
         Product product = products.get(0);
 
-        if(product == null) {
-            throw new BusinessException("No product info returned from MWS Product API for asin "+asin);
+        if (product == null) {
+            throw new BusinessException("No product info returned from MWS Product API for asin " + asin);
         }
 
         return product;
@@ -53,12 +54,10 @@ public class ProductClient {
     @Inject
     private ProductFetcher productFetcher;
 
-    public  List<Product> getProductsByASINs(Country country, List<String> asins) {
+    public List<Product> getProductsByASINs(Country country, List<String> asins) {
 
         MarketWebServiceIdentity credential = Settings.load().getConfigByCountry(country).getMwsCredential();
-        List<Product> result = productFetcher.read(asins,credential);
 
-        return result;
-
+        return productFetcher.read(asins, credential);
     }
 }

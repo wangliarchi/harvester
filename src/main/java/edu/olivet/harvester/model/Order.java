@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * Order information mapped to one row of daily update spreadsheet
+ *
  * @author <a href="mailto:rnd@olivetuniversity.edu">RnD</a> 09/19/2017 09:00:00
  */
 @Data
@@ -115,11 +116,11 @@ public class Order implements Keyable {
     /**
      * Determine whether a order number is valid or not by detecting whether it matches Amazon, BetterWorld or Ingram Order Number Pattern
      */
-    public boolean orderNumberValid() {
+    private boolean orderNumberValid() {
         String orderNo = StringUtils.defaultString(this.order_number).trim();
         return Regex.AMAZON_ORDER_NUMBER.isMatched(orderNo) ||
-            Regex.EBAY_ORDER_NUMBER.isMatched(orderNo) ||
-            Regex.BW_ORDER_NUMBER.isMatched(orderNo);
+                Regex.EBAY_ORDER_NUMBER.isMatched(orderNo) ||
+                Regex.BW_ORDER_NUMBER.isMatched(orderNo);
     }
 
     /**
@@ -133,9 +134,9 @@ public class Order implements Keyable {
     public boolean fulfilled() {
         return !this.colorIsGray() && !this.canceledBySeller() &&
                 (this.orderNumberValid() ||
-                Strings.containsAnyIgnoreCase(this.cost, FORWARDED) ||
-                Strings.containsAnyIgnoreCase(this.order_number, FORWARDED) ||
-                Strings.containsAnyIgnoreCase(this.account, FORWARDED));
+                        Strings.containsAnyIgnoreCase(this.cost, FORWARDED) ||
+                        Strings.containsAnyIgnoreCase(this.order_number, FORWARDED) ||
+                        Strings.containsAnyIgnoreCase(this.account, FORWARDED));
     }
 
     private static final String[] FORWARDED = {"yizhuan", "已转", "已移表"};
@@ -185,20 +186,20 @@ public class Order implements Keyable {
 
     public boolean sellerIsBW() {
         return (Strings.containsAnyIgnoreCase(seller, "bw-", "bw") && !Regex.AMAZON_ORDER_NUMBER.isMatched(order_number)) ||
-            Regex.BW_ORDER_NUMBER.isMatched(order_number);
+                Regex.BW_ORDER_NUMBER.isMatched(order_number);
     }
 
     public boolean ebay() {
         return Strings.containsAnyIgnoreCase(seller, "www.ebay.com") ||
-            Strings.containsAnyIgnoreCase(isbn, "www.ebay.com") ||
-            Strings.containsAnyIgnoreCase(remark, "ebay");
+                Strings.containsAnyIgnoreCase(isbn, "www.ebay.com") ||
+                Strings.containsAnyIgnoreCase(remark, "ebay");
     }
 
     public boolean japan() {
         return Strings.startsWithAnyIgnoreCase(seller, Country.JP.name());
     }
 
-//    public String expectedShipDate() {
+    //    public String expectedShipDate() {
 //        if(!this.expected_ship_date.isEmpty()) {
 //            return this.expected_ship_date.split(" ")[0];
 //        }
@@ -216,34 +217,38 @@ public class Order implements Keyable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Order order = (Order) o;
-        return  Objects.equal(order_id, order.order_id) &&
-            Objects.equal(recipient_name, order.recipient_name) &&
-            Objects.equal(sku, order.sku) &&
-            Objects.equal(quantity_purchased, order.quantity_purchased) &&
-            Objects.equal(isbn, order.isbn) &&
-            Objects.equal(seller, order.seller) &&
-            Objects.equal(seller_id, order.seller_id) &&
-            Objects.equal(condition, order.condition) &&
-            Objects.equal(character, order.character) &&
-            Objects.equal(remark, order.remark) &&
-            Objects.equal(item_name, order.item_name) &&
-            Objects.equal(ship_address_1, order.ship_address_1) &&
-            Objects.equal(ship_address_2, order.ship_address_2) &&
-            Objects.equal(ship_city, order.ship_city) &&
-            Objects.equal(ship_zip, order.ship_zip) &&
-            Objects.equal(ship_phone_number, order.ship_phone_number) &&
-            Objects.equal(order_number, order.order_number) &&
-            Objects.equal(account, order.account) &&
-            Objects.equal(ship_country, order.ship_country);
+        return Objects.equal(order_id, order.order_id) &&
+                Objects.equal(recipient_name, order.recipient_name) &&
+                Objects.equal(sku, order.sku) &&
+                Objects.equal(quantity_purchased, order.quantity_purchased) &&
+                Objects.equal(isbn, order.isbn) &&
+                Objects.equal(seller, order.seller) &&
+                Objects.equal(seller_id, order.seller_id) &&
+                Objects.equal(condition, order.condition) &&
+                Objects.equal(character, order.character) &&
+                Objects.equal(remark, order.remark) &&
+                Objects.equal(item_name, order.item_name) &&
+                Objects.equal(ship_address_1, order.ship_address_1) &&
+                Objects.equal(ship_address_2, order.ship_address_2) &&
+                Objects.equal(ship_city, order.ship_city) &&
+                Objects.equal(ship_zip, order.ship_zip) &&
+                Objects.equal(ship_phone_number, order.ship_phone_number) &&
+                Objects.equal(order_number, order.order_number) &&
+                Objects.equal(account, order.account) &&
+                Objects.equal(ship_country, order.ship_country);
     }
 
     @Override
     public int hashCode() {
         return Objects.hashCode(order_id, recipient_name, sku, quantity_purchased, isbn, seller, seller_id, condition,
-            character, remark, item_name, ship_address_1, ship_address_2, ship_city, ship_zip, ship_phone_number,
-            order_number, account, ship_country);
+                character, remark, item_name, ship_address_1, ship_address_2, ship_city, ship_zip, ship_phone_number,
+                order_number, account, ship_country);
     }
 }

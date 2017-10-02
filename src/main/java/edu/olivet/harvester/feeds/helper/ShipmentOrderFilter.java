@@ -28,8 +28,8 @@ public class ShipmentOrderFilter {
     private MessagePanel messagePanel = new VirtualMessagePanel();
 
     /**
-     * @param orders
-     * @return
+     * @param orders list of orders
+     * @return orders fitlered orders
      */
     public List<Order> filterOrders(List<Order> orders, Worksheet worksheet) {
         //remove duplicated orders. we only need unique AmazonOrderId here.
@@ -43,9 +43,7 @@ public class ShipmentOrderFilter {
 
         //return List
         List<Order> filteredList = new ArrayList<>();
-        filteredOrders.forEach((orderId, order) -> {
-            filteredList.add(order);
-        });
+        filteredOrders.forEach((orderId, order) -> filteredList.add(order));
 
 
         return filteredList;
@@ -58,7 +56,7 @@ public class ShipmentOrderFilter {
      * @return
      */
     public Map<String, Order> removeDulicatedOrders(List<Order> orders) {
-        Map<String, Order> filtered = new HashMap<String, Order>();
+        Map<String, Order> filtered = new HashMap<>();
 
         for (Order order : orders) {
             if (!filtered.containsKey(order.order_id)) {
@@ -79,7 +77,7 @@ public class ShipmentOrderFilter {
      */
     public Map<String, Order> removeWCGrayLabelOrders(Map<String, Order> orders) {
 
-        Map<String, Order> filtered = new HashMap<String, Order>();
+        Map<String, Order> filtered = new HashMap<>();
 
         orders.forEach((orderId, order) -> {
             if (!order.status.toLowerCase().equals(OrderEnums.Status.WaitCancel.value().toLowerCase())) {
@@ -96,21 +94,21 @@ public class ShipmentOrderFilter {
 
     public Map<String, Order> removeNotUnshippedOrders(Map<String, Order> orders, Country country) {
 
-        List<String> amazonOrderIds = new ArrayList<String>(orders.keySet());
+        List<String> amazonOrderIds = new ArrayList<>(orders.keySet());
 
         //todo: MWS API may not activated.
         List<com.amazonservices.mws.orders._2013_09_01.model.Order> amazonOrders = mwsOrderClient.getOrders(country, amazonOrderIds);
 
-        Map<String, com.amazonservices.mws.orders._2013_09_01.model.Order> orderMap = new HashMap<String, com.amazonservices.mws.orders._2013_09_01.model.Order>();
+        Map<String, com.amazonservices.mws.orders._2013_09_01.model.Order> orderMap = new HashMap<>();
         for (com.amazonservices.mws.orders._2013_09_01.model.Order order : amazonOrders) {
-            orderMap.put(order.getAmazonOrderId(),order);
+            orderMap.put(order.getAmazonOrderId(), order);
         }
 
 
         Map<String, Order> filtered = new HashMap<>(orders);
 
-        orders.forEach((orderId,order) ->{
-            if(orderMap.containsKey(orderId)) {
+        orders.forEach((orderId, order) -> {
+            if (orderMap.containsKey(orderId)) {
                 com.amazonservices.mws.orders._2013_09_01.model.Order amzOrder = orderMap.get(orderId);
 
                 if (!amzOrder.getOrderStatus().equals("Unshipped") && !amzOrder.getOrderStatus().equals("PartiallyShipped")) {

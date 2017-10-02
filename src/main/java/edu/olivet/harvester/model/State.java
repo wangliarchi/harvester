@@ -116,7 +116,7 @@ public enum State {
 
         for (State state : State.values()) {
             if (state.desc.equalsIgnoreCase(lowerSrc) || state.name().equalsIgnoreCase(lowerSrc) ||
-                Strings.containsAnyIgnoreCase(lowerSrc, state.desc)) {
+                    Strings.containsAnyIgnoreCase(lowerSrc, state.desc)) {
                 cache.put(lowerSrc, state);
                 return state;
             }

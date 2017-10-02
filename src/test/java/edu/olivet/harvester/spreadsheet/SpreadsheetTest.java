@@ -15,7 +15,7 @@ import java.util.Arrays;
 
 import static org.testng.Assert.*;
 
-@Guice(modules = {MockDateModule.class,MockDBModule.class})
+@Guice(modules = {MockDateModule.class, MockDBModule.class})
 public class SpreadsheetTest extends BaseTest {
 
 
@@ -30,7 +30,8 @@ public class SpreadsheetTest extends BaseTest {
         assertEquals(spreadsheet.getSpreadsheetType(), OrderEnums.OrderItemType.BOOK);
 
         //ca product
-        assertEquals(appScript.getSpreadsheet("17k9ohj5RTCeMKKbpEbBb7azB4u3yZ3aHs1FfYTPaAMo").getSpreadsheetType(), OrderEnums.OrderItemType.PRODUCT);
+        assertEquals(appScript.getSpreadsheet("17k9ohj5RTCeMKKbpEbBb7azB4u3yZ3aHs1FfYTPaAMo").getSpreadsheetType(),
+                OrderEnums.OrderItemType.PRODUCT);
 
     }
 

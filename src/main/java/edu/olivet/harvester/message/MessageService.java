@@ -8,7 +8,7 @@ import java.io.File;
 public interface MessageService {
 
     void sendMessage(String subject, String content, Destination destination);
-    void sendMessage(Destination destination, String subject, String content,
-                        EmailContentType contentType, File... attachments);
+
+    void sendMessage(Destination destination, String subject, String content, EmailContentType contentType, File... attachments);
 
 }

@@ -27,13 +27,12 @@ public class ChooseSheetDialogTest extends BaseTest {
 
     @BeforeClass
     public void init() {
-        appScript = new AppScript(){
+        appScript = new AppScript() {
             @Override
             public Spreadsheet reloadSpreadsheet(String spreadId) {
-                File localJsonFile = new File(BaseTest.TEST_DATA_ROOT +File.separator+ "spreadsheet-" + spreadId + ".json");
-                Spreadsheet spreadsheet =  JSON.parseObject(Tools.readFileToString(localJsonFile), Spreadsheet.class);
+                File localJsonFile = new File(BaseTest.TEST_DATA_ROOT + File.separator + "spreadsheet-" + spreadId + ".json");
 
-                return  spreadsheet;
+                return JSON.parseObject(Tools.readFileToString(localJsonFile), Spreadsheet.class);
 
             }
         };
@@ -45,24 +44,21 @@ public class ChooseSheetDialogTest extends BaseTest {
         List<String> spreadsheetIds = Settings.load(testConfigFilePath).listAllSpreadsheets();
         List<edu.olivet.harvester.spreadsheet.Spreadsheet> spreadsheets = new ArrayList<>();
 
-        for(String spreadsheetId : spreadsheetIds) {
+        for (String spreadsheetId : spreadsheetIds) {
             try {
                 Spreadsheet spreadsheet = appScript.reloadSpreadsheet(spreadsheetId);
                 spreadsheets.add(spreadsheet);
             } catch (Exception e) {
-
+                //ignore
             }
         }
 
 
-        ChooseSheetDialog dialog = UITools.setDialogAttr(new ChooseSheetDialog(spreadsheets,appScript));
+        ChooseSheetDialog dialog = UITools.setDialogAttr(new ChooseSheetDialog(spreadsheets, appScript));
 
 
         if (dialog.isOk()) {
             List<Worksheet> selectedWorksheets = dialog.getSelectedSheets();
-            List<String> sheetNames = new ArrayList<>();
-            selectedWorksheets.forEach(it -> {sheetNames.add(it.getSheetName());});
-
             System.out.println(selectedWorksheets);
         }
 

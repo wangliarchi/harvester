@@ -1,6 +1,5 @@
 package edu.olivet.harvester.feeds.helper;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.UIText;
@@ -8,7 +7,6 @@ import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Directory;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.model.OrderEnums;
-import edu.olivet.harvester.utils.Csv;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +21,7 @@ public class FeedGenerator {
 
     /**
      * 批量上传文件类型，通常包括订单运输确认、库存更新(下架、删点、补点)等等
+     *
      * @author <a href="mailto:nathanael4ever@gmail.com">Nathanael Yang</a> Aug 14, 2015 10:01:04 AM
      */
     public enum BatchFileType {
@@ -92,11 +91,11 @@ public class FeedGenerator {
         contents.add(BatchFileType.ShippingConfirmation.headers());
 
         for (String[] row : orders) {
-            contents.add(String.format("%s\t%s\t%s",row[0],row[1],row[2]));
+            contents.add(String.format("%s\t%s\t%s", row[0], row[1], row[2]));
         }
 
         File file = this.initReportFile(BatchFileType.ShippingConfirmation.uploadTypeCode, country, type);
-        Tools.writeLines(file,contents);
+        Tools.writeLines(file, contents);
 
         return file;
     }
@@ -111,18 +110,15 @@ public class FeedGenerator {
      */
     private File initReportFile(String feedType, Country country, OrderEnums.OrderItemType sheetType) {
 
-        File file = new File(this.getFeedDirectory(), country.name() + "_" + sheetType.name() + "_" + feedType + "_" + Dates.nowAsFileName() + ".txt");
-
-        return file;
-
+        String filePath = country.name() + "_" + sheetType.name() + "_" + feedType + "_" + Dates.nowAsFileName() + ".txt";
+        return new File(this.getFeedDirectory(), filePath);
 
     }
 
 
     private String getFeedDirectory() {
-        String feedRootDictoryPath = Directory.APP_DATA + File.separator + "feeds";
 
-        return feedRootDictoryPath;
+        return Directory.APP_DATA + File.separator + "feeds";
 
     }
 

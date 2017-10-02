@@ -64,35 +64,28 @@ public class Migration {
                 cfg.setCountry(country);
 
 
-                String seller = String.format("%s/%s", sellers.getJSONObject(country.code()).getString("email")
-                        , sellers.getJSONObject(country.code()).getString("password"));
+                String seller = String.format("%s/%s", sellers.getJSONObject(country.code()).getString("email"), sellers.getJSONObject(country.code()).getString("password"));
                 cfg.setSeller(new Account(seller, Account.AccountType.Seller));
 
-                String sellerEmail = String.format("%s/%s", sellerEmails.getJSONObject(country.code()).getString("email")
-                        , sellerEmails.getJSONObject(country.code()).getString("password"));
+                String sellerEmail = String.format("%s/%s", sellerEmails.getJSONObject(country.code()).getString("email"), sellerEmails.getJSONObject(country.code()).getString("password"));
                 cfg.setSellerEmail(new Account(sellerEmail, Account.AccountType.Seller));
 
 
-                String primeBuyer = String.format("%s/%s", primeBuyers.getJSONObject(country.code()).getString("email")
-                        , primeBuyers.getJSONObject(country.code()).getString("password"));
+                String primeBuyer = String.format("%s/%s", primeBuyers.getJSONObject(country.code()).getString("email"), primeBuyers.getJSONObject(country.code()).getString("password"));
                 cfg.setPrimeBuyer(new Account(primeBuyer, Account.AccountType.PrimeBuyer));
 
-                String ptBuyer = String.format("%s/%s", ptBuyers.getJSONObject(country.code()).getString("email")
-                        , ptBuyers.getJSONObject(country.code()).getString("password"));
+                String ptBuyer = String.format("%s/%s", ptBuyers.getJSONObject(country.code()).getString("email"), ptBuyers.getJSONObject(country.code()).getString("password"));
                 cfg.setBuyer(new Account(ptBuyer, Account.AccountType.Buyer));
 
 
-                String prodPrimeBuyer = String.format("%s/%s", prodPrimeBuyers.getJSONObject(country.code()).getString("email")
-                        , prodPrimeBuyers.getJSONObject(country.code()).getString("password"));
+                String prodPrimeBuyer = String.format("%s/%s", prodPrimeBuyers.getJSONObject(country.code()).getString("email"), prodPrimeBuyers.getJSONObject(country.code()).getString("password"));
                 cfg.setProdPrimeBuyer(new Account(prodPrimeBuyer, Account.AccountType.PrimeBuyer));
 
-                String prodPtBuyer = String.format("%s/%s", prodPtBuyers.getJSONObject(country.code()).getString("email")
-                        , prodPtBuyers.getJSONObject(country.code()).getString("password"));
+                String prodPtBuyer = String.format("%s/%s", prodPtBuyers.getJSONObject(country.code()).getString("email"), prodPtBuyers.getJSONObject(country.code()).getString("password"));
                 cfg.setProdBuyer(new Account(prodPtBuyer, Account.AccountType.Buyer));
 
 
-                String ebatesBuyer = String.format("%s/%s", ebatesBuyers.getJSONObject(country.code()).getString("email")
-                        , ebatesBuyers.getJSONObject(country.code()).getString("password"));
+                String ebatesBuyer = String.format("%s/%s", ebatesBuyers.getJSONObject(country.code()).getString("email"), ebatesBuyers.getJSONObject(country.code()).getString("password"));
                 cfg.setEbatesBuyer(new Account(ebatesBuyer, Account.AccountType.Buyer));
 
 

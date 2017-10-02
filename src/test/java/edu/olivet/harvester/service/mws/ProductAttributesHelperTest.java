@@ -26,10 +26,10 @@ public class ProductAttributesHelperTest extends BaseTest {
 
     @BeforeClass
     public void init() {
-        productClient = new ProductClient(){
+        productClient = new ProductClient() {
             @Override
             public Product getProductByASIN(Country country, String asin) {
-                File localProductXMLFile = new File(TEST_DATA_ROOT+File.separator+"asin-"+asin+".xml");
+                File localProductXMLFile = new File(TEST_DATA_ROOT + File.separator + "asin-" + asin + ".xml");
                 String xmlFragment = Tools.readFileToString(localProductXMLFile);
 
                 return MWSUtils.buildMwsObject(xmlFragment, Product.class);
@@ -42,18 +42,16 @@ public class ProductAttributesHelperTest extends BaseTest {
     public void testGetProductGroup() throws Exception {
 
         Map<String, String> productGroupsMap = new HashMap<>();
-        productGroupsMap.put("0310435641","Book");
-        productGroupsMap.put("B000FAGGWQ","DVD");
-        productGroupsMap.put("B01G47RQ5O","Music");
-        productGroupsMap.put("B01N5L2SU4","Book");
-        productGroupsMap.put("B015LYC2S2","Major Appliances");
+        productGroupsMap.put("0310435641", "Book");
+        productGroupsMap.put("B000FAGGWQ", "DVD");
+        productGroupsMap.put("B01G47RQ5O", "Music");
+        productGroupsMap.put("B01N5L2SU4", "Book");
+        productGroupsMap.put("B015LYC2S2", "Major Appliances");
 
-        productGroupsMap.forEach((asin,group)->{
-            product = productClient.getProductByASIN(Country.US,asin);
+        productGroupsMap.forEach((asin, group) -> {
+            product = productClient.getProductByASIN(Country.US, asin);
             assertEquals(ProductAttributesHelper.getProductGroup(product), group);
         });
-
-
 
 
     }

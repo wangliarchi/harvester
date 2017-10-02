@@ -5,15 +5,15 @@ package edu.olivet.harvester.message;
  */
 public class MessageFacotry {
 
-    public  enum MessageType {
+    public enum MessageType {
         Email
     }
 
     public static MessageService getService(MessageType type) {
-        if( type == MessageType.Email) {
-            return  new EmailService();
+        if (type == MessageType.Email) {
+            return new EmailService();
         }
 
-        return  new EmailService();
+        return new EmailService();
     }
 }

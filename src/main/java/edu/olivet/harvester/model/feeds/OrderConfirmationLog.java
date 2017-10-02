@@ -4,7 +4,6 @@ package edu.olivet.harvester.model.feeds;
 import edu.olivet.foundations.db.PrimaryKey;
 import edu.olivet.foundations.ui.ArrayConvertable;
 import edu.olivet.harvester.utils.DateFormat;
-import edu.olivet.harvester.utils.DatetimeHelper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.nutz.dao.entity.annotation.Column;

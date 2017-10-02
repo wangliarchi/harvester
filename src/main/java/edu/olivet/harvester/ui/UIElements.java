@@ -28,36 +28,36 @@ public class UIElements extends AbstractUIContainer {
 
     @Override
     public Menu[] getMenus() {
-        return new Menu[] {
-            harvester,
-            Menu.Settings,
-            Menu.Help
+        return new Menu[]{
+                harvester,
+                Menu.Settings,
+                Menu.Help
         };
     }
 
     @Override
     public Map<Menu, Action[]> getMenuActions() {
         Map<Menu, Action[]> map = new HashMap<>();
-        map.put(harvester, new Action[] {
-            Actions.SubmitOrder,
-            Action.Separator,
-            Actions.FindSupplier,
-            Action.Separator,
-            Actions.ConfirmShipment,
-            Actions.OrderConfirmationHistory
+        map.put(harvester, new Action[]{
+                Actions.SubmitOrder,
+                Action.Separator,
+                Actions.FindSupplier,
+                Action.Separator,
+                Actions.ConfirmShipment,
+                Actions.OrderConfirmationHistory
         });
-        map.put(Menu.Settings, new Action[] {
-            Action.Settings,
-            Action.Separator,
-            Action.CreateAutoStartTask,
-            Action.DeleteAutoStartTask,
-            Action.CreateShortCut,
-            Action.Separator,
-            Action.Restart
+        map.put(Menu.Settings, new Action[]{
+                Action.Settings,
+                Action.Separator,
+                Action.CreateAutoStartTask,
+                Action.DeleteAutoStartTask,
+                Action.CreateShortCut,
+                Action.Separator,
+                Action.Restart
         });
-        map.put(Menu.Help, new Action[] {
-            Action.CurrentVersion,
-            Action.UpgradeCheck
+        map.put(Menu.Help, new Action[]{
+                Action.CurrentVersion,
+                Action.UpgradeCheck
         });
         return map;
     }
@@ -69,11 +69,11 @@ public class UIElements extends AbstractUIContainer {
 
     @Override
     public Action[] getToolbarActions() {
-        return new Action[] {
-            Actions.SubmitOrder,
-            Actions.FindSupplier,
-            Actions.ConfirmShipment,
-            Action.Settings
+        return new Action[]{
+                Actions.SubmitOrder,
+                Actions.FindSupplier,
+                Actions.ConfirmShipment,
+                Action.Settings
         };
     }
 
@@ -89,14 +89,15 @@ public class UIElements extends AbstractUIContainer {
         logTextArea.setLineWrap(true);
         logTextArea.setEditable(false);
 
-        if(foregroundColor != null) {
+        if (foregroundColor != null) {
             logTextArea.setForeground(foregroundColor);
         }
 
         return logTextArea;
 
     }
-    public JPanel createLogPanel(String panelTitle, int height,JTextArea logTextArea) {
+
+    public JPanel createLogPanel(String panelTitle, int height, JTextArea logTextArea) {
         JPanel logAreaPanel = new JPanel();
         logAreaPanel.setBorder(new TitledBorder(null, panelTitle, TitledBorder.LEADING, TitledBorder.TOP, null, null));
 
@@ -121,7 +122,6 @@ public class UIElements extends AbstractUIContainer {
 
         return logAreaPanel;
     }
-
 
 
 }

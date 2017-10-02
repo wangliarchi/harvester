@@ -13,7 +13,7 @@ import org.w3c.dom.NodeList;
 public class ProductAttributesHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductAttributesHelper.class);
 
-    public static JSONObject parse(Product product) {
+    private static JSONObject parse(Product product) {
         JSONObject jsonProduct = new JSONObject();
 
         if (product.isSetAttributeSets()) {
@@ -27,9 +27,9 @@ public class ProductAttributesHelper {
                     nodeName = nodeName.replaceFirst("ns2:", "");
                     Node myNode = nodeList.item(i);
 
-                    try{
+                    try {
                         jsonProduct.put(nodeName, nodeList.item(i).getTextContent());
-                    }catch (JSONException e) {
+                    } catch (JSONException e) {
                         //ignore
                     }
                 }
@@ -40,10 +40,10 @@ public class ProductAttributesHelper {
     }
 
 
-     public static String getProductGroup(Product product) {
-        try{
+    public static String getProductGroup(Product product) {
+        try {
             return ProductAttributesHelper.parse(product).get("ProductGroup").toString();
-        }catch (JSONException e) {
+        } catch (JSONException e) {
             throw new BusinessException("No product group information returned from mws product api.");
         }
 

@@ -15,13 +15,8 @@ public class Carrier {
      * Ca Book： Canada Post
      * Ca Product：DHL Global Mail
      * Mx product/book： DHL Global Mail
-     *
-     * @param
-     * @return
      */
     public String getCarrierCodeByCountryAndType(Country country, OrderEnums.OrderItemType orderItemType) {
-//        System.out.println(country);
-//        System.out.println(orderItemType);
         //US book/product : USPS
         if (country == Country.US) {
             return "USPS";

@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.FeedUploader;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
+import edu.olivet.foundations.amazon.OrderFetcher;
 import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.MessagePanel;
@@ -20,6 +21,7 @@ import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.model.feeds.OrderConfirmationLog;
 import edu.olivet.harvester.service.Carrier;
 import edu.olivet.harvester.service.OrderItemTypeHelper;
+import edu.olivet.harvester.service.mws.OrderClient;
 import edu.olivet.harvester.spreadsheet.*;
 import edu.olivet.harvester.spreadsheet.exceptions.NoOrdersFoundInWorksheetException;
 import edu.olivet.harvester.spreadsheet.exceptions.NoWorksheetFoundException;
@@ -29,14 +31,16 @@ import edu.olivet.harvester.utils.Settings;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.Range;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.plugin.dom.exception.InvalidStateException;
 
 import java.io.File;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.*;
 
 
@@ -65,10 +69,12 @@ public class ConfirmShipments {
     private FeedUploader feedUploader;
 
     @Inject
+    @Getter
+    @Setter
     private ConfirmShipmentEmailSender confirmShipmentEmailSender;
 
     @Inject
-    private  ErrorAlertService errorAlertService;
+    private ErrorAlertService errorAlertService;
 
     @Inject
     private ShipmentOrderFilter shipmentOrderFilter;
@@ -78,6 +84,7 @@ public class ConfirmShipments {
 
     @Setter
     private int lastOrderRowNo = 3;
+
     /**
      * confirm shipments by worksheet. Errors handled by each confirmShipmentForWorksheet call separately.
      *
@@ -122,13 +129,13 @@ public class ConfirmShipments {
 
 
         if (worksheet.getSpreadsheet().getSpreadsheetCountry() == Country.JP) {
-            messagePanel.wrapLineMsg("It is not allowed to confirm shipment for Japan account yet.",InformationLevel.Negative);
+            messagePanel.wrapLineMsg("It is not allowed to confirm shipment for Japan account yet.", InformationLevel.Negative);
             return;
         }
 
         long start = System.currentTimeMillis();
         messagePanel.addMsgSeparator();
-        messagePanel.displayMsg(String.format("Starting confirming shipments for worksheet %s at %s", worksheet.toString(), Dates.now()),LOGGER);
+        messagePanel.displayMsg(String.format("Starting confirming shipments for worksheet %s at %s", worksheet.toString(), Dates.now()), LOGGER);
 
         //get orders from google spreadsheet, all errors are handled.
         List<Order> orders = getOrdersFromWorksheet(worksheet);
@@ -144,7 +151,7 @@ public class ConfirmShipments {
 
         if (orders.isEmpty()) {
 
-            messagePanel.displayMsg("No  orders need to be confirmed for sheet "+ worksheet.toString(),LOGGER, InformationLevel.Positive);
+            messagePanel.displayMsg("No  orders need to be confirmed for sheet " + worksheet.toString(), LOGGER, InformationLevel.Positive);
 
             if (messagePanel instanceof VirtualMessagePanel) {
                 String subject = String.format("No  orders need to be confirmed for sheet %s", worksheet.toString());
@@ -159,7 +166,6 @@ public class ConfirmShipments {
         messagePanel.displayMsg(orders.size() + "  order(s) found to be confirmed. ", InformationLevel.Important);
 
 
-
         //create feed file
         File feedFile;
         try {
@@ -167,7 +173,7 @@ public class ConfirmShipments {
             messagePanel.wrapLineMsg("Feed file generated at " + feedFile.getAbsolutePath(), InformationLevel.Important);
             messagePanel.wrapLineMsg(Tools.readFileToString(feedFile));
         } catch (Exception e) {
-            messagePanel.displayMsg("Error when generating feed file. " + e.getMessage(),LOGGER, InformationLevel.Negative);
+            messagePanel.displayMsg("Error when generating feed file. " + e.getMessage(), LOGGER, InformationLevel.Negative);
             if (messagePanel instanceof VirtualMessagePanel) {
                 String subject = String.format("Error when generating feed file for sheet %s", worksheet.toString());
                 confirmShipmentEmailSender.sendErrorFoundEmail(subject,
@@ -184,18 +190,18 @@ public class ConfirmShipments {
         try {
             result = submitFeed(feedFile, worksheet);
 
-            insertToLocalDbLog(feedFile,worksheet.getSpreadsheet().getSpreadsheetCountry(),result);
+            insertToLocalDbLog(feedFile, worksheet.getSpreadsheet().getSpreadsheetCountry(), result);
 
             //write log to worksheet
-            writeLogToWorksheet(worksheet,result);
+            writeLogToWorksheet(worksheet, result);
 
             //send email
             confirmShipmentEmailSender.sendSuccessEmail(result, feedFile, worksheet.getSpreadsheet().getSpreadsheetCountry());
         } catch (Exception e) {
 
-            errorAlertService.sendMessage("Error when submitting order confirmation feed file via MWS.",e.getMessage(),feedFile);
+            errorAlertService.sendMessage("Error when submitting order confirmation feed file via MWS.", e.getMessage(), feedFile);
 
-            messagePanel.displayMsg("Error when submitting feed file. " + e.getMessage(),LOGGER, InformationLevel.Negative);
+            messagePanel.displayMsg("Error when submitting feed file. " + e.getMessage(), LOGGER, InformationLevel.Negative);
             messagePanel.displayMsg("Please try to submit the feed file via Amazon Seller Center.");
             if (messagePanel instanceof VirtualMessagePanel) {
                 String subject = String.format("Error when submitting feed file for sheet %s, feed file %s", worksheet.toString(), feedFile.getName());
@@ -205,12 +211,7 @@ public class ConfirmShipments {
             }
 
 
-
-
         }
-
-
-
 
 
     }
@@ -233,22 +234,22 @@ public class ConfirmShipments {
         }
 
         orders.sort(Comparator.comparing(Order::getRow));
-        return orders.get(orders.size()-1).row;
+        return orders.get(orders.size() - 1).row;
     }
 
 
     public void writeLogToWorksheet(Worksheet worksheet, String result) {
         int[] counts = ServiceUtils.parseFeedSubmissionResult(result);
 
-        String log = String.format("auto-confirmed; Total %s, Succeed %s, Failed %s",counts[0],counts[1],counts[2]);
+        String log = String.format("auto-confirmed; Total %s, Succeed %s, Failed %s", counts[0], counts[1], counts[2]);
         String now = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(System.currentTimeMillis());
         while (true) {
             try {
-                appScript.commitShippingConfirmationLog(worksheet.getSpreadsheet().getSpreadsheetId(), worksheet.getSheetName(), lastOrderRowNo + 1, log + "\n"+now);
+                appScript.commitShippingConfirmationLog(worksheet.getSpreadsheet().getSpreadsheetId(), worksheet.getSheetName(), lastOrderRowNo + 1, log + "\n" + now);
                 break;
             } catch (BusinessException e) {
                 if (e.getMessage().contains("is not blank")) {
-                    LOGGER.warn("Row {} is not blank, try to add to next row.",lastOrderRowNo);
+                    LOGGER.warn("Row {} is not blank, try to add to next row.", lastOrderRowNo);
                     lastOrderRowNo++;
                 } else {
                     LOGGER.error(e.getMessage());
@@ -259,14 +260,11 @@ public class ConfirmShipments {
         }
 
 
-
-
     }
 
 
     /**
-     *
-     * @param feedFile feedfile
+     * @param feedFile  feedfile
      * @param worksheet worksheet
      * @return
      */
@@ -287,9 +285,6 @@ public class ConfirmShipments {
 
     /**
      * get orders from given worksheet. .
-     *
-     * @param worksheet
-     * @return List<Order> orders
      */
     protected List<Order> getOrdersFromWorksheet(Worksheet worksheet) {
 
@@ -323,7 +318,6 @@ public class ConfirmShipments {
             }
 
 
-
         } catch (BusinessException e) {
             messagePanel.displayMsg("Failed to read order data from " + worksheet.toString() + ". Please try again later.",
                     InformationLevel.Negative);
@@ -352,10 +346,6 @@ public class ConfirmShipments {
         } catch (Exception e) {
             //todo
             throw new BusinessException("Order confirmation for non mm/dd sheet is currently not supported.");
-//            DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-//            LocalDate localDate = LocalDate.now();
-//            defaultShipDate =  df.format(localDate);
-//            LOGGER.warn("Sheet with name " + worksheet.getSheetName() + " cant convert to date format.");
         }
 
         //prepare data
@@ -379,18 +369,49 @@ public class ConfirmShipments {
     }
 
 
+    @Inject
+    @Setter
+    private OrderClient mwsOrderClient;
+
+    public void notConfirmedOrderNotification() {
+        List<Country> countries = Settings.load().listAllCountries();
+
+        Map<OrderFetcher.DateRangeType, Date> dateMap = new HashMap<>();
+
+        Date createBefore = DateUtils.addDays(new Date(), -1);
+        dateMap.put(OrderFetcher.DateRangeType.CreatedBefore, createBefore);
+        dateMap.put(OrderFetcher.DateRangeType.CreatedAfter, DateUtils.addDays(new Date(), -30));
+
+        countries.forEach(country -> {
+            List<com.amazonservices.mws.orders._2013_09_01.model.Order> orders = mwsOrderClient.listOrders(country, dateMap, "Unshipped", "PartiallyShipped");
+
+            if (orders.size() > 0) {
+                //send email
+                String subject = String.format("Alert: %d %s created before %s %s not been confirmed.",
+                        orders.size(), orders.size() == 1 ? "order" : "orders", edu.olivet.harvester.utils.DateFormat.DATE_TIME.format(createBefore),
+                        orders.size() == 1 ? "has" : "have");
+
+                String content = subject + "\n\n";
+                for (com.amazonservices.mws.orders._2013_09_01.model.Order order : orders) {
+                    content += order.getAmazonOrderId() + "\t" + order.getOrderStatus() + "\t" + order.getPurchaseDate().toString() + "\n";
+                }
+
+                confirmShipmentEmailSender.sendErrorFoundEmail(subject, content, country);
+            }
+        });
+    }
+
+
     public String getSheetNameByDate(long millis) {
         return FastDateFormat.getInstance("MM/dd").format(millis);
     }
 
     public void execute() {
-
-
         //get all order update sheets for account
         List<String> spreadIds;
         try {
             spreadIds = Settings.load().listAllSpreadsheets();
-        } catch (InvalidStateException e) {
+        } catch (BusinessException e) {
             LOGGER.error("No configuration file found. {}", e.getMessage());
             throw new BusinessException("No configuration file found.");
         }
@@ -409,7 +430,6 @@ public class ConfirmShipments {
 
 
     }
-
 
     public void setMessagePanel(MessagePanel messagePanel) {
         this.messagePanel = messagePanel;

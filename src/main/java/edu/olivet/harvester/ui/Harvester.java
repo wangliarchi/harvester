@@ -12,6 +12,7 @@ import java.io.File;
 
 /**
  * Harvester: The Automated Order Fulfillment Solution
+ *
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 9/20/2017 11:58 AM
  */
 public class Harvester {
@@ -46,7 +47,7 @@ public class Harvester {
         //
         try {
             new AppScript().preloadAllSpreadsheets();
-        }catch (Exception e) {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }

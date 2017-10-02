@@ -52,7 +52,7 @@ public class ChooseSheetDialog extends BaseDialog {
 
     private AppScript appScript;
 
-    ChooseSheetDialog(List<Spreadsheet> spreadsheets,AppScript appScript) {
+    ChooseSheetDialog(List<Spreadsheet> spreadsheets, AppScript appScript) {
         super(null, true);
 
         this.spreadsheets = spreadsheets;
@@ -61,8 +61,6 @@ public class ChooseSheetDialog extends BaseDialog {
         this.initComponents();
         this.setResizable(false);
     }
-
-
 
 
     private void initComponents() {
@@ -87,7 +85,7 @@ public class ChooseSheetDialog extends BaseDialog {
             int spreadIndex = this.jSpreadList.getSelectedIndex();
             Spreadsheet spreadsheet = spreadsheets.get(spreadIndex);
             spreadsheet = appScript.reloadSpreadsheet(spreadsheet.getSpreadsheetId());
-            spreadsheets.set(spreadIndex,spreadsheet);
+            spreadsheets.set(spreadIndex, spreadsheet);
 
             formsValueChanged();
 
@@ -112,7 +110,6 @@ public class ChooseSheetDialog extends BaseDialog {
 
         this.jSpreadList.setListData(strings);
         this.jSpreadList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
 
 
         MouseListener mouseListener = new MouseAdapter() {
@@ -176,7 +173,6 @@ public class ChooseSheetDialog extends BaseDialog {
         pack();
 
 
-
         //set first spreadsheet selected by defaut
         this.jSpreadList.setSelectedIndex(0);
         formsValueChanged();
@@ -206,7 +202,7 @@ public class ChooseSheetDialog extends BaseDialog {
         //default to select today's sheet
         DateTimeFormatter df = DateTimeFormatter.ofPattern("MM/dd");
         LocalDate localDate = LocalDate.now();
-        String todaySheetName =  df.format(localDate);
+        String todaySheetName = df.format(localDate);
 
         int index = sheetNames.indexOf(todaySheetName);
         this.jSheetList.setSelectedIndex(index);
@@ -225,8 +221,8 @@ public class ChooseSheetDialog extends BaseDialog {
             Spreadsheet spreadsheet = spreadsheets.get(spreadIndex);
             List<String> sheetNames = this.jSheetList.getSelectedValuesList();
 
-            for(String sheetName : sheetNames) {
-                selectedWorksheets.add( new Worksheet(spreadsheet,sheetName));
+            for (String sheetName : sheetNames) {
+                selectedWorksheets.add(new Worksheet(spreadsheet, sheetName));
             }
 
             //selectedSheets = new Spreadsheet(spread.getSpreadsheetId(), spread.getTitle(), sheetNames);

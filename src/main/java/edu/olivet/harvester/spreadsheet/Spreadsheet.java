@@ -2,7 +2,6 @@ package edu.olivet.harvester.spreadsheet;
 
 
 import com.alibaba.fastjson.annotation.JSONField;
-import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.harvester.model.OrderEnums;
 import lombok.Data;
@@ -10,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,7 +23,7 @@ public class Spreadsheet {
     private static final Logger LOGGER = LoggerFactory.getLogger(Spreadsheet.class);
 
     /**
-     *google spreadsheet id
+     * google spreadsheet id
      */
     @JSONField(name = "spreadId")
     @Getter
@@ -45,28 +45,18 @@ public class Spreadsheet {
 
     @Getter
     @Setter
-    private  OrderEnums.OrderItemType spreadsheetType;
+    private OrderEnums.OrderItemType spreadsheetType;
 
 
-    public List<String> getOrderSheetNames(){
+    public List<String> getOrderSheetNames() {
         List<String> filteredSheetNames = sheetNames;
 
-        String[] notValidOrderSheets = {"daily cost","confirm","template","cs","memo"};
+        String[] notValidOrderSheets = {"daily cost", "confirm", "template", "cs", "memo"};
         filteredSheetNames.removeIf(p -> Arrays.asList(notValidOrderSheets).contains(p.toLowerCase()));
 
         return filteredSheetNames;
 
     }
-
-
-
-
-
-
-
-
-
-
 
 
 }

@@ -22,14 +22,15 @@ import static org.testng.Assert.*;
 @Guice(modules = {MockDBModule.class})
 public class OrderItemTypeHelperTest extends BaseTest {
 
-    @Inject private OrderItemTypeHelper helper;
+    @Inject
+    private OrderItemTypeHelper helper;
 
     @BeforeClass
     public void init() {
-        ProductClient productClient = new ProductClient(){
+        ProductClient productClient = new ProductClient() {
             @Override
             public Product getProductByASIN(Country country, String asin) {
-                File localProductXMLFile = new File(TEST_DATA_ROOT+File.separator+"asin-"+asin+".xml");
+                File localProductXMLFile = new File(TEST_DATA_ROOT + File.separator + "asin-" + asin + ".xml");
                 String xmlFragment = Tools.readFileToString(localProductXMLFile);
 
                 return MWSUtils.buildMwsObject(xmlFragment, Product.class);
@@ -82,12 +83,10 @@ public class OrderItemTypeHelperTest extends BaseTest {
         assertEquals(helper.getItemType(order), OrderEnums.OrderItemType.BOOK);
 
 
-
         //B015LYC2S2 XinXMZukkitchenJune16-2017-P0021687 kitchen -> product
         order.sku = "XinXMZukkitchenJune16-2017-P0021687";
         order.isbn = "B015LYC2S2";
         assertEquals(helper.getItemType(order), OrderEnums.OrderItemType.PRODUCT);
-
 
 
         //B0094KQG00 new701CAusubanP160805ZD-P030969
@@ -98,8 +97,7 @@ public class OrderItemTypeHelperTest extends BaseTest {
     }
 
 
-
-    @Test (expectedExceptions = BusinessException.class)
+    @Test(expectedExceptions = BusinessException.class)
     public void testGetItemTypeByMWSAPINotValidASIN() {
         Order order = BaseTest.prepareOrder();
 
@@ -140,7 +138,6 @@ public class OrderItemTypeHelperTest extends BaseTest {
         assertEquals(helper.getItemTypeByMWSAPI(order), OrderEnums.OrderItemType.PRODUCT);
 
 
-
         //B0094KQG00 new701CAusubanP160805ZD-P030969
         order.isbn = "B0094KQG00";
         assertEquals(helper.getItemTypeByMWSAPI(order), OrderEnums.OrderItemType.PRODUCT);
@@ -148,7 +145,7 @@ public class OrderItemTypeHelperTest extends BaseTest {
     }
 
     @Test
-    public  void  testGetItemTypeBySku() {
+    public void testGetItemTypeBySku() {
         Order order = BaseTest.prepareOrder();
 
         //B01N5L2SU4 book
@@ -171,7 +168,7 @@ public class OrderItemTypeHelperTest extends BaseTest {
     }
 
     @Test(expectedExceptions = BusinessException.class)
-    public  void  testGetItemTypeBySkuNoResult() {
+    public void testGetItemTypeBySkuNoResult() {
         Order order = BaseTest.prepareOrder();
 
         //B008KTVD90 -> exception

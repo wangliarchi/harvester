@@ -12,7 +12,7 @@ import java.util.Random;
 public enum BackgroundJob {
 
     ShipmentConfirmation("0 30 16 ? * MON,TUE,WED,THU,FRI,SAT *", ShipmentConfirmationJob.class),
-
+    UnshippedOrderCheck("0 30 17 ? * MON,TUE,WED,THU,FRI,SAT *",UnshippedOrderCheckJob.class),
     ConfigUpload("0 0 5,13,21 1/1 * ? *", ConfigUploadJob.class),
 
     AutoUpgrade("0 15 2 1/1 * ? *", AutoUpgradeJob.class);
@@ -30,8 +30,10 @@ public enum BackgroundJob {
         if (this.clazz == ShipmentConfirmationJob.class) {
             int hour = new Random().ints(1, 15, 17).findFirst().getAsInt();
             int min = new Random().ints(1, 0, 15).findFirst().getAsInt();
-
             return String.format("0 %d %d ? * MON,TUE,WED,THU,FRI,SAT *", min, hour);
+        } else if (this.clazz == UnshippedOrderCheckJob.class) {
+            int min = new Random().ints(1, 0, 15).findFirst().getAsInt();
+            return String.format("0 %d 17 ? * MON,TUE,WED,THU,FRI,SAT *", min);
         }
 
         return this.cron;

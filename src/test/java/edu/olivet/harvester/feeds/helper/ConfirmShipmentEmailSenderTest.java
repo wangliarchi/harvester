@@ -23,8 +23,8 @@ public class ConfirmShipmentEmailSenderTest extends BaseTest {
     private ConfirmShipmentEmailSender confirmShipmentEmailSender;
 
     @BeforeClass
-    public  void  init() {
-        confirmShipmentEmailSender.setSenderAccount(new Account("johnnyxiang2017@gmail.com/q1w2e3AA",Account.AccountType.Email));
+    public void init() {
+        confirmShipmentEmailSender.setSenderAccount(new Account("johnnyxiang2017@gmail.com/q1w2e3AA", Account.AccountType.Email));
         confirmShipmentEmailSender.setTestMode(true);
         confirmShipmentEmailSender.setTestDestination(new Destination().withToAddresses(testEmailAddress));
     }
@@ -34,7 +34,7 @@ public class ConfirmShipmentEmailSenderTest extends BaseTest {
         String submissionResult = "Feed Processing Summary:\n" +
                 "\tNumber of records processed\t\t11\n" +
                 "\tNumber of records successful\t\t11";
-        File feedFile = new File(TEST_DATA_ROOT+File.separator+"feed-US_BOOK_confirm_shipment_2017-9-28_120813.txt");
+        File feedFile = new File(TEST_DATA_ROOT + File.separator + "feed-US_BOOK_confirm_shipment_2017-9-28_120813.txt");
 
         confirmShipmentEmailSender.sendSuccessEmail(submissionResult, feedFile, Country.US);
     }
@@ -42,7 +42,7 @@ public class ConfirmShipmentEmailSenderTest extends BaseTest {
     @Test
     public void testSendErrorFoundEmail() {
         String subject = "No order found";
-        confirmShipmentEmailSender.sendErrorFoundEmail(subject,subject, Country.US);
+        confirmShipmentEmailSender.sendErrorFoundEmail(subject, subject, Country.US);
     }
 
 }

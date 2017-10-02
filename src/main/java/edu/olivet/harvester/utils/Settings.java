@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Configuration of Harvester, usually consisting of seller account, buyer accounts and etc.
@@ -41,6 +42,7 @@ public class Settings {
         File file = new File(filePath);
         return Settings.load(file);
     }
+
     public static Settings load(File file) {
         if (file.exists() && file.isFile()) {
             return JSON.parseObject(Tools.readFileToString(file), Settings.class);
@@ -50,21 +52,23 @@ public class Settings {
     }
 
 
-
     private String sid;
 
     private List<Configuration> configs;
 
+    public List<Country> listAllCountries() {
+        return configs.stream().map(config -> { return config.getCountry();}).collect(Collectors.toList());
+    }
+
     public Configuration getConfigByCountry(Country country) {
-        for(Configuration config : configs) {
+        for (Configuration config : configs) {
             if (config.country.equals(country)) {
                 return config;
             }
         }
 
-        throw new BusinessException("Configuration for country "+country.name()+" is not found.");
+        throw new BusinessException("Configuration for country " + country.name() + " is not found.");
     }
-
 
 
     public List<String> listAllSpreadsheets() {
@@ -95,12 +99,13 @@ public class Settings {
 
     /**
      * each spreadsheet holds certain type of order items: BOOK, PRODUCT or both
+     *
      * @return OrderItemType
      */
     public OrderEnums.OrderItemType getSpreadsheetType(String spreadsheetId) {
 
         for (Settings.Configuration config : configs) {
-            if (config.getSpreadId(OrderEnums.OrderItemType.BOOK) .equals( spreadsheetId) ) {
+            if (config.getSpreadId(OrderEnums.OrderItemType.BOOK).equals(spreadsheetId)) {
                 return OrderEnums.OrderItemType.BOOK;
             }
 
@@ -109,14 +114,14 @@ public class Settings {
             }
         }
 
-        throw new BusinessException("Spreadsheet id "+spreadsheetId+" is not in configuration file.");
+        throw new BusinessException("Spreadsheet id " + spreadsheetId + " is not in configuration file.");
 
     }
 
 
     public Country getSpreadsheetCountry(String spreadsheetId) {
         for (Settings.Configuration config : configs) {
-            if (config.getSpreadId(OrderEnums.OrderItemType.BOOK).equals(spreadsheetId) ) {
+            if (config.getSpreadId(OrderEnums.OrderItemType.BOOK).equals(spreadsheetId)) {
                 return config.getCountry();
             }
 
@@ -125,7 +130,7 @@ public class Settings {
             }
         }
 
-        throw new BusinessException("Spreadsheet id "+spreadsheetId+" is not in configuration file. No country info found.");
+        throw new BusinessException("Spreadsheet id " + spreadsheetId + " is not in configuration file. No country info found.");
 
     }
 
@@ -200,7 +205,7 @@ public class Settings {
                 list.add("User code not provided");
             }
 
-            if ( (ebatesBuyer == null || !ebatesBuyer.valid())) {
+            if ((ebatesBuyer == null || !ebatesBuyer.valid())) {
                 list.add("Ebates buyer account must be provided.");
             }
 
@@ -219,11 +224,9 @@ public class Settings {
 
         /**
          * get configed spreadsheet id by type: book or product
-         * @param type
-         * @return
+         *
          */
         String getSpreadId(OrderEnums.OrderItemType type) {
-
 
 
             if (type == OrderEnums.OrderItemType.PRODUCT) {
@@ -231,7 +234,6 @@ public class Settings {
             }
 
             return this.getBookDataSourceUrl();
-
 
 
         }

@@ -9,17 +9,20 @@ import edu.olivet.foundations.amazon.OrderFetcher;
 import edu.olivet.harvester.utils.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.Range;
 
+import javax.annotation.Nullable;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Singleton
-public class OrderClient  {
+public class OrderClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderClient.class);
 
 
     @Inject
     private OrderFetcher orderFetcher;
-
 
 
     /**
@@ -28,18 +31,21 @@ public class OrderClient  {
      * MWS GetOrder operation returns an order for each AmazonOrderId that you specify, up to a maximum of 50.
      * The GetOrder operation includes order information for each order returned,
      * including PurchaseDate, OrderStatus, FulfillmentChannel, and LastUpdateDate.
-     * @param country
-     * @param amazonOrderIds
      */
-    public  List<Order> getOrders(Country country, List<String> amazonOrderIds) {
+    public List<Order> getOrders(Country country, List<String> amazonOrderIds) {
 
         MarketWebServiceIdentity credential = Settings.load().getConfigByCountry(country).getMwsCredential();
 
-        List<Order> result = orderFetcher.read(amazonOrderIds,credential);
-
-
-        return result;
+        return orderFetcher.read(amazonOrderIds, credential);
 
     }
+
+    public List<Order> listOrders(Country country, @Nullable Map<OrderFetcher.DateRangeType,Date> dateMap, String... statuses) {
+        MarketWebServiceIdentity credential = Settings.load().getConfigByCountry(country).getMwsCredential();
+
+        return orderFetcher.readOrders(dateMap, credential,statuses);
+    }
+
+
 
 }

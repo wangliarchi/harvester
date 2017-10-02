@@ -17,9 +17,8 @@ import java.util.List;
 
 import static org.testng.Assert.*;
 
-@Guice(modules = {MockDateModule.class,MockDBModule.class})
+@Guice(modules = {MockDateModule.class, MockDBModule.class})
 public class SettingsTest extends BaseTest {
-
 
 
     @BeforeClass
@@ -33,14 +32,14 @@ public class SettingsTest extends BaseTest {
         //System.out.println(config);
 
         assertEquals(config.getCountry(), Country.US);
-        assertEquals(config.getBookDataSourceUrl(),"1IMbmaLUjqvZ7w8OdPd59fpTuad8U__5PAyKg3yR0DjY");
-        assertEquals(config.getStoreName(),"Mike Pro");
+        assertEquals(config.getBookDataSourceUrl(), "1IMbmaLUjqvZ7w8OdPd59fpTuad8U__5PAyKg3yR0DjY");
+        assertEquals(config.getStoreName(), "Mike Pro");
     }
 
     @Test
     public void testListAllSpreadsheets() throws Exception {
         List<String> spreadsheetIds = Settings.load(testConfigFilePath).listAllSpreadsheets();
-        String[] expectedIds = {"1IMbmaLUjqvZ7w8OdPd59fpTuad8U__5PAyKg3yR0DjY","1qxcCkAPvvBaR3KHa2MZv1V39m2E1IMytVDn1yXDaVEM",
+        String[] expectedIds = {"1IMbmaLUjqvZ7w8OdPd59fpTuad8U__5PAyKg3yR0DjY", "1qxcCkAPvvBaR3KHa2MZv1V39m2E1IMytVDn1yXDaVEM",
                 "1VIar2m0_78mUk3wcmfiqLWQOBB34NBsac94R4EYgcOU",
                 "17k9ohj5RTCeMKKbpEbBb7azB4u3yZ3aHs1FfYTPaAMo"};
         assertEquals(spreadsheetIds, Arrays.asList(expectedIds));
@@ -50,19 +49,19 @@ public class SettingsTest extends BaseTest {
     public void testgetSpreadIdByType() throws Exception {
         Settings.Configuration config = Settings.load(testConfigFilePath).getConfigByCountry(Country.US);
 
-        assertEquals(config.getSpreadId(OrderEnums.OrderItemType.BOOK),"1IMbmaLUjqvZ7w8OdPd59fpTuad8U__5PAyKg3yR0DjY");
+        assertEquals(config.getSpreadId(OrderEnums.OrderItemType.BOOK), "1IMbmaLUjqvZ7w8OdPd59fpTuad8U__5PAyKg3yR0DjY");
 
-        assertEquals(config.getSpreadId(OrderEnums.OrderItemType.PRODUCT),"1qxcCkAPvvBaR3KHa2MZv1V39m2E1IMytVDn1yXDaVEM");
+        assertEquals(config.getSpreadId(OrderEnums.OrderItemType.PRODUCT), "1qxcCkAPvvBaR3KHa2MZv1V39m2E1IMytVDn1yXDaVEM");
     }
 
     @Test
-    public void testGetMWSCredential()throws Exception {
+    public void testGetMWSCredential() throws Exception {
         Settings.Configuration config = Settings.load(testConfigFilePath).getConfigByCountry(Country.US);
 
-        assertEquals(config.getMwsCredential(),new MarketWebServiceIdentity(
+        assertEquals(config.getMwsCredential(), new MarketWebServiceIdentity(
                 "A3BEPQLI451F6I",
-               "AKIAI73MGXM4FSWB6TIQ",
-               "W5oIE4cbQ1MTG3YO5h4JU93J7FGjDX1/OLDjADBc",
+                "AKIAI73MGXM4FSWB6TIQ",
+                "W5oIE4cbQ1MTG3YO5h4JU93J7FGjDX1/OLDjADBc",
                 "ATVPDKIKX0DER"
 
         ));
@@ -72,14 +71,12 @@ public class SettingsTest extends BaseTest {
 
     @Test
     public void testConfigValidation() {
-        String testConfigFilePath = basePath +  "conf" + File.separator + "harvester-test-nomws.json";
+        String testConfigFilePath = basePath + "conf" + File.separator + "harvester-test-nomws.json";
         Settings.Configuration config = Settings.load(testConfigFilePath).getConfigByCountry(Country.US);
 
         assertTrue(config.validate().contains("MWS API credential not provided or invalid"));
 
     }
-
-
 
 
 }

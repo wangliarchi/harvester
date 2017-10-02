@@ -1,6 +1,5 @@
 package edu.olivet.harvester.service;
 
-
 import com.amazonservices.mws.products.model.Product;
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
@@ -50,7 +49,7 @@ public class OrderItemTypeHelper {
         }
 
 
-        try{
+        try {
 
             type = this.getItemTypeByMWSAPI(order);
             LOGGER.info("Order item type for {} found as {} from MWS product API. ASIN {}, SKU {}",
@@ -59,8 +58,10 @@ public class OrderItemTypeHelper {
 
             return type;
 
-        }catch (Exception e) {
-            LOGGER.warn("No product group info found by product api for {}, ASIN {}, SKU {} - {}, will set default to BOOK", order.order_id, order.isbn, order.sku, e.getMessage());
+        } catch (Exception e) {
+            LOGGER.warn(
+                    "No product group info found by product api for {}, ASIN {}, SKU {} - {}, will set default to BOOK", order.order_id, order.isbn, order.sku, e.getMessage()
+            );
         }
 
 
@@ -72,17 +73,13 @@ public class OrderItemTypeHelper {
 
     public OrderEnums.OrderItemType getItemTypeBySku(Order order) {
 
-        //ART	AUTO	pro	jewel	shoe	cloth	watch	BABY	BEAU	ELEC	FOOD	HARDWARE
-        // HEAL	HOME	MEASURE	OFFICE	PET	SAFETY	SPOR	TOOL	TOY	access	 guowai	bady	kit  out
         String sku = order.getSku();
 
         if (sku.isEmpty()) {
             throw new BusinessException("No valid SKU found for order " + order.order_id);
         }
 
-        String[] productKeywords = {"ART", "AUTO", "pro", "jewel", "shoe", "cloth", "watch", "BABY", "BEAU", "ELEC", "FOOD", "HARDWARE",
-                "HEAL", "HOME", "MEASURE", "OFFICE", "PET", "SAFETY", "SPOR", "TOOL", "TOY", "access", "guowai", "bady", "kit", "out", "uban"};
-
+        String[] productKeywords = {"ART", "AUTO", "pro", "jewel", "shoe", "cloth", "watch", "BABY", "BEAU", "ELEC", "FOOD", "HARDWARE", "HEAL", "HOME", "MEASURE", "OFFICE", "PET", "SAFETY", "SPOR", "TOOL", "TOY", "access", "guowai", "bady", "kit", "out", "uban"};
 
 
         for (String keyword : productKeywords) {
@@ -92,7 +89,7 @@ public class OrderItemTypeHelper {
         }
 
 
-        String[] bookKeywords = {"book","bk", "dvd", "cd"};
+        String[] bookKeywords = {"book", "bk", "dvd", "cd"};
 
         for (String keyword : bookKeywords) {
             if (sku.toLowerCase().contains(keyword.toLowerCase())) {
@@ -100,7 +97,7 @@ public class OrderItemTypeHelper {
             }
         }
 
-        throw new BusinessException("Order item type for {} not found from SKU pattern. ASIN "+order.isbn+", SKU "+sku);
+        throw new BusinessException("Order item type for {} not found from SKU pattern. ASIN " + order.isbn + ", SKU " + sku);
 
     }
 

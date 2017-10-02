@@ -9,9 +9,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 @Data
 public class Worksheet {
@@ -22,7 +20,7 @@ public class Worksheet {
     @Getter
     private Spreadsheet spreadsheet;
 
-    public  Worksheet(Spreadsheet spreadsheet, String sheetName) {
+    public Worksheet(Spreadsheet spreadsheet, String sheetName) {
         this.spreadsheet = spreadsheet;
         this.sheetName = sheetName;
     }
@@ -33,7 +31,7 @@ public class Worksheet {
         Date now = new Date();
         LocalDate localDate = now.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
-        Date sheetDate = new Date();
+        Date sheetDate;
         try {
             sheetDate = df.parse(localDate.getYear() + "/" + this.getSheetName());
             LocalDate sheetLocalDate = sheetDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -44,17 +42,16 @@ public class Worksheet {
             }
 
         } catch (ParseException e) {
-
             throw new BusinessException("Sheet with name " + this.getSheetName() + " is not valid");
         }
 
 
         DateFormat feedDf = new SimpleDateFormat("yyyy-MM-dd");
 
-        String shipDate = feedDf.format(sheetDate);
+        return feedDf.format(sheetDate);
 
-        return shipDate;
     }
+
     public String toString() {
         return this.spreadsheet.getTitle() + " - " + this.sheetName;
     }

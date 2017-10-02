@@ -9,8 +9,6 @@ import edu.olivet.foundations.utils.Dates;
 import edu.olivet.harvester.message.EmailService;
 import edu.olivet.harvester.utils.ServiceUtils;
 import edu.olivet.harvester.utils.Settings;
-import org.apache.commons.mail.EmailException;
-import org.omg.CORBA.portable.ValueOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,12 +23,12 @@ public class ConfirmShipmentEmailSender extends EmailService {
         Settings.Configuration config = Settings.load().getConfigByCountry(country);
 
         String subject = String.format("%s %s Confirm Shipment Report: %s",
-                config.getAccountCode(), Dates.today(),summary);
+                config.getAccountCode(), Dates.today(), summary);
 
         try {
             this.sendMessage(subject, errorDescription, new Destination().withToAddresses(config.getSellerEmail().getEmail()));
-        }catch (BusinessException e) {
-            LOGGER.error("Failed to send shipment confirmation success email.{} - {}",subject,e.getMessage());
+        } catch (BusinessException e) {
+            LOGGER.error("Failed to send shipment confirmation success email.{} - {}", subject, e.getMessage());
         }
 
     }
@@ -50,8 +48,8 @@ public class ConfirmShipmentEmailSender extends EmailService {
 
         try {
             this.sendMessage(destination, title, content, EmailContentType.PlainText, feedFile);
-        }catch (BusinessException e) {
-            LOGGER.error("Failed to send shipment confirmation success email.{} - {}",title,e.getMessage());
+        } catch (BusinessException e) {
+            LOGGER.error("Failed to send shipment confirmation success email.{} - {}", title, e.getMessage());
         }
     }
 }

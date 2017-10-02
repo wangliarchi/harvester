@@ -32,9 +32,9 @@ public class EmailService implements MessageService {
         senderAccount = Settings.load().getConfigs().get(0).getSellerEmail();
     }
 
-    public void sendMessage(String subject, String content, Destination destination)  {
+    public void sendMessage(String subject, String content, Destination destination) {
         try {
-            if(testMode) {
+            if (testMode) {
                 destination = testDestination;
             }
             gmailSender.send(senderAccount, destination, subject, content, EmailContentType.PlainText);
@@ -47,12 +47,12 @@ public class EmailService implements MessageService {
 
 
     public void sendMessage(Destination destination, String subject, String content,
-                               EmailContentType contentType, File... attachments) {
+                            EmailContentType contentType, File... attachments) {
         try {
-            if(testMode) {
+            if (testMode) {
                 destination = testDestination;
             }
-            gmailSender.send(senderAccount,destination, subject, content, contentType, attachments);
+            gmailSender.send(senderAccount, destination, subject, content, contentType, attachments);
         } catch (EmailException e) {
             throw new BusinessException(e);
         }

@@ -32,6 +32,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 9/20/2017 11:59 AM
@@ -42,10 +43,6 @@ public class UIHarvester extends AbstractApplicationUI {
     @Inject
     private DBManager dbManager;
 
-//    @Getter
-//    private JTextArea successLogTextArea;
-
-    //private static final int DEFAULT_HEIGHT = 820;
 
     public UIHarvester() {
         this.initComponents();
@@ -64,14 +61,6 @@ public class UIHarvester extends AbstractApplicationUI {
         this.setJMenuBar(menuBar);
         final JToolBar toolbar = UIElements.getInstance().createToolBar();
 
-//        int screenHeight = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds().height;
-//        int height = screenHeight >= DEFAULT_HEIGHT ? DEFAULT_HEIGHT : screenHeight;
-//        int sucHeight = height < DEFAULT_HEIGHT ? 180 : 220;
-//        int logLayoutHeight = height < DEFAULT_HEIGHT ? 210 : 250;
-
-//        successLogTextArea = UIElements.getInstance().createLogTextArea(Color.BLACK);
-//        successLogTextArea.append("Welcome to Harvester!"+Constants.NEW_LINE);
-//        final JPanel successLogPanel = UIElements.getInstance().createLogPanel(UIText.title("title.record.success"),sucHeight,successLogTextArea);
 
         final MemoryUsageBar memoryUsageBar = new MemoryUsageBar();
         statusPane = new JTextPane();
@@ -86,8 +75,6 @@ public class UIHarvester extends AbstractApplicationUI {
                                 .addComponent(toolbar))
                         .addGroup(layout.createSequentialGroup()
                                 .addComponent(icon))
-//                .addGroup(layout.createSequentialGroup()
-//                        .addComponent(successLogPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
                         .addGroup(layout.createSequentialGroup()
                                 .addComponent(statusPane, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
 
@@ -96,12 +83,11 @@ public class UIHarvester extends AbstractApplicationUI {
         layout.setVerticalGroup(
                 layout.createParallelGroup(Alignment.CENTER)
                         .addGroup(layout.createSequentialGroup()
-                                        .addComponent(toolbar, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(icon, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
-//                    .addComponent(successLogPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
-                                        .addGroup(layout.createParallelGroup(Alignment.BASELINE)
+                                .addComponent(toolbar, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(icon, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                                .addGroup(layout.createParallelGroup(Alignment.BASELINE)
 
-                                                .addComponent(memoryUsageBar, 24, 24, 24).addComponent(statusPane))
+                                        .addComponent(memoryUsageBar, 24, 24, 24).addComponent(statusPane))
                         ));
         pack();
     }
@@ -149,10 +135,7 @@ public class UIHarvester extends AbstractApplicationUI {
             confirmShipments.setMessagePanel(new ProgressDetail(Actions.ConfirmShipment));
 
             List<Worksheet> selectedWorksheets = dialog.getSelectedSheets();
-            List<String> sheetNames = new ArrayList<>();
-            selectedWorksheets.forEach(it -> {
-                sheetNames.add(it.getSheetName());
-            });
+            List<String> sheetNames = selectedWorksheets.stream().map(Worksheet::getSheetName).collect(Collectors.toList());
 
             confirmShipments.getMessagePanel().displayMsg(selectedWorksheets.size() + " worksheets from " + selectedWorksheets.get(0).getSpreadsheet().getTitle()
                     + " selected to confirm shipments - "
@@ -165,8 +148,10 @@ public class UIHarvester extends AbstractApplicationUI {
 
 
     @UIEvent
-    public void OrderConfirmationHistory() {
-        List<OrderConfirmationLog> list = dbManager.query(OrderConfirmationLog.class, Cnd.where("context", "!=", "").desc("uploadTime"));
+    public void orderConfirmationHistory() {
+        List<OrderConfirmationLog> list = dbManager.query(OrderConfirmationLog.class,
+                Cnd.where("context", "!=", "").desc("uploadTime"));
+
         UITools.displayListDialog(new ListModel<>(Actions.OrderConfirmationHistory.label(), list, OrderConfirmationLog.COLUMNS, null, OrderConfirmationLog.WIDTHS));
     }
 
