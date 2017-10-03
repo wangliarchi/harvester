@@ -7,7 +7,6 @@ import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Directory;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 
-
 import java.io.File;
 
 /**
@@ -48,7 +47,7 @@ public class Harvester {
         try {
             new AppScript().preloadAllSpreadsheets();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            //ignore, error logged by appscript
         }
     }
 

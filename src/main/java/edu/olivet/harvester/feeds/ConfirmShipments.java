@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.text.DateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 
 @Singleton
@@ -95,6 +96,8 @@ public class ConfirmShipments {
             confirmShipmentForWorksheet(worksheet);
             LOGGER.info("Confirm shipments for spreadsheet {} in {}.", worksheet.toString(), Strings.formatElapsedTime(start));
         }
+
+
 
     }
 
@@ -391,6 +394,9 @@ public class ConfirmShipments {
                 }
 
                 confirmShipmentEmailSender.sendErrorFoundEmail(subject, content.toString(), country);
+
+                messagePanel.wrapLineMsg(content.toString(),LOGGER,InformationLevel.Negative);
+
             }
         });
     }
@@ -421,6 +427,10 @@ public class ConfirmShipments {
                 LOGGER.error("Error when confirm shipment for sheet {} {}", spreadId, e.getMessage());
             }
         }
+
+        //wait for 2 mininues, then check unshipped orders.
+        Tools.sleep(2, TimeUnit.MINUTES);
+        notConfirmedOrderNotification();
 
 
     }

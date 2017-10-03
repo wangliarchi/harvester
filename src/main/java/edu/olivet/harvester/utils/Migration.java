@@ -49,13 +49,13 @@ public class Migration {
     static Settings loadFromOrderManConfigFile(File file) {
         if (file.exists() && file.isFile()) {
             JSONObject setting = JSON.parseObject(Tools.readFileToString(file));
-            JSONArray countries = setting.getJSONArray("countries");
+            final JSONArray countries = setting.getJSONArray("countries");
             JSONObject signatures = setting.getJSONObject("signatures");
             JSONObject googledrivebooks = setting.getJSONObject("googledrivebooks");
             JSONObject googledriveproducts = setting.getJSONObject("googledriveproducts");
             JSONObject orderFinders = setting.getJSONObject("orderFinders");
             JSONObject sellerids = setting.getJSONObject("sellerids");
-            String sid = setting.getString("id");
+            final String sid = setting.getString("id");
 
 
             Map<String, Account.AccountType> orderManAccountTypeMapping = new HashMap<>();

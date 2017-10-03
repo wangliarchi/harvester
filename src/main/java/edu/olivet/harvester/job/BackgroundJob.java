@@ -20,7 +20,8 @@ public enum BackgroundJob {
      * check unshipped orders, and send notification to account owner
      * run all weekdays and saturnday. random time between 17:00-18:00pm
      */
-    UnshippedOrderCheck("0 30 17 ? * MON,TUE,WED,THU,FRI,SAT *",UnshippedOrderCheckJob.class),
+    //UnshippedOrderCheck("0 30 17 ? * MON,TUE,WED,THU,FRI,SAT *",UnshippedOrderCheckJob.class),
+
     ConfigUpload("0 0 5,13,21 1/1 * ? *", ConfigUploadJob.class),
 
     AutoUpgrade("0 15 2 1/1 * ? *", AutoUpgradeJob.class);
