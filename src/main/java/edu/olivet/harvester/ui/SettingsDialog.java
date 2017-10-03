@@ -6,8 +6,6 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.BaseDialog;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
-import edu.olivet.foundations.utils.Configs;
-import edu.olivet.foundations.utils.Directory;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.utils.Migration;

@@ -1,38 +1,24 @@
 package edu.olivet.harvester.ui;
 
-import com.google.api.services.drive.model.File;
-import com.google.inject.Inject;
 import edu.olivet.deploy.Language;
-import edu.olivet.foundations.amazon.Country;
-import edu.olivet.foundations.google.DataSource;
-import edu.olivet.foundations.google.DataSource.DataSourceCategory;
-import edu.olivet.foundations.google.SpreadService;
 import edu.olivet.foundations.ui.BaseDialog;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
-import edu.olivet.foundations.utils.Constants;
-import edu.olivet.foundations.utils.Dates;
-import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.spreadsheet.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.utils.Settings;
-
+import lombok.Getter;
 
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -45,9 +31,10 @@ public class ChooseSheetDialog extends BaseDialog {
 
     private final List<Spreadsheet> spreadsheets;
 
-    private JList<String> jSpreadList;
-    private JList<String> jSheetList;
+    private JList<String> spreadList;
+    private JList<String> sheetNameList;
 
+    @Getter
     private List<Worksheet> selectedWorksheets;
 
     private AppScript appScript;
@@ -69,8 +56,8 @@ public class ChooseSheetDialog extends BaseDialog {
         final JPanel spreadPane = new JPanel();
         final JScrollPane spreadScrollPane = new JScrollPane();
 
-        jSpreadList = new JList<>();
-        jSheetList = new JList<>();
+        spreadList = new JList<>();
+        sheetNameList = new JList<>();
 
         final JPanel sheetPane = new JPanel();
         final JScrollPane sheetScrollPane = new JScrollPane();
@@ -82,7 +69,7 @@ public class ChooseSheetDialog extends BaseDialog {
         //refresh selected spreadsheet
         clearCacheBtn.addActionListener(e -> {
             //find selected spreadsheet
-            int spreadIndex = this.jSpreadList.getSelectedIndex();
+            int spreadIndex = this.spreadList.getSelectedIndex();
             Spreadsheet spreadsheet = spreadsheets.get(spreadIndex);
             spreadsheet = appScript.reloadSpreadsheet(spreadsheet.getSpreadsheetId());
             spreadsheets.set(spreadIndex, spreadsheet);
@@ -95,7 +82,7 @@ public class ChooseSheetDialog extends BaseDialog {
         setTitle(UIText.title("title.select.sheet"));
         spreadPane.setBorder(BorderFactory.createTitledBorder(UIText.title("title.spread")));
 
-        jSpreadList.addListSelectionListener(evt -> {
+        spreadList.addListSelectionListener(evt -> {
             if (evt.getValueIsAdjusting()) {
                 formsValueChanged();
             }
@@ -108,8 +95,8 @@ public class ChooseSheetDialog extends BaseDialog {
             strings[i] = spreadsheet.getTitle();
         }
 
-        this.jSpreadList.setListData(strings);
-        this.jSpreadList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        this.spreadList.setListData(strings);
+        this.spreadList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 
         MouseListener mouseListener = new MouseAdapter() {
@@ -121,8 +108,8 @@ public class ChooseSheetDialog extends BaseDialog {
         };
 
 
-        jSheetList.addMouseListener(mouseListener);
-        spreadScrollPane.setViewportView(jSpreadList);
+        sheetNameList.addMouseListener(mouseListener);
+        spreadScrollPane.setViewportView(spreadList);
 
         GroupLayout spreadLayout = new GroupLayout(spreadPane);
         spreadPane.setLayout(spreadLayout);
@@ -135,7 +122,7 @@ public class ChooseSheetDialog extends BaseDialog {
 
         sheetPane.setBorder(BorderFactory.createTitledBorder(UIText.title("title.sheet")));
 
-        sheetScrollPane.setViewportView(jSheetList);
+        sheetScrollPane.setViewportView(sheetNameList);
 
         GroupLayout sheetLayout = new GroupLayout(sheetPane);
         sheetPane.setLayout(sheetLayout);
@@ -174,13 +161,13 @@ public class ChooseSheetDialog extends BaseDialog {
 
 
         //set first spreadsheet selected by defaut
-        this.jSpreadList.setSelectedIndex(0);
+        this.spreadList.setSelectedIndex(0);
         formsValueChanged();
     }
 
     private void formsValueChanged() {
 
-        int selected = jSpreadList.getSelectedIndex();
+        int selected = spreadList.getSelectedIndex();
 
         if (selected < 0) {
             return;
@@ -192,11 +179,11 @@ public class ChooseSheetDialog extends BaseDialog {
         int count = sheetNames.size();
 
         if (count == 0) {
-            this.jSheetList.setListData(new String[0]);
+            this.sheetNameList.setListData(new String[0]);
             return;
         }
 
-        this.jSheetList.setListData(sheetNames.toArray(new String[sheetNames.size()]));
+        this.sheetNameList.setListData(sheetNames.toArray(new String[sheetNames.size()]));
 
 
         //default to select today's sheet
@@ -205,27 +192,25 @@ public class ChooseSheetDialog extends BaseDialog {
         String todaySheetName = df.format(localDate);
 
         int index = sheetNames.indexOf(todaySheetName);
-        this.jSheetList.setSelectedIndex(index);
-//        this.jSheetList.setSelectionInterval(0, count - 1);
+        this.sheetNameList.setSelectedIndex(index);
 
     }
 
     @Override
     public void ok() {
-        int spreadIndex = this.jSpreadList.getSelectedIndex();
-        int sheetIndex = this.jSheetList.getSelectedIndex();
+        int spreadIndex = this.spreadList.getSelectedIndex();
+        int sheetIndex = this.sheetNameList.getSelectedIndex();
 
         selectedWorksheets = new ArrayList<>();
 
         if (spreadIndex >= 0 && sheetIndex >= 0) {
             Spreadsheet spreadsheet = spreadsheets.get(spreadIndex);
-            List<String> sheetNames = this.jSheetList.getSelectedValuesList();
+            List<String> sheetNames = this.sheetNameList.getSelectedValuesList();
 
             for (String sheetName : sheetNames) {
                 selectedWorksheets.add(new Worksheet(spreadsheet, sheetName));
             }
 
-            //selectedSheets = new Spreadsheet(spread.getSpreadsheetId(), spread.getTitle(), sheetNames);
             this.setVisible(false);
 
             ok = true;
@@ -233,11 +218,6 @@ public class ChooseSheetDialog extends BaseDialog {
             UITools.error(UIText.message("message.error.nosheetselected"), UIText.title("title.conf_error"));
         }
     }
-
-    List<Worksheet> getSelectedSheets() {
-        return this.selectedWorksheets;
-    }
-
 
     public static void main(String[] args) {
         UIText.setLocale(Language.current());
@@ -259,6 +239,6 @@ public class ChooseSheetDialog extends BaseDialog {
         }
 
         ChooseSheetDialog dialog = UITools.setDialogAttr(new ChooseSheetDialog(spreadsheets, appScript));
-        System.out.println(dialog.getSelectedSheets());
+        System.out.println(dialog.getSelectedWorksheets());
     }
 }

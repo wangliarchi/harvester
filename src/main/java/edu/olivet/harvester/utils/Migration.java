@@ -9,11 +9,17 @@ import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.utils.Directory;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Migrate configuration from OrderMan
@@ -21,6 +27,8 @@ import java.util.List;
  * @author <a href="mailto:rnd@olivetuniversity.edu">RnD</a> 9/29/17 7:49 PM
  */
 public class Migration {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Migration.class);
 
     public static Settings loadSettings() {
 
@@ -35,70 +43,76 @@ public class Migration {
 
     }
 
+    /**
+     * migrate Orderman account configuration to Harvester.
+     */
     static Settings loadFromOrderManConfigFile(File file) {
         if (file.exists() && file.isFile()) {
             JSONObject setting = JSON.parseObject(Tools.readFileToString(file));
             JSONArray countries = setting.getJSONArray("countries");
-            JSONObject sellers = setting.getJSONObject("sellers");
-            JSONObject sellerEmails = setting.getJSONObject("sellerEmails");
             JSONObject signatures = setting.getJSONObject("signatures");
             JSONObject googledrivebooks = setting.getJSONObject("googledrivebooks");
             JSONObject googledriveproducts = setting.getJSONObject("googledriveproducts");
-            JSONObject primeBuyers = setting.getJSONObject("primeBuyers");
-            JSONObject ptBuyers = setting.getJSONObject("ptBuyers");
-            JSONObject prodPrimeBuyers = setting.getJSONObject("prodPrimeBuyers");
-            JSONObject prodPtBuyers = setting.getJSONObject("prodPtBuyers");
-            JSONObject ebatesBuyers = setting.getJSONObject("ebatesBuyers");
             JSONObject orderFinders = setting.getJSONObject("orderFinders");
             JSONObject sellerids = setting.getJSONObject("sellerids");
             String sid = setting.getString("id");
 
 
+            Map<String, Account.AccountType> orderManAccountTypeMapping = new HashMap<>();
+            orderManAccountTypeMapping.put("seller", Account.AccountType.Seller);
+            orderManAccountTypeMapping.put("sellerEmail", Account.AccountType.Email);
+            orderManAccountTypeMapping.put("primeBuyer", Account.AccountType.PrimeBuyer);
+            orderManAccountTypeMapping.put("ptBuyer", Account.AccountType.Buyer);
+            orderManAccountTypeMapping.put("prodPrimeBuyer", Account.AccountType.PrimeBuyer);
+            orderManAccountTypeMapping.put("prodPtBuyer", Account.AccountType.Buyer);
+            orderManAccountTypeMapping.put("ebatesBuyer", Account.AccountType.EbatesBuyer);
+
+            Map<String, String> orderManHarvesterAccountMapping = new HashMap<>();
+            orderManHarvesterAccountMapping.put("ptBuyer", "buyer");
+            orderManHarvesterAccountMapping.put("prodPtBuyer", "prodBuyer");
+
+
             List<Settings.Configuration> configs = new ArrayList<>(countries.size());
 
-
             for (int i = 0; i < countries.size(); i++) {
-                Settings.Configuration cfg = new Settings.Configuration();
+                Country country = Country.valueOf(countries.getString(i));
 
-                Country country = Country.fromCode(countries.getString(i));
+                Settings.Configuration cfg = new Settings.Configuration();
                 cfg.setCountry(country);
 
+                orderManAccountTypeMapping.forEach((String orderManKey, Account.AccountType accountType) -> {
 
-                String seller = String.format("%s/%s", sellers.getJSONObject(country.code()).getString("email"), sellers.getJSONObject(country.code()).getString("password"));
-                cfg.setSeller(new Account(seller, Account.AccountType.Seller));
+                    String methodName;
+                    methodName = orderManHarvesterAccountMapping.getOrDefault(orderManKey, orderManKey);
 
-                String sellerEmail = String.format("%s/%s", sellerEmails.getJSONObject(country.code()).getString("email"), sellerEmails.getJSONObject(country.code()).getString("password"));
-                cfg.setSellerEmail(new Account(sellerEmail, Account.AccountType.Seller));
+                    JSONObject accounts = setting.getJSONObject(orderManKey + "s");
+                    JSONObject account = accounts.getJSONObject(country.name());
 
+                    if (account != null && account.containsKey("email")) {
+                        String accountString = String.format("%s/%s", account.getString("email"), account.getString("password"));
+                        try {
+                            Method method = cfg.getClass().getDeclaredMethod("set" + StringUtils.capitalize(methodName), Account.class);
+                            method.invoke(cfg, new Account(accountString, accountType));
+                        } catch (NoSuchMethodException e) {
+                            LOGGER.error("No method found {} - {}", methodName, e.getMessage());
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            LOGGER.error("{} - {}", methodName, e.getMessage());
+                        }
 
-                String primeBuyer = String.format("%s/%s", primeBuyers.getJSONObject(country.code()).getString("email"), primeBuyers.getJSONObject(country.code()).getString("password"));
-                cfg.setPrimeBuyer(new Account(primeBuyer, Account.AccountType.PrimeBuyer));
-
-                String ptBuyer = String.format("%s/%s", ptBuyers.getJSONObject(country.code()).getString("email"), ptBuyers.getJSONObject(country.code()).getString("password"));
-                cfg.setBuyer(new Account(ptBuyer, Account.AccountType.Buyer));
-
-
-                String prodPrimeBuyer = String.format("%s/%s", prodPrimeBuyers.getJSONObject(country.code()).getString("email"), prodPrimeBuyers.getJSONObject(country.code()).getString("password"));
-                cfg.setProdPrimeBuyer(new Account(prodPrimeBuyer, Account.AccountType.PrimeBuyer));
-
-                String prodPtBuyer = String.format("%s/%s", prodPtBuyers.getJSONObject(country.code()).getString("email"), prodPtBuyers.getJSONObject(country.code()).getString("password"));
-                cfg.setProdBuyer(new Account(prodPtBuyer, Account.AccountType.Buyer));
-
-
-                String ebatesBuyer = String.format("%s/%s", ebatesBuyers.getJSONObject(country.code()).getString("email"), ebatesBuyers.getJSONObject(country.code()).getString("password"));
-                cfg.setEbatesBuyer(new Account(ebatesBuyer, Account.AccountType.Buyer));
+                    }
+                });
 
 
-                cfg.setBookDataSourceUrl(AppScript.getSpreadId(googledrivebooks.getString(country.code()).trim()));
-                cfg.setProductDataSourceUrl(AppScript.getSpreadId(googledriveproducts.getString(country.code()).trim()));
+                cfg.setBookDataSourceUrl(AppScript.getSpreadId(googledrivebooks.getString(country.name()).trim()));
+                cfg.setProductDataSourceUrl(AppScript.getSpreadId(googledriveproducts.getString(country.name()).trim()));
 
-                cfg.setSignature(signatures.getString(country.code()).trim());
-                cfg.setUserCode(orderFinders.getString(country.code()).trim());
+                cfg.setSignature(signatures.getString(country.name()).trim());
+                cfg.setUserCode(orderFinders.getString(country.name()).trim());
 
-                String selleridsString = sellerids.getString(country.code()).trim();
+                String selleridsString = sellerids.getString(country.name()).trim();
                 if (selleridsString.isEmpty()) {
                     if (country == Country.CA || country == Country.MX) {
-                        selleridsString = sellerids.getString(Country.US.code()).trim();
+                        selleridsString = sellerids.getString(Country.US.name()).trim();
                     }
                 }
 
@@ -109,7 +123,6 @@ public class Migration {
                     String secretKey = mwsCredentialParts[3].trim();
 
                     cfg.setMwsCredential(new MarketWebServiceIdentity(sellerId, accessKey, secretKey, country.marketPlaceId()));
-
                     cfg.setStoreName(mwsCredentialParts[4].trim());
                 }
 

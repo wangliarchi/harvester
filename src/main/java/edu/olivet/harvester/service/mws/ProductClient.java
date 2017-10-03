@@ -23,13 +23,10 @@ public class ProductClient {
 
 
     /**
-     * Returns a list of products and their attributes, based on a list of ASIN values..
-     * https://docs.developer.amazonservices.com/en_UK/products/Products_GetMatchingProduct.html
-     *
+     * <pre>Returns a list of products and their attributes, based on a list of ASIN values..
      * including PurchaseDate, OrderStatus, FulfillmentChannel, and LastUpdateDate.
-     *
-     * @param country
-     * @param asin
+     * https://docs.developer.amazonservices.com/en_UK/products/Products_GetMatchingProduct.html
+     * </pre>
      */
     public Product getProductByASIN(Country country, String asin) {
         List<String> asins = new ArrayList<>();

@@ -2,8 +2,6 @@ package edu.olivet.harvester.job;
 
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
-
 public class BackgroundJobTest {
     @Test
     public void testGetCron() throws Exception {

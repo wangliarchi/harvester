@@ -1,7 +1,6 @@
 package edu.olivet.harvester.service.mws;
 
 import com.amazonservices.mws.products.model.Product;
-import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.MWSUtils;
 import edu.olivet.foundations.mock.MockDBModule;

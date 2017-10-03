@@ -11,11 +11,11 @@ import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 @Guice(modules = {MockDateModule.class, MockDBModule.class})
 public class SettingsTest extends BaseTest {
@@ -39,9 +39,11 @@ public class SettingsTest extends BaseTest {
     @Test
     public void testListAllSpreadsheets() throws Exception {
         List<String> spreadsheetIds = Settings.load(testConfigFilePath).listAllSpreadsheets();
-        String[] expectedIds = {"1IMbmaLUjqvZ7w8OdPd59fpTuad8U__5PAyKg3yR0DjY", "1qxcCkAPvvBaR3KHa2MZv1V39m2E1IMytVDn1yXDaVEM",
-                "1VIar2m0_78mUk3wcmfiqLWQOBB34NBsac94R4EYgcOU",
-                "17k9ohj5RTCeMKKbpEbBb7azB4u3yZ3aHs1FfYTPaAMo"};
+        String[] expectedIds = {
+            "1IMbmaLUjqvZ7w8OdPd59fpTuad8U__5PAyKg3yR0DjY",
+            "1qxcCkAPvvBaR3KHa2MZv1V39m2E1IMytVDn1yXDaVEM",
+            "1VIar2m0_78mUk3wcmfiqLWQOBB34NBsac94R4EYgcOU",
+            "17k9ohj5RTCeMKKbpEbBb7azB4u3yZ3aHs1FfYTPaAMo"};
         assertEquals(spreadsheetIds, Arrays.asList(expectedIds));
     }
 

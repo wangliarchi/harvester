@@ -1,19 +1,17 @@
 package edu.olivet.harvester.spreadsheet;
 
-import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.mock.MockDBModule;
 import edu.olivet.foundations.mock.MockDateModule;
 import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.model.OrderEnums;
-import edu.olivet.harvester.spreadsheet.service.AppScript;
-import lombok.Getter;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 @Guice(modules = {MockDateModule.class, MockDBModule.class})
 public class SpreadsheetTest extends BaseTest {

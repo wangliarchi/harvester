@@ -70,7 +70,8 @@ public class BaseTest {
 
         @Override
         public List<Order> readOrders(String spreadId, String sheetName) {
-            String localJSONFilePath = BaseTest.TEST_DATA_ROOT + File.separator + "spreadsheet-data-" + spreadId + "-" + sheetName.replaceAll("/", "") + ".json";
+            String localJSONFilePath = BaseTest.TEST_DATA_ROOT + File.separator +
+                "spreadsheet-data-" + spreadId + "-" + sheetName.replaceAll("/", "") + ".json";
             File localJsonFile = new File(localJSONFilePath);
 
             if (!localJsonFile.exists()) {

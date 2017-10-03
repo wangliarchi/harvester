@@ -12,12 +12,8 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 
-import static org.testng.Assert.*;
-
 @Guice(modules = {MockDBModule.class})
 public class ConfirmShipmentEmailSenderTest extends BaseTest {
-
-    private String testEmailAddress = "johnnyxiang2017@gmail.com";
 
     @Inject
     private ConfirmShipmentEmailSender confirmShipmentEmailSender;
@@ -26,6 +22,7 @@ public class ConfirmShipmentEmailSenderTest extends BaseTest {
     public void init() {
         confirmShipmentEmailSender.setSenderAccount(new Account("johnnyxiang2017@gmail.com/q1w2e3AA", Account.AccountType.Email));
         confirmShipmentEmailSender.setTestMode(true);
+        String testEmailAddress = "johnnyxiang2017@gmail.com";
         confirmShipmentEmailSender.setTestDestination(new Destination().withToAddresses(testEmailAddress));
     }
 

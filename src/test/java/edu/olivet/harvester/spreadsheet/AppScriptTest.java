@@ -1,14 +1,11 @@
 package edu.olivet.harvester.spreadsheet;
 
-import com.google.inject.Inject;
 import edu.olivet.foundations.aop.RepeatModule;
 import edu.olivet.foundations.mock.MockDBModule;
 import edu.olivet.foundations.utils.DateModule;
 import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums.OrderColor;
-import edu.olivet.harvester.spreadsheet.exceptions.NoOrdersFoundInWorksheetException;
-import edu.olivet.harvester.spreadsheet.exceptions.NoWorksheetFoundException;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;

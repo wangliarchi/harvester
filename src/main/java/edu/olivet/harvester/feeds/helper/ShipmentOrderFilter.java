@@ -12,10 +12,7 @@ import edu.olivet.harvester.spreadsheet.Worksheet;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ShipmentOrderFilter {
 
@@ -33,7 +30,7 @@ public class ShipmentOrderFilter {
      */
     public List<Order> filterOrders(List<Order> orders, Worksheet worksheet) {
         //remove duplicated orders. we only need unique AmazonOrderId here.
-        Map<String, Order> filteredOrders = removeDulicatedOrders(orders);
+        Map<String, Order> filteredOrders = removeDuplicatedOrders(orders);
 
         //wc code gray label orders do not need to confirm
         filteredOrders = removeWCGrayLabelOrders(filteredOrders);
@@ -45,24 +42,23 @@ public class ShipmentOrderFilter {
         List<Order> filteredList = new ArrayList<>();
         filteredOrders.forEach((orderId, order) -> filteredList.add(order));
 
+        filteredList.sort(Comparator.comparing(Order::getRow));
 
         return filteredList;
     }
 
     /**
      * remove duplicated orders. we only need unique AmazonOrderId here.
-     *
-     * @param orders
-     * @return
      */
-    public Map<String, Order> removeDulicatedOrders(List<Order> orders) {
-        Map<String, Order> filtered = new HashMap<>();
+    public Map<String, Order> removeDuplicatedOrders(List<Order> orders) {
+        Map<String, Order> filtered = new LinkedHashMap<>();
 
         for (Order order : orders) {
             if (!filtered.containsKey(order.order_id)) {
                 filtered.put(order.order_id, order);
             } else {
-                messagePanel.displayMsg("Row " + order.getRow() + " " + order.order_id + " ignored since each order id only need to be confirmed once. ",
+                messagePanel.displayMsg(
+                        "Row " + order.getRow() + " " + order.order_id + " ignored since each order id only need to be confirmed once. ",
                         InformationLevel.Negative);
             }
         }
@@ -73,14 +69,14 @@ public class ShipmentOrderFilter {
     /**
      * wc code gray label orders do not need to confirm
      *
-     * @return
+     *
      */
     public Map<String, Order> removeWCGrayLabelOrders(Map<String, Order> orders) {
 
-        Map<String, Order> filtered = new HashMap<>();
+        Map<String, Order> filtered = new LinkedHashMap<>();
 
         orders.forEach((orderId, order) -> {
-            if (!order.status.toLowerCase().equals(OrderEnums.Status.WaitCancel.value().toLowerCase())) {
+            if (! OrderEnums.Status.WaitCancel.value().toLowerCase().equals(order.status.toLowerCase())) {
                 filtered.put(orderId, order);
             } else {
                 messagePanel.displayMsg("Row " + order.getRow() + " " + order.order_id + " ignored as it's marcked WC gray order. ",
@@ -105,13 +101,13 @@ public class ShipmentOrderFilter {
         }
 
 
-        Map<String, Order> filtered = new HashMap<>(orders);
+        Map<String, Order> filtered = new LinkedHashMap<>(orders);
 
         orders.forEach((orderId, order) -> {
             if (orderMap.containsKey(orderId)) {
                 com.amazonservices.mws.orders._2013_09_01.model.Order amzOrder = orderMap.get(orderId);
 
-                if (!amzOrder.getOrderStatus().equals("Unshipped") && !amzOrder.getOrderStatus().equals("PartiallyShipped")) {
+                if (!"Unshipped".equals(amzOrder.getOrderStatus()) && !"PartiallyShipped".equals(amzOrder.getOrderStatus())) {
                     filtered.remove(orderId);
 
                     messagePanel.displayMsg(

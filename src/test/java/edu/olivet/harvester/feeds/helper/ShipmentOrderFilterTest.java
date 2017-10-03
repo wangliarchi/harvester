@@ -1,7 +1,6 @@
 package edu.olivet.harvester.feeds.helper;
 
 
-import com.alibaba.fastjson.JSON;
 import com.amazonservices.mws.orders._2013_09_01.model.Order;
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
@@ -12,7 +11,6 @@ import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.service.mws.OrderClient;
 import edu.olivet.harvester.spreadsheet.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.Worksheet;
-import edu.olivet.harvester.spreadsheet.service.AppScript;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
@@ -20,7 +18,7 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.util.*;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 @Guice(modules = {MockDBModule.class})
 public class ShipmentOrderFilterTest extends BaseTest {
@@ -55,7 +53,7 @@ public class ShipmentOrderFilterTest extends BaseTest {
 
         List<edu.olivet.harvester.model.Order> orders = appScript.getOrdersFromWorksheet(worksheet);
 
-        Map<String, edu.olivet.harvester.model.Order> filterd = shipmentOrderFilter.removeDulicatedOrders(orders);
+        Map<String, edu.olivet.harvester.model.Order> filterd = shipmentOrderFilter.removeDuplicatedOrders(orders);
 
         assertEquals(filterd.size(),10);
 

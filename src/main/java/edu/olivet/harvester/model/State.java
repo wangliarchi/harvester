@@ -73,10 +73,12 @@ public enum State {
     /**
      * 地址位置横坐标
      */
+    @SuppressWarnings("CheckStyle")
     private final int x;
     /**
      * 地址位置纵坐标
      */
+    @SuppressWarnings("CheckStyle")
     private final int y;
     /**
      * 完整名称描述

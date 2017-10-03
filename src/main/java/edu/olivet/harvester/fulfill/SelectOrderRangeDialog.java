@@ -4,6 +4,7 @@ import edu.olivet.deploy.Language;
 import edu.olivet.foundations.ui.BaseDialog;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
+import edu.olivet.harvester.spreadsheet.OrderRange;
 import lombok.Getter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;

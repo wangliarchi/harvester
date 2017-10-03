@@ -42,9 +42,12 @@ public class ConfirmShipmentEmailSender extends EmailService {
         String title = String.format("%s %s Confirm Shipment Batch File Report: Total %s, Succeed %s, Failed %s",
                 config.getAccountCode(), Dates.today(), counts[0], counts[1], counts[2]);
 
-        String content = String.format("Order confirmation feed file %s was uploaded and executed successfully:\n%n%s \n\n Feed file uploaded to Amazon is attached in this email. ", feedFile.getName(), result);
+        String content = String.format(
+            "Order confirmation feed file %s was uploaded and executed successfully:%n%n%s %n%n Feed file uploaded to Amazon is attached in this email.",
+                feedFile.getName(), result);
 
-        Destination destination = new Destination().withToAddresses(config.getSellerEmail().getEmail()).withCcAddresses(Constants.RND_EMAIL);
+        Destination destination = new Destination().withToAddresses(config.getSellerEmail().getEmail())
+                .withCcAddresses(Constants.RND_EMAIL);
 
         try {
             this.sendMessage(destination, title, content, EmailContentType.PlainText, feedFile);

@@ -104,9 +104,6 @@ public class FeedGenerator {
     /**
      * initialize feed file.
      *
-     * @param feedType
-     * @param country
-     * @return
      */
     private File initReportFile(String feedType, Country country, OrderEnums.OrderItemType sheetType) {
 

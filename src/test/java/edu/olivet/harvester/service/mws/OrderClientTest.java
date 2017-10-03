@@ -24,7 +24,7 @@ public class OrderClientTest {
 
         List<Order> orders = orderClient.getOrders(Country.US,amazonOrderIds);
 
-        orders.forEach(it -> System.out.println(it));
+        orders.forEach(System.out::println);
 
     }
 

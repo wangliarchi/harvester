@@ -1,31 +1,20 @@
 package edu.olivet.harvester.feeds;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONException;
 import com.amazonservices.mws.orders._2013_09_01.model.ListOrdersResult;
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.*;
 import edu.olivet.foundations.mock.MockDBModule;
 import edu.olivet.foundations.mock.MockDateModule;
 import edu.olivet.foundations.utils.BusinessException;
-import edu.olivet.foundations.utils.RegexUtils;
-import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.feeds.helper.ConfirmShipmentEmailSender;
 import edu.olivet.harvester.feeds.helper.FeedGenerator;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.service.mws.OrderClient;
 import edu.olivet.harvester.spreadsheet.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.Worksheet;
-import edu.olivet.harvester.spreadsheet.exceptions.NoOrdersFoundInWorksheetException;
-import edu.olivet.harvester.spreadsheet.exceptions.NoWorksheetFoundException;
-import edu.olivet.harvester.spreadsheet.service.AppScript;
-import edu.olivet.harvester.spreadsheet.service.OrderHelper;
 import edu.olivet.harvester.utils.Settings;
-import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
@@ -34,9 +23,12 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 @Guice(modules = {MockDateModule.class, MockDBModule.class})
 public class ConfirmShipmentsTest extends BaseTest {
@@ -44,13 +36,12 @@ public class ConfirmShipmentsTest extends BaseTest {
     @Inject
     private ConfirmShipments confirmShipments;
 
-    private String spreadsheetId = "1qxcCkAPvvBaR3KHa2MZv1V39m2E1IMytVDn1yXDaVEM";
-
     private Spreadsheet spreadsheet;
 
     @BeforeClass
     public void init() {
         confirmShipments.setAppScript(appScript);
+        String spreadsheetId = "1qxcCkAPvvBaR3KHa2MZv1V39m2E1IMytVDn1yXDaVEM";
         spreadsheet = appScript.getSpreadsheet(spreadsheetId);
 
     }
@@ -123,7 +114,8 @@ public class ConfirmShipmentsTest extends BaseTest {
     @Test(expectedExceptions = BusinessException.class)
     public void testSubmitFeed() {
 
-        Settings.Configuration config = Settings.load(basePath + File.separator + "conf/harvester-test-invalidmws.json").getConfigByCountry(Country.US);
+        String configFilePath = basePath + File.separator + "conf/harvester-test-invalidmws.json";
+        Settings.Configuration config = Settings.load(configFilePath).getConfigByCountry(Country.US);
 
         MarketWebServiceIdentity credential = config.getMwsCredential();
 
@@ -144,23 +136,21 @@ public class ConfirmShipmentsTest extends BaseTest {
         confirmShipments.insertToLocalDbLog(feedFile, Country.US, submissionResult);
     }
 
-    @Test
-    public void testGenerateFeedFile() throws Exception {
-    }
 
-    @Test public void  testNotConfirmedOrderNotification() throws ParseException {
+    @Test
+    public void testNotConfirmedOrderNotification() throws ParseException {
 
         OrderClient orderClient = new OrderClient() {
             @Override
-            public List<com.amazonservices.mws.orders._2013_09_01.model.Order> listOrders(Country country, @Nullable Map<OrderFetcher.DateRangeType,Date> dateMap, String... statuses){
+            public List<com.amazonservices.mws.orders._2013_09_01.model.Order> listOrders(Country country, @Nullable Map<OrderFetcher.DateRangeType, Date> dateMap, String... statuses) {
 
                 try {
-                    File localOrderXMLFile = new File(TEST_DATA_ROOT + File.separator + "list-orders-" + country.code() + ".xml");
+                    File localOrderXMLFile = new File(TEST_DATA_ROOT + File.separator + "list-orders-" + country.name() + ".xml");
                     String xmlFragment = Tools.readFileToString(localOrderXMLFile);
                     ListOrdersResult listOrdersResult = MWSUtils.buildMwsObject(xmlFragment, ListOrdersResult.class);
 
                     return listOrdersResult.getOrders();
-                }catch (Exception e) {
+                } catch (Exception e) {
                     return new ArrayList<>();
                 }
 

@@ -5,6 +5,7 @@ import edu.olivet.foundations.amazon.Account.AccountType;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.ui.UITools;
+import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.utils.Settings.Configuration;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
@@ -191,11 +192,11 @@ public class ConfigurationPanel extends JPanel {
         cfg.setMwsCredential(new MarketWebServiceIdentity(sellerIdFld.getText().trim(),
             mwsAccessKeyFld.getText().trim(), mwsSecretKeyFld.getText().trim(), country.marketPlaceId()));
 
-        cfg.setBookDataSourceUrl(bookDataSourceUrlFld.getText().trim());
+        cfg.setBookDataSourceUrl(AppScript.getSpreadId(bookDataSourceUrlFld.getText().trim()));
         cfg.setPrimeBuyer(new Account(primeBuyerFld.getText(), AccountType.PrimeBuyer));
         cfg.setBuyer(new Account(buyerFld.getText(), AccountType.Buyer));
 
-        cfg.setProductDataSourceUrl(productDataSourceUrlFld.getText().trim());
+        cfg.setProductDataSourceUrl(AppScript.getSpreadId(productDataSourceUrlFld.getText().trim()));
         cfg.setProdPrimeBuyer(new Account(prodPrimeBuyerFld.getText(), AccountType.PrimeBuyer));
         cfg.setProdBuyer(new Account(prodBuyerFld.getText(), AccountType.Buyer));
         cfg.setEbatesBuyer(new Account(ebatesBuyerFld.getText(), AccountType.Buyer));

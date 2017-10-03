@@ -1,25 +1,25 @@
 {
 	"countries":["US","CA","MX"],
 	"ebatesBuyers":{"US":{
-			"email":"vagimike0@gmail.com",
+			"email":"usebates@gmail.com",
 			"enable2StepVerfication":false,
 			"isPrimeAvailable":false,
 			"name":"",
-			"password":"ZeroTemple*",
+			"password":"usebates*",
 			"type":"EbatesBuyer"
 		},"CA":{
-			"email":"vagimike0@gmail.com",
+			"email":"caebates@gmail.com",
 			"enable2StepVerfication":false,
 			"isPrimeAvailable":false,
 			"name":"",
-			"password":"ZeroTemple*",
+			"password":"caebates*",
 			"type":"EbatesBuyer"
 		},"MX":{
-			"email":"vagimike0@gmail.com",
+			"email":"mxebates@gmail.com",
 			"enable2StepVerfication":false,
 			"isPrimeAvailable":false,
 			"name":"",
-			"password":"ZeroTemple*",
+			"password":"mxebates*",
 			"type":"EbatesBuyer"
 		}
 	},
@@ -32,36 +32,25 @@
 	"orderFinders":{"US":"Jane","CA":"MikeB","MX":"Anny"
 	},
 	"primeBuyers":{"US":{
-			"email":"vagimike0@gmail.com",
-			"enable2StepVerfication":false,
-			"isPrimeAvailable":false,
-			"name":"",
-			"password":"ZeroTemple*",
+			"email":"pbuyerus@gmail.com",
+            "enable2StepVerfication":false,
+            "isPrimeAvailable":false,
+            "name":"",
+            "password":"pbuyeruspw",
 			"type":"PrimeBuyer"
 		},"CA":{
-			"email":"vagimike0@gmail.com",
+			"email":"caprimebuyer@gmail.com",
 			"enable2StepVerfication":false,
 			"isPrimeAvailable":false,
 			"name":"",
-			"password":"ZeroTemple*",
+			"password":"caprimebuyer*",
 			"type":"PrimeBuyer"
 		},"MX":{
-			"email":"vagimike0@gmail.com",
-			"enable2StepVerfication":false,
-			"isPrimeAvailable":false,
-			"name":"",
-			"password":"ZeroTemple*",
-			"type":"PrimeBuyer"
+
 		}
 	},
-	"prodPrimeBuyers":{"US":{
-			"email":"vagimike0@gmail.com",
-			"enable2StepVerfication":false,
-			"isPrimeAvailable":false,
-			"name":"",
-			"password":"ZeroTemple*",
-			"type":"PrimeBuyer"
-		},"CA":{
+	"prodPrimeBuyers":{"US":"",
+	    "CA":{
 			"email":"vagimike0@gmail.com",
 			"enable2StepVerfication":false,
 			"isPrimeAvailable":false,
@@ -78,12 +67,7 @@
 		}
 	},
 	"prodPtBuyers":{"US":{
-			"email":"vagimike0@gmail.com",
-			"enable2StepVerfication":false,
-			"isPrimeAvailable":false,
-			"name":"",
-			"password":"ZeroTemple*",
-			"type":"PtBuyer"
+
 		},"CA":{
 			"email":"vagimike0@gmail.com",
 			"enable2StepVerfication":false,
@@ -92,20 +76,20 @@
 			"password":"ZeroTemple*",
 			"type":"PtBuyer"
 		},"MX":{
-			"email":"vagimike0@gmail.com",
+			"email":"mxprobuyer@gmail.com",
 			"enable2StepVerfication":false,
 			"isPrimeAvailable":false,
 			"name":"",
-			"password":"ZeroTemple*",
+			"password":"mxprobuyer*",
 			"type":"PtBuyer"
 		}
 	},
 	"ptBuyers":{"US":{
-			"email":"vagimike0@gmail.com",
+			"email":"buyerus@gmail.com",
 			"enable2StepVerfication":false,
 			"isPrimeAvailable":false,
 			"name":"",
-			"password":"ZeroTemple*",
+			"password":"buyeruspw",
 			"type":"PtBuyer"
 		},"CA":{
 			"email":"vagimike0@gmail.com",
@@ -115,12 +99,7 @@
 			"password":"ZeroTemple*",
 			"type":"PtBuyer"
 		},"MX":{
-			"email":"vagimike0@gmail.com",
-			"enable2StepVerfication":false,
-			"isPrimeAvailable":false,
-			"name":"",
-			"password":"ZeroTemple*",
-			"type":"PtBuyer"
+
 		}
 	},
 	"sellerEmails":{"US":{

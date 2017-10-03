@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author <a href="mailto:rnd@olivetuniversity.edu">RnD</a> 09/19/2017 09:00:00
  */
+@SuppressWarnings("CheckStyle")
 @Data
 public class Order implements Keyable {
     public int row;
@@ -199,15 +200,7 @@ public class Order implements Keyable {
         return Strings.startsWithAnyIgnoreCase(seller, Country.JP.name());
     }
 
-    //    public String expectedShipDate() {
-//        if(!this.expected_ship_date.isEmpty()) {
-//            return this.expected_ship_date.split(" ")[0];
-//        }
-//
-//        //parse purchase-date
-//
-//
-//    }
+
     public String shippingCountryCode;
 
     @Override

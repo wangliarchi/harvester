@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -32,6 +31,7 @@ import java.util.stream.Collectors;
 public class Settings {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Settings.class);
+
 
     public static Settings load() {
         File file = new File(Harvester.CONFIG_FILE_PATH);
@@ -57,7 +57,7 @@ public class Settings {
     private List<Configuration> configs;
 
     public List<Country> listAllCountries() {
-        return configs.stream().map(config -> { return config.getCountry();}).collect(Collectors.toList());
+        return configs.stream().map(Configuration::getCountry).collect(Collectors.toList());
     }
 
     public Configuration getConfigByCountry(Country country) {
@@ -193,6 +193,7 @@ public class Settings {
                 }
             }
 
+
             if (!this.consistent(primeBuyer, buyer)) {
                 list.add("Book prime buyer and non-prime buyer validity inconsistent");
             }
@@ -215,6 +216,7 @@ public class Settings {
         /**
          * Check consistence of prime buyer and non-prime buyer: shall be both valid or both empty
          */
+        @SuppressWarnings("BooleanMethodIsAlwaysInverted")
         private boolean consistent(Account primeBuyer, Account buyer) {
             boolean primeValid = primeBuyer != null && primeBuyer.valid();
             boolean valid = buyer != null && buyer.valid();
@@ -224,7 +226,6 @@ public class Settings {
 
         /**
          * get configed spreadsheet id by type: book or product
-         *
          */
         String getSpreadId(OrderEnums.OrderItemType type) {
 

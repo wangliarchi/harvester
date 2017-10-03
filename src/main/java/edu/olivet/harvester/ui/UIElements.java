@@ -3,7 +3,6 @@ package edu.olivet.harvester.ui;
 import edu.olivet.foundations.ui.AbstractUIContainer;
 import edu.olivet.foundations.ui.Action;
 import edu.olivet.foundations.ui.Menu;
-import edu.olivet.foundations.ui.UIText;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -29,9 +28,9 @@ public class UIElements extends AbstractUIContainer {
     @Override
     public Menu[] getMenus() {
         return new Menu[]{
-                harvester,
-                Menu.Settings,
-                Menu.Help
+            harvester,
+            Menu.Settings,
+            Menu.Help
         };
     }
 
@@ -39,25 +38,25 @@ public class UIElements extends AbstractUIContainer {
     public Map<Menu, Action[]> getMenuActions() {
         Map<Menu, Action[]> map = new HashMap<>();
         map.put(harvester, new Action[]{
-                Actions.SubmitOrder,
-                Action.Separator,
-                Actions.FindSupplier,
-                Action.Separator,
-                Actions.ConfirmShipment,
-                Actions.OrderConfirmationHistory
+            Actions.SubmitOrder,
+            Action.Separator,
+            Actions.FindSupplier,
+            Action.Separator,
+            Actions.ConfirmShipment,
+            Actions.OrderConfirmationHistory
         });
         map.put(Menu.Settings, new Action[]{
-                Action.Settings,
-                Action.Separator,
-                Action.CreateAutoStartTask,
-                Action.DeleteAutoStartTask,
-                Action.CreateShortCut,
-                Action.Separator,
-                Action.Restart
+            Action.Settings,
+            Action.Separator,
+            Action.CreateAutoStartTask,
+            Action.DeleteAutoStartTask,
+            Action.CreateShortCut,
+            Action.Separator,
+            Action.Restart
         });
         map.put(Menu.Help, new Action[]{
-                Action.CurrentVersion,
-                Action.UpgradeCheck
+            Action.CurrentVersion,
+            Action.UpgradeCheck
         });
         return map;
     }
@@ -70,10 +69,10 @@ public class UIElements extends AbstractUIContainer {
     @Override
     public Action[] getToolbarActions() {
         return new Action[]{
-                Actions.SubmitOrder,
-                Actions.FindSupplier,
-                Actions.ConfirmShipment,
-                Action.Settings
+            Actions.SubmitOrder,
+            Actions.FindSupplier,
+            Actions.ConfirmShipment,
+            Action.Settings
         };
     }
 
@@ -105,14 +104,14 @@ public class UIElements extends AbstractUIContainer {
 
         GroupLayout logAreaLayout = new GroupLayout(logAreaPanel);
         logAreaLayout.setHorizontalGroup(
-                logAreaLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(logAreaLayout.createSequentialGroup()
-                                .addComponent(logAreaScrollPane, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
+            logAreaLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                .addGroup(logAreaLayout.createSequentialGroup()
+                    .addComponent(logAreaScrollPane, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
         );
         logAreaLayout.setVerticalGroup(
-                logAreaLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(GroupLayout.Alignment.TRAILING, logAreaLayout.createSequentialGroup()
-                                .addComponent(logAreaScrollPane, GroupLayout.PREFERRED_SIZE, height, GroupLayout.PREFERRED_SIZE))
+            logAreaLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                .addGroup(GroupLayout.Alignment.TRAILING, logAreaLayout.createSequentialGroup()
+                    .addComponent(logAreaScrollPane, GroupLayout.PREFERRED_SIZE, height, GroupLayout.PREFERRED_SIZE))
         );
 
 

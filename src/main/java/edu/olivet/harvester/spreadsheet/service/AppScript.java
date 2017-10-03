@@ -93,9 +93,9 @@ public class AppScript {
             List<String> spreadsheetIds = Settings.load().listAllSpreadsheets();
             for (String spreadsheetId : spreadsheetIds) {
                 try {
-                    Spreadsheet spreadsheet = reloadSpreadsheet(spreadsheetId);
+                    reloadSpreadsheet(spreadsheetId);
                 } catch (Exception e) {
-                    LOGGER.warn("{} is invalid. {}", spreadsheetId, e.getMessage());
+                    LOGGER.error("{} is invalid. {}", spreadsheetId, e.getMessage());
                 }
             }
         } catch (Exception e) {
@@ -113,7 +113,7 @@ public class AppScript {
      * </pre>
      */
     private static final String URL_PREFIX =
-            "https?://(spreadsheets.google.com/feeds/(cells|spreadsheets)/|docs.google.com/spreadsheets/d/|drive.google.com/open[?]id=)";
+        "https?://(spreadsheets.google.com/feeds/(cells|spreadsheets)/|docs.google.com/spreadsheets/d/|drive.google.com/open[?]id=)";
 
     public static String getSpreadId(String url) {
         String str = StringUtils.defaultString(url).replaceFirst(URL_PREFIX, StringUtils.EMPTY);
@@ -158,7 +158,8 @@ public class AppScript {
         params.put(PARAM_METHOD, "CommitShippingConfirmationLog");
         String result = this.processResult(this.get(params));
         if (!SUCCESS.equals(result)) {
-            throw new BusinessException(String.format("Failed to commit shipping confirmation log to row %d of sheet %s: %s", row, sheetName, result));
+            throw new BusinessException(String.format("Failed to commit shipping confirmation log to row %d of sheet %s: %s",
+                row, sheetName, result));
         }
     }
 
@@ -298,7 +299,7 @@ public class AppScript {
         }
 
         if (CollectionUtils.isEmpty(orders)) {
-            throw new NoOrdersFoundInWorksheetException("No valid orders found for sheet name " + worksheet.getSheetName() + " found in " + worksheet.getSpreadsheet().getTitle() + ".");
+            throw new NoOrdersFoundInWorksheetException("No valid orders found for sheet  " + worksheet.toString() + ".");
         }
 
         return orders;

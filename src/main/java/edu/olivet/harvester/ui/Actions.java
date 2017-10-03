@@ -5,6 +5,7 @@ import edu.olivet.foundations.ui.Action;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 9/20/2017 11:58 AM
  */
+@SuppressWarnings("CheckStyle")
 public class Actions {
 
     public static final Action SubmitOrder = new Action("SubmitOrder", "Submit Orders", null, "start.png");
