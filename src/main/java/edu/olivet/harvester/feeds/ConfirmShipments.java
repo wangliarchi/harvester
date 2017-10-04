@@ -407,6 +407,10 @@ public class ConfirmShipments {
     }
 
     public void execute() {
+
+        //this method is for cronjob, keep silent.
+        setMessagePanel(new VirtualMessagePanel());
+
         //get all order update sheets for account
         List<String> spreadIds;
         try {
