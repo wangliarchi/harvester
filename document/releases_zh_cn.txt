@@ -16,3 +16,12 @@
 
 更新内容：
 1. Reset message panel to virtual for shipment confirmation cron job.
+
+======================================================================
+版本：1.0-2017-09-24.1,1.0-2017-09-25.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. Fix a bug in setting migration.
+2. Account code in auto order confirmation email subject should use country name, not country code
