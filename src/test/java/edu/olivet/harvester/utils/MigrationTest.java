@@ -24,7 +24,7 @@ public class MigrationTest extends BaseTest {
         assertEquals(settings.getConfigByCountry(Country.US).getMwsCredential().getAccessKey(), "AKIAI73MGXM4FSWB6TIQ");
         assertEquals(settings.getConfigByCountry(Country.US).getMwsCredential().getSecretKey(), "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");
 
-        assertEquals(settings.getConfigByCountry(Country.US).getSeller().getEmail(),"mike.barrpro@gmail.com");
+        assertEquals(settings.getConfigByCountry(Country.US).getSeller().getEmail(),"usseller@gmail.com");
         assertEquals(settings.getConfigByCountry(Country.US).getSeller().getPassword(),"BarrP78Fly");
 
         assertEquals(settings.getConfigByCountry(Country.US).getBuyer().getEmail(),"buyerus@gmail.com");
@@ -42,6 +42,20 @@ public class MigrationTest extends BaseTest {
 
         assertEquals(settings.getConfigByCountry(Country.MX).getBuyer(),null);
         assertEquals(settings.getConfigByCountry(Country.MX).getProdBuyer().getEmail(),"mxprobuyer@gmail.com");
+
+
+
+        assertEquals(settings.getConfigByCountry(Country.CA).getMwsCredential().getSellerId(),"CAA3BEPQLI451F6I");
+        assertEquals(settings.getConfigByCountry(Country.CA).getMwsCredential().getAccessKey(), "CAAKIAI73MGXM4FSWB6TIQ");
+        assertEquals(settings.getConfigByCountry(Country.CA).getMwsCredential().getSecretKey(), "CAW5oIE4cbQ1MTG3YO5h4JU93J7FGjDX1/OLDjADBc");
+
+
+        assertEquals(settings.getConfigByCountry(Country.MX).getMwsCredential().getSellerId(),"CAA3BEPQLI451F6I");
+        assertEquals(settings.getConfigByCountry(Country.MX).getMwsCredential().getAccessKey(), "CAAKIAI73MGXM4FSWB6TIQ");
+        assertEquals(settings.getConfigByCountry(Country.MX).getMwsCredential().getSecretKey(), "CAW5oIE4cbQ1MTG3YO5h4JU93J7FGjDX1/OLDjADBc");
+
+
+
     }
 
 }

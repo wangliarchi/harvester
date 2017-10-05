@@ -55,6 +55,8 @@ public class Migration {
             JSONObject googledriveproducts = setting.getJSONObject("googledriveproducts");
             JSONObject orderFinders = setting.getJSONObject("orderFinders");
             JSONObject sellerids = setting.getJSONObject("sellerids");
+            JSONObject sellers = setting.getJSONObject("sellers");
+
             final String sid = setting.getString("id");
 
 
@@ -111,9 +113,18 @@ public class Migration {
 
                 String selleridsString = sellerids.getString(country.name()).trim();
                 if (selleridsString.isEmpty()) {
-                    if (country == Country.CA || country == Country.MX) {
-                        selleridsString = sellerids.getString(Country.US.name()).trim();
+//                    if (country == Country.CA || country == Country.MX) {
+//                        selleridsString = sellerids.getString(Country.US.name()).trim();
+//                    }
+                    //check seller email, if accounts share the same email, they should share same mws credential.
+                    //seller email must be there
+                    String currentSellerEmail = sellers.getJSONObject(country.name()).getString("email");
+                    for (Object o : countries) {
+                        if (!o.equals(country.name()) && currentSellerEmail.equals(sellers.getJSONObject(o.toString()).getString("email")) && StringUtils.isNotEmpty(sellerids.getString(o.toString()))) {
+                            selleridsString = sellerids.getString(o.toString()).trim();
+                        }
                     }
+
                 }
 
                 String[] mwsCredentialParts = selleridsString.split("/t");

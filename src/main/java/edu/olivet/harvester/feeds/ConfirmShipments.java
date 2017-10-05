@@ -268,6 +268,8 @@ public class ConfirmShipments {
         Country country = worksheet.getSpreadsheet().getSpreadsheetCountry();
         MarketWebServiceIdentity credential = Settings.load().getConfigByCountry(country).getMwsCredential();
 
+        LOGGER.info("Submitting order confirmation feeed to amzazon {}, using credential {}", country.name(),credential.toString());
+
         String result = feedUploader.execute(feedFile, FeedGenerator.BatchFileType.ShippingConfirmation.feedType(), credential, 1);
 
         messagePanel.wrapLineMsg("Feed has been submitted successfully. " + result, LOGGER, InformationLevel.Important);
