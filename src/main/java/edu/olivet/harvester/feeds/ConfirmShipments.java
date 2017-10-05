@@ -352,11 +352,11 @@ public class ConfirmShipments {
 
             //sales channel data may be missed, or not accurate.
             Country country;
-//            try {
+            try {
                 country = Country.fromSalesChanel(order.sales_chanel);
-//            }catch (Exception e) {
-//                country = worksheet.getSpreadsheet().getSpreadsheetCountry();
-//            }
+            }catch (Exception e) {
+                country = worksheet.getSpreadsheet().getSpreadsheetCountry();
+            }
 
             String carrierCode = carrierHelper.getCarrierCodeByCountryAndType(country, orderItemType);
 
