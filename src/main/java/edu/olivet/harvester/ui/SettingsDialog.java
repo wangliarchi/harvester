@@ -201,7 +201,7 @@ public class SettingsDialog extends BaseDialog {
                 Configuration config = cfgPanel.collect();
                 List<String> errors = config.validate();
                 if (CollectionUtils.isEmpty(errors)) {
-                    config.setAccountCode(sid + config.getCountry().code());
+                    config.setAccountCode(sid + config.getCountry().name());
                     configs.add(config);
                 } else {
                     UITools.error(String.format("Please fix %d configuration error(s) of %s marketplace:%n%n%s",
