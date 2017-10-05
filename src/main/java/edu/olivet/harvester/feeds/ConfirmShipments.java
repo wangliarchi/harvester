@@ -350,7 +350,15 @@ public class ConfirmShipments {
 
             OrderEnums.OrderItemType orderItemType = orderItemTypeHelper.getItemType(order);
 
-            String carrierCode = carrierHelper.getCarrierCodeByCountryAndType(Country.fromSalesChanel(order.sales_chanel), orderItemType);
+            //sales channel data may be missed, or not accurate.
+            Country country;
+//            try {
+                country = Country.fromSalesChanel(order.sales_chanel);
+//            }catch (Exception e) {
+//                country = worksheet.getSpreadsheet().getSpreadsheetCountry();
+//            }
+
+            String carrierCode = carrierHelper.getCarrierCodeByCountryAndType(country, orderItemType);
 
 
             String[] row = {order.order_id, carrierCode, defaultShipDate};

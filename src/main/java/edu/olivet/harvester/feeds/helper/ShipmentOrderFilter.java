@@ -114,12 +114,11 @@ public class ShipmentOrderFilter {
                             "Row " + order.getRow() + " " + order.order_id + " ignored. Order status is " + amzOrder.getOrderStatus(),
                             InformationLevel.Negative
                     );
-
-
-                    //If order is canceled, update in order update sheet: Column A (status) to finish,
-                    // Column AD (remark) to buyer canceled/ refunded
-
+                } else {
+                    filtered.get(orderId).setSales_chanel(amzOrder.getSalesChannel());
                 }
+
+
             }
         });
 
