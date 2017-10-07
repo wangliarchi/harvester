@@ -164,4 +164,11 @@ public class ConfirmShipmentsTest extends BaseTest {
         confirmShipments.notConfirmedOrderNotification();
     }
 
+    @Test
+    public void testGetOrderFinderEmail() {
+        Worksheet worksheet = new Worksheet(spreadsheet, "09/22");
+        List<Order> orders = confirmShipments.getOrdersFromWorksheet(worksheet);
+        assertEquals(confirmShipments.getOrderFinderEmail(orders),"johnnyxiang2017@gmail.com");
+    }
+
 }

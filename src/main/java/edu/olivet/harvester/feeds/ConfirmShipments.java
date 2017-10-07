@@ -38,6 +38,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,6 +88,8 @@ public class ConfirmShipments {
 
     @Setter
     private int lastOrderRowNo = 3;
+
+    private String orderFinderEmail;
 
     /**
      * confirm shipments by worksheet. Errors handled by each confirmShipmentForWorksheet call separately.
@@ -143,13 +146,14 @@ public class ConfirmShipments {
 
 
         lastOrderRowNo = getLastOrderRow(orders);
+        orderFinderEmail = getOrderFinderEmail(orders);
 
         StringBuilder resultSummary = new StringBuilder();
         messagePanel.displayMsg(orders.size() + "  order(s) found on the worksheet. ");
         resultSummary.append("Total ").append(orders.size()).append("\n");
 
         //filter orders
-        orders = shipmentOrderFilter.filterOrders(orders, worksheet,resultSummary);
+        orders = shipmentOrderFilter.filterOrders(orders, worksheet, resultSummary);
 
 
         if (orders.isEmpty()) {
@@ -160,7 +164,7 @@ public class ConfirmShipments {
                 String subject = String.format("No  orders need to be confirmed for sheet %s", worksheet.toString());
                 confirmShipmentEmailSender.sendErrorFoundEmail(subject,
                         subject,
-                        worksheet.getSpreadsheet().getSpreadsheetCountry());
+                        worksheet.getSpreadsheet().getSpreadsheetCountry(),orderFinderEmail);
             }
 
             return;
@@ -181,7 +185,7 @@ public class ConfirmShipments {
                 String subject = String.format("Error when generating feed file for sheet %s", worksheet.toString());
                 confirmShipmentEmailSender.sendErrorFoundEmail(subject,
                         "Error when generating feed file. " + e.getMessage(),
-                        worksheet.getSpreadsheet().getSpreadsheetCountry());
+                        worksheet.getSpreadsheet().getSpreadsheetCountry(),orderFinderEmail);
             }
 
             return;
@@ -200,7 +204,7 @@ public class ConfirmShipments {
             writeLogToWorksheet(worksheet, result);
 
             //send email
-            confirmShipmentEmailSender.sendSuccessEmail(result, feedFile, worksheet.getSpreadsheet().getSpreadsheetCountry());
+            confirmShipmentEmailSender.sendSuccessEmail(result, feedFile, worksheet.getSpreadsheet().getSpreadsheetCountry(),orderFinderEmail);
         } catch (Exception e) {
 
             errorAlertService.sendMessage("Error when submitting order confirmation feed file via MWS.",
@@ -212,7 +216,7 @@ public class ConfirmShipments {
                 String subject = String.format("Error when submitting file for sheet %s, feed file %s", worksheet.toString(), feedFile.getName());
                 confirmShipmentEmailSender.sendErrorFoundEmail(subject,
                         "Error when submitting feed file. " + e.getMessage(),
-                        worksheet.getSpreadsheet().getSpreadsheetCountry());
+                        worksheet.getSpreadsheet().getSpreadsheetCountry(),orderFinderEmail);
             }
 
 
@@ -235,6 +239,20 @@ public class ConfirmShipments {
         return CollectionUtils.isEmpty(orders) ? 3 : orders.stream().mapToInt(Order::getRow).max().getAsInt();
     }
 
+    public @Nullable String getOrderFinderEmail(List<Order> orders) {
+        for (Order order : orders) {
+            if (StringUtils.isNotEmpty(order.code)) {
+                String[] parts = StringUtils.split(order.code, "/");
+                for (String part : parts) {
+                    if (RegexUtils.isEmail(part.trim())) {
+                        return part.trim();
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
 
     public void writeLogToWorksheet(Worksheet worksheet, String result) {
         int[] counts = ServiceUtils.parseFeedSubmissionResult(result);
@@ -301,7 +319,7 @@ public class ConfirmShipments {
             if (messagePanel instanceof VirtualMessagePanel) {
                 String subject = String.format("No worksheet %s found.", worksheet.toString());
                 confirmShipmentEmailSender.sendErrorFoundEmail(subject,
-                        "Please check if orders have been exported correctly", worksheet.getSpreadsheet().getSpreadsheetCountry());
+                        "Please check if orders have been exported correctly", worksheet.getSpreadsheet().getSpreadsheetCountry(),orderFinderEmail);
             }
 
 
@@ -313,7 +331,7 @@ public class ConfirmShipments {
             if (messagePanel instanceof VirtualMessagePanel) {
                 String subject = String.format("No order data found on worksheet %s ", worksheet.toString());
                 confirmShipmentEmailSender.sendErrorFoundEmail(subject,
-                        "Please check if orders have been exported correctly", worksheet.getSpreadsheet().getSpreadsheetCountry());
+                        "Please check if orders have been exported correctly", worksheet.getSpreadsheet().getSpreadsheetCountry(),orderFinderEmail);
             }
 
 
@@ -326,7 +344,7 @@ public class ConfirmShipments {
                 String subject = String.format("Failed to read order data from %s", worksheet.toString());
                 confirmShipmentEmailSender.sendErrorFoundEmail(subject,
                         "Please check if orders have been exported correctly. \t " + e.getMessage(),
-                        worksheet.getSpreadsheet().getSpreadsheetCountry());
+                        worksheet.getSpreadsheet().getSpreadsheetCountry(),orderFinderEmail);
             }
 
 
