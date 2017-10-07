@@ -8,12 +8,16 @@ import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.foundations.utils.Tools;
+import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.utils.Migration;
+import edu.olivet.harvester.utils.SettingValidator;
 import edu.olivet.harvester.utils.Settings;
 import edu.olivet.harvester.utils.Settings.Configuration;
 import lombok.Getter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
@@ -30,6 +34,9 @@ import java.util.List;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 9/20/2017 9:41 PM
  */
 public class SettingsDialog extends BaseDialog {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SettingsDialog.class);
+
     @Getter
     private Settings settings;
 
@@ -38,9 +45,14 @@ public class SettingsDialog extends BaseDialog {
 
     private JTextField sidFld;
     private JTabbedPane tabbedPane;
+    private SettingValidator settingValidator;
 
-    SettingsDialog() {
+
+    SettingsDialog(SettingValidator settingValidator) {
         super(null, true);
+
+        this.settingValidator = settingValidator;
+
         this.setMinimumSize(new Dimension(720, 600));
         this.setTitle("Harvester: Fulfillment Configuration");
         sidFld = new JTextField();
@@ -50,11 +62,14 @@ public class SettingsDialog extends BaseDialog {
         try {
             settings = Settings.load();
         } catch (IllegalStateException e) {
-            try {
-                //load setting migrated from orderman
-                settings = Migration.loadSettings();
-            } catch (Exception e1) {
-                // -> Ignore
+            if (Migration.hasMigrationFile() && Migration.isUseMigration()) {
+                try {
+                    //load setting migrated from orderman
+                    settings = Migration.loadSettings();
+                } catch (Exception e1) {
+                    LOGGER.error("Error loading migration configuration file.");
+                    // -> Ignore
+                }
             }
         }
 
@@ -214,6 +229,16 @@ public class SettingsDialog extends BaseDialog {
             UITools.error("Please configure at least one marketplace.");
         }
 
+        //validate
+        List<String> errors = settingValidator.validate(configs);
+        if (!CollectionUtils.isEmpty(errors) && errors.size() > 0) {
+            StringBuilder sb = new StringBuilder("\n");
+            errors.forEach(error -> sb.append(error + "\n\n"));
+            UITools.error(sb.toString(), "Error");
+            return;
+        }
+
+
         this.settings = new Settings(sid, configs);
         File file = new File(Harvester.CONFIG_FILE_PATH);
         Tools.writeStringToFile(file, JSON.toJSONString(this.settings, true));
@@ -236,9 +261,11 @@ public class SettingsDialog extends BaseDialog {
     }
 
     public static void main(String[] args) {
+
+
         UIText.setLocale(Language.current());
         UITools.setTheme();
-        UITools.setDialogAttr(new SettingsDialog(), true);
+        UITools.setDialogAttr(new SettingsDialog(new SettingValidator(new AppScript())), true);
         System.exit(0);
     }
 }

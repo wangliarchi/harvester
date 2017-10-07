@@ -23,6 +23,7 @@ import lombok.Getter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.nutz.lang.Lang;
@@ -50,11 +51,15 @@ public class AppScript {
 
     @Repeat(expectedExceptions = {BusinessException.class, JSONException.class})
     public Spreadsheet getSpreadsheet(String spreadId) {
-
-        return SPREADSHEET_CLIENT_CACHE.computeIfAbsent(spreadId, k -> this.reloadSpreadsheet(spreadId));
+        Spreadsheet spreadsheet = SPREADSHEET_CLIENT_CACHE.computeIfAbsent(spreadId, k -> this.reloadSpreadsheet(spreadId));
+        return afterSpreadsheetLoaded(spreadsheet);
 
     }
 
+    public @Nullable  Spreadsheet getSpreadsheetFromCache(String spreadId) {
+        return SPREADSHEET_CLIENT_CACHE.getOrDefault(spreadId,null);
+
+    }
 
     public Spreadsheet reloadSpreadsheet(String spreadId) {
         Map<String, String> params = new HashMap<>();
@@ -62,10 +67,7 @@ public class AppScript {
         params.put(PARAM_METHOD, "GETSPREADMETADATA");
         String json = this.processResult(this.get(params));
 
-
         Spreadsheet spreadsheet = JSON.parseObject(json, Spreadsheet.class);
-        spreadsheet = afterSpreadsheetLoaded(spreadsheet);
-
 
         SPREADSHEET_CLIENT_CACHE.put(spreadId, spreadsheet);
         return spreadsheet;

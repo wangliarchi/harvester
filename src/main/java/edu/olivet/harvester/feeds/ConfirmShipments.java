@@ -1,5 +1,6 @@
 package edu.olivet.harvester.feeds;
 
+import com.amazonaws.mws.model.FeedSubmissionInfo;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import edu.olivet.foundations.amazon.Country;
@@ -21,6 +22,7 @@ import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.model.feeds.OrderConfirmationLog;
 import edu.olivet.harvester.service.Carrier;
 import edu.olivet.harvester.service.OrderItemTypeHelper;
+import edu.olivet.harvester.service.mws.FeedSubmissionFetcher;
 import edu.olivet.harvester.service.mws.OrderClient;
 import edu.olivet.harvester.spreadsheet.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.Worksheet;
@@ -142,11 +144,12 @@ public class ConfirmShipments {
 
         lastOrderRowNo = getLastOrderRow(orders);
 
-
+        StringBuilder resultSummary = new StringBuilder();
         messagePanel.displayMsg(orders.size() + "  order(s) found on the worksheet. ");
+        resultSummary.append("Total ").append(orders.size()).append("\n");
 
         //filter orders
-        orders = shipmentOrderFilter.filterOrders(orders, worksheet);
+        orders = shipmentOrderFilter.filterOrders(orders, worksheet,resultSummary);
 
 
         if (orders.isEmpty()) {
@@ -192,6 +195,7 @@ public class ConfirmShipments {
 
             insertToLocalDbLog(feedFile, worksheet.getSpreadsheet().getSpreadsheetCountry(), result);
 
+            result = resultSummary.toString() + result;
             //write log to worksheet
             writeLogToWorksheet(worksheet, result);
 
@@ -268,7 +272,7 @@ public class ConfirmShipments {
         Country country = worksheet.getSpreadsheet().getSpreadsheetCountry();
         MarketWebServiceIdentity credential = Settings.load().getConfigByCountry(country).getMwsCredential();
 
-        LOGGER.info("Submitting order confirmation feeed to amzazon {}, using credential {}", country.name(),credential.toString());
+        LOGGER.info("Submitting order confirmation feeed to amzazon {}, using credential {}", country.name(), credential.toString());
 
         String result = feedUploader.execute(feedFile, FeedGenerator.BatchFileType.ShippingConfirmation.feedType(), credential, 1);
 
@@ -354,7 +358,7 @@ public class ConfirmShipments {
             Country country;
             try {
                 country = Country.fromSalesChanel(order.sales_chanel);
-            }catch (Exception e) {
+            } catch (Exception e) {
                 country = worksheet.getSpreadsheet().getSpreadsheetCountry();
             }
 
@@ -411,6 +415,13 @@ public class ConfirmShipments {
         });
     }
 
+
+    @Inject
+    FeedSubmissionFetcher feedSubmissionFetcher;
+
+    public List<FeedSubmissionInfo> getUnprocessedFeedSubmission(Country country) {
+        return feedSubmissionFetcher.getActiveShipmentConfirmationSubmissionList(country);
+    }
 
     public String getSheetNameByDate(long millis) {
         return FastDateFormat.getInstance("MM/dd").format(millis);

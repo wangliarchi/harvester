@@ -52,8 +52,8 @@ public class ShipmentOrderFilterTest extends BaseTest {
         Worksheet worksheet = new Worksheet(spreadsheet, "08/31");
 
         List<edu.olivet.harvester.model.Order> orders = appScript.getOrdersFromWorksheet(worksheet);
-
-        Map<String, edu.olivet.harvester.model.Order> filterd = shipmentOrderFilter.removeDuplicatedOrders(orders);
+        StringBuilder resultSummary = new StringBuilder();
+        Map<String, edu.olivet.harvester.model.Order> filterd = shipmentOrderFilter.removeDuplicatedOrders(orders,resultSummary);
 
         assertEquals(filterd.size(),10);
 
@@ -68,6 +68,8 @@ public class ShipmentOrderFilterTest extends BaseTest {
                 "112-1328432-8909803",
                 "114-6250525-1507456")));
 
+        System.out.println(resultSummary);
+
     }
 
     @Test
@@ -78,7 +80,8 @@ public class ShipmentOrderFilterTest extends BaseTest {
         Map<String, edu.olivet.harvester.model.Order> orders = new HashMap<>();
         orders.put(order.order_id,order);
 
-        Map<String, edu.olivet.harvester.model.Order> filtered = shipmentOrderFilter.removeWCGrayLabelOrders(orders);
+        StringBuilder resultSummary = new StringBuilder();
+        Map<String, edu.olivet.harvester.model.Order> filtered = shipmentOrderFilter.removeWCGrayLabelOrders(orders, resultSummary);
 
         assertEquals(filtered.size(),0);
 
@@ -86,10 +89,11 @@ public class ShipmentOrderFilterTest extends BaseTest {
         order.status = "WC";
         orders.put(order.order_id,order);
 
-        filtered = shipmentOrderFilter.removeWCGrayLabelOrders(orders);
+        filtered = shipmentOrderFilter.removeWCGrayLabelOrders(orders, resultSummary);
 
         assertEquals(filtered.size(),0);
 
+        System.out.println(resultSummary);
 
     }
 
@@ -103,10 +107,13 @@ public class ShipmentOrderFilterTest extends BaseTest {
         orders.put(order.order_id,order);
 
 
+        StringBuilder resultSummary = new StringBuilder();
 
-        Map<String, edu.olivet.harvester.model.Order> filtered = shipmentOrderFilter.removeNotUnshippedOrders(orders, Country.US);
+        Map<String, edu.olivet.harvester.model.Order> filtered = shipmentOrderFilter.removeNotUnshippedOrders(orders, Country.US, resultSummary);
 
         assertEquals(filtered.size(),0);
+
+        System.out.println(resultSummary);
 
     }
 }
