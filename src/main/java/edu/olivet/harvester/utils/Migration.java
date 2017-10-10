@@ -142,14 +142,22 @@ public class Migration {
 
                 }
 
+                //"A3BEPQLI451F6I/tATVPDKIKX0DER/tAKIAI73MGXM4FSWB6TIQ/tW5oIE4cbQ1MTG3YO5h4JU93J7FGjDX1/OLDjADBc/tMike Pro/t1.0/tnull"
                 String[] mwsCredentialParts = selleridsString.split("/t");
                 if (mwsCredentialParts.length > 3) {
+
                     String sellerId = mwsCredentialParts[0].trim();
                     String accessKey = mwsCredentialParts[2].trim();
-                    String secretKey = mwsCredentialParts[3].trim();
+
+                    String secretKey;
+                    if (mwsCredentialParts.length == 7) {
+                        secretKey = mwsCredentialParts[3].trim();
+                    } else {
+                        secretKey =  mwsCredentialParts[4].trim()+ mwsCredentialParts[3].trim();
+                    }
 
                     cfg.setMwsCredential(new MarketWebServiceIdentity(sellerId, accessKey, secretKey, country.marketPlaceId()));
-                    cfg.setStoreName(mwsCredentialParts[4].trim());
+                    cfg.setStoreName(mwsCredentialParts[mwsCredentialParts.length-7+5].trim());
                 }
 
                 configs.add(cfg);
