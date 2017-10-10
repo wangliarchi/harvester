@@ -11,6 +11,7 @@ import edu.olivet.harvester.service.mws.OrderClient;
 import edu.olivet.harvester.spreadsheet.Worksheet;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,19 @@ public class ShipmentOrderFilter {
      * @return orders fitlered orders
      */
     public List<Order> filterOrders(List<Order> orders, Worksheet worksheet, StringBuilder resultSummary) {
+
+
+        //if order purchased date is over maxDaysBack days, ignore???
+        Date minDate =  DateUtils.addDays(new Date(), -30);
+        orders.removeIf(it -> {
+            try {
+                return it.getPurchaseDate().before(minDate);
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage());
+            }
+            return false;
+        });
+
         //remove duplicated orders. we only need unique AmazonOrderId here.
         Map<String, Order> filteredOrders = removeDuplicatedOrders(orders, resultSummary);
 
