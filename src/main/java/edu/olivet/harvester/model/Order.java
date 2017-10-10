@@ -3,11 +3,17 @@ package edu.olivet.harvester.model;
 import com.google.common.base.Objects;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.db.Keyable;
+import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.model.OrderEnums.OrderColor;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
+
+import java.text.ParseException;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Order information mapped to one row of daily update spreadsheet
@@ -203,10 +209,28 @@ public class Order implements Keyable {
 
     public String shippingCountryCode;
 
+
+    public Date getPurchaseDate() {
+        return parsePurchaseDate(purchase_date);
+    }
+    private static final String[] PURCHASE_DATE_PATTERNS = {"yyyy-MM-dd'T'HH:mm:ssXXX","yyyy-MM-dd'T'HH:mm:ss'Z'","yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "M/d/yyyy H:mm",
+            "M/d/yyyy H:mm:ss", "yyyy-MM-dd HH:mm:ss", "MM-dd-yyyy HH:mm", "yyyy-MM-dd"};
+    public static Date parsePurchaseDate(String purchaseDateText) {
+        try {
+            return DateUtils.parseDate(purchaseDateText, Locale.US, PURCHASE_DATE_PATTERNS);
+        } catch (ParseException e) {
+            throw new BusinessException(
+                    String.format("Failed to parse order purchase date in text: %s. Supported date patterns: %s.",
+                            purchaseDateText,
+                            StringUtils.join(PURCHASE_DATE_PATTERNS, " ")));
+        }
+    }
+
     @Override
     public String getKey() {
         return this.order_id;
     }
+
 
     @Override
     public boolean equals(Object o) {
