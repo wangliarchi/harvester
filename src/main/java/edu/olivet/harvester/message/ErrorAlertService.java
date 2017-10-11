@@ -29,8 +29,6 @@ public class ErrorAlertService extends EmailService {
         super.sendMessage(destination, subject, content, EmailContentType.Html, attachments);
     }
 
-//    public void sendMessage(String subject, String content, Country country, File... attachments) {
-//        super.sendMessage(destination, subject, content, EmailContentType.Html, attachments);
-//    }
+
 
 }

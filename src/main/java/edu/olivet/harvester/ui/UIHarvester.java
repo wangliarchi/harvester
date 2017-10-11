@@ -1,5 +1,6 @@
 package edu.olivet.harvester.ui;
 
+import com.amazonaws.mws.model.FeedSubmissionInfo;
 import com.google.inject.Inject;
 import edu.olivet.deploy.Language;
 import edu.olivet.foundations.db.DBManager;
@@ -14,6 +15,7 @@ import edu.olivet.harvester.model.feeds.OrderConfirmationLog;
 import edu.olivet.harvester.spreadsheet.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
+import edu.olivet.harvester.utils.SettingValidator;
 import edu.olivet.harvester.utils.Settings;
 import org.nutz.dao.Cnd;
 import org.slf4j.Logger;
@@ -62,25 +64,25 @@ public class UIHarvester extends AbstractApplicationUI {
         GroupLayout layout = new GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup()
-                    .addComponent(toolbar))
-                .addGroup(layout.createSequentialGroup()
-                    .addComponent(icon))
-                .addGroup(layout.createSequentialGroup()
-                    .addComponent(statusPane, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                layout.createParallelGroup(Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(toolbar))
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(icon))
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(statusPane, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
 
-                    .addComponent(memoryUsageBar, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, 200))
+                                .addComponent(memoryUsageBar, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, 200))
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(Alignment.CENTER)
-                .addGroup(layout.createSequentialGroup()
-                    .addComponent(toolbar, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-                    .addComponent(icon, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createParallelGroup(Alignment.BASELINE)
+                layout.createParallelGroup(Alignment.CENTER)
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(toolbar, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(icon, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                                .addGroup(layout.createParallelGroup(Alignment.BASELINE)
 
-                        .addComponent(memoryUsageBar, 24, 24, 24).addComponent(statusPane))
-                ));
+                                        .addComponent(memoryUsageBar, 24, 24, 24).addComponent(statusPane))
+                        ));
         pack();
     }
 
@@ -117,7 +119,7 @@ public class UIHarvester extends AbstractApplicationUI {
             } catch (Exception e) {
                 LOGGER.error("{} is invalid. {}", spreadsheetId, e.getMessage());
                 spreadsheetIdError.append(String.format("%s is not a valid spreadsheet id, or it's not shared to %s \n",
-                    spreadsheetId, Constants.RND_EMAIL));
+                        spreadsheetId, Constants.RND_EMAIL));
             }
         }
 
@@ -131,16 +133,32 @@ public class UIHarvester extends AbstractApplicationUI {
 
         if (dialog.isOk()) {
 
-            confirmShipments.setMessagePanel(new ProgressDetail(Actions.ConfirmShipment));
-
 
             List<Worksheet> selectedWorksheets = dialog.getSelectedWorksheets();
             List<String> sheetNames = selectedWorksheets.stream().map(Worksheet::getSheetName).collect(Collectors.toList());
 
+            try {
+                List<FeedSubmissionInfo> submissionInfo = confirmShipments.getUnprocessedFeedSubmission(selectedWorksheets.get(0).getSpreadsheet().getSpreadsheetCountry());
+
+                if (submissionInfo.size() > 0) {
+                    String msg = String.format("Unprocessed/processing order confirmation feed(s) found.  \n\n %s \n\n" +
+                            " Are you sure to submit again?", submissionInfo.toString());
+                    if (!UITools.confirmed(msg)) {
+                        return;
+                    }
+
+                }
+            } catch (Exception e) {
+                LOGGER.error("Failed to load unprocessed feed submissions for {} - {}", selectedWorksheets.get(0).getSpreadsheet().getSpreadsheetCountry(), e.getMessage());
+            }
+
+            confirmShipments.setMessagePanel(new ProgressDetail(Actions.ConfirmShipment));
+
+
             confirmShipments.getMessagePanel().displayMsg(
-                selectedWorksheets.size() + " worksheets from " + selectedWorksheets.get(0).getSpreadsheet().getTitle() +
-                    " selected to confirm shipments - " +
-                    String.join(",", sheetNames), LOGGER, InformationLevel.Information);
+                    selectedWorksheets.size() + " worksheets from " + selectedWorksheets.get(0).getSpreadsheet().getTitle() +
+                            " selected to confirm shipments - " +
+                            String.join(",", sheetNames), LOGGER, InformationLevel.Information);
 
 
             confirmShipments.confirmShipmentForWorksheets(selectedWorksheets);
@@ -151,7 +169,7 @@ public class UIHarvester extends AbstractApplicationUI {
     @UIEvent
     public void orderConfirmationHistory() {
         List<OrderConfirmationLog> list = dbManager.query(OrderConfirmationLog.class,
-            Cnd.where("context", "!=", "").desc("uploadTime"));
+                Cnd.where("context", "!=", "").desc("uploadTime"));
 
         ListModel<OrderConfirmationLog> dialog = new ListModel<>(Actions.OrderConfirmationHistory.label(), list, OrderConfirmationLog.COLUMNS, null, OrderConfirmationLog.WIDTHS);
         UITools.displayListDialog(dialog);
@@ -162,7 +180,7 @@ public class UIHarvester extends AbstractApplicationUI {
 
     @UIEvent
     public void settings() {
-        SettingsDialog dialog = UITools.setDialogAttr(new SettingsDialog());
+        SettingsDialog dialog = UITools.setDialogAttr(new SettingsDialog(new SettingValidator(new AppScript())));
         if (dialog.isOk()) {
             this.settings = dialog.getSettings();
         }

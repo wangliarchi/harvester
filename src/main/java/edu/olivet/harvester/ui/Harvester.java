@@ -6,6 +6,8 @@ import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Directory;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
+import edu.olivet.harvester.utils.Migration;
+import edu.olivet.harvester.utils.SettingValidator;
 
 import java.io.File;
 
@@ -26,12 +28,20 @@ public class Harvester {
         UITools.init(APP);
 
         if (!new File(CONFIG_FILE_PATH).exists()) {
-            UITools.info("Please configure fulfillment requirements for Harvester.");
-            SettingsDialog dialog = UITools.setDialogAttr(new SettingsDialog());
+
+            if (Migration.hasMigrationFile() && UITools.confirmed("OrderMan configuration is found. Do you want to migrate it to Harvester?")) {
+                Migration.setUseMigration(true);
+            } else {
+                Migration.setUseMigration(false);
+                UITools.info("Please configure fulfillment requirements for Harvester.");
+            }
+
+            SettingsDialog dialog = UITools.setDialogAttr(new SettingsDialog(new SettingValidator(new AppScript())));
             if (!dialog.isOk() || dialog.getSettings() == null) {
                 UITools.error("Harvester cannot run without necessary configurations!");
                 System.exit(4);
             }
+
         }
 
         new AutoUpgradeJob().execute();

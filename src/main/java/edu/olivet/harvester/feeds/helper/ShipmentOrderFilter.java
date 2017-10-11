@@ -11,11 +11,13 @@ import edu.olivet.harvester.service.mws.OrderClient;
 import edu.olivet.harvester.spreadsheet.Worksheet;
 import lombok.Getter;
 import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 public class ShipmentOrderFilter {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShipmentOrderFilter.class);
     @Inject
     @Setter
     private OrderClient mwsOrderClient;
@@ -28,15 +30,15 @@ public class ShipmentOrderFilter {
      * @param orders list of orders
      * @return orders fitlered orders
      */
-    public List<Order> filterOrders(List<Order> orders, Worksheet worksheet) {
+    public List<Order> filterOrders(List<Order> orders, Worksheet worksheet, StringBuilder resultSummary) {
         //remove duplicated orders. we only need unique AmazonOrderId here.
-        Map<String, Order> filteredOrders = removeDuplicatedOrders(orders);
+        Map<String, Order> filteredOrders = removeDuplicatedOrders(orders, resultSummary);
 
         //wc code gray label orders do not need to confirm
-        filteredOrders = removeWCGrayLabelOrders(filteredOrders);
+        filteredOrders = removeWCGrayLabelOrders(filteredOrders, resultSummary);
 
         //check order status via MWS, only unshipped orders need to be confirmed
-        filteredOrders = removeNotUnshippedOrders(filteredOrders, worksheet.getSpreadsheet().getSpreadsheetCountry());
+        filteredOrders = removeNotUnshippedOrders(filteredOrders, worksheet.getSpreadsheet().getSpreadsheetCountry(), resultSummary);
 
         //return List
         List<Order> filteredList = new ArrayList<>();
@@ -50,17 +52,22 @@ public class ShipmentOrderFilter {
     /**
      * remove duplicated orders. we only need unique AmazonOrderId here.
      */
-    public Map<String, Order> removeDuplicatedOrders(List<Order> orders) {
+    public Map<String, Order> removeDuplicatedOrders(List<Order> orders, StringBuilder resultSummary) {
         Map<String, Order> filtered = new LinkedHashMap<>();
 
         for (Order order : orders) {
             if (!filtered.containsKey(order.order_id)) {
                 filtered.put(order.order_id, order);
             } else {
+
                 messagePanel.displayMsg(
                         "Row " + order.getRow() + " " + order.order_id + " ignored since each order id only need to be confirmed once. ",
-                        InformationLevel.Negative);
+                        LOGGER, InformationLevel.Negative);
             }
+        }
+
+        if (orders.size() - filtered.size() > 0) {
+            resultSummary.append(String.format("%d duplicated, ", orders.size() - filtered.size()));
         }
 
         return filtered;
@@ -68,27 +75,30 @@ public class ShipmentOrderFilter {
 
     /**
      * wc code gray label orders do not need to confirm
-     *
-     *
      */
-    public Map<String, Order> removeWCGrayLabelOrders(Map<String, Order> orders) {
+    public Map<String, Order> removeWCGrayLabelOrders(Map<String, Order> orders, StringBuilder resultSummary) {
 
         Map<String, Order> filtered = new LinkedHashMap<>();
 
         orders.forEach((orderId, order) -> {
-            if (! OrderEnums.Status.WaitCancel.value().toLowerCase().equals(order.status.toLowerCase())) {
+            if (!OrderEnums.Status.WaitCancel.value().toLowerCase().equals(order.status.toLowerCase())) {
                 filtered.put(orderId, order);
             } else {
                 messagePanel.displayMsg("Row " + order.getRow() + " " + order.order_id + " ignored as it's marcked WC gray order. ",
-                        InformationLevel.Negative);
+                        LOGGER, InformationLevel.Negative);
             }
         });
+
+
+        if (orders.size() - filtered.size() > 0) {
+            resultSummary.append(String.format("%d WC, ", orders.size() - filtered.size()));
+        }
 
         return filtered;
     }
 
 
-    public Map<String, Order> removeNotUnshippedOrders(Map<String, Order> orders, Country country) {
+    public Map<String, Order> removeNotUnshippedOrders(Map<String, Order> orders, Country country, StringBuilder resultSummary) {
 
         List<String> amazonOrderIds = new ArrayList<>(orders.keySet());
 
@@ -103,6 +113,8 @@ public class ShipmentOrderFilter {
 
         Map<String, Order> filtered = new LinkedHashMap<>(orders);
 
+        List<Order> shipped = new ArrayList<>();
+        List<Order> canceled = new ArrayList<>();
         orders.forEach((orderId, order) -> {
             if (orderMap.containsKey(orderId)) {
                 com.amazonservices.mws.orders._2013_09_01.model.Order amzOrder = orderMap.get(orderId);
@@ -112,8 +124,14 @@ public class ShipmentOrderFilter {
 
                     messagePanel.displayMsg(
                             "Row " + order.getRow() + " " + order.order_id + " ignored. Order status is " + amzOrder.getOrderStatus(),
-                            InformationLevel.Negative
+                            LOGGER, InformationLevel.Negative
                     );
+
+                    if ("Shipped".equalsIgnoreCase(amzOrder.getOrderStatus())) {
+                        shipped.add(order);
+                    } else if ("Canceled".equalsIgnoreCase(amzOrder.getOrderStatus())) {
+                        canceled.add(order);
+                    }
                 } else {
                     filtered.get(orderId).setSales_chanel(amzOrder.getSalesChannel());
                 }
@@ -121,6 +139,14 @@ public class ShipmentOrderFilter {
 
             }
         });
+
+        if (shipped.size() > 0) {
+            resultSummary.append(String.format("%d shipped, ", shipped.size()));
+        }
+
+        if (canceled.size() > 0) {
+            resultSummary.append(String.format("%d canceled, ", canceled.size()));
+        }
 
         return filtered;
 

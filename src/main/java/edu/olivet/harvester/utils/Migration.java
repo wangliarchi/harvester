@@ -9,6 +9,8 @@ import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.utils.Directory;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +31,22 @@ import java.util.Map;
 public class Migration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Migration.class);
+
+    @Setter
+    @Getter
+    private static boolean useMigration = false;
+
+    public static boolean hasMigrationFile() {
+        String settingFilePath = Directory.Customize.path() + File.separator + "accounts.js";
+        File orderManConfigFile = new File(settingFilePath);
+        if (orderManConfigFile.exists()) {
+            return true;
+        }
+
+        orderManConfigFile = new File("C:\\OrderMan\\customize\\accounts.js");
+        return orderManConfigFile.exists();
+
+    }
 
     public static Settings loadSettings() {
 
@@ -113,9 +131,6 @@ public class Migration {
 
                 String selleridsString = sellerids.getString(country.name()).trim();
                 if (selleridsString.isEmpty()) {
-//                    if (country == Country.CA || country == Country.MX) {
-//                        selleridsString = sellerids.getString(Country.US.name()).trim();
-//                    }
                     //check seller email, if accounts share the same email, they should share same mws credential.
                     //seller email must be there
                     String currentSellerEmail = sellers.getJSONObject(country.name()).getString("email");
