@@ -33,7 +33,7 @@ public class ShipmentOrderFilter {
      * @param orders list of orders
      * @return orders fitlered orders
      */
-    public List<Order> filterOrders(List<Order> orders, Worksheet worksheet, StringBuilder resultSummary) {
+    public List<Order> filterOrders(List<Order> orders, Worksheet worksheet, StringBuilder resultSummary, StringBuilder resultDetail) {
 
 
         //if order purchased date is over maxDaysBack days, ignore???
@@ -48,13 +48,13 @@ public class ShipmentOrderFilter {
         });
 
         //remove duplicated orders. we only need unique AmazonOrderId here.
-        Map<String, Order> filteredOrders = removeDuplicatedOrders(orders, resultSummary);
+        Map<String, Order> filteredOrders = removeDuplicatedOrders(orders, resultSummary, resultDetail);
 
         //wc code gray label orders do not need to confirm
-        filteredOrders = removeWCGrayLabelOrders(filteredOrders, resultSummary);
+        filteredOrders = removeWCGrayLabelOrders(filteredOrders, resultSummary, resultDetail);
 
         //check order status via MWS, only unshipped orders need to be confirmed
-        filteredOrders = removeNotUnshippedOrders(filteredOrders, worksheet.getSpreadsheet().getSpreadsheetCountry(), resultSummary);
+        filteredOrders = removeNotUnshippedOrders(filteredOrders, worksheet.getSpreadsheet().getSpreadsheetCountry(), resultSummary, resultDetail);
 
         //return List
         List<Order> filteredList = new ArrayList<>();
@@ -68,7 +68,7 @@ public class ShipmentOrderFilter {
     /**
      * remove duplicated orders. we only need unique AmazonOrderId here.
      */
-    public Map<String, Order> removeDuplicatedOrders(List<Order> orders, StringBuilder resultSummary) {
+    public Map<String, Order> removeDuplicatedOrders(List<Order> orders, StringBuilder resultSummary, StringBuilder resultDetail) {
         Map<String, Order> filtered = new LinkedHashMap<>();
         List<String> duplicatedOrderIds = new ArrayList<>();
         for (Order order : orders) {
@@ -83,7 +83,8 @@ public class ShipmentOrderFilter {
         }
 
         if (!duplicatedOrderIds.isEmpty()) {
-            resultSummary.append(String.format("%d duplicated: ", duplicatedOrderIds.size())).append("\n")
+            resultSummary.append(duplicatedOrderIds.size()).append("duplicated; ");
+            resultDetail.append(String.format("%d duplicated: ", duplicatedOrderIds.size())).append("\n")
                     .append(StringUtils.join(duplicatedOrderIds, "\n")).append("\n\n");
         }
 
@@ -93,7 +94,7 @@ public class ShipmentOrderFilter {
     /**
      * wc code gray label orders do not need to confirm
      */
-    public Map<String, Order> removeWCGrayLabelOrders(Map<String, Order> orders, StringBuilder resultSummary) {
+    public Map<String, Order> removeWCGrayLabelOrders(Map<String, Order> orders, StringBuilder resultSummary, StringBuilder resultDetail) {
 
         Map<String, Order> filtered = new LinkedHashMap<>();
 
@@ -111,7 +112,8 @@ public class ShipmentOrderFilter {
 
 
         if (!grayWCOrderIds.isEmpty()) {
-            resultSummary.append(String.format("%d gray WC: ", grayWCOrderIds.size())).append("\n")
+            resultSummary.append(grayWCOrderIds.size()).append("gray WC; ");
+            resultDetail.append(String.format("%d gray WC: ", grayWCOrderIds.size())).append("\n")
                     .append(StringUtils.join(grayWCOrderIds, "\n")).append("\n\n");
         }
 
@@ -119,7 +121,7 @@ public class ShipmentOrderFilter {
     }
 
 
-    public Map<String, Order> removeNotUnshippedOrders(Map<String, Order> orders, Country country, StringBuilder resultSummary) {
+    public Map<String, Order> removeNotUnshippedOrders(Map<String, Order> orders, Country country, StringBuilder resultSummary, StringBuilder resultDetail) {
 
         List<String> amazonOrderIds = new ArrayList<>(orders.keySet());
 
@@ -169,12 +171,14 @@ public class ShipmentOrderFilter {
         });
 
         if (!shipped.isEmpty()) {
-            resultSummary.append(String.format("%d shipped: ", shipped.size())).append("\n")
+            resultSummary.append(shipped.size()).append("shipped; ");
+            resultDetail.append(String.format("%d shipped: ", shipped.size())).append("\n")
                     .append(StringUtils.join(shipped.stream().map(it -> it.order_id).collect(Collectors.toSet()), "\n")).append("\n\n");
         }
 
         if (!canceled.isEmpty()) {
-            resultSummary.append(String.format("%d canceled: ", canceled.size())).append("\n")
+            resultSummary.append(canceled.size()).append("canceled; ");
+            resultDetail.append(String.format("%d canceled: ", canceled.size())).append("\n")
                     .append(StringUtils.join(canceled.stream().map(it -> it.order_id).collect(Collectors.toSet()), "\n")).append("\n\n");
         }
 

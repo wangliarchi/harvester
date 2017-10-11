@@ -95,6 +95,9 @@ public class ConfirmShipments {
     @Getter
     private StringBuilder resultSummary = new StringBuilder();
 
+    @Getter
+    private StringBuilder resultDetail = new StringBuilder();
+
     /**
      * confirm shipments by worksheet. Errors handled by each confirmShipmentForWorksheet call separately.
      */
@@ -107,6 +110,9 @@ public class ConfirmShipments {
                 LOGGER.info("Confirm shipments for spreadsheet {} in {}.", worksheet.toString(), Strings.formatElapsedTime(start));
             } catch (Exception e) {
                 LOGGER.info("Error confirming shipments for spreadsheet {} . {}", worksheet.toString(), e.getMessage());
+
+                confirmShipmentEmailSender.sendErrorFoundEmail("Error confirming shipments for spreadsheet"+ worksheet.toString(),
+                        e.getMessage(), worksheet.getSpreadsheet().getSpreadsheetCountry());
             }
 
         }
@@ -154,6 +160,7 @@ public class ConfirmShipments {
             return;
         }
 
+
         messagePanel.addMsgSeparator();
         messagePanel.displayMsg(
                 String.format("Starting confirming shipments for worksheet %s at %s", worksheet.toString(), Dates.now()), LOGGER);
@@ -163,7 +170,11 @@ public class ConfirmShipments {
 
 
         messagePanel.displayMsg(orders.size() + "  order(s) found on the worksheet. ");
-        resultSummary.append("Total ").append(orders.size()).append(" orders found.").append("\n");
+
+        resultSummary = new StringBuilder();
+        resultDetail = new StringBuilder();
+        resultSummary.append("Total ").append(orders.size()).append("; ");
+        resultDetail.append("Total ").append(orders.size()).append(" orders found.").append("\n");
 
 
         if (orders.isEmpty()) {
@@ -174,7 +185,7 @@ public class ConfirmShipments {
         orderFinderEmail = getOrderFinderEmail(orders);
 
         //filter orders
-        orders = shipmentOrderFilter.filterOrders(orders, worksheet, resultSummary);
+        orders = shipmentOrderFilter.filterOrders(orders, worksheet, resultSummary, resultDetail);
 
         if (orders.isEmpty()) {
             messagePanel.displayMsg("No  orders need to be confirmed for sheet " + worksheet.toString(), LOGGER, InformationLevel.Positive);
@@ -189,8 +200,8 @@ public class ConfirmShipments {
         }
 
         messagePanel.displayMsg(orders.size() + "  order(s) found to be confirmed. ", InformationLevel.Important);
-        resultSummary.append(orders.size()).append(" submitted.").append("\n");
-
+        resultDetail.append(orders.size()).append(" submitted.").append("\n");
+        resultSummary.append(orders.size()).append(" submitted. ");
         //create feed file
         File feedFile;
         try {
@@ -215,9 +226,9 @@ public class ConfirmShipments {
             result = submitFeed(feedFile, worksheet, country);
 
             //write log to worksheet
-            writeLogToWorksheet(worksheet, result);
+            writeLogToWorksheet(worksheet, result, resultSummary.toString() );
 
-            result = resultSummary.toString() + "\n" + result;
+            result = resultDetail.toString() + "\n" + result;
 
             insertToLocalDbLog(feedFile, country, result);
 
@@ -272,10 +283,10 @@ public class ConfirmShipments {
         return null;
     }
 
-    public void writeLogToWorksheet(Worksheet worksheet, String result) {
+    public void writeLogToWorksheet(Worksheet worksheet, String result, String summary) {
         int[] counts = ServiceUtils.parseFeedSubmissionResult(result);
 
-        String log = String.format("auto-confirmed; Total %s, Succeed %s, Failed %s", counts[0], counts[1], counts[2]);
+        String log = String.format("auto-confirmed; %s. Total %s, Succeed %s, Failed %s",summary, counts[0], counts[1], counts[2]);
         String now = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(System.currentTimeMillis());
         while (true) {
             try {
