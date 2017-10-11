@@ -3,7 +3,9 @@ package edu.olivet.harvester.spreadsheet;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.harvester.model.OrderEnums;
+import edu.olivet.harvester.utils.Settings;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -39,7 +41,6 @@ public class Spreadsheet {
     @Getter
     private List<String> sheetNames;
 
-    @Getter
     @Setter
     private Country spreadsheetCountry;
 
@@ -55,7 +56,18 @@ public class Spreadsheet {
         filteredSheetNames.removeIf(p -> Arrays.asList(notValidOrderSheets).contains(p.toLowerCase()));
 
         return filteredSheetNames;
+    }
 
+    public Country getSpreadsheetCountry() {
+        if (spreadsheetCountry == null) {
+            try {
+                setSpreadsheetCountry(Settings.load().getSpreadsheetCountry(spreadsheetId));
+            } catch (BusinessException e) {
+                throw new BusinessException("Cant load country information for spreadsheet " + spreadsheetId);
+            }
+        }
+
+        return spreadsheetCountry;
     }
 
 

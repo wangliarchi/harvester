@@ -233,7 +233,7 @@ public class SettingsDialog extends BaseDialog {
         List<String> errors = settingValidator.validate(configs);
         if (!CollectionUtils.isEmpty(errors) && errors.size() > 0) {
             StringBuilder sb = new StringBuilder("\n");
-            errors.forEach(error -> sb.append(error + "\n\n"));
+            errors.forEach(error -> sb.append(error).append("\n\n"));
             UITools.error(sb.toString(), "Error");
             return;
         }
@@ -242,6 +242,8 @@ public class SettingsDialog extends BaseDialog {
         this.settings = new Settings(sid, configs);
         File file = new File(Harvester.CONFIG_FILE_PATH);
         Tools.writeStringToFile(file, JSON.toJSONString(this.settings, true));
+        //clear cache
+
 
         //UITools.info(String.format("Congratulations! Harvester configuration successfully saved into%n%s", file.getAbsolutePath()));
         UITools.info("Configuration has been saved successfully.");
