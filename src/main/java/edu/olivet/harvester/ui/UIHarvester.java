@@ -140,9 +140,12 @@ public class UIHarvester extends AbstractApplicationUI {
             try {
                 List<FeedSubmissionInfo> submissionInfo = confirmShipments.getUnprocessedFeedSubmission(selectedWorksheets.get(0).getSpreadsheet().getSpreadsheetCountry());
 
+
                 if (submissionInfo.size() > 0) {
+                    StringBuilder submissions = new StringBuilder();
+                    submissionInfo.forEach(it -> submissions.append(String.format("FeedSubmissionId %s submitted at %s, current status %s \n", it.getFeedSubmissionId(),it.getSubmittedDate(),it.getFeedProcessingStatus())));
                     String msg = String.format("Unprocessed/processing order confirmation feed(s) found.  \n\n %s \n\n" +
-                            " Are you sure to submit again?", submissionInfo.toString());
+                            " Are you sure to submit again?", submissions.toString());
                     if (!UITools.confirmed(msg)) {
                         return;
                     }

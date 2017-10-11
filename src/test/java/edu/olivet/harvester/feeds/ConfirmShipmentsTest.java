@@ -65,6 +65,21 @@ public class ConfirmShipmentsTest extends BaseTest {
 
 
     @Test
+    public void testGetOrdersFromWorksheetIT() throws Exception {
+
+
+        Worksheet worksheet = new Worksheet(spreadsheet, "09/22");
+
+        List<Order> orders = confirmShipments.getOrdersFromWorksheet(worksheet);
+
+
+        assertEquals(orders.get(0).sku, "JiuXMZLCustextbkAug22-2017-C726348");
+        assertEquals(orders.get(7).status, "n");
+
+
+    }
+
+    @Test
     public void testGetLastOrderRow() {
         Worksheet worksheet = new Worksheet(spreadsheet, "09/22");
 
@@ -162,6 +177,13 @@ public class ConfirmShipmentsTest extends BaseTest {
         confirmShipments.setConfirmShipmentEmailSender(confirmShipmentEmailSender);
         confirmShipments.setMwsOrderClient(orderClient);
         confirmShipments.notConfirmedOrderNotification();
+    }
+
+    @Test
+    public void testGetOrderFinderEmail() {
+        Worksheet worksheet = new Worksheet(spreadsheet, "09/22");
+        List<Order> orders = confirmShipments.getOrdersFromWorksheet(worksheet);
+        assertEquals(confirmShipments.getOrderFinderEmail(orders),"johnnyxiang2017@gmail.com");
     }
 
 }

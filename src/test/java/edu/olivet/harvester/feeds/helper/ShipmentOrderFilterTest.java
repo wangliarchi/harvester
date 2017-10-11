@@ -46,7 +46,7 @@ public class ShipmentOrderFilterTest extends BaseTest {
     }
 
     @Test
-    public void testRemoveDulicatedOrders() {
+    public void testRemoveDuplicatedOrders() {
         String spreadsheetId = "1IMbmaLUjqvZ7w8OdPd59fpTuad8U__5PAyKg3yR0DjY";
         Spreadsheet spreadsheet = appScript.reloadSpreadsheet(spreadsheetId);
         Worksheet worksheet = new Worksheet(spreadsheet, "08/31");

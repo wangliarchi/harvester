@@ -24,7 +24,7 @@ public class SettingValidator {
     }
 
     public @Nullable List<String> validate(List<Settings.Configuration> configs) {
-        List<String> errors = new ArrayList();
+        List<String> errors = new ArrayList<>();
 
         errors.addAll(spreadsheetIdNeedToBeUnique(configs));
 
@@ -40,7 +40,7 @@ public class SettingValidator {
 
     public List<String> validateSpreadsheetIds(Settings.Configuration config) {
 
-        List<String> errors = new ArrayList();
+        List<String> errors = new ArrayList<>();
         Country country = config.getCountry();
 
         if (StringUtils.isNotEmpty(config.getBookDataSourceUrl())) {
@@ -68,7 +68,7 @@ public class SettingValidator {
     }
 
     public List<String> spreadsheetIdNeedToBeUnique(List<Settings.Configuration> configs) {
-        List<String> errors = new ArrayList();
+        List<String> errors = new ArrayList<>();
 
 
         Map<String, ArrayList<String>> spreadsheetIds = new HashMap<>();
@@ -106,7 +106,7 @@ public class SettingValidator {
 
     public List<String> spreadsheetCountryAndTitleShouldMatch(Settings.Configuration config) {
 
-        List<String> errors = new ArrayList();
+        List<String> errors = new ArrayList<>();
         Country country = config.getCountry();
 
         List<String> spreadsheetIds =
@@ -138,7 +138,7 @@ public class SettingValidator {
 
     public List<String> spreadsheetTypeAndTitleShouldMatch(Settings.Configuration config) {
 
-        List<String> errors = new ArrayList();
+        List<String> errors = new ArrayList<>();
         Country country = config.getCountry();
 
         if (StringUtils.isNotEmpty(config.getBookDataSourceUrl())) {

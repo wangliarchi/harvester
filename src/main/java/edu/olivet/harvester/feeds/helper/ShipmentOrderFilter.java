@@ -11,10 +11,13 @@ import edu.olivet.harvester.service.mws.OrderClient;
 import edu.olivet.harvester.spreadsheet.Worksheet;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ShipmentOrderFilter {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShipmentOrderFilter.class);
@@ -31,6 +34,19 @@ public class ShipmentOrderFilter {
      * @return orders fitlered orders
      */
     public List<Order> filterOrders(List<Order> orders, Worksheet worksheet, StringBuilder resultSummary) {
+
+
+        //if order purchased date is over maxDaysBack days, ignore???
+        Date minDate = DateUtils.addDays(new Date(), -30);
+        orders.removeIf(it -> {
+            try {
+                return it.getPurchaseDate().before(minDate);
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage());
+            }
+            return false;
+        });
+
         //remove duplicated orders. we only need unique AmazonOrderId here.
         Map<String, Order> filteredOrders = removeDuplicatedOrders(orders, resultSummary);
 
@@ -54,20 +70,21 @@ public class ShipmentOrderFilter {
      */
     public Map<String, Order> removeDuplicatedOrders(List<Order> orders, StringBuilder resultSummary) {
         Map<String, Order> filtered = new LinkedHashMap<>();
-
+        List<String> duplicatedOrderIds = new ArrayList<>();
         for (Order order : orders) {
             if (!filtered.containsKey(order.order_id)) {
                 filtered.put(order.order_id, order);
             } else {
-
                 messagePanel.displayMsg(
                         "Row " + order.getRow() + " " + order.order_id + " ignored since each order id only need to be confirmed once. ",
                         LOGGER, InformationLevel.Negative);
+                duplicatedOrderIds.add(order.order_id);
             }
         }
 
-        if (orders.size() - filtered.size() > 0) {
-            resultSummary.append(String.format("%d duplicated, ", orders.size() - filtered.size()));
+        if (!duplicatedOrderIds.isEmpty()) {
+            resultSummary.append(String.format("%d duplicated: ", duplicatedOrderIds.size())).append("\n")
+                    .append(StringUtils.join(duplicatedOrderIds, "\n")).append("\n\n");
         }
 
         return filtered;
@@ -80,18 +97,22 @@ public class ShipmentOrderFilter {
 
         Map<String, Order> filtered = new LinkedHashMap<>();
 
+        List<String> grayWCOrderIds = new ArrayList<>();
+
         orders.forEach((orderId, order) -> {
             if (!OrderEnums.Status.WaitCancel.value().toLowerCase().equals(order.status.toLowerCase())) {
                 filtered.put(orderId, order);
             } else {
                 messagePanel.displayMsg("Row " + order.getRow() + " " + order.order_id + " ignored as it's marcked WC gray order. ",
                         LOGGER, InformationLevel.Negative);
+                grayWCOrderIds.add(order.order_id);
             }
         });
 
 
-        if (orders.size() - filtered.size() > 0) {
-            resultSummary.append(String.format("%d WC, ", orders.size() - filtered.size()));
+        if (!grayWCOrderIds.isEmpty()) {
+            resultSummary.append(String.format("%d gray WC: ", grayWCOrderIds.size())).append("\n")
+                    .append(StringUtils.join(grayWCOrderIds, "\n")).append("\n\n");
         }
 
         return filtered;
@@ -103,7 +124,14 @@ public class ShipmentOrderFilter {
         List<String> amazonOrderIds = new ArrayList<>(orders.keySet());
 
         //todo: MWS API may not activated.
-        List<com.amazonservices.mws.orders._2013_09_01.model.Order> amazonOrders = mwsOrderClient.getOrders(country, amazonOrderIds);
+        List<com.amazonservices.mws.orders._2013_09_01.model.Order> amazonOrders;
+        try {
+            amazonOrders = mwsOrderClient.getOrders(country, amazonOrderIds);
+        } catch (Exception e) {
+            LOGGER.error("Error load order info via MWS for country {}, {}", country.name(), e.getMessage());
+            return orders;
+        }
+
 
         Map<String, com.amazonservices.mws.orders._2013_09_01.model.Order> orderMap = new HashMap<>();
         for (com.amazonservices.mws.orders._2013_09_01.model.Order order : amazonOrders) {
@@ -140,12 +168,14 @@ public class ShipmentOrderFilter {
             }
         });
 
-        if (shipped.size() > 0) {
-            resultSummary.append(String.format("%d shipped, ", shipped.size()));
+        if (!shipped.isEmpty()) {
+            resultSummary.append(String.format("%d shipped: ", shipped.size())).append("\n")
+                    .append(StringUtils.join(shipped.stream().map(it -> it.order_id).collect(Collectors.toSet()), "\n")).append("\n\n");
         }
 
-        if (canceled.size() > 0) {
-            resultSummary.append(String.format("%d canceled, ", canceled.size()));
+        if (!canceled.isEmpty()) {
+            resultSummary.append(String.format("%d canceled: ", canceled.size())).append("\n")
+                    .append(StringUtils.join(canceled.stream().map(it -> it.order_id).collect(Collectors.toSet()), "\n")).append("\n\n");
         }
 
         return filtered;

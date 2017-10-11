@@ -27,6 +27,8 @@ public class Harvester {
     public static void main(String[] args) {
         UITools.init(APP);
 
+        new AutoUpgradeJob().execute();
+
         if (!new File(CONFIG_FILE_PATH).exists()) {
 
             if (Migration.hasMigrationFile() && UITools.confirmed("OrderMan configuration is found. Do you want to migrate it to Harvester?")) {
@@ -44,7 +46,7 @@ public class Harvester {
 
         }
 
-        new AutoUpgradeJob().execute();
+
 
 
         UIHarvester uiHarvester = ApplicationContext.getBean(UIHarvester.class);
