@@ -153,11 +153,11 @@ public class Migration {
                     if (mwsCredentialParts.length == 7) {
                         secretKey = mwsCredentialParts[3].trim();
                     } else {
-                        secretKey =  mwsCredentialParts[4].trim()+ mwsCredentialParts[3].trim();
+                        secretKey = mwsCredentialParts[4].trim() + mwsCredentialParts[3].trim();
                     }
 
                     cfg.setMwsCredential(new MarketWebServiceIdentity(sellerId, accessKey, secretKey, country.marketPlaceId()));
-                    cfg.setStoreName(mwsCredentialParts[mwsCredentialParts.length-7+5].trim());
+                    cfg.setStoreName(mwsCredentialParts[mwsCredentialParts.length - 7 + 5].trim());
                 }
 
                 configs.add(cfg);

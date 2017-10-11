@@ -32,7 +32,7 @@ public class ConfirmShipmentEmailSender extends EmailService {
         }
 
         try {
-            this.sendMessage(subject, errorDescription,destination );
+            this.sendMessage(subject, errorDescription, destination);
         } catch (BusinessException e) {
             LOGGER.error("Failed to send shipment confirmation success email.{} - {}", subject, e.getMessage());
         }
@@ -51,7 +51,7 @@ public class ConfirmShipmentEmailSender extends EmailService {
         Settings.Configuration config = Settings.load().getConfigByCountry(country);
         Destination destination = new Destination().withCcAddresses(config.getSellerEmail().getEmail()).withToAddresses(receptions);
 
-        if(StringUtils.isNotEmpty(receptions)) {
+        if (StringUtils.isNotEmpty(receptions)) {
             destination.withToAddresses(receptions);
         }
 
@@ -82,6 +82,7 @@ public class ConfirmShipmentEmailSender extends EmailService {
         }
 
     }
+
     public void sendSuccessEmail(String result, File feedFile, Country country) {
 
         Settings.Configuration config = Settings.load().getConfigByCountry(country);
@@ -90,7 +91,7 @@ public class ConfirmShipmentEmailSender extends EmailService {
                 .withCcAddresses(Constants.RND_EMAIL);
 
 
-        sendSuccessEmail(result,feedFile,country,destination);
+        sendSuccessEmail(result, feedFile, country, destination);
     }
 
     public void sendSuccessEmail(String result, File feedFile, Country country, String receptions) {
@@ -101,12 +102,11 @@ public class ConfirmShipmentEmailSender extends EmailService {
                 .withCcAddresses(config.getSellerEmail().getEmail())
                 .withBccAddresses(Constants.RND_EMAIL);
 
-        if(StringUtils.isNotEmpty(receptions)) {
+        if (StringUtils.isNotEmpty(receptions)) {
             destination.withToAddresses(receptions);
         }
 
 
-
-        sendSuccessEmail(result,feedFile,country,destination);
+        sendSuccessEmail(result, feedFile, country, destination);
     }
 }
