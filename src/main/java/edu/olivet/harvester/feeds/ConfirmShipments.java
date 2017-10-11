@@ -173,7 +173,7 @@ public class ConfirmShipments {
 
         resultSummary = new StringBuilder();
         resultDetail = new StringBuilder();
-        resultSummary.append("Total ").append(orders.size()).append("; ");
+        resultSummary.append("Total ").append(orders.size()).append(" found; ");
         resultDetail.append("Total ").append(orders.size()).append(" orders found.").append("\n");
 
 
@@ -286,7 +286,7 @@ public class ConfirmShipments {
     public void writeLogToWorksheet(Worksheet worksheet, String result, String summary) {
         int[] counts = ServiceUtils.parseFeedSubmissionResult(result);
 
-        String log = String.format("auto-confirmed; %s. Total %s, Succeed %s, Failed %s",summary, counts[0], counts[1], counts[2]);
+        String log = String.format("auto-confirmed; %s. Process summary: Total submitted %s, Succeed %s, Failed %s",summary, counts[0], counts[1], counts[2]);
         String now = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(System.currentTimeMillis());
         while (true) {
             try {

@@ -53,11 +53,13 @@ public class ShipmentOrderFilterTest extends BaseTest {
 
         List<edu.olivet.harvester.model.Order> orders = appScript.getOrdersFromWorksheet(worksheet);
         StringBuilder resultSummary = new StringBuilder();
-        Map<String, edu.olivet.harvester.model.Order> filterd = shipmentOrderFilter.removeDuplicatedOrders(orders,resultSummary);
+        StringBuilder resultDetail = new StringBuilder();
+        Map<String, edu.olivet.harvester.model.Order> filterd = shipmentOrderFilter.removeDuplicatedOrders(orders,resultSummary, resultDetail);
 
         assertEquals(filterd.size(),10);
 
-        assertEquals(filterd.keySet(),new HashSet<>(Arrays.asList("112-9914696-8464248",
+        assertEquals(filterd.keySet(),new HashSet<>(Arrays.asList(
+                "112-9914696-8464248",
                 "114-6213194-8837063",
                 "114-6532260-0041852",
                 "111-3140015-6109021",
@@ -69,6 +71,7 @@ public class ShipmentOrderFilterTest extends BaseTest {
                 "114-6250525-1507456")));
 
         System.out.println(resultSummary);
+        System.out.println(resultDetail);
 
     }
 
@@ -81,20 +84,23 @@ public class ShipmentOrderFilterTest extends BaseTest {
         orders.put(order.order_id,order);
 
         StringBuilder resultSummary = new StringBuilder();
-        Map<String, edu.olivet.harvester.model.Order> filtered = shipmentOrderFilter.removeWCGrayLabelOrders(orders, resultSummary);
+        StringBuilder resultDetail = new StringBuilder();
+        Map<String, edu.olivet.harvester.model.Order> filtered = shipmentOrderFilter.removeWCGrayLabelOrders(orders, resultSummary,resultDetail);
 
         assertEquals(filtered.size(),0);
 
 
+        resultSummary = new StringBuilder();
+        resultDetail = new StringBuilder();
         order.status = "WC";
         orders.put(order.order_id,order);
 
-        filtered = shipmentOrderFilter.removeWCGrayLabelOrders(orders, resultSummary);
+        filtered = shipmentOrderFilter.removeWCGrayLabelOrders(orders, resultSummary,resultDetail);
 
         assertEquals(filtered.size(),0);
 
         System.out.println(resultSummary);
-
+        System.out.println(resultDetail);
     }
 
     @Test
@@ -108,12 +114,12 @@ public class ShipmentOrderFilterTest extends BaseTest {
 
 
         StringBuilder resultSummary = new StringBuilder();
-
-        Map<String, edu.olivet.harvester.model.Order> filtered = shipmentOrderFilter.removeNotUnshippedOrders(orders, Country.US, resultSummary);
+        StringBuilder resultDetail = new StringBuilder();
+        Map<String, edu.olivet.harvester.model.Order> filtered = shipmentOrderFilter.removeNotUnshippedOrders(orders, Country.US, resultSummary, resultDetail);
 
         assertEquals(filtered.size(),0);
 
         System.out.println(resultSummary);
-
+        System.out.println(resultDetail);
     }
 }

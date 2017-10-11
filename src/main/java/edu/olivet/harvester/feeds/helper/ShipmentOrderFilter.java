@@ -83,7 +83,7 @@ public class ShipmentOrderFilter {
         }
 
         if (!duplicatedOrderIds.isEmpty()) {
-            resultSummary.append(duplicatedOrderIds.size()).append("duplicated; ");
+            resultSummary.append(duplicatedOrderIds.size()).append(" duplicated; ");
             resultDetail.append(String.format("%d duplicated: ", duplicatedOrderIds.size())).append("\n")
                     .append(StringUtils.join(duplicatedOrderIds, "\n")).append("\n\n");
         }
@@ -112,7 +112,7 @@ public class ShipmentOrderFilter {
 
 
         if (!grayWCOrderIds.isEmpty()) {
-            resultSummary.append(grayWCOrderIds.size()).append("gray WC; ");
+            resultSummary.append(grayWCOrderIds.size()).append(" gray WC; ");
             resultDetail.append(String.format("%d gray WC: ", grayWCOrderIds.size())).append("\n")
                     .append(StringUtils.join(grayWCOrderIds, "\n")).append("\n\n");
         }
@@ -171,13 +171,13 @@ public class ShipmentOrderFilter {
         });
 
         if (!shipped.isEmpty()) {
-            resultSummary.append(shipped.size()).append("shipped; ");
+            resultSummary.append(shipped.size()).append(" shipped; ");
             resultDetail.append(String.format("%d shipped: ", shipped.size())).append("\n")
                     .append(StringUtils.join(shipped.stream().map(it -> it.order_id).collect(Collectors.toSet()), "\n")).append("\n\n");
         }
 
         if (!canceled.isEmpty()) {
-            resultSummary.append(canceled.size()).append("canceled; ");
+            resultSummary.append(canceled.size()).append(" canceled; ");
             resultDetail.append(String.format("%d canceled: ", canceled.size())).append("\n")
                     .append(StringUtils.join(canceled.stream().map(it -> it.order_id).collect(Collectors.toSet()), "\n")).append("\n\n");
         }

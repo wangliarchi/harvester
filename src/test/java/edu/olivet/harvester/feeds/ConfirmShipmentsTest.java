@@ -102,7 +102,7 @@ public class ConfirmShipmentsTest extends BaseTest {
 
         //write to test googlesheet
         confirmShipments.setLastOrderRowNo(confirmShipments.getLastOrderRow(orders));
-        confirmShipments.writeLogToWorksheet(worksheet, submissionResult);
+        confirmShipments.writeLogToWorksheet(worksheet, submissionResult,"Total 7; ");
     }
 
     @Test
