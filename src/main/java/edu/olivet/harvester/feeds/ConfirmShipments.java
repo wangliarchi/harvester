@@ -7,6 +7,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.FeedUploader;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.amazon.OrderFetcher;
+import edu.olivet.foundations.aop.Profile;
 import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.MessagePanel;
@@ -551,11 +552,15 @@ public class ConfirmShipments {
         shipmentOrderFilter.setMessagePanel(messagePanel);
     }
 
+    @Profile
+    public void test(){
+        LOGGER.info("profile log test");
+    }
     public static void main(String[] args) {
         UITools.setTheme();
 
-        ApplicationContext.getBean(ConfirmShipments.class).execute();
-
+        //ApplicationContext.getBean(ConfirmShipments.class).execute();
+        ApplicationContext.getBean(ConfirmShipments.class).test();
     }
 
 
