@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.MWSUtils;
 import edu.olivet.foundations.mock.MockDBModule;
+import edu.olivet.foundations.mock.MockDateModule;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.service.mws.OrderClient;
@@ -16,14 +17,19 @@ import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertEquals;
 
-@Guice(modules = {MockDBModule.class})
+@Guice(modules = {MockDBModule.class, MockDateModule.class})
 public class ShipmentOrderFilterTest extends BaseTest {
 
-    @Inject private ShipmentOrderFilter shipmentOrderFilter;
+    @Inject
+    private ShipmentOrderFilter shipmentOrderFilter;
 
     @BeforeClass
     public void init() {
@@ -42,7 +48,7 @@ public class ShipmentOrderFilterTest extends BaseTest {
 
         };
 
-        shipmentOrderFilter.setMwsOrderClient(orderClient);
+
     }
 
     @Test
@@ -54,11 +60,11 @@ public class ShipmentOrderFilterTest extends BaseTest {
         List<edu.olivet.harvester.model.Order> orders = appScript.getOrdersFromWorksheet(worksheet);
         StringBuilder resultSummary = new StringBuilder();
         StringBuilder resultDetail = new StringBuilder();
-        Map<String, edu.olivet.harvester.model.Order> filterd = shipmentOrderFilter.removeDuplicatedOrders(orders,resultSummary, resultDetail);
+        List<edu.olivet.harvester.model.Order> filterd = shipmentOrderFilter.removeDuplicatedOrders(orders, resultSummary, resultDetail);
 
-        assertEquals(filterd.size(),10);
+        assertEquals(filterd.size(), 10);
 
-        assertEquals(filterd.keySet(),new HashSet<>(Arrays.asList(
+        assertEquals(filterd.stream().map(it -> it.order_id).collect(Collectors.toSet()), new HashSet<>(Arrays.asList(
                 "112-9914696-8464248",
                 "114-6213194-8837063",
                 "114-6532260-0041852",
@@ -80,24 +86,24 @@ public class ShipmentOrderFilterTest extends BaseTest {
         edu.olivet.harvester.model.Order order = BaseTest.prepareOrder();
         order.status = "wc";
 
-        Map<String, edu.olivet.harvester.model.Order> orders = new HashMap<>();
-        orders.put(order.order_id,order);
+        List<edu.olivet.harvester.model.Order> orders = new ArrayList<>(2);
+        orders.add(order);
 
         StringBuilder resultSummary = new StringBuilder();
         StringBuilder resultDetail = new StringBuilder();
-        Map<String, edu.olivet.harvester.model.Order> filtered = shipmentOrderFilter.removeWCGrayLabelOrders(orders, resultSummary,resultDetail);
+        List<edu.olivet.harvester.model.Order> filtered = shipmentOrderFilter.removeWCGrayLabelOrders(orders, resultSummary, resultDetail);
 
-        assertEquals(filtered.size(),0);
+        assertEquals(filtered.size(), 0);
 
 
         resultSummary = new StringBuilder();
         resultDetail = new StringBuilder();
         order.status = "WC";
-        orders.put(order.order_id,order);
+        orders.add(order);
 
-        filtered = shipmentOrderFilter.removeWCGrayLabelOrders(orders, resultSummary,resultDetail);
+        filtered = shipmentOrderFilter.removeWCGrayLabelOrders(orders, resultSummary, resultDetail);
 
-        assertEquals(filtered.size(),0);
+        assertEquals(filtered.size(), 0);
 
         System.out.println(resultSummary);
         System.out.println(resultDetail);
@@ -105,19 +111,29 @@ public class ShipmentOrderFilterTest extends BaseTest {
 
     @Test
     public void testRemoveNotUnshippedOrders() {
+        List<edu.olivet.harvester.model.Order> orders = new ArrayList<>(3);
+
         edu.olivet.harvester.model.Order order = BaseTest.prepareOrder();
-
-        //canceled
         order.order_id = "113-3520286-4229806";
-        Map<String, edu.olivet.harvester.model.Order> orders = new HashMap<>();
-        orders.put(order.order_id,order);
+        order.setAmazonOrderStatus("Canceled");
+        orders.add(order);
 
+        edu.olivet.harvester.model.Order orderShipped = BaseTest.prepareOrder();
+        orderShipped.order_id = "113-3520286-4229802";
+        orderShipped.setAmazonOrderStatus("Shipped");
+        orders.add(orderShipped);
+
+
+        edu.olivet.harvester.model.Order orderUnshipped = BaseTest.prepareOrder();
+        orderUnshipped.order_id = "113-3520286-4229803";
+        orderUnshipped.setAmazonOrderStatus("Unshipped");
+        orders.add(orderUnshipped);
 
         StringBuilder resultSummary = new StringBuilder();
         StringBuilder resultDetail = new StringBuilder();
-        Map<String, edu.olivet.harvester.model.Order> filtered = shipmentOrderFilter.removeNotUnshippedOrders(orders, Country.US, resultSummary, resultDetail);
+        List<edu.olivet.harvester.model.Order> filtered = shipmentOrderFilter.removeNotUnshippedOrders(orders, Country.US, resultSummary, resultDetail);
 
-        assertEquals(filtered.size(),0);
+        assertEquals(filtered.size(), 1);
 
         System.out.println(resultSummary);
         System.out.println(resultDetail);

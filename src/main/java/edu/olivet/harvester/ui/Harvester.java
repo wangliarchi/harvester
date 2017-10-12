@@ -8,6 +8,7 @@ import edu.olivet.foundations.utils.Directory;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.utils.Migration;
 import edu.olivet.harvester.utils.SettingValidator;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.io.File;
 
@@ -27,7 +28,9 @@ public class Harvester {
     public static void main(String[] args) {
         UITools.init(APP);
 
-        new AutoUpgradeJob().execute();
+        if (SystemUtils.IS_OS_WINDOWS) {
+            new AutoUpgradeJob().execute();
+        }
 
         if (!new File(CONFIG_FILE_PATH).exists()) {
 
@@ -45,8 +48,6 @@ public class Harvester {
             }
 
         }
-
-
 
 
         UIHarvester uiHarvester = ApplicationContext.getBean(UIHarvester.class);

@@ -29,6 +29,7 @@ import edu.olivet.harvester.spreadsheet.Worksheet;
 import edu.olivet.harvester.spreadsheet.exceptions.NoOrdersFoundInWorksheetException;
 import edu.olivet.harvester.spreadsheet.exceptions.NoWorksheetFoundException;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
+import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.utils.ServiceUtils;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Getter;
@@ -46,6 +47,7 @@ import java.io.File;
 import java.text.DateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 
 @Singleton
@@ -84,6 +86,9 @@ public class ConfirmShipments {
     private ShipmentOrderFilter shipmentOrderFilter;
 
     @Inject
+    private SheetAPI sheetAPI;
+
+    @Inject
     private DBManager dbManager;
 
     @Setter
@@ -91,12 +96,6 @@ public class ConfirmShipments {
 
     private String orderFinderEmail;
 
-
-    @Getter
-    private StringBuilder resultSummary = new StringBuilder();
-
-    @Getter
-    private StringBuilder resultDetail = new StringBuilder();
 
     /**
      * confirm shipments by worksheet. Errors handled by each confirmShipmentForWorksheet call separately.
@@ -111,7 +110,7 @@ public class ConfirmShipments {
             } catch (Exception e) {
                 LOGGER.info("Error confirming shipments for spreadsheet {} . {}", worksheet.toString(), e.getMessage());
 
-                confirmShipmentEmailSender.sendErrorFoundEmail("Error confirming shipments for spreadsheet"+ worksheet.toString(),
+                confirmShipmentEmailSender.sendErrorFoundEmail("Error confirming shipments for spreadsheet" + worksheet.toString(),
                         e.getMessage(), worksheet.getSpreadsheet().getSpreadsheetCountry());
             }
 
@@ -146,6 +145,9 @@ public class ConfirmShipments {
 
     private void confirmShipmentForWorksheet(Worksheet worksheet) {
 
+        StringBuilder resultSummary = new StringBuilder();
+        StringBuilder resultDetail = new StringBuilder();
+
         Country country;
         try {
             country = worksheet.getSpreadsheet().getSpreadsheetCountry();
@@ -171,8 +173,7 @@ public class ConfirmShipments {
 
         messagePanel.displayMsg(orders.size() + "  order(s) found on the worksheet. ");
 
-        resultSummary = new StringBuilder();
-        resultDetail = new StringBuilder();
+
         resultSummary.append("Total ").append(orders.size()).append(" found; ");
         resultDetail.append("Total ").append(orders.size()).append(" orders found.").append("\n");
 
@@ -183,6 +184,22 @@ public class ConfirmShipments {
 
         lastOrderRowNo = getLastOrderRow(orders);
         orderFinderEmail = getOrderFinderEmail(orders);
+
+        mwsOrderClient.getAmazonOrderStatuses(orders, country);
+        List<Order> canceledOrders = new ArrayList<>();
+        orders.forEach(order -> {
+            if ("Canceled".equals(order.getAmazonOrderStatus())) {
+                canceledOrders.add(order);
+            }
+        });
+
+        if (CollectionUtils.isNotEmpty(canceledOrders)) {
+            try {
+                sheetAPI.markBuyerCancelOrders(canceledOrders, worksheet);
+            } catch (Exception e) {
+                LOGGER.error("Failed to mark canceled orders {} for {}", worksheet, canceledOrders.stream().map(it -> it.order_id).collect(Collectors.toList()), e);
+            }
+        }
 
         //filter orders
         orders = shipmentOrderFilter.filterOrders(orders, worksheet, resultSummary, resultDetail);
@@ -226,7 +243,7 @@ public class ConfirmShipments {
             result = submitFeed(feedFile, worksheet, country);
 
             //write log to worksheet
-            writeLogToWorksheet(worksheet, result, resultSummary.toString() );
+            writeLogToWorksheet(worksheet, result, resultSummary.toString());
 
             result = resultDetail.toString() + "\n" + result;
 
@@ -286,7 +303,7 @@ public class ConfirmShipments {
     public void writeLogToWorksheet(Worksheet worksheet, String result, String summary) {
         int[] counts = ServiceUtils.parseFeedSubmissionResult(result);
 
-        String log = String.format("auto-confirmed; %s. Process summary: Total submitted %s, Succeed %s, Failed %s",summary, counts[0], counts[1], counts[2]);
+        String log = String.format("auto-confirmed; %s. Process summary: Total submitted %s, Succeed %s, Failed %s", summary, counts[0], counts[1], counts[2]);
         String now = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(System.currentTimeMillis());
         while (true) {
             try {
@@ -337,12 +354,13 @@ public class ConfirmShipments {
         try {
             country = worksheet.getSpreadsheet().getSpreadsheetCountry();
         } catch (Exception e) {
-            LOGGER.error("Cant load country info for worksheet {}. {}", worksheet.toString(),e.getMessage());
-            throw  e;
+            LOGGER.error("Cant load country info for worksheet {}. {}", worksheet.toString(), e.getMessage());
+            throw e;
         }
 
-        return getOrdersFromWorksheet(worksheet,country);
+        return getOrdersFromWorksheet(worksheet, country);
     }
+
     /**
      * get orders from given worksheet. .
      */

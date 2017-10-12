@@ -8,6 +8,8 @@ import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.model.OrderEnums.OrderColor;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
@@ -225,6 +227,11 @@ public class Order implements Keyable {
                             StringUtils.join(PURCHASE_DATE_PATTERNS, " ")));
         }
     }
+
+
+    @Getter
+    @Setter
+    private String amazonOrderStatus;
 
     @Override
     public String getKey() {

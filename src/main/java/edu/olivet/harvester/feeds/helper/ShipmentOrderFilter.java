@@ -1,13 +1,11 @@
 package edu.olivet.harvester.feeds.helper;
 
-import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.MessagePanel;
 import edu.olivet.foundations.ui.VirtualMessagePanel;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
-import edu.olivet.harvester.service.mws.OrderClient;
 import edu.olivet.harvester.spreadsheet.Worksheet;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,13 +19,11 @@ import java.util.stream.Collectors;
 
 public class ShipmentOrderFilter {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShipmentOrderFilter.class);
-    @Inject
-    @Setter
-    private OrderClient mwsOrderClient;
 
     @Setter
     @Getter
     private MessagePanel messagePanel = new VirtualMessagePanel();
+
 
     /**
      * @param orders list of orders
@@ -48,7 +44,7 @@ public class ShipmentOrderFilter {
         });
 
         //remove duplicated orders. we only need unique AmazonOrderId here.
-        Map<String, Order> filteredOrders = removeDuplicatedOrders(orders, resultSummary, resultDetail);
+        List<Order> filteredOrders = removeDuplicatedOrders(orders, resultSummary, resultDetail);
 
         //wc code gray label orders do not need to confirm
         filteredOrders = removeWCGrayLabelOrders(filteredOrders, resultSummary, resultDetail);
@@ -57,18 +53,15 @@ public class ShipmentOrderFilter {
         filteredOrders = removeNotUnshippedOrders(filteredOrders, worksheet.getSpreadsheet().getSpreadsheetCountry(), resultSummary, resultDetail);
 
         //return List
-        List<Order> filteredList = new ArrayList<>();
-        filteredOrders.forEach((orderId, order) -> filteredList.add(order));
+        filteredOrders.sort(Comparator.comparing(Order::getRow));
 
-        filteredList.sort(Comparator.comparing(Order::getRow));
-
-        return filteredList;
+        return filteredOrders;
     }
 
     /**
      * remove duplicated orders. we only need unique AmazonOrderId here.
      */
-    public Map<String, Order> removeDuplicatedOrders(List<Order> orders, StringBuilder resultSummary, StringBuilder resultDetail) {
+    public List<Order> removeDuplicatedOrders(List<Order> orders, StringBuilder resultSummary, StringBuilder resultDetail) {
         Map<String, Order> filtered = new LinkedHashMap<>();
         List<String> duplicatedOrderIds = new ArrayList<>();
         for (Order order : orders) {
@@ -88,21 +81,21 @@ public class ShipmentOrderFilter {
                     .append(StringUtils.join(duplicatedOrderIds, "\n")).append("\n\n");
         }
 
-        return filtered;
+        return filtered.values().stream().collect(Collectors.toList());
     }
 
     /**
      * wc code gray label orders do not need to confirm
      */
-    public Map<String, Order> removeWCGrayLabelOrders(Map<String, Order> orders, StringBuilder resultSummary, StringBuilder resultDetail) {
+    public List<Order> removeWCGrayLabelOrders(List<Order> orders, StringBuilder resultSummary, StringBuilder resultDetail) {
 
-        Map<String, Order> filtered = new LinkedHashMap<>();
+        List<Order> filtered = new ArrayList<>();
 
         List<String> grayWCOrderIds = new ArrayList<>();
 
-        orders.forEach((orderId, order) -> {
+        orders.forEach(order -> {
             if (!OrderEnums.Status.WaitCancel.value().toLowerCase().equals(order.status.toLowerCase())) {
-                filtered.put(orderId, order);
+                filtered.add(order);
             } else {
                 messagePanel.displayMsg("Row " + order.getRow() + " " + order.order_id + " ignored as it's marcked WC gray order. ",
                         LOGGER, InformationLevel.Negative);
@@ -121,53 +114,30 @@ public class ShipmentOrderFilter {
     }
 
 
-    public Map<String, Order> removeNotUnshippedOrders(Map<String, Order> orders, Country country, StringBuilder resultSummary, StringBuilder resultDetail) {
+    public List<Order> removeNotUnshippedOrders(List<Order> orders, Country country, StringBuilder resultSummary, StringBuilder resultDetail) {
 
-        List<String> amazonOrderIds = new ArrayList<>(orders.keySet());
-
-        //todo: MWS API may not activated.
-        List<com.amazonservices.mws.orders._2013_09_01.model.Order> amazonOrders;
-        try {
-            amazonOrders = mwsOrderClient.getOrders(country, amazonOrderIds);
-        } catch (Exception e) {
-            LOGGER.error("Error load order info via MWS for country {}, {}", country.name(), e.getMessage());
-            return orders;
-        }
-
-
-        Map<String, com.amazonservices.mws.orders._2013_09_01.model.Order> orderMap = new HashMap<>();
-        for (com.amazonservices.mws.orders._2013_09_01.model.Order order : amazonOrders) {
-            orderMap.put(order.getAmazonOrderId(), order);
-        }
-
-
-        Map<String, Order> filtered = new LinkedHashMap<>(orders);
-
+        List<Order> filtered = new ArrayList<>();
         List<Order> shipped = new ArrayList<>();
         List<Order> canceled = new ArrayList<>();
-        orders.forEach((orderId, order) -> {
-            if (orderMap.containsKey(orderId)) {
-                com.amazonservices.mws.orders._2013_09_01.model.Order amzOrder = orderMap.get(orderId);
 
-                if (!"Unshipped".equals(amzOrder.getOrderStatus()) && !"PartiallyShipped".equals(amzOrder.getOrderStatus())) {
-                    filtered.remove(orderId);
+        orders.forEach(order -> {
+            if (StringUtils.isNotEmpty(order.getAmazonOrderStatus()) &&
+                    !"Unshipped".equals(order.getAmazonOrderStatus()) && !"PartiallyShipped".equals(order.getAmazonOrderStatus())) {
+                messagePanel.displayMsg(
+                        "Row " + order.getRow() + " " + order.order_id + " ignored. Order status is " + order.getAmazonOrderStatus(),
+                        LOGGER, InformationLevel.Negative
+                );
 
-                    messagePanel.displayMsg(
-                            "Row " + order.getRow() + " " + order.order_id + " ignored. Order status is " + amzOrder.getOrderStatus(),
-                            LOGGER, InformationLevel.Negative
-                    );
-
-                    if ("Shipped".equalsIgnoreCase(amzOrder.getOrderStatus())) {
-                        shipped.add(order);
-                    } else if ("Canceled".equalsIgnoreCase(amzOrder.getOrderStatus())) {
-                        canceled.add(order);
-                    }
-                } else {
-                    filtered.get(orderId).setSales_chanel(amzOrder.getSalesChannel());
+                if ("Shipped".equalsIgnoreCase(order.getAmazonOrderStatus())) {
+                    shipped.add(order);
+                } else if ("Canceled".equalsIgnoreCase(order.getAmazonOrderStatus())) {
+                    canceled.add(order);
                 }
-
-
+            } else {
+                filtered.add(order);
             }
+
+
         });
 
         if (!shipped.isEmpty()) {
@@ -183,7 +153,7 @@ public class ShipmentOrderFilter {
         }
 
         return filtered;
-
-
     }
+
+
 }

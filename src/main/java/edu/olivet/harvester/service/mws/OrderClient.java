@@ -11,9 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Singleton
 public class OrderClient {
@@ -39,12 +38,40 @@ public class OrderClient {
 
     }
 
-    public List<Order> listOrders(Country country, @Nullable Map<OrderFetcher.DateRangeType,Date> dateMap, String... statuses) {
+    public List<Order> listOrders(Country country, @Nullable Map<OrderFetcher.DateRangeType, Date> dateMap, String... statuses) {
         MarketWebServiceIdentity credential = Settings.load().getConfigByCountry(country).getMwsCredential();
 
-        return orderFetcher.readOrders(dateMap, credential,statuses);
+        return orderFetcher.readOrders(dateMap, credential, statuses);
     }
 
+
+    public void getAmazonOrderStatuses(List<edu.olivet.harvester.model.Order> orders, Country country) {
+
+        List<String> amazonOrderIds = orders.stream().map(it -> it.order_id).collect(Collectors.toList());
+
+        List<com.amazonservices.mws.orders._2013_09_01.model.Order> amazonOrders;
+        try {
+            amazonOrders = getOrders(country, amazonOrderIds);
+        } catch (Exception e) {
+            LOGGER.error("Error load order info via MWS for country {}, {}", country.name(), e.getMessage());
+            return;
+        }
+
+
+        Map<String, com.amazonservices.mws.orders._2013_09_01.model.Order> orderMap = new HashMap<>();
+        for (com.amazonservices.mws.orders._2013_09_01.model.Order order : amazonOrders) {
+            orderMap.put(order.getAmazonOrderId(), order);
+        }
+
+        List<edu.olivet.harvester.model.Order> shippedCanceledOrders = new ArrayList<>();
+        orders.forEach(order -> {
+            if (orderMap.containsKey(order.order_id)) {
+                com.amazonservices.mws.orders._2013_09_01.model.Order amzOrder = orderMap.get(order.order_id);
+                order.setAmazonOrderStatus(amzOrder.getOrderStatus());
+                order.setSales_chanel(amzOrder.getSalesChannel());
+            }
+        });
+    }
 
 
 }
