@@ -53,7 +53,7 @@ public class OrderClient {
         try {
             amazonOrders = getOrders(country, amazonOrderIds);
         } catch (Exception e) {
-            LOGGER.error("Error load order info via MWS for country {}, {}", country.name(), e.getMessage());
+            LOGGER.error("Error load order info via MWS for country {}, {}", country.name(), e);
             return;
         }
 

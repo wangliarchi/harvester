@@ -67,7 +67,7 @@ public class FeedSubmissionFetcher extends FeedUploader {
                 }
 
                 times++;
-                LOGGER.warn("GetFeedSubmissionList 无执行结果, 尝试第{}次等待{}分钟: {}", country.label(), times, waitTime, e.getMessage());
+                LOGGER.warn("GetFeedSubmissionList 无执行结果, 尝试第{}次等待{}分钟: {}", country.label(), times, waitTime, e);
                 Tools.sleep(waitTime, TimeUnit.MINUTES);
             }
         }

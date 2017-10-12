@@ -95,7 +95,7 @@ public class ConfirmShipments {
     @Setter
     private int lastOrderRowNo = 3;
 
-    private String orderFinderEmail;
+    //private String orderFinderEmail;
 
 
     /**
@@ -109,7 +109,7 @@ public class ConfirmShipments {
                 confirmShipmentForWorksheet(worksheet);
                 LOGGER.info("Confirm shipments for spreadsheet {} in {}.", worksheet.toString(), Strings.formatElapsedTime(start));
             } catch (Exception e) {
-                LOGGER.info("Error confirming shipments for spreadsheet {} . {}", worksheet.toString(), e.getMessage());
+                LOGGER.info("Error confirming shipments for spreadsheet {} . ", worksheet.toString(), e);
 
                 confirmShipmentEmailSender.sendErrorFoundEmail("Error confirming shipments for spreadsheet" + worksheet.toString(),
                         e.getMessage(), worksheet.getSpreadsheet().getSpreadsheetCountry());
@@ -128,7 +128,7 @@ public class ConfirmShipments {
         try {
             workingSpreadsheet = appScript.getSpreadsheet(spreadsheetId);
         } catch (Exception e) {
-            LOGGER.error("No google spread sheet found for id {}. {}", spreadsheetId, e.getMessage());
+            LOGGER.error("No google spread sheet found for id {}. {}", spreadsheetId, e);
             throw new BusinessException(
                     String.format(
                             "No google spreadsheet found for %s. Please make sure the correct order update google sheet id is entered.",
@@ -184,7 +184,7 @@ public class ConfirmShipments {
         }
 
         lastOrderRowNo = getLastOrderRow(orders);
-        orderFinderEmail = getOrderFinderEmail(orders);
+        //orderFinderEmail = getOrderFinderEmail(orders);
 
         mwsOrderClient.getAmazonOrderStatuses(orders, country);
         List<Order> canceledOrders = new ArrayList<>();
@@ -210,8 +210,7 @@ public class ConfirmShipments {
 
             if (messagePanel instanceof VirtualMessagePanel) {
                 String subject = String.format("No  orders need to be confirmed for sheet %s", worksheet.toString());
-                confirmShipmentEmailSender.sendErrorFoundEmail(subject,
-                        subject, country, orderFinderEmail);
+                confirmShipmentEmailSender.sendErrorFoundEmail(subject,subject, country);
             }
 
             return;
@@ -227,11 +226,12 @@ public class ConfirmShipments {
             messagePanel.wrapLineMsg("Feed file generated at " + feedFile.getAbsolutePath(), InformationLevel.Important);
             messagePanel.wrapLineMsg(Tools.readFileToString(feedFile));
         } catch (Exception e) {
-            messagePanel.displayMsg("Error when generating feed file. " + e.getMessage(), LOGGER, InformationLevel.Negative);
+            messagePanel.displayMsg("Error when generating feed file. " + e.getMessage(), InformationLevel.Negative);
+            LOGGER.error("Error when generating feed file. " + e);
             if (messagePanel instanceof VirtualMessagePanel) {
                 String subject = String.format("Error when generating feed file for sheet %s", worksheet.toString());
                 confirmShipmentEmailSender.sendErrorFoundEmail(subject,
-                        "Error when generating feed file. " + e.getMessage(), country, orderFinderEmail);
+                        "Error when generating feed file. " + e.getMessage(), country);
             }
 
             return;
@@ -251,19 +251,20 @@ public class ConfirmShipments {
             insertToLocalDbLog(feedFile, country, result);
 
             //send email
-            confirmShipmentEmailSender.sendSuccessEmail(result, feedFile, country, orderFinderEmail);
+            confirmShipmentEmailSender.sendSuccessEmail(result, feedFile, country);
         } catch (Exception e) {
 
             errorAlertService.sendMessage("Error when submitting order confirmation feed file via MWS.",
                     e.getMessage(), country, feedFile);
 
-            messagePanel.displayMsg("Error when submitting feed file. " + e.getMessage(), LOGGER, InformationLevel.Negative);
+            messagePanel.displayMsg("Error when submitting feed file. " + e.getMessage(), InformationLevel.Negative);
+            LOGGER.error("Error when submitting feed file. ",  e);
+
             messagePanel.displayMsg("Please try to submit the feed file via Amazon Seller Center.");
             if (messagePanel instanceof VirtualMessagePanel) {
                 String subject = String.format("Error when submitting file for sheet %s, feed file %s", worksheet.toString(), feedFile.getName());
                 confirmShipmentEmailSender.sendErrorFoundEmail(subject,
-                        "Error when submitting feed file. " + e.getMessage(),
-                        country, orderFinderEmail);
+                        "Error when submitting feed file. " + e.getMessage(), country);
             }
 
 
@@ -316,7 +317,7 @@ public class ConfirmShipments {
                     LOGGER.warn("Row {} is not blank, try to add to next row.", lastOrderRowNo);
                     lastOrderRowNo++;
                 } else {
-                    LOGGER.error(e.getMessage());
+                    LOGGER.error("",e);
                     break;
                 }
 
@@ -355,7 +356,7 @@ public class ConfirmShipments {
         try {
             country = worksheet.getSpreadsheet().getSpreadsheetCountry();
         } catch (Exception e) {
-            LOGGER.error("Cant load country info for worksheet {}. {}", worksheet.toString(), e.getMessage());
+            LOGGER.error("Cant load country info for worksheet {}. {}", worksheet.toString(), e);
             throw e;
         }
 
@@ -373,39 +374,38 @@ public class ConfirmShipments {
             orders = appScript.getOrdersFromWorksheet(worksheet);
         } catch (NoWorksheetFoundException e) {
 
-            LOGGER.error("No worksheet {} found. {}", worksheet.toString(), e.getMessage());
+            LOGGER.error("No worksheet {} found. {}", worksheet.toString(), e);
 
             messagePanel.displayMsg(String.format("No worksheet %s found", worksheet.toString()), InformationLevel.Negative);
 
             if (messagePanel instanceof VirtualMessagePanel) {
                 String subject = String.format("No worksheet %s found.", worksheet.toString());
                 confirmShipmentEmailSender.sendErrorFoundEmail(subject,
-                        "Please check if orders have been exported correctly", country, orderFinderEmail);
+                        "Please check if orders have been exported correctly", country);
             }
 
 
         } catch (NoOrdersFoundInWorksheetException e) {
             messagePanel.displayMsg("No order data found on worksheet " + worksheet.toString(),
                     InformationLevel.Negative);
-            LOGGER.error("No order data found on worksheet {}. {}", worksheet.toString(), e.getMessage());
+            LOGGER.error("No order data found on worksheet {}. {}", worksheet.toString(), e);
 
             if (messagePanel instanceof VirtualMessagePanel) {
                 String subject = String.format("No order data found on worksheet %s ", worksheet.toString());
                 confirmShipmentEmailSender.sendErrorFoundEmail(subject,
-                        "Please check if orders have been exported correctly", country, orderFinderEmail);
+                        "Please check if orders have been exported correctly", country);
             }
 
 
         } catch (BusinessException e) {
             messagePanel.displayMsg("Failed to read order data from " + worksheet.toString() + ". Please try again later.",
                     InformationLevel.Negative);
-            LOGGER.error("Failed to read order data {} - {}", worksheet.toString(), e.getMessage());
+            LOGGER.error("Failed to read order data {} - {}", worksheet.toString(), e);
 
             if (messagePanel instanceof VirtualMessagePanel) {
                 String subject = String.format("Failed to read order data from %s", worksheet.toString());
                 confirmShipmentEmailSender.sendErrorFoundEmail(subject,
-                        "Please check if orders have been exported correctly. \t " + e.getMessage(),
-                        country, orderFinderEmail);
+                        "Please check if orders have been exported correctly. \t " + e.getMessage(), country);
             }
 
 
@@ -489,13 +489,14 @@ public class ConfirmShipments {
                                 .append("\n");
                     }
 
-                    confirmShipmentEmailSender.sendErrorFoundEmail(subject, content.toString(), country, orderFinderEmail);
+                    confirmShipmentEmailSender.sendErrorFoundEmail(subject, content.toString(), country);
 
                     messagePanel.wrapLineMsg(content.toString(), LOGGER, InformationLevel.Negative);
 
                 }
             } catch (Exception e) {
-                messagePanel.wrapLineMsg("Error read unshipped orders via MWS. " + e.getMessage(), LOGGER, InformationLevel.Negative);
+                messagePanel.wrapLineMsg("Error read unshipped orders via MWS. " + e.getMessage(), InformationLevel.Negative);
+                LOGGER.error("Error read unshipped orders via MWS. ", e);
             }
 
 
@@ -524,7 +525,7 @@ public class ConfirmShipments {
         try {
             spreadIds = Settings.load().listAllSpreadsheets();
         } catch (BusinessException e) {
-            LOGGER.error("No configuration file found. {}", e.getMessage());
+            LOGGER.error("No configuration file found. {}", e);
             throw new BusinessException("No configuration file found.");
         }
 
@@ -536,7 +537,7 @@ public class ConfirmShipments {
             try {
                 confirmShipmentForSpreadsheetId(spreadId, sheetName);
             } catch (Exception e) {
-                LOGGER.error("Error when confirm shipment for sheet {} {}", spreadId, e.getMessage());
+                LOGGER.error("Error when confirm shipment for sheet {} {}", spreadId, e);
             }
         }
 

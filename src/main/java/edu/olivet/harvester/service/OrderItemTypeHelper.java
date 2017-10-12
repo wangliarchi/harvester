@@ -45,7 +45,7 @@ public class OrderItemTypeHelper {
             return type;
 
         } catch (Exception e) {
-            LOGGER.warn("No product group info found by sku pattern for {}, ASIN {}, SKU {} - {}", order.order_id, order.isbn, order.sku, e.getMessage());
+            LOGGER.warn("No product group info found by sku pattern for {}, ASIN {}, SKU {} - {}", order.order_id, order.isbn, order.sku, e);
         }
 
 
@@ -60,7 +60,7 @@ public class OrderItemTypeHelper {
 
         } catch (Exception e) {
             LOGGER.warn(
-                    "No product group info found by product api for {}, ASIN {}, SKU {} - {}, will set default to BOOK", order.order_id, order.isbn, order.sku, e.getMessage()
+                    "No product group info found by product api for {}, ASIN {}, SKU {} - {}, will set default to BOOK", order.order_id, order.isbn, order.sku, e
             );
         }
 

@@ -97,7 +97,7 @@ public class AppScript {
                 try {
                     reloadSpreadsheet(spreadsheetId);
                 } catch (Exception e) {
-                    LOGGER.error("{} is invalid. {}", spreadsheetId, e.getMessage());
+                    LOGGER.error("{} is invalid. {}", spreadsheetId, e);
                 }
             }
         } catch (Exception e) {
@@ -291,7 +291,7 @@ public class AppScript {
         try {
             orders = this.readOrders(worksheet.getSpreadsheet().getSpreadsheetId(), worksheet.getSheetName());
         } catch (Exception e) {
-            LOGGER.error("读取订单数据失败: {} - {}", worksheet.getSheetName(), e.getMessage());
+            LOGGER.error("读取订单数据失败: {} - {}", worksheet.getSheetName(), e);
 
             if (e.getMessage().contains("Cannot read sheet according to provided sheet id and name")) {
                 throw new NoWorksheetFoundException(e.getMessage());

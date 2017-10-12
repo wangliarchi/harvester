@@ -114,9 +114,9 @@ public class Migration {
                             Method method = cfg.getClass().getDeclaredMethod("set" + StringUtils.capitalize(methodName), Account.class);
                             method.invoke(cfg, new Account(accountString, accountType));
                         } catch (NoSuchMethodException e) {
-                            LOGGER.error("No method found {} - {}", methodName, e.getMessage());
+                            LOGGER.error("No method found {} - {}", methodName, e);
                         } catch (IllegalAccessException | InvocationTargetException e) {
-                            LOGGER.error("{} - {}", methodName, e.getMessage());
+                            LOGGER.error("{} - {}", methodName, e);
                         }
 
                     }

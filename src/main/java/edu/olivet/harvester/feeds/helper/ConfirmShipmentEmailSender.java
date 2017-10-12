@@ -34,7 +34,7 @@ public class ConfirmShipmentEmailSender extends EmailService {
         try {
             this.sendMessage(subject, errorDescription, destination);
         } catch (BusinessException e) {
-            LOGGER.error("Failed to send shipment confirmation success email.{} - {}", subject, e.getMessage());
+            LOGGER.error("Failed to send shipment confirmation success email.{} - {}", subject, e);
         }
     }
 
@@ -78,7 +78,7 @@ public class ConfirmShipmentEmailSender extends EmailService {
         try {
             this.sendMessage(destination, title, content, EmailContentType.PlainText, feedFile);
         } catch (BusinessException e) {
-            LOGGER.error("Failed to send shipment confirmation success email.{} - {}", title, e.getMessage());
+            LOGGER.error("Failed to send shipment confirmation success email.{} - {}", title, e);
         }
 
     }
