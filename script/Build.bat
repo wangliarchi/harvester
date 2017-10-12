@@ -97,6 +97,9 @@ xcopy %PROJECT_DIR%\target\deps\*.jar 	    			%DIST_DIR%\lib\deps\ /d /y /q
 xcopy %PROJECT_DIR%\src\main\resources\logback*.xml		%DIST_DIR%\app-data\customize\ /d /y /q
 xcopy %PROJECT_DIR%\app-data\customize\currency-rates	%DIST_DIR%\app-data\customize\ /d /y /q
 xcopy %PROJECT_DIR%\template\*.* 		  				%DIST_DIR%\app-data\template\ /d /y /e /q
+xcopy %PROJECT_DIR%\script\StartApplication.bat		    %DIST_DIR%\app-data\tools\ /d /y /q
+xcopy %PROJECT_DIR%\script\CreateTaskScheduler.bat      %DIST_DIR%\app-data\tools\ /d /y /q
+xcopy %PROJECT_DIR%\script\DeleteTaskScheduler.bat      %DIST_DIR%\app-data\tools\ /d /y /q
 echo Programming files of Harvester V%VERSION% synchronized to Dropbox successfully.
 
 copy %PROJECT_DIR%\target\harvester-%VERSION%.jar  		C:\Harvester\lib\harvester.jar /y
