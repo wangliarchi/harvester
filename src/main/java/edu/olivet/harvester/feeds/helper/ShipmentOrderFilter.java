@@ -38,7 +38,7 @@ public class ShipmentOrderFilter {
             try {
                 return it.getPurchaseDate().before(minDate);
             } catch (Exception e) {
-                LOGGER.error(e.getMessage());
+                LOGGER.error("",e);
             }
             return false;
         });
