@@ -43,3 +43,41 @@
 1. added order update sheet validation for account configurations
 2. check if there are unprocessed/processing order confirmation feed before submitting new ones.
 3. other minor fixes
+
+======================================================================
+版本：1.0-2017-10-07.1,1.0-2017-10-11.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. improved order confirmation log, more readable.
+2. some mws secret key contains tab \t!
+3. check order purchase date if it's recent order
+4. other minor fixes
+
+======================================================================
+版本：1.0-2017-10-11.1,1.0-2017-10-11.2
+代号：Harvester
+性质：0
+
+更新内容：
+1. add more info on order confirmation log on spreadsheet
+
+======================================================================
+版本：1.0-2017-10-11.2,1.0-2017-10-12.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. mark gray and insert "buyer canceled" if order is canceled
+
+======================================================================
+版本：1.0-2017-10-12.1,1.0-2017-10-12.2
+代号：Harvester
+性质：0
+
+更新内容：
+1. stop sending order confirmation notification emails to order fulfillment people.
+2. added starting program bat file. it was missed in previous versions
+3. change to check Harvester running status every 4 hours. it was once at 2AM everyday.
+4. other fixes
