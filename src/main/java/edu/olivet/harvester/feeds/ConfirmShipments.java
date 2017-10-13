@@ -6,8 +6,6 @@ import com.google.inject.Singleton;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.FeedUploader;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
-import edu.olivet.foundations.amazon.OrderFetcher;
-import edu.olivet.foundations.aop.Profile;
 import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.MessagePanel;
@@ -46,7 +44,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.text.DateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -251,7 +251,10 @@ public class ConfirmShipments {
             insertToLocalDbLog(feedFile, country, result);
 
             //send email
-            confirmShipmentEmailSender.sendSuccessEmail(result, feedFile, country);
+            if (messagePanel instanceof VirtualMessagePanel) {
+                confirmShipmentEmailSender.sendSuccessEmail(result, feedFile, country);
+            }
+
         } catch (Exception e) {
 
             errorAlertService.sendMessage("Error when submitting order confirmation feed file via MWS.",
@@ -462,17 +465,17 @@ public class ConfirmShipments {
     public void notConfirmedOrderNotification() {
         List<Country> countries = Settings.load().listAllCountries();
 
-        Map<OrderFetcher.DateRangeType, Date> dateMap = new HashMap<>();
 
         Date createBefore = DateUtils.addDays(new Date(), -1);
-        dateMap.put(OrderFetcher.DateRangeType.CreatedBefore, createBefore);
-        dateMap.put(OrderFetcher.DateRangeType.CreatedAfter, DateUtils.addDays(new Date(), -10));
+        Date createAfter = DateUtils.addDays(new Date(), -10);
 
         countries.forEach(country -> {
             try {
-                List<com.amazonservices.mws.orders._2013_09_01.model.Order> orders = mwsOrderClient.listOrders(country, dateMap, "Unshipped", "PartiallyShipped");
 
-                orders.removeIf(order -> "Shipped".equals(order.getOrderStatus()) || "Canceled".equals(order.getOrderStatus()));
+                LOGGER.info("Load Unshipped or PartiallyShipped orders between {} and {}",createAfter, createBefore);
+                List<com.amazonservices.mws.orders._2013_09_01.model.Order> orders = mwsOrderClient.listUnshippedOrders(country, createBefore,createAfter);
+                LOGGER.info("{} unshipped or partiallyShipped order(s) founded  between {} and {}",createAfter, createBefore);
+
 
                 if (orders.size() > 0) {
                     //send email
@@ -553,15 +556,12 @@ public class ConfirmShipments {
         shipmentOrderFilter.setMessagePanel(messagePanel);
     }
 
-    @Profile
-    public void test(){
-        LOGGER.info("profile log test");
-    }
+
     public static void main(String[] args) {
         UITools.setTheme();
 
-        //ApplicationContext.getBean(ConfirmShipments.class).execute();
-        ApplicationContext.getBean(ConfirmShipments.class).test();
+        ApplicationContext.getBean(ConfirmShipments.class).execute();
+
     }
 
 
