@@ -7,6 +7,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.amazon.OrderFetcher;
 import edu.olivet.harvester.utils.Settings;
+import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,6 +72,28 @@ public class OrderClient {
                 order.setSales_chanel(amzOrder.getSalesChannel());
             }
         });
+    }
+
+    public List<Order> listUnshippedOrders(Country country) {
+        Map<OrderFetcher.DateRangeType, Date> dateMap = new HashMap<>();
+
+        Date createdBefore = DateUtils.addDays(new Date(), -1);
+        Date createdAfter = DateUtils.addDays(new Date(), -10);
+
+        return listUnshippedOrders(country,createdBefore,createdAfter);
+
+    }
+
+    public List<Order> listUnshippedOrders(Country country, Date createdBefore, Date createdAfter) {
+        Map<OrderFetcher.DateRangeType, Date> dateMap = new HashMap<>();
+        dateMap.put(OrderFetcher.DateRangeType.CreatedBefore, createdBefore);
+        dateMap.put(OrderFetcher.DateRangeType.CreatedAfter, createdAfter);
+
+        List<Order> orders =  listOrders(country,dateMap, "Unshipped", "PartiallyShipped");
+        orders.removeIf(order -> "Shipped".equals(order.getOrderStatus()) || "Canceled".equals(order.getOrderStatus()));
+
+        return  orders;
+
     }
 
 

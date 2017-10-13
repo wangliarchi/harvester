@@ -2,6 +2,7 @@ package edu.olivet.harvester.job;
 
 import edu.olivet.foundations.job.AbstractBackgroundJob;
 import edu.olivet.foundations.job.AutoUpgradeJob;
+import edu.olivet.harvester.utils.CheckTime;
 import lombok.Getter;
 
 import java.util.Random;
@@ -24,10 +25,14 @@ public enum BackgroundJob {
 
     ConfigUpload("0 0 5,13,21 1/1 * ? *", ConfigUploadJob.class),
 
+    ContextUploadJob("0 15 2 1/1 * ? *", ContextUploadJob.class),
+
     AutoUpgrade("0 15 2 1/1 * ? *", AutoUpgradeJob.class);
 
+
     private final String cron;
-    @Getter private final Class<? extends AbstractBackgroundJob> clazz;
+    @Getter
+    private final Class<? extends AbstractBackgroundJob> clazz;
 
     BackgroundJob(String cron, Class<? extends AbstractBackgroundJob> clazz) {
         this.cron = cron;
@@ -36,13 +41,12 @@ public enum BackgroundJob {
 
     public String getCron() {
 
-        if (this.clazz == ShipmentConfirmationJob.class) {
+        if (this == ShipmentConfirmation) {
             int hour = new Random().ints(1, 15, 17).findFirst().getAsInt();
             int min = new Random().ints(1, 0, 15).findFirst().getAsInt();
             return String.format("0 %d %d ? * MON,TUE,WED,THU,FRI,SAT *", min, hour);
-        } else if (this.clazz == UnshippedOrderCheckJob.class) {
-            int min = new Random().ints(1, 0, 15).findFirst().getAsInt();
-            return String.format("0 %d 17 ? * MON,TUE,WED,THU,FRI,SAT *", min);
+        } else if (this == ContextUploadJob) {
+            return CheckTime.getInstance().cron();
         }
 
         return this.cron;

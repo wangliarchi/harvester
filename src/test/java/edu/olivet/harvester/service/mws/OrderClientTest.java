@@ -4,10 +4,12 @@ import com.amazonservices.mws.orders._2013_09_01.model.Order;
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.harvester.common.BaseTest;
+import org.apache.commons.lang3.time.DateUtils;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Guice
@@ -46,6 +48,16 @@ public class OrderClientTest {
 
         orders.forEach(it -> System.out.println(it.order_id + "\t" + it.getAmazonOrderStatus()));
 
+    }
+
+    @Test
+    public void testListUnshippedOrders() {
+        Date createdBefore = DateUtils.addDays(new Date(), 0);
+        Date createdAfter = DateUtils.addDays(new Date(), -10);
+
+        List<Order> orders = orderClient.listUnshippedOrders(Country.US, createdBefore,createdAfter);
+
+        orders.forEach(it -> System.out.println(it.getAmazonOrderId() + "\t" + it.getOrderStatus() + "\t" + it.getPurchaseDate()));
     }
 
 }
