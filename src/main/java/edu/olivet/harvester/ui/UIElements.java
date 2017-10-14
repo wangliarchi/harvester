@@ -42,9 +42,7 @@ public class UIElements extends AbstractUIContainer {
             Actions.ConfirmShipment,
             Actions.OrderConfirmationHistory
         });
-        map.put(Menu.ToolBox, new Action[]{
-            Action.Settings,
-        });
+
         map.put(Menu.Settings, new Action[]{
             Action.Settings,
             Action.Separator,
