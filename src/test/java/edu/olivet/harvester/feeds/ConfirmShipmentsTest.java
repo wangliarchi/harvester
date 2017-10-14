@@ -135,7 +135,7 @@ public class ConfirmShipmentsTest extends BaseTest {
         MarketWebServiceIdentity credential = config.getMwsCredential();
 
         File feedFile = new File(TEST_DATA_ROOT + File.separator + "feed-US_BOO_confirm_shipment-invalid.txt");
-        String result = feedUploader.execute(feedFile, FeedGenerator.BatchFileType.ShippingConfirmation.feedType(), credential, 1);
+        feedUploader.execute(feedFile, FeedGenerator.BatchFileType.ShippingConfirmation.feedType(), credential, 1);
 
     }
 

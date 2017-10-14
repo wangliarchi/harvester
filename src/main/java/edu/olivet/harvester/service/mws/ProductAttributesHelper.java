@@ -25,8 +25,6 @@ public class ProductAttributesHelper {
                 for (int i = 0; i < nodeList.getLength(); i++) {
                     String nodeName = nodeList.item(i).getNodeName();
                     nodeName = nodeName.replaceFirst("ns2:", "");
-                    Node myNode = nodeList.item(i);
-
                     try {
                         jsonProduct.put(nodeName, nodeList.item(i).getTextContent());
                     } catch (JSONException e) {

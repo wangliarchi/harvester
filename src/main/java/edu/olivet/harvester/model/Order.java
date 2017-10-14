@@ -215,7 +215,7 @@ public class Order implements Keyable {
     public Date getPurchaseDate() {
         return parsePurchaseDate(purchase_date);
     }
-    private static final String[] PURCHASE_DATE_PATTERNS = {"yyyy-MM-dd'T'HH:mm:ssXXX","yyyy-MM-dd'T'HH:mm:ssZ","yyyy-MM-dd'T'HH:mm:ss.SSSZ", "M/d/yyyy H:mm",
+    public static final String[] PURCHASE_DATE_PATTERNS = {"yyyy-MM-dd'T'HH:mm:ssXXX","yyyy-MM-dd'T'HH:mm:ssZ","yyyy-MM-dd'T'HH:mm:ss.SSSZ","yyyy-MM-dd'T'HH:mm:ss'Z'","yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "M/d/yyyy H:mm",
             "M/d/yyyy H:mm:ss", "yyyy-MM-dd HH:mm:ss", "MM-dd-yyyy HH:mm", "yyyy-MM-dd"};
     public static Date parsePurchaseDate(String purchaseDateText) {
         try {
@@ -274,5 +274,19 @@ public class Order implements Keyable {
         return Objects.hashCode(order_id, recipient_name, sku, quantity_purchased, isbn, seller, seller_id, condition,
                 character, remark, item_name, ship_address_1, ship_address_2, ship_city, ship_zip, ship_phone_number,
                 order_number, account, ship_country);
+    }
+
+    public static void main(String[] args) {
+        //
+        try {
+            Date date = DateUtils.parseDate("2016-10-12T22:53:00.000Z", Locale.US, Order.PURCHASE_DATE_PATTERNS);
+
+            Date minDate = DateUtils.addDays(new Date(), -30);
+
+            System.out.println(date.before(minDate));
+
+        }catch (Exception e) {
+
+        }
     }
 }

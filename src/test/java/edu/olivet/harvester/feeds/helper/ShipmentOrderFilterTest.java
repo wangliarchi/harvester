@@ -1,22 +1,15 @@
 package edu.olivet.harvester.feeds.helper;
 
 
-import com.amazonservices.mws.orders._2013_09_01.model.Order;
 import com.google.inject.Inject;
-import edu.olivet.foundations.amazon.Country;
-import edu.olivet.foundations.amazon.MWSUtils;
 import edu.olivet.foundations.mock.MockDBModule;
 import edu.olivet.foundations.mock.MockDateModule;
-import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.common.BaseTest;
-import edu.olivet.harvester.service.mws.OrderClient;
 import edu.olivet.harvester.spreadsheet.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.Worksheet;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -30,26 +23,6 @@ public class ShipmentOrderFilterTest extends BaseTest {
 
     @Inject
     private ShipmentOrderFilter shipmentOrderFilter;
-
-    @BeforeClass
-    public void init() {
-
-        OrderClient orderClient = new OrderClient() {
-            @Override
-            public List<Order> getOrders(Country country, List<String> amazonOrderIds) {
-                List<com.amazonservices.mws.orders._2013_09_01.model.Order> result = new ArrayList<>();
-                for (String amazonOrderId : amazonOrderIds) {
-                    File localOrderXMLFile = new File(TEST_DATA_ROOT + File.separator + "order-" + amazonOrderId + ".xml");
-                    String xmlFragment = Tools.readFileToString(localOrderXMLFile);
-                    result.add(MWSUtils.buildMwsObject(xmlFragment, com.amazonservices.mws.orders._2013_09_01.model.Order.class));
-                }
-                return result;
-            }
-
-        };
-
-
-    }
 
     @Test
     public void testRemoveDuplicatedOrders() {
@@ -131,7 +104,7 @@ public class ShipmentOrderFilterTest extends BaseTest {
 
         StringBuilder resultSummary = new StringBuilder();
         StringBuilder resultDetail = new StringBuilder();
-        List<edu.olivet.harvester.model.Order> filtered = shipmentOrderFilter.removeNotUnshippedOrders(orders, Country.US, resultSummary, resultDetail);
+        List<edu.olivet.harvester.model.Order> filtered = shipmentOrderFilter.removeNotUnshippedOrders(orders, resultSummary, resultDetail);
 
         assertEquals(filtered.size(), 1);
 

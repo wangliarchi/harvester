@@ -1,4 +1,4 @@
-package edu.olivet.harvester.model.feeds;
+package edu.olivet.harvester.feeds.model;
 
 
 import edu.olivet.foundations.db.PrimaryKey;

@@ -9,7 +9,6 @@ import edu.olivet.harvester.job.ContextUploadJob;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.utils.Migration;
 import edu.olivet.harvester.utils.SettingValidator;
-import lombok.Getter;
 import org.apache.commons.lang3.SystemUtils;
 
 import java.io.File;
@@ -23,8 +22,8 @@ public class Harvester {
 
     public static final String CONFIG_FILE_PATH = Directory.Customize.path() + "/harvester-config.json";
 
-    @Getter
-    static final String APP_NAME = "Harvester";
+
+    public static final String APP_NAME = "Harvester";
 
     private static final Application APP = new Application(APP_NAME);
 
@@ -60,7 +59,7 @@ public class Harvester {
         uiHarvester.startBackgroundJobs();
 
         ApplicationContext.getBean(ContextUploadJob.class).execute();
-        //
+
         try {
             new AppScript().preloadAllSpreadsheets();
         } catch (Exception e) {

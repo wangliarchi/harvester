@@ -9,11 +9,12 @@ import edu.olivet.harvester.utils.Settings;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * reprensent a google spreadsheet
@@ -44,24 +45,32 @@ public class Spreadsheet {
     @Setter
     private Country spreadsheetCountry;
 
-    @Getter
     @Setter
     private OrderEnums.OrderItemType spreadsheetType;
 
 
+    static final String[] INVALID_ORDER_SHEETS = {"daily cost", "confirm", "template", "cs", "memo"};
+
     public List<String> getOrderSheetNames() {
-        List<String> filteredSheetNames = sheetNames;
+      return sheetNames.stream().filter(p -> ArrayUtils.contains(INVALID_ORDER_SHEETS,p.toLowerCase()) == false).collect(Collectors.toList());
+    }
 
-        String[] notValidOrderSheets = {"daily cost", "confirm", "template", "cs", "memo"};
-        filteredSheetNames.removeIf(p -> Arrays.asList(notValidOrderSheets).contains(p.toLowerCase()));
+    public OrderEnums.OrderItemType getSpreadsheetType() {
+        if (spreadsheetType == null) {
+            try {
+                spreadsheetType = Settings.load().getSpreadsheetType(spreadsheetId);
+            } catch (BusinessException e) {
+                throw new BusinessException("Cant load type information for spreadsheet " + spreadsheetId);
+            }
+        }
 
-        return filteredSheetNames;
+        return spreadsheetType;
     }
 
     public Country getSpreadsheetCountry() {
         if (spreadsheetCountry == null) {
             try {
-                setSpreadsheetCountry(Settings.load().getSpreadsheetCountry(spreadsheetId));
+                spreadsheetCountry = Settings.load().getSpreadsheetCountry(spreadsheetId);
             } catch (BusinessException e) {
                 throw new BusinessException("Cant load country information for spreadsheet " + spreadsheetId);
             }

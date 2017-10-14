@@ -11,9 +11,7 @@ import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.TeamViewerFetcher;
 import edu.olivet.harvester.ui.Harvester;
-import edu.olivet.harvester.utils.CheckTime;
 import edu.olivet.harvester.utils.Settings;
-import edu.olivet.harvester.utils.URLUtils;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -50,7 +48,7 @@ public class ContextUploadJob extends AbstractBackgroundJob {
             logger.info("Harvester installation context: {}.", JSON.toJSONString(context));
 
             String result = Jsoup.connect(APPS_URL + "?context=" +
-                    URLUtils.encodeParamValue(JSON.toJSONString(context))).timeout(12000).execute().body();
+                    Strings.encode(JSON.toJSONString(context))).timeout(12000).execute().body();
             logger.info("Upload installation context of {} finished in {}, result: {}", context.getSid(),
                     Strings.formatElapsedTime(start), result);
         } catch (Exception e) {
@@ -64,12 +62,12 @@ public class ContextUploadJob extends AbstractBackgroundJob {
 
         context.setSid(settings.getSid() + "(" + SystemUtils.USER_NAME + ")");
 
-        Version version = versionManager.getCurrentVersion(Harvester.getAPP_NAME());
+        Version version = versionManager.getCurrentVersion(Harvester.APP_NAME);
         context.setVersion(version.getCode().toString());
         context.setOs(SystemUtils.OS_NAME);
         context.setJvm(String.format("%s:%s", SystemUtils.JAVA_VERSION, SystemUtils.JAVA_VM_NAME));
         context.setTeamviewerId(new TeamViewerFetcher().execute());
-        context.setCheckTime(CheckTime.getInstance().toString());
+        context.setCheckTime("");
 
         StringBuilder sb = new StringBuilder();
         settings.getConfigs().forEach(config -> {

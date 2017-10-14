@@ -12,7 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -64,7 +67,7 @@ public class OrderClient {
             orderMap.put(order.getAmazonOrderId(), order);
         }
 
-        List<edu.olivet.harvester.model.Order> shippedCanceledOrders = new ArrayList<>();
+
         orders.forEach(order -> {
             if (orderMap.containsKey(order.order_id)) {
                 com.amazonservices.mws.orders._2013_09_01.model.Order amzOrder = orderMap.get(order.order_id);
@@ -75,8 +78,6 @@ public class OrderClient {
     }
 
     public List<Order> listUnshippedOrders(Country country) {
-        Map<OrderFetcher.DateRangeType, Date> dateMap = new HashMap<>();
-
         Date createdBefore = DateUtils.addDays(new Date(), -1);
         Date createdAfter = DateUtils.addDays(new Date(), -10);
 
