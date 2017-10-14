@@ -1,6 +1,5 @@
 package edu.olivet.harvester.feeds.helper;
 
-import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.MessagePanel;
 import edu.olivet.foundations.ui.VirtualMessagePanel;
@@ -50,7 +49,7 @@ public class ShipmentOrderFilter {
         filteredOrders = removeWCGrayLabelOrders(filteredOrders, resultSummary, resultDetail);
 
         //check order status via MWS, only unshipped orders need to be confirmed
-        filteredOrders = removeNotUnshippedOrders(filteredOrders, worksheet.getSpreadsheet().getSpreadsheetCountry(), resultSummary, resultDetail);
+        filteredOrders = removeNotUnshippedOrders(filteredOrders, resultSummary, resultDetail);
 
         //return List
         filteredOrders.sort(Comparator.comparing(Order::getRow));
@@ -114,7 +113,7 @@ public class ShipmentOrderFilter {
     }
 
 
-    public List<Order> removeNotUnshippedOrders(List<Order> orders, Country country, StringBuilder resultSummary, StringBuilder resultDetail) {
+    public List<Order> removeNotUnshippedOrders(List<Order> orders, StringBuilder resultSummary, StringBuilder resultDetail) {
 
         List<Order> filtered = new ArrayList<>();
         List<Order> shipped = new ArrayList<>();

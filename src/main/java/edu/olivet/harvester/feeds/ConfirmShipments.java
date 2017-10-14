@@ -15,10 +15,10 @@ import edu.olivet.foundations.utils.*;
 import edu.olivet.harvester.feeds.helper.ConfirmShipmentEmailSender;
 import edu.olivet.harvester.feeds.helper.FeedGenerator;
 import edu.olivet.harvester.feeds.helper.ShipmentOrderFilter;
+import edu.olivet.harvester.feeds.model.OrderConfirmationLog;
 import edu.olivet.harvester.message.ErrorAlertService;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
-import edu.olivet.harvester.model.feeds.OrderConfirmationLog;
 import edu.olivet.harvester.service.Carrier;
 import edu.olivet.harvester.service.OrderItemTypeHelper;
 import edu.olivet.harvester.service.mws.FeedSubmissionFetcher;
@@ -241,7 +241,7 @@ public class ConfirmShipments {
         //submit feed to amazon via MWS Feed API
         String result;
         try {
-            result = submitFeed(feedFile, worksheet, country);
+            result = submitFeed(feedFile, country);
 
             //write log to worksheet
             writeLogToWorksheet(worksheet, result, resultSummary.toString());
@@ -308,7 +308,7 @@ public class ConfirmShipments {
     public void writeLogToWorksheet(Worksheet worksheet, String result, String summary) {
         int[] counts = ServiceUtils.parseFeedSubmissionResult(result);
 
-        String log = String.format("auto-confirmed; %s. Process summary: Total submitted %s, Succeed %s, Failed %s", summary, counts[0], counts[1], counts[2]);
+        String log = String.format("auto-confirmed; %s Process summary: Total submitted %s, Succeed %s, Failed %s", summary, counts[0], counts[1], counts[2]);
         String now = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(System.currentTimeMillis());
         while (true) {
             try {
@@ -334,7 +334,7 @@ public class ConfirmShipments {
     /**
      *
      */
-    public String submitFeed(File feedFile, Worksheet worksheet, Country country) {
+    public String submitFeed(File feedFile,  Country country) {
 
         messagePanel.displayMsg("Feed submitted to Amazon... It may take few minutes for Amazon to process.");
 
