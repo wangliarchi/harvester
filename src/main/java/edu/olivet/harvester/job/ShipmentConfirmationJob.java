@@ -39,8 +39,10 @@ public class ShipmentConfirmationJob extends AbstractBackgroundJob {
 
     @Override
     public void runIfMissed() {
-
-
+        DateTime dt = new DateTime();
+        if(dt.getHourOfDay() < 17) {
+            return;
+        }
         List<CronjobLog> list = dbManager.query(CronjobLog.class,
             Cnd.where("jobName", "=", this.getClass().getName())
                 .where("runTime",">",Dates.beginOfDay(new DateTime()).toDate())
