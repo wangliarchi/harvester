@@ -1,6 +1,5 @@
 package edu.olivet.harvester.job;
 
-import com.google.inject.Inject;
 import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.job.AbstractBackgroundJob;
 import edu.olivet.foundations.utils.ApplicationContext;
@@ -22,9 +21,6 @@ import java.util.List;
 public class ShipmentConfirmationJob extends AbstractBackgroundJob {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShipmentConfirmationJob.class);
 
-    @Inject
-    private DBManager dbManager;
-
 
     @Override
     public void execute() {
@@ -34,19 +30,22 @@ public class ShipmentConfirmationJob extends AbstractBackgroundJob {
         log.setJobName(this.getClass().getName());
         log.setRunTime(new Date());
 
+        DBManager dbManager = ApplicationContext.getBean(DBManager.class);
         dbManager.insert(log, CronjobLog.class);
     }
 
     @Override
     public void runIfMissed() {
         DateTime dt = new DateTime();
-        if(dt.getHourOfDay() < 17) {
+        if (dt.getHourOfDay() < 17) {
             return;
         }
+
+        DBManager dbManager = ApplicationContext.getBean(DBManager.class);
         List<CronjobLog> list = dbManager.query(CronjobLog.class,
-            Cnd.where("jobName", "=", this.getClass().getName())
-                .where("runTime",">",Dates.beginOfDay(new DateTime()).toDate())
-                .desc("runTime"));
+                Cnd.where("jobName", "=", this.getClass().getName())
+                        .and("runTime", ">", Dates.beginOfDay(new DateTime()).toDate())
+                        .desc("runTime"));
 
         if (CollectionUtils.isEmpty(list)) {
             LOGGER.info("{} executed at program startup.", this.getClass().getName());
@@ -57,7 +56,7 @@ public class ShipmentConfirmationJob extends AbstractBackgroundJob {
     }
 
     public static void main(String[] args) {
-        ShipmentConfirmationJob bean = ApplicationContext.getBean(ShipmentConfirmationJob.class);
+        ShipmentConfirmationJob bean = new ShipmentConfirmationJob();
         bean.runIfMissed();
     }
 

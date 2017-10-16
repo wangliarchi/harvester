@@ -36,7 +36,7 @@ public class CronjobLog extends PrimaryKey implements ArrayConvertable {
         return new Object[] {String.format("%s.txt", this.id), DateFormat.DATE_TIME.format(this.runTime), this.jobName};
     }
 
-    public static final String[] COLUMNS = {"Cronjob Name", "Run Time", "Batch Execution Result"};
+    public static final String[] COLUMNS = {"Cronjob Name", "Run Time"};
 
-    public static final int[] WIDTHS = {150, 150, 500};
+    public static final int[] WIDTHS = {250, 150};
 }
