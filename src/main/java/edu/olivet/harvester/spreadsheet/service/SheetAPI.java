@@ -30,15 +30,15 @@ public class SheetAPI {
     private static final Logger LOGGER = LoggerFactory.getLogger(SheetAPI.class);
 
     @Inject
-    private GoogleServiceProvider googleServiceProvider;
+    protected GoogleServiceProvider googleServiceProvider;
 
     @Inject
-    private SpreadService spreadService;
+    protected SpreadService spreadService;
 
     @Inject
-    private GoogleAPIHelper googleAPIHelper;
+    protected GoogleAPIHelper googleAPIHelper;
 
-    private Sheets sheetService;
+    protected Sheets sheetService;
 
     @Inject
     public void init() {
@@ -124,6 +124,65 @@ public class SheetAPI {
         } catch (IOException e) {
             throw googleAPIHelper.wrapException(e);
         }
+    }
+
+
+    @Repeat(expectedExceptions = BusinessException.class)
+    public SheetProperties sheetCopyTo(String spreadsheetId, int templateSheetId, String destSpreadId) {
+
+        CopySheetToAnotherSpreadsheetRequest requestBody = new CopySheetToAnotherSpreadsheetRequest();
+        requestBody.setDestinationSpreadsheetId(destSpreadId);
+
+        try {
+            Sheets.Spreadsheets.SheetsOperations.CopyTo request =
+                    sheetService.spreadsheets().sheets().copyTo(spreadsheetId, templateSheetId, requestBody);
+
+            return request.execute();
+        } catch (IOException e) {
+            throw googleAPIHelper.wrapException(e);
+        }
+    }
+
+
+
+
+
+    public void moveSheetToIndex(SheetProperties sheetProperties, String spreadsheetId, int moveTo) {
+
+        sheetProperties.setIndex(moveTo);
+        List<Request> requests = new ArrayList<>();
+        Request request = new Request().setUpdateSheetProperties(new UpdateSheetPropertiesRequest().setProperties(sheetProperties).setFields("title,index"));
+        requests.add(request);
+
+        BatchUpdateSpreadsheetRequest body =
+                new BatchUpdateSpreadsheetRequest().setRequests(requests);
+
+        try {
+            this.batchUpdate(spreadsheetId, body);
+        } catch (BusinessException e) {
+            LOGGER.error("Fail to rename sheet and move to first for {} {}. Try to delete the sheet - {}", sheetProperties.getTitle(), spreadsheetId, e.getMessage());
+            deleteSheet(sheetProperties.getSheetId(), spreadsheetId);
+        }
+
+
+    }
+
+    public void deleteSheet(int sheetId, String spreadsheetId) {
+
+        List<Request> requests = new ArrayList<>();
+        Request request = new Request().setDeleteSheet(new DeleteSheetRequest().setSheetId(sheetId));
+        requests.add(request);
+
+        BatchUpdateSpreadsheetRequest body =
+                new BatchUpdateSpreadsheetRequest().setRequests(requests);
+
+        try {
+            this.batchUpdate(spreadsheetId, body);
+        } catch (BusinessException e) {
+            LOGGER.error("Fail to delete sheet {} {} - {}", sheetId, spreadsheetId, e.getMessage());
+            throw new BusinessException(e);
+        }
+
     }
 
 
