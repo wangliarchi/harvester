@@ -24,9 +24,11 @@ public enum BackgroundJob {
 
     //ConfigUpload("0 0 5,13,21 1/1 * ? *", ConfigUploadJob.class),
 
-    AutoUpgrade("0 15 2 1/1 * ? *", AutoUpgradeJob.class),
+    HarvesterAutoUpgrade("0 15 2 1/1 * ? *", AutoUpgradeJob.class),
 
-    ContextUploadJob("0 0 5,13,21 1/1 * ? *", ContextUploadJob.class);
+    ContextUploadJob("0 0 5,13,21 1/1 * ? *", ContextUploadJob.class),
+
+    LogUpload("0 45 8,18 1/1 * ? *", LogUploader.class);
 
 
     private final String cron;
