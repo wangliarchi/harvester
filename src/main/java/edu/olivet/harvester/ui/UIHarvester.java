@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,6 +54,16 @@ public class UIHarvester extends AbstractApplicationUI {
         this.setTitle("Harvester: Automated Order Fulfillment");
         UITools.setIcon(this, "harvester.png");
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        this.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                if (!UITools.confirmed("Are you sure to close Harvester? \nBackground jobs may be running.")) {
+                    return;
+                }
+                System.exit(0);
+            }
+        });
 
         final JMenuBar menuBar = UIElements.getInstance().createMenuBar();
         this.setJMenuBar(menuBar);
