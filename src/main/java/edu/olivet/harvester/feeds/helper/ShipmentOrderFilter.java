@@ -3,6 +3,7 @@ package edu.olivet.harvester.feeds.helper;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.MessagePanel;
 import edu.olivet.foundations.ui.VirtualMessagePanel;
+import edu.olivet.foundations.utils.Dates;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.spreadsheet.Worksheet;
@@ -32,12 +33,26 @@ public class ShipmentOrderFilter {
 
 
         //if order purchased date is over maxDaysBack days, ignore???
+
         Date minDate = DateUtils.addDays(new Date(), -30);
+
+        //check first order. if first order is from last year, and more than 30 days before current day. it should be last year's sheet
+        try {
+            Order firstOrder = orders.get(0);
+            if (Dates.getYear(firstOrder.getPurchaseDate()) != Dates.getYear(new Date()) && firstOrder.getPurchaseDate().before(minDate)) {
+                orders.clear();
+                LOGGER.error("Sheet is from last year.");
+                return orders;
+            }
+        } catch (Exception e) {
+            LOGGER.error("Fail to check first order for {}",worksheet,e);
+        }
+
         orders.removeIf(it -> {
             try {
                 return it.getPurchaseDate().before(minDate);
             } catch (Exception e) {
-                LOGGER.error("",e);
+                LOGGER.error("", e);
             }
             return false;
         });
