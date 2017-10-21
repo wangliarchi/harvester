@@ -3,6 +3,7 @@ package edu.olivet.harvester.utils;
 import com.alibaba.fastjson.JSON;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.amazon.MWSUtils;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Tools;
@@ -237,6 +238,19 @@ public class Settings {
             return this.getBookDataSourceUrl();
 
 
+        }
+
+        public MarketWebServiceIdentity getMwsCredential() {
+            if (country.europe()) {
+                for (Country country : Country.EURO) {
+                    mwsCredential.setMarketPlaceId(country.marketPlaceId());
+                    if (MWSUtils.isCredentialAccessible(mwsCredential)) {
+                        return mwsCredential;
+                    }
+                }
+            }
+
+            return mwsCredential;
         }
 
 
