@@ -122,12 +122,29 @@ public class Migration {
                     }
                 });
 
+                try {
+                    cfg.setBookDataSourceUrl(AppScript.getSpreadId(googledrivebooks.getString(country.name()).trim()));
+                } catch (Exception e) {
+                    //
+                }
 
-                cfg.setBookDataSourceUrl(AppScript.getSpreadId(googledrivebooks.getString(country.name()).trim()));
-                cfg.setProductDataSourceUrl(AppScript.getSpreadId(googledriveproducts.getString(country.name()).trim()));
+                try {
+                    cfg.setProductDataSourceUrl(AppScript.getSpreadId(googledriveproducts.getString(country.name()).trim()));
+                } catch (Exception e) {
+                    //
+                }
 
-                cfg.setSignature(signatures.getString(country.name()).trim());
-                cfg.setUserCode(orderFinders.getString(country.name()).trim());
+                try {
+                    cfg.setSignature(signatures.getString(country.name()).trim());
+                } catch (Exception e) {
+                    //
+                }
+
+                try {
+                    cfg.setUserCode(orderFinders.getString(country.name()).trim());
+                } catch (Exception e) {
+                    //
+                }
 
                 String selleridsString = sellerids.getString(country.name()).trim();
                 if (selleridsString.isEmpty()) {
@@ -168,6 +185,10 @@ public class Migration {
         } else {
             throw new IllegalStateException("Cannot find expected configuration file " + file.getAbsolutePath());
         }
+    }
+
+    public static void main(String[] args) {
+        Migration.loadSettings();
     }
 
 }
