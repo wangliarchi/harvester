@@ -1,9 +1,12 @@
 package edu.olivet.harvester.utils;
 
+import com.google.api.services.drive.model.File;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.harvester.spreadsheet.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
+import edu.olivet.harvester.spreadsheet.service.SheetAPI;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,12 +21,14 @@ public class SettingValidator {
 
 
     private AppScript appScript;
+    private SheetAPI sheetAPI;
 
-    public SettingValidator(AppScript appScript) {
+    public SettingValidator(AppScript appScript, SheetAPI sheetAPI) {
         this.appScript = appScript;
+        this.sheetAPI = sheetAPI;
     }
 
-    public @Nullable List<String> validate(List<Settings.Configuration> configs) {
+    public @Nullable List<String> validate(String sid, List<Settings.Configuration> configs) {
         List<String> errors = new ArrayList<>();
 
         errors.addAll(spreadsheetIdNeedToBeUnique(configs));
@@ -32,6 +37,7 @@ public class SettingValidator {
             errors.addAll(validateSpreadsheetIds(config));
             errors.addAll(spreadsheetTypeAndTitleShouldMatch(config));
             errors.addAll(spreadsheetCountryAndTitleShouldMatch(config));
+            errors.addAll(possibleSpreadsheetExistedButNotEntered(sid, config));
         });
 
         return errors;
@@ -166,5 +172,36 @@ public class SettingValidator {
 
         return errors;
     }
+
+    public List<String> possibleSpreadsheetExistedButNotEntered(String sid, Settings.Configuration config){
+        List<String> errors = new ArrayList<>();
+
+        if(StringUtils.isBlank(config.getBookDataSourceUrl())) {
+            try {
+                List<File> availableSheets = sheetAPI.getAvailableSheets(sid, config.getCountry(), "BOOK");
+                if (CollectionUtils.isNotEmpty(availableSheets)) {
+                    errors.add(String.format("%s does'nt fill BOOK spreadsheet, but possible sheets found. %s",
+                            config.getCountry().name(), availableSheets.stream().map(it->it.getName()).collect(Collectors.toSet())));
+                }
+            }catch (Exception e) {
+
+            }
+        }
+
+        if(StringUtils.isBlank(config.getProductDataSourceUrl())) {
+            try {
+                List<File> availableSheets = sheetAPI.getAvailableSheets(sid, config.getCountry(), "ExportedOrder");
+                if (CollectionUtils.isNotEmpty(availableSheets)) {
+                    errors.add(String.format("%s does'nt fill PRODUCT spreadsheet, but possible sheets found. %s",
+                            config.getCountry().name(), availableSheets.stream().map(it->it.getName()).collect(Collectors.toSet())));
+                }
+            }catch (Exception e) {
+
+            }
+        }
+
+        return errors;
+    }
+
 
 }

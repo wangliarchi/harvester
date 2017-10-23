@@ -1,14 +1,17 @@
 package edu.olivet.harvester.spreadsheet.service;
 
+import com.google.api.services.drive.model.File;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.*;
 import com.google.inject.Inject;
+import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.google.GoogleAPIHelper;
 import edu.olivet.foundations.google.GoogleServiceProvider;
 import edu.olivet.foundations.google.SpreadService;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Constants;
+import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
@@ -21,7 +24,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 10/11/17 1:53 PM
@@ -239,5 +245,27 @@ public class SheetAPI {
 
 
     }
+
+
+    @Repeat(expectedExceptions = BusinessException.class)
+    public List<File> getAvailableSheets(String sid, Country country, String dataSourceId) {
+        List<File> sheets = spreadService.getAvailableSheets(sid, country , dataSourceId, Constants.RND_EMAIL);
+
+        List<String> toRemoveKeywordList = Stream.of("fba resale", "cancel", "test", "history", "histroy", "copy of", "grey", "gray", "pl",
+                "backup", "to white", "国际转运", "forward", "top reviewer", "german book", "special sheet")
+                .collect(Collectors.toList());
+
+        for (int i = 2011; i < Dates.getYear(new Date()); i++) {
+            toRemoveKeywordList.add(String.valueOf(i));
+        }
+
+        String[] toRemoveKeywords = toRemoveKeywordList.toArray(new String[toRemoveKeywordList.size()]);
+
+        sheets.removeIf(it -> StringUtils.containsAny(it.getName().toLowerCase(), toRemoveKeywords));
+
+        return sheets;
+    }
+
+
 
 }

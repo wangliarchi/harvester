@@ -26,7 +26,7 @@ public class SettingValidatorTest extends BaseTest {
     @Test
     public void testValidate() {
         Settings settings = Settings.load(testConfigFilePath);
-        List<String> errors = settingValidator.validate(settings.getConfigs());
+        List<String> errors = settingValidator.validate(settings.getSid(),settings.getConfigs());
 
         System.out.println(errors);
     }
