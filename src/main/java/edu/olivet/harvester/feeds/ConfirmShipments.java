@@ -123,6 +123,7 @@ public class ConfirmShipments {
 
     private void confirmShipmentForSpreadsheetId(String spreadsheetId, String sheetName) {
 
+
         //set spreadsheet id, check if the given spreadsheet id is valid
         Spreadsheet workingSpreadsheet;
         try {
@@ -146,6 +147,7 @@ public class ConfirmShipments {
 
     private void confirmShipmentForWorksheet(Worksheet worksheet) {
 
+
         StringBuilder resultSummary = new StringBuilder();
         StringBuilder resultDetail = new StringBuilder();
 
@@ -161,6 +163,22 @@ public class ConfirmShipments {
         if (country == Country.JP) {
             messagePanel.wrapLineMsg("It is not allowed to confirm shipment for Japan account yet.", InformationLevel.Negative);
             return;
+        }
+
+
+        while (true) {
+            try {
+                List<FeedSubmissionInfo> submissionInfo = getUnprocessedFeedSubmission(country);
+                if (submissionInfo.size() > 0) {
+                    messagePanel.wrapLineMsg(String.format("%s processing/unporcessed order confirmation found. Wait 5 mins to try again.",submissionInfo.size()),LOGGER,InformationLevel.Information);
+                    Tools.sleep(5, TimeUnit.MINUTES);
+                } else {
+                    break;
+                }
+            } catch (Exception e) {
+                LOGGER.error("Failed to load unprocessed feed submission. ",e);
+                break;
+            }
         }
 
 
@@ -210,7 +228,7 @@ public class ConfirmShipments {
 
             if (messagePanel instanceof VirtualMessagePanel) {
                 String subject = String.format("No  orders need to be confirmed for sheet %s", worksheet.toString());
-                confirmShipmentEmailSender.sendErrorFoundEmail(subject,subject, country);
+                confirmShipmentEmailSender.sendErrorFoundEmail(subject, subject, country);
             }
 
             return;
@@ -261,7 +279,7 @@ public class ConfirmShipments {
                     e.getMessage(), country, feedFile);
 
             messagePanel.displayMsg("Error when submitting feed file. " + e.getMessage(), InformationLevel.Negative);
-            LOGGER.error("Error when submitting feed file. ",  e);
+            LOGGER.error("Error when submitting feed file. ", e);
 
             messagePanel.displayMsg("Please try to submit the feed file via Amazon Seller Center.");
             if (messagePanel instanceof VirtualMessagePanel) {
@@ -320,7 +338,7 @@ public class ConfirmShipments {
                     LOGGER.warn("Row {} is not blank, try to add to next row.", lastOrderRowNo);
                     lastOrderRowNo++;
                 } else {
-                    LOGGER.error("",e);
+                    LOGGER.error("", e);
                     break;
                 }
 
@@ -334,7 +352,7 @@ public class ConfirmShipments {
     /**
      *
      */
-    public String submitFeed(File feedFile,  Country country) {
+    public String submitFeed(File feedFile, Country country) {
 
         messagePanel.displayMsg("Feed submitted to Amazon... It may take few minutes for Amazon to process.");
 
@@ -472,9 +490,9 @@ public class ConfirmShipments {
         countries.forEach(country -> {
             try {
 
-                LOGGER.info("Load Unshipped or PartiallyShipped orders between {} and {}",createAfter, createBefore);
-                List<com.amazonservices.mws.orders._2013_09_01.model.Order> orders = mwsOrderClient.listUnshippedOrders(country, createBefore,createAfter);
-                LOGGER.info("{} unshipped or partiallyShipped order(s) founded  between {} and {}",createAfter, createBefore);
+                LOGGER.info("Load Unshipped or PartiallyShipped orders between {} and {}", createAfter, createBefore);
+                List<com.amazonservices.mws.orders._2013_09_01.model.Order> orders = mwsOrderClient.listUnshippedOrders(country, createBefore, createAfter);
+                LOGGER.info("{} unshipped or partiallyShipped order(s) founded  between {} and {}", createAfter, createBefore);
 
 
                 if (orders.size() > 0) {
