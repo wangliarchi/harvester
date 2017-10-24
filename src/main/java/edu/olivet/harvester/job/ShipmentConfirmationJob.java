@@ -37,7 +37,7 @@ public class ShipmentConfirmationJob extends AbstractBackgroundJob {
     @Override
     public void runIfMissed() {
         DateTime dt = new DateTime();
-        if (dt.getHourOfDay() < 17) {
+        if (dt.getHourOfDay() < 14) {
             return;
         }
 
