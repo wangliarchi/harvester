@@ -486,12 +486,15 @@ public class ConfirmShipments {
 
         Date createBefore = DateUtils.addDays(new Date(), -1);
         Date createAfter = DateUtils.addDays(new Date(), -10);
+        Date now = new Date();
 
         countries.forEach(country -> {
             try {
 
                 LOGGER.info("Load Unshipped or PartiallyShipped orders between {} and {}", createAfter, createBefore);
                 List<com.amazonservices.mws.orders._2013_09_01.model.Order> orders = mwsOrderClient.listUnshippedOrders(country, createBefore, createAfter);
+                //todo timezone? should be fine since there should be at lest one day between EarliestShipDate and LatestShipDate
+                orders.removeIf(order -> order.getEarliestShipDate().toGregorianCalendar().getTime().after(now));
                 LOGGER.info("{} unshipped or partiallyShipped order(s) founded  between {} and {}", createAfter, createBefore);
 
 
