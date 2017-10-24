@@ -36,8 +36,7 @@ public class ContextUploadJob extends AbstractBackgroundJob {
         private String timeZone;
     }
 
-    @Inject
-    VersionManager versionManager;
+
     private static final String APPS_URL = "https://script.google.com/macros/s/AKfycbxdEFwL8oO7ahkB0ICe7Wf0TuMaYG01ntQrm3zXWWFVfVJNtcgo/exec";
 
     @Override
@@ -62,6 +61,7 @@ public class ContextUploadJob extends AbstractBackgroundJob {
 
         context.setSid(settings.getSid() + "(" + SystemUtils.USER_NAME + ")");
 
+        VersionManager versionManager = ApplicationContext.getBean(VersionManager.class);
         Version version = versionManager.getCurrentVersion(Harvester.APP_NAME);
         context.setVersion(version.getCode().toString());
         context.setOs(SystemUtils.OS_NAME);
