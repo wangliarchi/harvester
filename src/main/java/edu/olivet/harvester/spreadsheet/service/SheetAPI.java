@@ -67,6 +67,20 @@ public class SheetAPI {
         }
     }
 
+    @Repeat(expectedExceptions = BusinessException.class)
+    public Spreadsheet getSpreadsheet(String spreadsheetId, List<String> ranges) {
+        try {
+            final long start = System.currentTimeMillis();
+            Sheets.Spreadsheets.Get request =
+                    sheetService.spreadsheets().get(spreadsheetId).setIncludeGridData(true).setRanges(ranges);
+            Spreadsheet response = request.execute();
+            response.setSpreadsheetId(spreadsheetId);
+            LOGGER.info("读取{} SHEETS，耗时{}", spreadsheetId, Strings.formatElapsedTime(start));
+            return response;
+        } catch (IOException e) {
+            throw googleAPIHelper.wrapException(e);
+        }
+    }
 
     @Repeat(expectedExceptions = BusinessException.class)
     public List<ValueRange> bactchGetSpreadsheetValues(Spreadsheet spreadsheet, List<String> ranges) {
@@ -132,6 +146,26 @@ public class SheetAPI {
         }
     }
 
+    @Repeat(expectedExceptions = BusinessException.class)
+    public void duplicateSheet(String spreadsheetId, int templateSheetId, String newSheetName) {
+        DuplicateSheetRequest duplicateSheetRequest = new DuplicateSheetRequest();
+        duplicateSheetRequest.setSourceSheetId(templateSheetId)
+                .setInsertSheetIndex(0)
+                .setNewSheetName(newSheetName);
+
+        List<Request> requests = new ArrayList<>();
+        Request request = new Request().setDuplicateSheet(duplicateSheetRequest);
+        requests.add(request);
+        BatchUpdateSpreadsheetRequest body =
+                new BatchUpdateSpreadsheetRequest().setRequests(requests);
+
+        try {
+            this.batchUpdate(spreadsheetId, body);
+        } catch (Exception e) {
+            throw new BusinessException(e);
+        }
+
+    }
 
     @Repeat(expectedExceptions = BusinessException.class)
     public SheetProperties sheetCopyTo(String spreadsheetId, int templateSheetId, String destSpreadId) {
@@ -148,9 +182,6 @@ public class SheetAPI {
             throw googleAPIHelper.wrapException(e);
         }
     }
-
-
-
 
 
     public void moveSheetToIndex(SheetProperties sheetProperties, String spreadsheetId, int moveTo) {
@@ -249,7 +280,7 @@ public class SheetAPI {
 
     @Repeat(expectedExceptions = BusinessException.class)
     public List<File> getAvailableSheets(String sid, Country country, String dataSourceId) {
-        List<File> sheets = spreadService.getAvailableSheets(sid, country , dataSourceId, Constants.RND_EMAIL);
+        List<File> sheets = spreadService.getAvailableSheets(sid, country, dataSourceId, Constants.RND_EMAIL);
 
         List<String> toRemoveKeywordList = Stream.of("fba resale", "cancel", "test", "history", "histroy", "copy of", "grey", "gray", "pl",
                 "backup", "to white", "国际转运", "forward", "top reviewer", "german book", "special sheet")
@@ -265,7 +296,6 @@ public class SheetAPI {
 
         return sheets;
     }
-
 
 
 }
