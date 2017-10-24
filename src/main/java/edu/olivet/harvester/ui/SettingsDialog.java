@@ -6,9 +6,11 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.BaseDialog;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
+import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
+import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.utils.Migration;
 import edu.olivet.harvester.utils.SettingValidator;
 import edu.olivet.harvester.utils.Settings;
@@ -230,7 +232,7 @@ public class SettingsDialog extends BaseDialog {
         }
 
         //validate
-        List<String> errors = settingValidator.validate(configs);
+        List<String> errors = settingValidator.validate(sid, configs);
         if (!CollectionUtils.isEmpty(errors) && errors.size() > 0) {
             StringBuilder sb = new StringBuilder("\n");
             errors.forEach(error -> sb.append(error).append("\n\n"));
@@ -263,11 +265,9 @@ public class SettingsDialog extends BaseDialog {
     }
 
     public static void main(String[] args) {
-
-
         UIText.setLocale(Language.current());
         UITools.setTheme();
-        UITools.setDialogAttr(new SettingsDialog(new SettingValidator(new AppScript())), true);
+        UITools.setDialogAttr(new SettingsDialog(new SettingValidator(new AppScript(), ApplicationContext.getBean(SheetAPI.class))), true);
         System.exit(0);
     }
 }

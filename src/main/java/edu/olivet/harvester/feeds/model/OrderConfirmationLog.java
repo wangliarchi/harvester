@@ -31,12 +31,12 @@ public class OrderConfirmationLog extends PrimaryKey implements ArrayConvertable
 
     @Override
     public Object[] toArray() {
-        return new Object[] {String.format("%s.txt", this.id), DateFormat.DATE_TIME.format(this.uploadTime), this.result};
+        return new Object[] {this.id, DateFormat.DATE_TIME.format(this.uploadTime), this.result};
     }
 
     public static final String[] COLUMNS = {"Feed File", "Upload Time", "Batch Execution Result"};
 
-    public static final int[] WIDTHS = {150, 150, 500};
+    public static final int[] WIDTHS = {150, 120, 500};
 }
 
 

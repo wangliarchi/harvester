@@ -52,7 +52,7 @@ public class Spreadsheet {
     static final String[] INVALID_ORDER_SHEETS = {"daily cost", "confirm", "template", "cs", "memo"};
 
     public List<String> getOrderSheetNames() {
-      return sheetNames.stream().filter(p -> ArrayUtils.contains(INVALID_ORDER_SHEETS,p.toLowerCase()) == false).collect(Collectors.toList());
+        return sheetNames.stream().filter(p -> !ArrayUtils.contains(INVALID_ORDER_SHEETS, p.toLowerCase())).collect(Collectors.toList());
     }
 
     public OrderEnums.OrderItemType getSpreadsheetType() {

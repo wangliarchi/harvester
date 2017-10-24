@@ -7,6 +7,7 @@ import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Directory;
 import edu.olivet.harvester.job.ContextUploadJob;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
+import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.utils.Migration;
 import edu.olivet.harvester.utils.SettingValidator;
 import org.apache.commons.lang3.SystemUtils;
@@ -43,7 +44,7 @@ public class Harvester {
                 UITools.info("Please configure fulfillment requirements for Harvester.");
             }
 
-            SettingsDialog dialog = UITools.setDialogAttr(new SettingsDialog(new SettingValidator(new AppScript())));
+            SettingsDialog dialog = UITools.setDialogAttr(new SettingsDialog(new SettingValidator(new AppScript(),ApplicationContext.getBean(SheetAPI.class))));
             if (!dialog.isOk() || dialog.getSettings() == null) {
                 UITools.error("Harvester cannot run without necessary configurations!");
                 System.exit(4);

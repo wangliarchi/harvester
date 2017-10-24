@@ -1,14 +1,17 @@
 package edu.olivet.harvester.spreadsheet.service;
 
+import com.google.api.services.drive.model.File;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.*;
 import com.google.inject.Inject;
+import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.google.GoogleAPIHelper;
 import edu.olivet.foundations.google.GoogleServiceProvider;
 import edu.olivet.foundations.google.SpreadService;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Constants;
+import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
@@ -21,7 +24,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 10/11/17 1:53 PM
@@ -61,6 +67,20 @@ public class SheetAPI {
         }
     }
 
+    @Repeat(expectedExceptions = BusinessException.class)
+    public Spreadsheet getSpreadsheet(String spreadsheetId, List<String> ranges) {
+        try {
+            final long start = System.currentTimeMillis();
+            Sheets.Spreadsheets.Get request =
+                    sheetService.spreadsheets().get(spreadsheetId).setIncludeGridData(true).setRanges(ranges);
+            Spreadsheet response = request.execute();
+            response.setSpreadsheetId(spreadsheetId);
+            LOGGER.info("读取{} SHEETS，耗时{}", spreadsheetId, Strings.formatElapsedTime(start));
+            return response;
+        } catch (IOException e) {
+            throw googleAPIHelper.wrapException(e);
+        }
+    }
 
     @Repeat(expectedExceptions = BusinessException.class)
     public List<ValueRange> bactchGetSpreadsheetValues(Spreadsheet spreadsheet, List<String> ranges) {
@@ -126,6 +146,26 @@ public class SheetAPI {
         }
     }
 
+    @Repeat(expectedExceptions = BusinessException.class)
+    public void duplicateSheet(String spreadsheetId, int templateSheetId, String newSheetName) {
+        DuplicateSheetRequest duplicateSheetRequest = new DuplicateSheetRequest();
+        duplicateSheetRequest.setSourceSheetId(templateSheetId)
+                .setInsertSheetIndex(0)
+                .setNewSheetName(newSheetName);
+
+        List<Request> requests = new ArrayList<>();
+        Request request = new Request().setDuplicateSheet(duplicateSheetRequest);
+        requests.add(request);
+        BatchUpdateSpreadsheetRequest body =
+                new BatchUpdateSpreadsheetRequest().setRequests(requests);
+
+        try {
+            this.batchUpdate(spreadsheetId, body);
+        } catch (Exception e) {
+            throw new BusinessException(e);
+        }
+
+    }
 
     @Repeat(expectedExceptions = BusinessException.class)
     public SheetProperties sheetCopyTo(String spreadsheetId, int templateSheetId, String destSpreadId) {
@@ -142,9 +182,6 @@ public class SheetAPI {
             throw googleAPIHelper.wrapException(e);
         }
     }
-
-
-
 
 
     public void moveSheetToIndex(SheetProperties sheetProperties, String spreadsheetId, int moveTo) {
@@ -239,5 +276,26 @@ public class SheetAPI {
 
 
     }
+
+
+    @Repeat(expectedExceptions = BusinessException.class)
+    public List<File> getAvailableSheets(String sid, Country country, String dataSourceId) {
+        List<File> sheets = spreadService.getAvailableSheets(sid, country, dataSourceId, Constants.RND_EMAIL);
+
+        List<String> toRemoveKeywordList = Stream.of("fba resale", "cancel", "test", "history", "histroy", "copy of", "grey", "gray", "pl",
+                "backup", "to white", "国际转运", "forward", "top reviewer", "german book", "special sheet")
+                .collect(Collectors.toList());
+
+        for (int i = 2011; i < Dates.getYear(new Date()); i++) {
+            toRemoveKeywordList.add(String.valueOf(i));
+        }
+
+        String[] toRemoveKeywords = toRemoveKeywordList.toArray(new String[toRemoveKeywordList.size()]);
+
+        sheets.removeIf(it -> StringUtils.containsAny(it.getName().toLowerCase(), toRemoveKeywords));
+
+        return sheets;
+    }
+
 
 }

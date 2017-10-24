@@ -17,6 +17,7 @@ import edu.olivet.harvester.job.BackgroundJob;
 import edu.olivet.harvester.spreadsheet.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
+import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.utils.SettingValidator;
 import edu.olivet.harvester.utils.Settings;
 import org.nutz.dao.Cnd;
@@ -41,6 +42,8 @@ public class UIHarvester extends AbstractApplicationUI {
     @Inject
     private DBManager dbManager;
 
+    @Inject
+    private SheetAPI sheetAPI;
 
     public UIHarvester() {
         this.initComponents();
@@ -53,7 +56,6 @@ public class UIHarvester extends AbstractApplicationUI {
         this.setResizable(true);
         this.setTitle("Harvester: Automated Order Fulfillment");
         UITools.setIcon(this, "harvester.png");
-        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
@@ -197,7 +199,7 @@ public class UIHarvester extends AbstractApplicationUI {
 
     @UIEvent
     public void settings() {
-        SettingsDialog dialog = UITools.setDialogAttr(new SettingsDialog(new SettingValidator(new AppScript())));
+        SettingsDialog dialog = UITools.setDialogAttr(new SettingsDialog(new SettingValidator(new AppScript(), sheetAPI)));
         if (dialog.isOk()) {
             this.settings = dialog.getSettings();
         }

@@ -12,10 +12,14 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+
+import static java.lang.Math.toIntExact;
 
 /**
  * Order information mapped to one row of daily update spreadsheet
@@ -215,8 +219,10 @@ public class Order implements Keyable {
     public Date getPurchaseDate() {
         return parsePurchaseDate(purchase_date);
     }
-    public static final String[] PURCHASE_DATE_PATTERNS = {"yyyy-MM-dd'T'HH:mm:ssXXX","yyyy-MM-dd'T'HH:mm:ssZ","yyyy-MM-dd'T'HH:mm:ss.SSSZ","yyyy-MM-dd'T'HH:mm:ss'Z'","yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "M/d/yyyy H:mm",
+
+    public static final String[] PURCHASE_DATE_PATTERNS = {"yyyy-MM-dd'T'HH:mm:ssXXX", "yyyy-MM-dd'T'HH:mm:ssZ", "yyyy-MM-dd'T'HH:mm:ss.SSSZ", "yyyy-MM-dd'T'HH:mm:ss'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "M/d/yyyy H:mm",
             "M/d/yyyy H:mm:ss", "yyyy-MM-dd HH:mm:ss", "MM-dd-yyyy HH:mm", "yyyy-MM-dd"};
+
     public static Date parsePurchaseDate(String purchaseDateText) {
         try {
             return DateUtils.parseDate(purchaseDateText, Locale.US, PURCHASE_DATE_PATTERNS);
@@ -232,6 +238,47 @@ public class Order implements Keyable {
     @Getter
     @Setter
     private String amazonOrderStatus;
+
+    public int maxEddDays() {
+        String expectedShipDateString = StringUtils.split(expected_ship_date, " ")[1];
+        String estimatedDeliveryDateString = StringUtils.split(estimated_delivery_date, " ")[1];
+
+        Date expectedShipDate, estimatedDeliveryDate;
+        try {
+            expectedShipDate = FastDateFormat.getInstance("yyyy-M-d").parse(expectedShipDateString);
+        } catch (ParseException e) {
+            throw new BusinessException(e);
+        }
+
+        try {
+            estimatedDeliveryDate = FastDateFormat.getInstance("yyyy-M-d").parse(estimatedDeliveryDateString);
+        } catch (ParseException e) {
+            throw new BusinessException(e);
+        }
+
+        long diff = estimatedDeliveryDate.getTime() - expectedShipDate.getTime();
+
+        return toIntExact(TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS));
+    }
+
+
+    public int eddDays() {
+        String estimatedDeliveryDateString = StringUtils.split(estimated_delivery_date, " ")[1];
+
+        Date today = new Date();
+
+        Date estimatedDeliveryDate;
+
+        try {
+            estimatedDeliveryDate = FastDateFormat.getInstance("yyyy-M-d").parse(estimatedDeliveryDateString);
+        } catch (ParseException e) {
+            throw new BusinessException(e);
+        }
+
+        long diff = estimatedDeliveryDate.getTime() - today.getTime();
+
+        return toIntExact(TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS));
+    }
 
     @Override
     public String getKey() {
@@ -285,7 +332,7 @@ public class Order implements Keyable {
 
             System.out.println(date.before(minDate));
 
-        }catch (Exception e) {
+        } catch (Exception e) {
 
         }
     }

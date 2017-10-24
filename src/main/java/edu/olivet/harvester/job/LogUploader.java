@@ -58,9 +58,7 @@ public class LogUploader extends AbstractBackgroundJob {
         LogUploader logUploader = new LogUploader();
         try {
             logUploader.executeWithoutWait();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (DbxException e) {
+        } catch (IOException | DbxException e) {
             e.printStackTrace();
         }
     }
