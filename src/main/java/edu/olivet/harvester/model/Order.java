@@ -280,6 +280,17 @@ public class Order implements Keyable {
         return toIntExact(TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS));
     }
 
+    public boolean selfBuy() {
+        return StringUtils.isBlank(quantity_purchased) ||
+                "0".equals(quantity_purchased) ||
+                colorIsYellow() ||
+                (StringUtils.isNotBlank(recipient_name) && StringUtils.containsIgnoreCase(recipient_name, "No Invoice"));
+    }
+
+    public boolean colorIsYellow() {
+        return OrderColor.Yellow.code().equalsIgnoreCase(color);
+    }
+
     @Override
     public String getKey() {
         return this.order_id;
