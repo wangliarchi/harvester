@@ -47,9 +47,9 @@ public class OrderEnums {
         Fail("#ff0000"),
 
         /**
-         * 字买单，黄色
+         * 自买单，黄色
          */
-        Yellow("##ffff00");
+        Yellow("#ffff00");
 
 
 
