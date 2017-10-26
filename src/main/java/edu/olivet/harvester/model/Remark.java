@@ -70,6 +70,12 @@ public enum Remark {
      */
     UK_TRANSFER(new String[] {"UK转运"}, new String[] {"UK FWD"}, true),
 
+
+    /**
+     * 自买单
+     */
+    SELF_ORDER(new String[] {"self-order"}, new String[] {"self order"}, true),
+
     /**
      * UK转运中Seller为AP，需要直接寄到美国LA WareHouse的特定类型，仅用于多单一做场景，注意，这里无需进行US直寄也即切换到美国亚马逊做单的操作
      */
