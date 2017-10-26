@@ -44,12 +44,9 @@ public class OrderEnums {
         /**
          * 操作失败，一般为红色
          */
-        Fail("#ff0000"),
+        Fail("#ff0000");
 
-        /**
-         * 自买单，黄色
-         */
-        Yellow("#ffff00");
+
 
 
 
