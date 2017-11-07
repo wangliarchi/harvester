@@ -1,6 +1,8 @@
 package edu.olivet.harvester.spreadsheet;
 
+import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.harvester.utils.ServiceUtils;
 import lombok.Data;
 import lombok.Getter;
 
@@ -9,6 +11,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 @Data
@@ -27,32 +30,36 @@ public class Worksheet {
 
     public String getOrderConfirmationDate() {
         //current worksheet date
-        DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
+        DateFormat df = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date now = new Date();
-        LocalDate localDate = now.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        ZoneId zoneId = ServiceUtils.getTimeZone(spreadsheet.getSpreadsheetCountry()).toZoneId();
+        LocalDate localDate = now.toInstant().atZone(zoneId).toLocalDate();
 
         Date sheetDate;
+        LocalDate sheetLocalDate;
         try {
-            sheetDate = df.parse(localDate.getYear() + "/" + this.getSheetName());
-            LocalDate sheetLocalDate = sheetDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-
-            //attention - adjust year when the sheet day is 12/31 and current date is new year
-            if (sheetLocalDate.isAfter(localDate)) {
-                sheetDate = df.parse((localDate.getYear() - 1) + "/" + this.getSheetName());
-            }
-
+            sheetDate = df.parse(localDate.getYear() + "/" + this.getSheetName() + " 07:00:00");
+            sheetLocalDate = sheetDate.toInstant().atZone(zoneId).toLocalDate();
         } catch (ParseException e) {
             throw new BusinessException("Sheet with name " + this.getSheetName() + " is not valid");
         }
 
 
-        DateFormat feedDf = new SimpleDateFormat("yyyy-MM-dd");
+        DateTimeFormatter feedDf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        return feedDf.format(sheetDate);
+        return feedDf.format(sheetLocalDate);
 
     }
 
     public String toString() {
         return this.spreadsheet.getTitle() + " - " + this.sheetName;
+    }
+
+    public static void main(String[] args) {
+        Spreadsheet spreadsheet = new Spreadsheet();
+        spreadsheet.setSpreadsheetCountry(Country.US);
+        Worksheet worksheet = new Worksheet(spreadsheet, "11/07");
+        System.out.println(worksheet.getOrderConfirmationDate());
+
     }
 }
