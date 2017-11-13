@@ -39,7 +39,7 @@ public class ChooseSheetDialog extends BaseDialog {
 
     private AppScript appScript;
 
-    ChooseSheetDialog(List<Spreadsheet> spreadsheets, AppScript appScript) {
+    public ChooseSheetDialog(List<Spreadsheet> spreadsheets, AppScript appScript) {
         super(null, true);
 
         this.spreadsheets = spreadsheets;
@@ -163,6 +163,19 @@ public class ChooseSheetDialog extends BaseDialog {
         //set first spreadsheet selected by defaut
         this.spreadList.setSelectedIndex(0);
         formsValueChanged();
+    }
+
+    public void setSheetNameListSelectionMode(int selectionMode) {
+        this.sheetNameList.setSelectionMode(selectionMode);
+
+    }
+
+    public void setSelectedSpreadsheet(String spreadsheetTitle) {
+        this.spreadList.setSelectedValue(spreadsheetTitle,true);
+    }
+
+    public void setSelectedSheet(String sheetName) {
+        this.sheetNameList.setSelectedValue(sheetName,true);
     }
 
     private void formsValueChanged() {

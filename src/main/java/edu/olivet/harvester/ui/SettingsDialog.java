@@ -50,7 +50,7 @@ public class SettingsDialog extends BaseDialog {
     private SettingValidator settingValidator;
 
 
-    SettingsDialog(SettingValidator settingValidator) {
+    public SettingsDialog(SettingValidator settingValidator) {
         super(null, true);
 
         this.settingValidator = settingValidator;

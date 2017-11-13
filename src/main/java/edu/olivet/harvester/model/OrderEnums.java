@@ -1,5 +1,6 @@
 package edu.olivet.harvester.model;
 
+import edu.olivet.harvester.fulfill.utils.FulfillmentEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -219,6 +220,32 @@ public class OrderEnums {
             String currentStatus = StringUtils.defaultString(value);
             String validStatuses = StringUtils.join(statuses, ",");
             throw new IllegalArgumentException(String.format("非法订单状态:%s，程序只接受以下状态:%s", currentStatus, validStatuses));
+        }
+
+        /**
+         * 校验当前订单状态在给定的场景下是否合法
+         * @param status	当前订单status一列值
+         * @param scenario	当前操作场景
+         * @return	是否合法
+         */
+        public static boolean isValid(String status, FulfillmentEnum.Action scenario) {
+            try {
+                Status sts = Status.get(status);
+                switch (scenario) {
+                    case SubmitOrder:
+                        return  sts == CommonSeller || sts == PrimeSeller ||
+                                sts == BuyAndTransfer || sts == PrimeBuyAndTransfer ||
+                                sts == International;
+                    case UpdateStatus:
+                        return 	sts == Initial;
+                    case HuntSupplier:
+                        return 	sts != Finish && sts != Refund;
+                    default:
+                        return true;
+                }
+            } catch (IllegalArgumentException e) {
+                return false;
+            }
         }
     }
 

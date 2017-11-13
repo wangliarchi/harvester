@@ -483,7 +483,7 @@ public enum Remark {
      *
      * @param text 订单批注文本
      */
-    public static Country getFulfillCountry(String text) {
+    public static Country getDirectShipFromCountry(String text) {
         if (StringUtils.isBlank(text)) {
             throw new IllegalArgumentException("Remark cannot be empty");
         }
@@ -520,7 +520,21 @@ public enum Remark {
      */
     public static boolean needFulfillInOtherCountry(String text) {
         try {
-            getFulfillCountry(text);
+            getDirectShipFromCountry(text);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+
+    /**
+     * 通过订单批注判定该条订单是否需要切换到其他国家直寄做单
+     * @param text	订单批注文本
+     */
+    public static boolean isDirectShip(String text) {
+        try {
+            getDirectShipFromCountry(text);
             return true;
         } catch (IllegalArgumentException e) {
             return false;
@@ -539,6 +553,9 @@ public enum Remark {
         return matchAny(text, Remark.PURCHASE_BACK, Remark.PURCHASE_BACK_EX) && !Remark.needFulfillInOtherCountry(text);
     }
 
+    public static boolean ukFwd(String text) {
+        return 	matchAny(text, Remark.UK_TRANSFER);
+    }
     /**
      * 根据给定的国家获取对应的直寄批注文本
      *

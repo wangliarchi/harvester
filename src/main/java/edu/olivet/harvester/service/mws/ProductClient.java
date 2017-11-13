@@ -24,7 +24,7 @@ public class ProductClient {
 
     /**
      * <pre>Returns a list of products and their attributes, based on a list of ASIN values..
-     * including PurchaseDate, OrderStatus, FulfillmentChannel, and LastUpdateDate.
+     * including PurchaseDate, OrderNotFulfilled, FulfillmentChannel, and LastUpdateDate.
      * https://docs.developer.amazonservices.com/en_UK/products/Products_GetMatchingProduct.html
      * </pre>
      */
