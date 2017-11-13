@@ -126,3 +126,37 @@
 更新内容：
 1. check all 5 eu marketplace for active mws credential
 2. minor bug fixes
+
+
+======================================================================
+版本：1.0-2017-10-20.1,1.0-2017-10-24.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. change order confirmation to between 12:00-2:00pm
+2. minor bug fixes
+======================================================================
+版本：1.0-2017-10-24.1,1.0-2017-11-07.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. for order confirmation, use date of marketplace timezone instead of system timezone.
+
+======================================================================
+版本：1.0-2017-11-07.1,1.0-2017-11-08.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. Fixed Harvester cant start on non-english and non-chinese system bug.
+
+======================================================================
+版本：1.0-2017-11-08.1,1.0-2017-11-11.1
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. Not using product api to check product type，rely on sku pattern only.

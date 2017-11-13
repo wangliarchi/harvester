@@ -4,6 +4,7 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.*;
 import com.google.inject.Inject;
+import com.mchange.lang.IntegerUtils;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.google.GoogleAPIHelper;
@@ -17,6 +18,7 @@ import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.spreadsheet.Worksheet;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,8 +86,13 @@ public class SheetAPI {
 
     @Repeat(expectedExceptions = BusinessException.class)
     public List<ValueRange> bactchGetSpreadsheetValues(Spreadsheet spreadsheet, List<String> ranges) {
+        return bactchGetSpreadsheetValues(spreadsheet.getSpreadsheetId(), ranges);
+    }
+
+    @Repeat(expectedExceptions = BusinessException.class)
+    public List<ValueRange> bactchGetSpreadsheetValues(String spreadsheetId, List<String> ranges) {
         try {
-            Sheets.Spreadsheets.Values.BatchGet request = sheetService.spreadsheets().values().batchGet(spreadsheet.getSpreadsheetId()).setRanges(ranges);
+            Sheets.Spreadsheets.Values.BatchGet request = sheetService.spreadsheets().values().batchGet(spreadsheetId).setRanges(ranges);
             BatchGetValuesResponse response = request.execute();
             return response.getValueRanges();
         } catch (IOException e) {
@@ -295,6 +302,13 @@ public class SheetAPI {
         sheets.removeIf(it -> StringUtils.containsAny(it.getName().toLowerCase(), toRemoveKeywords));
 
         return sheets;
+    }
+
+
+    public int rowNoFromRange(String range) {
+        String[] aparts = StringUtils.split(range, ":");
+        String[] bparts = StringUtils.split(aparts[ArrayUtils.getLength(aparts) - 1], "!");
+        return IntegerUtils.parseInt(bparts[ArrayUtils.getLength(bparts) - 1].replaceAll("[^0-9]", ""), 0);
     }
 
 

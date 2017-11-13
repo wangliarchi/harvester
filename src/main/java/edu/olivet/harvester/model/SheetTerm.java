@@ -4,7 +4,7 @@ import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.foundations.utils.Strings;
 
 /**
- * Google Sheet中业务名词常量定义
+ * GoogleAddressValidator Sheet中业务名词常量定义
  * @author <a href="mailto:rnd@olivetuniversity.edu">RnD</a> 09/19/2017 09:00:00
  */
 public enum SheetTerm {

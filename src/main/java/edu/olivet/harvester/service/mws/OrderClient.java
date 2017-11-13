@@ -32,7 +32,7 @@ public class OrderClient {
      * https://docs.developer.amazonservices.com/en_UK/orders-2013-09-01/Orders_GetOrder.html
      * MWS GetOrder operation returns an order for each AmazonOrderId that you specify, up to a maximum of 50.
      * The GetOrder operation includes order information for each order returned,
-     * including PurchaseDate, OrderStatus, FulfillmentChannel, and LastUpdateDate.
+     * including PurchaseDate, OrderNotFulfilled, FulfillmentChannel, and LastUpdateDate.
      */
     public List<Order> getOrders(Country country, List<String> amazonOrderIds) {
 

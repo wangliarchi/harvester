@@ -10,6 +10,10 @@ import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
+import edu.olivet.harvester.fulfill.model.AdvancedSubmitSetting;
+import edu.olivet.harvester.fulfill.model.RuntimeSettings;
+import edu.olivet.harvester.fulfill.utils.OrderFilter;
+import edu.olivet.harvester.model.ConfigEnums;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums.OrderColor;
 import edu.olivet.harvester.model.OrderEnums.OrderColumn;
@@ -56,8 +60,8 @@ public class AppScript {
 
     }
 
-    public @Nullable  Spreadsheet getSpreadsheetFromCache(String spreadId) {
-        return SPREADSHEET_CLIENT_CACHE.getOrDefault(spreadId,null);
+    public @Nullable Spreadsheet getSpreadsheetFromCache(String spreadId) {
+        return SPREADSHEET_CLIENT_CACHE.getOrDefault(spreadId, null);
 
     }
 
@@ -115,7 +119,7 @@ public class AppScript {
      * </pre>
      */
     private static final String URL_PREFIX =
-        "https?://(spreadsheets.google.com/feeds/(cells|spreadsheets)/|docs.google.com/spreadsheets/d/|drive.google.com/open[?]id=)";
+            "https?://(spreadsheets.google.com/feeds/(cells|spreadsheets)/|docs.google.com/spreadsheets/d/|drive.google.com/open[?]id=)";
 
     public static String getSpreadId(String url) {
         String str = StringUtils.defaultString(url).replaceFirst(URL_PREFIX, StringUtils.EMPTY);
@@ -161,11 +165,11 @@ public class AppScript {
         String result = this.processResult(this.get(params));
         if (!SUCCESS.equals(result)) {
             throw new BusinessException(String.format("Failed to commit shipping confirmation log to row %d of sheet %s: %s",
-                row, sheetName, result));
+                    row, sheetName, result));
         }
     }
 
-    private String processResult(String result) {
+    protected String processResult(String result) {
         if (Strings.containsAnyIgnoreCase(StringUtils.defaultString(result), "<html")) {
             Document doc = Jsoup.parse(result);
             return doc.select("body").get(0).text().trim();
@@ -176,6 +180,31 @@ public class AppScript {
     @Inject
     private OrderHelper orderHelper;
     private static final String DEFAULT_RANGE = "A-AO";
+
+    public List<Order> readOrders(RuntimeSettings settings) {
+        try {
+            List<Order> orders = readOrders(settings.getSpreadsheetId(), settings.getSheetName());
+            orders = OrderFilter.filterOrders(orders, settings.getAdvancedSubmitSetting());
+            orders.forEach(it -> {
+                it.setContext(settings.context());
+            });
+
+            if (org.apache.commons.collections.CollectionUtils.isEmpty(orders)) {
+                return orders;
+            }
+
+            AdvancedSubmitSetting advs = settings.getAdvancedSubmitSetting();
+            // 限制做多少条时，需要按照条件过滤完之后取子集，不能直接在AppScript端取子集
+            int size = orders.size();
+            if (advs.getSubmitRange() == ConfigEnums.SubmitRange.LimitCount && size > advs.getCountLimit()) {
+                return orders.subList(0, advs.getCountLimit());
+            }
+            return orders;
+
+        } catch (Exception e) {
+            throw new BusinessException(e);
+        }
+    }
 
     @Repeat
     public List<Order> readOrders(String spreadId, String sheetName) {
@@ -189,6 +218,10 @@ public class AppScript {
         String json = this.processResult(this.get(params));
 
         List<Order> orders = this.parse(json);
+        orders.forEach(it -> {
+            it.setSheetName(sheetName);
+        });
+
         LOGGER.info("Read {} orders from sheet {} via in {}", orders.size(), sheetName, Strings.formatElapsedTime(start));
         return orders;
     }

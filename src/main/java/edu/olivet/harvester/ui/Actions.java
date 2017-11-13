@@ -15,4 +15,6 @@ public class Actions {
     public static final Action ConfirmShipment = new Action("ConfirmShipment", "Confirm Shipments", null, "truck.png");
 
     public static final Action OrderConfirmationHistory = new Action("OrderConfirmationHistory", "Order Confirmation History", null, "list.png");
+
+    public static final Action ConfigBankCard = new Action("ConfigBankCard","Bank Card Configuration",null,"creditcards.png");
 }

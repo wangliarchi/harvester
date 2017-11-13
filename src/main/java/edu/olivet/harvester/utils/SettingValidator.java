@@ -9,6 +9,8 @@ import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,7 +21,7 @@ import java.util.stream.Stream;
  */
 public class SettingValidator {
 
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(SettingValidator.class);
     private AppScript appScript;
     private SheetAPI sheetAPI;
 
@@ -53,6 +55,7 @@ public class SettingValidator {
             try {
                 appScript.reloadSpreadsheet(config.getBookDataSourceUrl());
             } catch (Exception e) {
+                LOGGER.error("",e);
                 errors.add(String.format("%s BOOK spreadsheet %s is not a valid spreadsheet id, or not shared with %s yet.",
                         country.name(), config.getBookDataSourceUrl(), Constants.RND_EMAIL));
             }
@@ -64,6 +67,7 @@ public class SettingValidator {
             try {
                 appScript.reloadSpreadsheet(config.getProductDataSourceUrl());
             } catch (Exception e) {
+                LOGGER.error("",e);
                 errors.add(String.format("%s PRODUCT spreadsheet %s is not a valid spreadsheet id, or not shared with %s yet.",
                         country.name(), config.getProductDataSourceUrl(), Constants.RND_EMAIL));
             }

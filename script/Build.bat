@@ -80,7 +80,7 @@ title Fully Build Harvester Project
 cd /d %PROJECT_DIR%
 set CP=%PROJECT_DIR%\target\*;%PROJECT_DIR%\target\deps\*
 if not exist %PROJECT_DIR%\app-data\tmp mkdir %PROJECT_DIR%\app-data\tmp
-java -cp %CP% edu.olivet.foundations.utils.CurrencyRateCalculatorImpl
+java -cp %CP% edu.olivet.foundations.utils.CurrencyRateCalculatorFixer
 java -cp %CP% edu.olivet.foundations.release.ReleasePublisher Harvester
 echo Harvester documentation generated successfully.
 

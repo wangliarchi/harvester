@@ -1,9 +1,11 @@
 package edu.olivet.harvester.model;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.google.common.base.Objects;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.db.Keyable;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.model.OrderEnums.OrderColor;
@@ -106,6 +108,8 @@ public class Order implements Keyable {
 
     public String sid;
 
+    public String sheetName;
+
     /**
      * Sales chanel of order, which will be useful in multiple marketplaces scenario
      * For example, an order in Europe might be placed at UK, FR, DE, IT or ES
@@ -126,6 +130,24 @@ public class Order implements Keyable {
         return OrderColor.isGray(this.color);
     }
 
+
+    /**
+     * 做单时的上下文：账号-国家-sheet名称
+     */
+    @JSONField(serialize = false)
+    private String context;
+    /**
+     * 做单时的上下文：sheet对应url地址
+     */
+    @JSONField(serialize = false)
+    private String contextUrl;
+
+    /**
+     * 做单是 实际下单数量，如果卖家没有足够库存，这个数字和quantity_ordered会不一样
+     */
+    @JSONField(serialize = false)
+    public String quantity_fulfilled;
+
     /**
      * Determine whether a order number is valid or not by detecting whether it matches Amazon, BetterWorld or Ingram Order Number Pattern
      */
@@ -134,6 +156,10 @@ public class Order implements Keyable {
         return Regex.AMAZON_ORDER_NUMBER.isMatched(orderNo) ||
                 Regex.EBAY_ORDER_NUMBER.isMatched(orderNo) ||
                 Regex.BW_ORDER_NUMBER.isMatched(orderNo);
+    }
+
+    public boolean addressChanged() {
+        return Remark.ADDRESS_CHANGED.isContainedBy(this.remark);
     }
 
     /**
@@ -197,9 +223,21 @@ public class Order implements Keyable {
         return Remark.FULFILL_FROM_UK.isContainedBy(this.remark);
     }
 
-    public boolean sellerIsBW() {
-        return (Strings.containsAnyIgnoreCase(seller, "bw-", "bw") && !Regex.AMAZON_ORDER_NUMBER.isMatched(order_number)) ||
-                Regex.BW_ORDER_NUMBER.isMatched(order_number);
+
+    /**
+     * <pre>
+     * 判定当前订单是否需要买回转运，根据其状态和Remark，用于<strong>做单</strong>场景
+     * <strong>如果批注中包含了直寄，则先不视为买回转运</strong>
+     * </pre>
+     */
+    public boolean needBuyAndTransfer() {
+        return this.statusIndicatePurchaseBack() || Remark.purchaseBack(this.remark) || Remark.ukFwd(this.remark);
+    }
+
+
+    public boolean statusIndicatePurchaseBack() {
+        return OrderEnums.Status.BuyAndTransfer.value().equalsIgnoreCase(status) ||
+                OrderEnums.Status.PrimeBuyAndTransfer.value().equalsIgnoreCase(status);
     }
 
     public boolean ebay() {
@@ -239,6 +277,11 @@ public class Order implements Keyable {
     @Setter
     private String amazonOrderStatus;
 
+    public Date latestEdd() {
+        String estimatedDeliveryDateString = StringUtils.split(estimated_delivery_date, " ")[1];
+
+        return Dates.parseDate(estimatedDeliveryDateString);
+    }
     public int maxEddDays() {
         String expectedShipDateString = StringUtils.split(expected_ship_date, " ")[1];
         String estimatedDeliveryDateString = StringUtils.split(estimated_delivery_date, " ")[1];
@@ -283,7 +326,63 @@ public class Order implements Keyable {
     public boolean selfBuy() {
         return StringUtils.isBlank(quantity_purchased) ||
                 "0".equals(quantity_purchased) ||
-                Remark.SELF_ORDER.isContainedBy(remark) ;
+                Remark.SELF_ORDER.isContainedBy(remark);
+    }
+
+    /**
+     * 判断当前产品是否为AddOn
+     */
+    @JSONField(serialize = false)
+    public boolean isAddOn() {
+        return Remark.ADD_ON.isContainedBy(this.remark);
+    }
+
+    /**
+     * 判定当前订单是否为待检查状态
+     */
+    public boolean toBeChecked() {
+        return Remark.TO_BE_CHECKED.isContainedBy(this.remark);
+    }
+
+
+    /**
+     * 判断当前订单对应Seller是否为AP Warehouse（亚马逊）
+     */
+    public boolean sellerIsAPWarehouse() {
+        return OrderEnums.SellerType.APWareHouse.abbrev().equalsIgnoreCase(this.character);
+    }
+
+    /**
+     * 判断当前订单对应Seller是否为普通Seller
+     */
+    public boolean sellerIsPt() {
+        return OrderEnums.Status.CommonSeller.value().equalsIgnoreCase(this.status) ||
+                OrderEnums.SellerType.Pt.abbrev().equalsIgnoreCase(this.character) ||
+                OrderEnums.SellerType.ImagePt.abbrev().equalsIgnoreCase(this.character);
+    }
+
+    /**
+     * 获取订单的原始标价和当前实际Seller的标价差值
+     */
+    @JSONField(serialize = false)
+    public float getPriceDiff() {
+        return Float.parseFloat(this.price) - Float.parseFloat(this.seller_price);
+    }
+
+    /**
+     * 判断当前订单对应Seller是否为Prime
+     */
+    public boolean sellerIsPrime() {
+        return OrderEnums.Status.PrimeSeller.value().equalsIgnoreCase(this.status) ||
+                OrderEnums.Status.PrimeBuyAndTransfer.value().equalsIgnoreCase(this.status) ||
+                OrderEnums.SellerType.Prime.abbrev().equalsIgnoreCase(this.character) ||
+                OrderEnums.SellerType.ImagePrime.abbrev().equalsIgnoreCase(this.character) ||
+                sellerIsAP() ||
+                sellerIsAPWarehouse();
+    }
+
+    public boolean sellerIsAP() {
+        return OrderEnums.SellerType.AP.name().equalsIgnoreCase(this.seller) || OrderEnums.SellerType.AP.abbrev().equalsIgnoreCase(this.character);
     }
 
 
@@ -330,6 +429,7 @@ public class Order implements Keyable {
                 order_number, account, ship_country);
     }
 
+
     public static void main(String[] args) {
         //
         try {
@@ -343,4 +443,6 @@ public class Order implements Keyable {
 
         }
     }
+
+
 }

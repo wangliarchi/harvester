@@ -1,4 +1,4 @@
-package edu.olivet.harvester.fulfill;
+package edu.olivet.harvester.ui;
 
 import com.teamdev.jxbrowser.chromium.*;
 import com.teamdev.jxbrowser.chromium.dom.By;
@@ -175,7 +175,7 @@ class BrowserFrame extends JFrame {
     }
 
     public static void main(String[] args) {
-        BrowserFrame dialog = new BrowserFrame(new Account(args[0], AccountType.PrimeBuyer));
+        BrowserFrame dialog = new BrowserFrame(new Account(args[0], AccountType.Buyer));
         UITools.setDialogAttr(dialog, true);
         dialog.loginMobilePage();
     }

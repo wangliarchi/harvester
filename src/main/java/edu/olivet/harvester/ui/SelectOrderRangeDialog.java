@@ -1,4 +1,4 @@
-package edu.olivet.harvester.fulfill;
+package edu.olivet.harvester.ui;
 
 import edu.olivet.deploy.Language;
 import edu.olivet.foundations.ui.BaseDialog;
