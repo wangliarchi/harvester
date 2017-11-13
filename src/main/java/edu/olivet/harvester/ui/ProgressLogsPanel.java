@@ -64,9 +64,9 @@ public class ProgressLogsPanel extends JPanel implements MessagePanel {
 
 
         if (SystemUtils.IS_OS_WINDOWS) {
-            failedRecordsTextPanel.setFont(new Font(jSplitPane1.getFont().getName(), Font.PLAIN, Constants.TEXT_FONT_SIZE - 2));
+            failedRecordsTextPanel.setFont(new Font(failedRecordsTextPanel.getFont().getName(), Font.PLAIN, Constants.TEXT_FONT_SIZE - 2));
         } else if (SystemUtils.IS_OS_LINUX) {
-            failedRecordsTextPanel.setFont(new Font(Constants.LINUX_TEXT_FONT, Font.PLAIN, Constants.TEXT_FONT_SIZE - 2));
+           failedRecordsTextPanel.setFont(new Font(Constants.LINUX_TEXT_FONT, Font.PLAIN, Constants.TEXT_FONT_SIZE - 2));
         }
 
         GroupLayout layout = new GroupLayout(this);
