@@ -58,6 +58,7 @@ public class MarkStatusService {
         if (showErrorMsg) {
             messageListener.addMsg(resultSummary);
         }
+
         if (CollectionUtils.isEmpty(orders)) {
             UITools.info(UIText.message("message.info.nostatus"), UIText.title("title.result"));
             return;
@@ -67,8 +68,10 @@ public class MarkStatusService {
         List<Order> validOrders = new ArrayList<>();
         for (Order order : orders) {
             String error = orderValidator.isValid(order, FulfillmentEnum.Action.UpdateStatus);
-            if (StringUtils.isNotBlank(error) && showErrorMsg) {
-                messageListener.addMsg(order, error, InformationLevel.Negative);
+            if (StringUtils.isNotBlank(error) ) {
+                if(showErrorMsg) {
+                    messageListener.addMsg(order, error, InformationLevel.Negative);
+                }
             } else {
                 validOrders.add(order);
             }
