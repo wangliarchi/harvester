@@ -58,9 +58,9 @@ public class SettingsTest extends BaseTest {
 
     @Test
     public void testGetMWSCredential() throws Exception {
-        Settings.Configuration config = Settings.load(testConfigFilePath).getConfigByCountry(Country.US);
-
-        assertEquals(config.getMwsCredential(), new MarketWebServiceIdentity(
+        Settings.Configuration config = Settings.load().getConfigByCountry(Country.UK);
+        config.getMwsCredential();
+        assertEquals(config.getValidMwsCredential(), new MarketWebServiceIdentity(
                 "A3BEPQLI451F6I",
                 "AKIAI73MGXM4FSWB6TIQ",
                 "W5oIE4cbQ1MTG3YO5h4JU93J7FGjDX1/OLDjADBc",
