@@ -25,6 +25,7 @@ import edu.olivet.harvester.spreadsheet.service.OrderHelper;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.ui.TabbedBuyerPanel;
 import edu.olivet.harvester.utils.MessageListener;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -32,8 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.*;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -70,7 +70,9 @@ public class OrderSubmitter {
     @Inject
     OrderService orderService;
 
+    private static final Map<String,Boolean> DUPLICATION_CHECK_CACHE = new HashMap<>();
     public void execute(RuntimeSettings settings) {
+        messageListener.empty();
 
         try {
             String spreadsheetId = settings.getSpreadsheetId();
@@ -81,20 +83,24 @@ public class OrderSubmitter {
         }
 
         //check duplication
-        Spreadsheet spreadsheet = sheetService.getSpreadsheet(settings.getSpreadsheetId());
-        List<Order> duplicatedOrders = orderService.findDuplicates(spreadsheet);
-        if (CollectionUtils.isNotEmpty(duplicatedOrders)) {
-            String msg = String.format("%s duplicated orders found in %s, %s", duplicatedOrders.size(), spreadsheet.getProperties().getTitle(),
-                    StringUtils.join(duplicatedOrders.stream().map(it -> it.order_id + " @ " + it.sheetName).collect(Collectors.toSet()).toArray(new String[duplicatedOrders.size()]), ", "));
-            UITools.error(msg + "\n\n Please fix before submitting orders.");
-            return;
-        }
+        DUPLICATION_CHECK_CACHE.computeIfAbsent(settings.getSpreadsheetId(),k->{
+            Spreadsheet spreadsheet = sheetService.getSpreadsheet(settings.getSpreadsheetId());
+            List<Order> duplicatedOrders = orderService.findDuplicates(spreadsheet);
+            if (CollectionUtils.isNotEmpty(duplicatedOrders)) {
+                String msg = String.format("%s duplicated orders found in %s, %s", duplicatedOrders.size(), spreadsheet.getProperties().getTitle(),
+                        StringUtils.join(duplicatedOrders.stream().map(it -> it.order_id + " @ " + it.sheetName).collect(Collectors.toSet()).toArray(new String[duplicatedOrders.size()]), ", "));
+                UITools.error(msg + "\n\n Please fix before submitting orders.");
+            }
+
+            return true;
+        });
+
 
         long start = System.currentTimeMillis();
 
 
         //mark status first
-        markStatusService.excute(settings, true);
+        markStatusService.excute(settings, false);
 
 
         List<Order> orders = appScript.readOrders(settings);
