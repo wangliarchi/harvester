@@ -14,7 +14,7 @@ import java.util.Date;
 
 @Table(value = "order_confirmation_record")
 @Data
-@EqualsAndHashCode()
+@EqualsAndHashCode(callSuper = false)
 
 public class OrderConfirmationLog extends PrimaryKey implements ArrayConvertable {
     @Name
