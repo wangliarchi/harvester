@@ -267,6 +267,10 @@ public class RuntimeSettingsPanel extends JPanel {
     }
 
     public void selectRange() {
+        //spreadsheet should be selected first.
+        if(StringUtils.isBlank(settings.getSheetName())) {
+            return;
+        }
         UITools.setDialogAttr(new SelectRangeDialog(null, true, settings.getAdvancedSubmitSetting()), true);
         settings = RuntimeSettings.load();
         selectedRangeLabel.setText(settings.getAdvancedSubmitSetting().toString());
