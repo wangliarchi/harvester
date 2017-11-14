@@ -36,7 +36,7 @@ public class SettingValidator {
         configs.forEach(config -> {
             errors.addAll(validateSpreadsheetIds(config));
             errors.addAll(spreadsheetTypeAndTitleShouldMatch(config));
-            errors.addAll(spreadsheetCountryAndTitleShouldMatch(config));
+            errors.addAll(spreadsheetAccountCountryAndTitleShouldMatch(sid,config));
             errors.addAll(possibleSpreadsheetExistedButNotEntered(sid, config));
         });
 
@@ -51,7 +51,7 @@ public class SettingValidator {
 
         if (StringUtils.isNotEmpty(config.getBookDataSourceUrl())) {
             try {
-                appScript.reloadSpreadsheet(config.getBookDataSourceUrl());
+                appScript.getSpreadsheet(config.getBookDataSourceUrl());
             } catch (Exception e) {
                 errors.add(String.format("%s BOOK spreadsheet %s is not a valid spreadsheet id, or not shared with %s yet.",
                         country.name(), config.getBookDataSourceUrl(), Constants.RND_EMAIL));
@@ -62,7 +62,7 @@ public class SettingValidator {
 
         if (StringUtils.isNotEmpty(config.getProductDataSourceUrl())) {
             try {
-                appScript.reloadSpreadsheet(config.getProductDataSourceUrl());
+                appScript.getSpreadsheet(config.getProductDataSourceUrl());
             } catch (Exception e) {
                 errors.add(String.format("%s PRODUCT spreadsheet %s is not a valid spreadsheet id, or not shared with %s yet.",
                         country.name(), config.getProductDataSourceUrl(), Constants.RND_EMAIL));
@@ -110,7 +110,7 @@ public class SettingValidator {
         return errors;
     }
 
-    public List<String> spreadsheetCountryAndTitleShouldMatch(Settings.Configuration config) {
+    public List<String> spreadsheetAccountCountryAndTitleShouldMatch(String sid,Settings.Configuration config) {
 
         List<String> errors = new ArrayList<>();
         Country country = config.getCountry();
@@ -120,8 +120,15 @@ public class SettingValidator {
 
         spreadsheetIds.forEach(spreadsheetId -> {
             if (StringUtils.isNotEmpty(spreadsheetId)) {
-                Spreadsheet spreadsheet = appScript.getSpreadsheetFromCache(spreadsheetId);
+                Spreadsheet spreadsheet = appScript.getSpreadsheet(spreadsheetId);
                 if (spreadsheet != null) {
+
+                    if(!StringUtils.containsIgnoreCase(spreadsheet.getTitle(), sid)) {
+                        errors.add(String.format("%s spreadsheet %s(%s) seems not for account %s.",
+                                country.name(), spreadsheet.getTitle(), spreadsheetId, sid));
+                        return;
+                    }
+
                     if (country.europe()) {
                         if (!StringUtils.containsIgnoreCase(spreadsheet.getTitle(), country.name()) && !StringUtils.containsIgnoreCase(spreadsheet.getTitle(), "EU")) {
                             errors.add(String.format("%s spreadsheet %s(%s) seems not for %s.",
@@ -154,6 +161,11 @@ public class SettingValidator {
                 errors.add(String.format("%s BOOK spreadsheet %s(%s) seems a product order sheet.",
                         country.name(), config.getBookDataSourceUrl(), spreadsheet.getTitle()));
             }
+
+            if (spreadsheet != null && StringUtils.containsIgnoreCase(spreadsheet.getTitle(), "product")) {
+
+            }
+
         }
 
 
@@ -172,6 +184,8 @@ public class SettingValidator {
 
         return errors;
     }
+
+
 
     public List<String> possibleSpreadsheetExistedButNotEntered(String sid, Settings.Configuration config){
         List<String> errors = new ArrayList<>();
