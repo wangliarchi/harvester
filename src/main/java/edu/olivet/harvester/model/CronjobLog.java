@@ -17,7 +17,7 @@ import java.util.Date;
 
 @Table(value = "cronjob_record")
 @Data
-@EqualsAndHashCode()
+@EqualsAndHashCode(callSuper = false)
 
 public class CronjobLog extends PrimaryKey implements ArrayConvertable {
     @Name
