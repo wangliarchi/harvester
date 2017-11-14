@@ -185,9 +185,7 @@ public class AppScript {
         try {
             List<Order> orders = readOrders(settings.getSpreadsheetId(), settings.getSheetName());
             orders = OrderFilter.filterOrders(orders, settings.getAdvancedSubmitSetting());
-            orders.forEach(it -> {
-                it.setContext(settings.context());
-            });
+            orders.forEach(it -> it.setContext(settings.context()));
 
             if (org.apache.commons.collections.CollectionUtils.isEmpty(orders)) {
                 return orders;
@@ -218,9 +216,7 @@ public class AppScript {
         String json = this.processResult(this.get(params));
 
         List<Order> orders = this.parse(json);
-        orders.forEach(it -> {
-            it.setSheetName(sheetName);
-        });
+        orders.forEach(it -> it.setSheetName(sheetName));
 
         LOGGER.info("Read {} orders from sheet {} via in {}", orders.size(), sheetName, Strings.formatElapsedTime(start));
         return orders;

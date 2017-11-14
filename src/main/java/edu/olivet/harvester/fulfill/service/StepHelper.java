@@ -92,7 +92,7 @@ public class StepHelper {
             case ShippingMethod:
             case ShippingMethodOnePage:
                 //jumped here directly after checkout btn clicked, go back to enter shipping method...
-                if(Checkout.class.getName().equals(state.getPrevStep().stepName)) {
+                if (Checkout.class.getName().equals(state.getPrevStep().stepName)) {
                     return enterShippingAddress;
                 }
 

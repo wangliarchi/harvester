@@ -46,7 +46,8 @@ public class BuyerPanel extends JPanel {
     @Getter
     private BrowserView browserView;
 
-    @Getter @Setter
+    @Getter
+    @Setter
     /**
      * current proccessing order
      */
@@ -92,10 +93,8 @@ public class BuyerPanel extends JPanel {
         }
     }
 
-    public @Nullable
-    CookieStorage loginBuyerAccount() {
+    public @Nullable CookieStorage loginBuyerAccount() {
         Browser browser = browserView.getBrowser();
-
         Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> it.loadURL(country.baseUrl()));
 
         return null;

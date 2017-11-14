@@ -52,7 +52,6 @@ public class MainPanel extends JPanel {
         );
 
 
-
         mainWindowPanel.addAllBuyerAccountTabs();
         mainWindowPanel.getSelectedBuyerPanel().toHomePage();
         mainWindowPanel.resetZoomLevel();
@@ -61,8 +60,8 @@ public class MainPanel extends JPanel {
     public void initEventListeners() {
         this.addComponentListener(new ComponentListener() {
             public void componentResized(ComponentEvent e) {
-                jSplitPane1.setDividerLocation(getHeight()-170);
-                jSplitPane2.setDividerLocation(getWidth()-330);
+                jSplitPane1.setDividerLocation(runtimeSettingsPanel.getPreferredSize().height);
+                jSplitPane2.setDividerLocation(getWidth() - runtimeSettingsPanel.getPreferredSize().width - 20);
                 mainWindowPanel.resetZoomLevel();
             }
 
@@ -82,6 +81,7 @@ public class MainPanel extends JPanel {
             }
         });
     }
+
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JSplitPane jSplitPane2;
     private RuntimeSettingsPanel runtimeSettingsPanel;

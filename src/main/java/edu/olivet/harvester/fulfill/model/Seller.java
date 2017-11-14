@@ -225,7 +225,7 @@ public class Seller {
 
 
     public void setInstock(String delivery_str) {
-        if (this.instock == false) {
+        if (!this.instock) {
             return;
         }
 

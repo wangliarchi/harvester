@@ -10,12 +10,12 @@ import edu.olivet.harvester.utils.JXBrowserHelper;
  */
 public class CantShipToAddressPage extends FulfillmentPage {
 
-    public CantShipToAddressPage (BuyerPanel buyerPanel) {
+    public CantShipToAddressPage(BuyerPanel buyerPanel) {
         super(buyerPanel);
     }
 
     public void execute(Order order) {
-        JXBrowserHelper.saveOrderScreenshot(order,buyerPanel,"1");
+        JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
     }
 
 

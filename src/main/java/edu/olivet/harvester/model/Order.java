@@ -282,6 +282,7 @@ public class Order implements Keyable {
 
         return Dates.parseDate(estimatedDeliveryDateString);
     }
+
     public int maxEddDays() {
         String expectedShipDateString = StringUtils.split(expected_ship_date, " ")[1];
         String estimatedDeliveryDateString = StringUtils.split(estimated_delivery_date, " ")[1];
@@ -440,7 +441,7 @@ public class Order implements Keyable {
             System.out.println(date.before(minDate));
 
         } catch (Exception e) {
-
+            //ignore
         }
     }
 

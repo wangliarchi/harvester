@@ -95,7 +95,7 @@ public class ShipmentOrderFilter {
                     .append(StringUtils.join(duplicatedOrderIds, "\n")).append("\n\n");
         }
 
-        return filtered.values().stream().collect(Collectors.toList());
+        return new ArrayList<>(filtered.values());
     }
 
     /**

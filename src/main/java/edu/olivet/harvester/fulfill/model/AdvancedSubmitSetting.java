@@ -37,45 +37,59 @@ public class AdvancedSubmitSetting {
     private OrderEnums.Status statusFilterValue;
     private boolean autoLoop;
     private int loopInterval;
+
     public ConfigEnums.SubmitRange getSubmitRange() {
         return submitRange;
     }
+
     public void setSubmitRange(ConfigEnums.SubmitRange scopeType) {
         this.submitRange = scopeType;
     }
+
     public int getSingleRowNo() {
         return singleRowNo;
     }
+
     public void setSingleRowNo(int singleRowNo) {
         this.singleRowNo = singleRowNo;
     }
+
     public int getStartRowNo() {
         return startRowNo;
     }
+
     public void setStartRowNo(int startRowNo) {
         this.startRowNo = startRowNo;
     }
+
     public int getEndRowNo() {
         return endRowNo;
     }
+
     public void setEndRowNo(int endRowNo) {
         this.endRowNo = endRowNo;
     }
+
     public String getMultiRows() {
         return multiRows;
     }
+
     public void setMultiRows(String multiRows) {
         this.multiRows = multiRows;
     }
+
     public boolean isAutoLoop() {
         return autoLoop;
     }
+
     public void setAutoLoop(boolean autoLoop) {
         this.autoLoop = autoLoop;
     }
+
     public int getLoopInterval() {
         return loopInterval;
     }
+
     public void setLoopInterval(int loopInterval) {
         this.loopInterval = loopInterval;
     }
@@ -114,15 +128,19 @@ public class AdvancedSubmitSetting {
     public int getCountLimit() {
         return countLimit;
     }
+
     public void setCountLimit(int countLimit) {
         this.countLimit = countLimit;
     }
+
     public OrderEnums.Status getStatusFilterValue() {
         return statusFilterValue;
     }
+
     public void setStatusFilterValue(OrderEnums.Status statusFilterValue) {
         this.statusFilterValue = statusFilterValue;
     }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -138,34 +156,47 @@ public class AdvancedSubmitSetting {
         result = prime * result + ((submitRange == null) ? 0 : submitRange.hashCode());
         return result;
     }
+
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         AdvancedSubmitSetting other = (AdvancedSubmitSetting) obj;
-        if (autoLoop != other.autoLoop)
+        if (autoLoop != other.autoLoop) {
             return false;
-        if (countLimit != other.countLimit)
+        }
+        if (countLimit != other.countLimit) {
             return false;
-        if (endRowNo != other.endRowNo)
+        }
+        if (endRowNo != other.endRowNo) {
             return false;
-        if (loopInterval != other.loopInterval)
+        }
+        if (loopInterval != other.loopInterval) {
             return false;
+        }
         if (multiRows == null) {
-            if (other.multiRows != null)
+            if (other.multiRows != null) {
                 return false;
-        } else if (!multiRows.equals(other.multiRows))
+            }
+        } else if (!multiRows.equals(other.multiRows)) {
             return false;
-        if (singleRowNo != other.singleRowNo)
+        }
+        if (singleRowNo != other.singleRowNo) {
             return false;
-        if (startRowNo != other.startRowNo)
+        }
+        if (startRowNo != other.startRowNo) {
             return false;
-        if (statusFilterValue != other.statusFilterValue)
+        }
+        if (statusFilterValue != other.statusFilterValue) {
             return false;
+        }
         return submitRange == other.submitRange;
     }
 }

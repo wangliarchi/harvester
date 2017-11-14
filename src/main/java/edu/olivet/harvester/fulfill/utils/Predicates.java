@@ -109,7 +109,7 @@ public class Predicates {
      * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Jan 6, 2015 9:12:04 AM
      */
     static class MultiRowPredicate implements Predicate {
-        private Map<Integer, Boolean> rowMap = new HashMap<Integer, Boolean>();
+        private Map<Integer, Boolean> rowMap = new HashMap<>();
 
         public MultiRowPredicate(String multiRows) {
             String[] rows = StringUtils.split(multiRows, Constants.COMMA);
@@ -166,7 +166,6 @@ public class Predicates {
     }
 
 
-
     /**
      * 按满足多单客服例信发送前提条件进行筛选过滤
      *
@@ -202,18 +201,14 @@ public class Predicates {
         private Map<String, OrderIdStatistic> statisticCache;
 
         public Map<String, OrderIdStatistic> getCardinalityMap() {
-            Map<String, OrderIdStatistic> map = new HashMap<String, OrderIdStatistic>();
-            Map<String, Integer> countMap = new HashMap<String, Integer>();
-            Map<String, Integer> finishedMap = new HashMap<String, Integer>();
+            Map<String, OrderIdStatistic> map = new HashMap<>();
+            Map<String, Integer> countMap = new HashMap<>();
+            Map<String, Integer> finishedMap = new HashMap<>();
 
             for (Order order : orders) {
 
 
-                if (countMap.get(order.order_id) == null) {
-                    countMap.put(order.order_id, 1);
-                } else {
-                    countMap.put(order.order_id, countMap.get(order.order_id) + 1);
-                }
+                countMap.merge(order.order_id, 1, (a, b) -> a + b);
 
             }
 

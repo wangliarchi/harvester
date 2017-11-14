@@ -115,9 +115,7 @@ public class SheetService extends SheetAPI {
     public Map<Integer, String> fetchOrderStatus(String spreadsheetId, List<Order> orders) {
 
         List<String> ranges = new ArrayList<>(orders.size());
-        orders.forEach(order -> {
-            ranges.add(String.format("%s!A%d", order.sheetName, order.row));
-        });
+        orders.forEach(order -> ranges.add(String.format("%s!A%d", order.sheetName, order.row)));
         List<ValueRange> valueRanges = bactchGetSpreadsheetValues(spreadsheetId, ranges);
 
         Map<Integer, String> statusMap = new HashMap<>();

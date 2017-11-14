@@ -31,7 +31,7 @@ public class Login extends Step {
     public Step createDynamicInstance(FlowState state) {
         state.setPrevStep(this);
 
-        if (this.prevStep!= null && this.prevStep.stepName.equals(ProcessToCheckout.class.getName())) {
+        if (this.prevStep != null && this.prevStep.stepName.equals(ProcessToCheckout.class.getName())) {
             return processToCheckout;
         }
 

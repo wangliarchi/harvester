@@ -130,9 +130,7 @@ public class MessageListener implements MessageQueue {
     }
 
     public void addMsg(List<String> msgs, InformationLevel... infoLevels) {
-        msgs.forEach(msg -> {
-            this.addLongMsg(msg, infoLevels);
-        });
+        msgs.forEach(msg -> this.addLongMsg(msg, infoLevels));
 
     }
 

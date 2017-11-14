@@ -23,6 +23,7 @@ public class UIElements extends AbstractUIContainer {
     private final Menu harvester = new Menu("Harvester", "H");
 
     private final Menu confirmShipment = new Menu("Confirm Shipment", "C");
+
     @Override
     public Menu[] getMenus() {
         return new Menu[]{
@@ -43,7 +44,7 @@ public class UIElements extends AbstractUIContainer {
 
         });
 
-        map.put(confirmShipment,new Action[]{
+        map.put(confirmShipment, new Action[]{
                 Actions.ConfirmShipment,
                 Actions.OrderConfirmationHistory
         });

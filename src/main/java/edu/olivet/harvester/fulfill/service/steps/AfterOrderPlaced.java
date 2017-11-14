@@ -58,7 +58,7 @@ public class AfterOrderPlaced extends Step {
         try {
             updateSpending(settings.getSpreadsheetId(), state.getOrder());
         } catch (Exception e) {
-
+            //ignore
         }
     }
 

@@ -70,13 +70,14 @@ public class BankCardPanel extends JPanel {
     private JTextField cvvField = new JTextField();
 
     CreditCard collect() {
-        return new CreditCard(buyerAccountField.getText(),bankCardNoField.getText(),cvvField.getText());
+        return new CreditCard(buyerAccountField.getText(), bankCardNoField.getText(), cvvField.getText());
     }
 
-    public  void load(CreditCard creditCard) {
+    public void load(CreditCard creditCard) {
         bankCardNoField.setText(creditCard.getCardNo());
         cvvField.setText(creditCard.getCvv());
     }
+
     public static void main(String[] args) {
 
         UITools.setTheme();

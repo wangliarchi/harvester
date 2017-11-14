@@ -33,7 +33,7 @@ public class ChooseSheetDialog extends BaseDialog {
 
     private JList<String> spreadList;
     private JList<String> sheetNameList;
-
+    public boolean continueToNext = false;
     @Getter
     private List<Worksheet> selectedWorksheets;
 
@@ -46,9 +46,12 @@ public class ChooseSheetDialog extends BaseDialog {
         this.appScript = appScript;
 
         this.initComponents();
+        this.initEvents();
         this.setResizable(false);
     }
 
+    JButton continueBtn;
+    JButton clearCacheBtn;
 
     private void initComponents() {
 
@@ -63,33 +66,16 @@ public class ChooseSheetDialog extends BaseDialog {
         final JScrollPane sheetScrollPane = new JScrollPane();
         this.initButtons();
 
-        JButton clearCacheBtn = new JButton(UIText.label("datasource.refresh"));
+        clearCacheBtn = new JButton(UIText.label("datasource.refresh"));
         clearCacheBtn.setToolTipText(UIText.tooltip("tooltip.clear.sheetcache"));
 
-        //refresh selected spreadsheet
-        clearCacheBtn.addActionListener(e -> {
-            //find selected spreadsheet
-            int spreadIndex = this.spreadList.getSelectedIndex();
-            Spreadsheet spreadsheet = spreadsheets.get(spreadIndex);
-            spreadsheet = appScript.reloadSpreadsheet(spreadsheet.getSpreadsheetId());
-            spreadsheets.set(spreadIndex, spreadsheet);
+        continueBtn = new JButton(UIText.label("Continue to Select Range"));
+        clearCacheBtn.setToolTipText(UIText.tooltip("Continue to select range to mark status or submit."));
 
-            formsValueChanged();
 
-        });
-
-        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setTitle(UIText.title("title.select.sheet"));
         spreadPane.setBorder(BorderFactory.createTitledBorder(UIText.title("title.spread")));
-
-        spreadList.addListSelectionListener(evt -> {
-            if (evt.getValueIsAdjusting()) {
-                formsValueChanged();
-            }
-        });
         String[] strings = new String[spreadsheets.size()];
-
-
         for (int i = 0; i < spreadsheets.size(); i++) {
             Spreadsheet spreadsheet = spreadsheets.get(i);
             strings[i] = spreadsheet.getTitle();
@@ -99,16 +85,6 @@ public class ChooseSheetDialog extends BaseDialog {
         this.spreadList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 
-        MouseListener mouseListener = new MouseAdapter() {
-            public void mouseClicked(MouseEvent mouseEvent) {
-                if (mouseEvent.getClickCount() == 2) {
-                    ok();
-                }
-            }
-        };
-
-
-        sheetNameList.addMouseListener(mouseListener);
         spreadScrollPane.setViewportView(spreadList);
 
         GroupLayout spreadLayout = new GroupLayout(spreadPane);
@@ -135,31 +111,73 @@ public class ChooseSheetDialog extends BaseDialog {
 
         GroupLayout layout = new GroupLayout(getContentPane());
 
+
+        continueBtn.setVisible(false);
+
         layout.setHorizontalGroup(layout
                 .createParallelGroup(Alignment.TRAILING)
-                .addComponent(spreadPane, 400, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
-                .addComponent(sheetPane, 400, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                .addComponent(spreadPane, 480, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                .addComponent(sheetPane, 480, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createSequentialGroup()
+                        .addComponent(cancelBtn, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(clearCacheBtn, UITools.BUTTON_WIDTH + 10, UITools.BUTTON_WIDTH + 10, UITools.BUTTON_WIDTH + 10)
-                        .addGap(1)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(okBtn, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH)
-                        .addGap(1)
-                        .addComponent(cancelBtn, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH)));
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+
+                        .addComponent(continueBtn)
+                ));
 
 
         layout.setVerticalGroup(layout.createParallelGroup(Alignment.LEADING).addGroup(
-
                 layout.createSequentialGroup()
                         .addComponent(spreadPane, 150, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
                         .addComponent(sheetPane, 300, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(Alignment.BASELINE)
-                                .addComponent(clearCacheBtn).addComponent(cancelBtn).addComponent(okBtn))));
+                                .addComponent(clearCacheBtn).addComponent(cancelBtn).addComponent(okBtn).addComponent(continueBtn))));
 
         getContentPane().setLayout(layout);
         getRootPane().setDefaultButton(okBtn);
         pack();
 
+    }
 
+    private void initEvents() {
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
+        MouseListener mouseListener = new MouseAdapter() {
+            public void mouseClicked(MouseEvent mouseEvent) {
+                if (mouseEvent.getClickCount() == 2) {
+                    ok();
+                }
+            }
+        };
+        sheetNameList.addMouseListener(mouseListener);
+
+        spreadList.addListSelectionListener(evt -> {
+            if (evt.getValueIsAdjusting()) {
+                formsValueChanged();
+            }
+        });
+
+        //refresh selected spreadsheet
+        clearCacheBtn.addActionListener(e -> {
+            //find selected spreadsheet
+            int spreadIndex = this.spreadList.getSelectedIndex();
+            Spreadsheet spreadsheet = spreadsheets.get(spreadIndex);
+            spreadsheet = appScript.reloadSpreadsheet(spreadsheet.getSpreadsheetId());
+            spreadsheets.set(spreadIndex, spreadsheet);
+
+            formsValueChanged();
+
+        });
+
+        continueBtn.addActionListener(e -> {
+            continueToNext = true;
+            ok();
+
+        });
         //set first spreadsheet selected by defaut
         this.spreadList.setSelectedIndex(0);
         formsValueChanged();
@@ -167,15 +185,14 @@ public class ChooseSheetDialog extends BaseDialog {
 
     public void setSheetNameListSelectionMode(int selectionMode) {
         this.sheetNameList.setSelectionMode(selectionMode);
-
     }
 
     public void setSelectedSpreadsheet(String spreadsheetTitle) {
-        this.spreadList.setSelectedValue(spreadsheetTitle,true);
+        this.spreadList.setSelectedValue(spreadsheetTitle, true);
     }
 
     public void setSelectedSheet(String sheetName) {
-        this.sheetNameList.setSelectedValue(sheetName,true);
+        this.sheetNameList.setSelectedValue(sheetName, true);
     }
 
     private void formsValueChanged() {
@@ -207,6 +224,11 @@ public class ChooseSheetDialog extends BaseDialog {
         int index = sheetNames.indexOf(todaySheetName);
         this.sheetNameList.setSelectedIndex(index);
 
+    }
+
+    public void showContinueBtn(boolean show) {
+        continueBtn.setVisible(show);
+        continueBtn.invalidate();
     }
 
     @Override
@@ -253,5 +275,6 @@ public class ChooseSheetDialog extends BaseDialog {
 
         ChooseSheetDialog dialog = UITools.setDialogAttr(new ChooseSheetDialog(spreadsheets, appScript));
         System.out.println(dialog.getSelectedWorksheets());
+
     }
 }

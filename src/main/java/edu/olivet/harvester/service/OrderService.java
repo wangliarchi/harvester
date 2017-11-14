@@ -240,9 +240,7 @@ public class OrderService {
 
         List<String> sheetNames = new ArrayList<>();
         //save sheet properties to cache
-        spreadsheet.getSheets().forEach(sheet -> {
-            sheetNames.add(sheet.getProperties().getTitle());
-        });
+        spreadsheet.getSheets().forEach(sheet -> sheetNames.add(sheet.getProperties().getTitle()));
 
         sheetNames.removeIf(it -> !isOrderSheet(it, dateRange));
         //
@@ -331,10 +329,11 @@ public class OrderService {
     }
 
 
-    public List<Order> findDuplicates(Spreadsheet spreadsheet ) {
+    public List<Order> findDuplicates(Spreadsheet spreadsheet) {
         List<Order> orders = getOrders(spreadsheet);
         return findDuplicates(orders);
     }
+
     /**
      * <pre>
      * check duplicated orders

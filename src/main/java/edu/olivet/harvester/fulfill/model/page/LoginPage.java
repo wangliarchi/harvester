@@ -63,7 +63,6 @@ public class LoginPage extends FulfillmentPage implements PageObject {
 
     @Repeat(expectedExceptions = BusinessException.class)
     public void login() {
-
         long start = System.currentTimeMillis();
         if (order != null) {
             JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "0");
@@ -108,7 +107,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
                 UITools.info("Please enter login verification code.");
                 WaitTime.Short.execute();
                 while (true) {
-                    String enteredCode = codeField.getAttribute("value").toString();
+                    String enteredCode = codeField.getAttribute("value");
                     if (StringUtils.length(enteredCode) >= 6) {
                         break;
                     }

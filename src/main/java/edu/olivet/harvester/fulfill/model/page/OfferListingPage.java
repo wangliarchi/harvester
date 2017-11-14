@@ -61,7 +61,7 @@ public class OfferListingPage extends FulfillmentPage {
 
         Seller seller = findSeller(order);
         LOGGER.info("Found seller {} for order {}", seller.getName(), order.order_id);
-        addToCart(browser, seller.getIndex());
+        _addToCart(browser, seller.getIndex());
         LOGGER.info("Added to shopping cart successfully, now at {} -> {}, took {}", browser.getTitle(), browser.getURL(), Strings.formatElapsedTime(start));
 
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
@@ -75,7 +75,7 @@ public class OfferListingPage extends FulfillmentPage {
         Country currentCountry = OrderHelper.getFulfillementCountry(order);
         List<Seller> sellers = sellerService.parseSellers(browser, currentCountry);
 
-        List<Seller> results = new ArrayList<Seller>();
+        List<Seller> results = new ArrayList<>();
         for (Seller seller : sellers) {
             String sellerName = seller.getName();
 
@@ -93,7 +93,7 @@ public class OfferListingPage extends FulfillmentPage {
     }
 
     @Repeat(expectedExceptions = BusinessException.class)
-    public void addToCart(Browser browser, int sellerIndex) {
+    public void _addToCart(Browser browser, int sellerIndex) {
 
         List<DOMElement> rows = JXBrowserHelper.selectElementsByCssSelector(browser, "div.a-row.olpOffer");
         DOMElement sellerRow = rows.get(sellerIndex);
@@ -121,7 +121,7 @@ public class OfferListingPage extends FulfillmentPage {
         Browser browser = buyerPanel.getBrowserView().getBrowser();
         String offerListingURL = "https://www.amazon.com//gp/offer-listing/0545521378/ref=olp_prime_new?ie=UTF8&condition=new&shipPromoFilter=1";
         JXBrowserHelper.loadPage(browser, offerListingURL);
-        offerListingPage.addToCart(browser, 0);
+        offerListingPage._addToCart(browser, 0);
 
 
     }

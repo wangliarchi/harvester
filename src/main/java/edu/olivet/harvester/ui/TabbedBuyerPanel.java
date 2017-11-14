@@ -115,9 +115,7 @@ public class TabbedBuyerPanel extends JTabbedPane {
 
     public void resetZoomLevel() {
         zoomLevel = (getWidth() - 1000) > 0 ? 1 : (getWidth() / 1000 - 2.1);
-        buyerPanels.forEach((index, buyerPanel) -> {
-            buyerPanel.getBrowserView().getBrowser().setZoomLevel(zoomLevel);
-        });
+        buyerPanels.forEach((index, buyerPanel) -> buyerPanel.getBrowserView().getBrowser().setZoomLevel(zoomLevel));
     }
 
     private String getTabKey(Country country, Account account) {

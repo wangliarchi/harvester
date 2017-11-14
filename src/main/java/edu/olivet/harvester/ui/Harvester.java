@@ -68,8 +68,8 @@ public class Harvester {
         messageListener.setContainer(ProgressLogsPanel.getInstance());
         messageListener.start();
         messageListener.addLongMsg("Harvester Started Successfully!", InformationLevel.Positive);
-      
 
+        Migration.migrateCreditCardSetttings();
         try {
             new AppScript().preloadAllSpreadsheets();
         } catch (Exception e) {

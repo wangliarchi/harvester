@@ -21,7 +21,7 @@ public class FlowState {
     private Order order;
 
     public FlowState() {
-        this.steps = new ArrayList<Step>();
+        this.steps = new ArrayList<>();
     }
 
     public void saveScreenshot() {

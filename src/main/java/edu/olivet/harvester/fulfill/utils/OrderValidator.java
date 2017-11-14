@@ -130,7 +130,7 @@ public class OrderValidator {
     }
 
     public String validWithValidators(Order order, List<Validator> validators) {
-        Validator[] vs = validators.stream().toArray(Validator[]::new);
+        Validator[] vs = validators.toArray(new Validator[0]);
         return validWithValidators(order, vs);
     }
 
@@ -278,21 +278,21 @@ public class OrderValidator {
      * Switzerland
      **/
     public String validZipCode(Order order) {
-        if (order.ship_zip.length() == 4
-                && !order.ship_country.equalsIgnoreCase("Argentina")
-                && !order.ship_country.equalsIgnoreCase("Australia")
-                && !order.ship_country.equalsIgnoreCase("Austria")
-                && !order.ship_country.equalsIgnoreCase("Belgium")
-                && !order.ship_country.equalsIgnoreCase("Cyprus")
-                && !order.ship_country.equalsIgnoreCase("Denmark")
-                && !order.ship_country.equalsIgnoreCase("Liechtenstein")
-                && !order.ship_country.equalsIgnoreCase("Luxembourg")
-                && !order.ship_country.equalsIgnoreCase("Norway")
-                && !order.ship_country.equalsIgnoreCase("New Zealand")
-                && !order.ship_country.equalsIgnoreCase("Switzerland")
-                && !order.ship_country.equalsIgnoreCase("England")
-                && !order.ship_country.equalsIgnoreCase("Canada")
-                ) {
+        if (order.ship_zip.length() == 4 &&
+
+                !order.ship_country.equalsIgnoreCase("Argentina") &&
+                !order.ship_country.equalsIgnoreCase("Australia") &&
+                !order.ship_country.equalsIgnoreCase("Austria") &&
+                !order.ship_country.equalsIgnoreCase("Belgium") &&
+                !order.ship_country.equalsIgnoreCase("Cyprus") &&
+                !order.ship_country.equalsIgnoreCase("Denmark") &&
+                !order.ship_country.equalsIgnoreCase("Liechtenstein") &&
+                !order.ship_country.equalsIgnoreCase("Luxembourg") &&
+                !order.ship_country.equalsIgnoreCase("Norway") &&
+                !order.ship_country.equalsIgnoreCase("New Zealand") &&
+                !order.ship_country.equalsIgnoreCase("Switzerland") &&
+                !order.ship_country.equalsIgnoreCase("England") &&
+                !order.ship_country.equalsIgnoreCase("Canada")) {
             order.ship_zip = "0" + order.ship_zip;
         }
 
@@ -375,7 +375,7 @@ public class OrderValidator {
                 ConditionUtils.getConditionLevel(corrected);
                 return "";
             } catch (IllegalArgumentException e) {
-
+                //ignore
             }
         }
         return String.format("Order condition %s is not valid.", order.condition);
@@ -418,7 +418,7 @@ public class OrderValidator {
         if (list.size() > 0) {
             OrderFulfillmentRecord record = list.get(0);
             return String.format("Order fulfilled at %s with order number %s by buyer account %s. Please check if this order is a duplicated record. If not, please update remark.",
-                    DateFormat.DATE_TIME.format(record.getFulfillDate()),record.getOrderNumber(),record.getBuyerAccount()
+                    DateFormat.DATE_TIME.format(record.getFulfillDate()), record.getOrderNumber(), record.getBuyerAccount()
             );
         }
 
@@ -427,13 +427,14 @@ public class OrderValidator {
 
     @Inject
     ForbiddenSeller forbiddenSeller;
+
     public String isNotForbiddenSeller(Order order) {
         Seller seller = new Seller();
         seller.setUuid(order.seller_id);
         seller.setCountry_OfferListing(OrderHelper.getFulfillementCountry(order));
         seller.setName(order.seller);
-        if(forbiddenSeller.isForbidden(seller)) {
-            return String.format("Seller %s (%s) is forbidden.",seller.getName(),seller.getUuid());
+        if (forbiddenSeller.isForbidden(seller)) {
+            return String.format("Seller %s (%s) is forbidden.", seller.getName(), seller.getUuid());
         }
         return "";
     }

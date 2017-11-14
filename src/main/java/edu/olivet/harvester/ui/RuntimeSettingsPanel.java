@@ -8,7 +8,6 @@ import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.harvester.fulfill.model.AdvancedSubmitSetting;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
-import edu.olivet.harvester.spreadsheet.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.events.MarkStatusEvent;
@@ -21,8 +20,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.util.ArrayList;
+import java.awt.event.ItemEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 
 
@@ -50,7 +50,7 @@ public class RuntimeSettingsPanel extends JPanel {
         List<Country> countries = systemSettings.listAllCountries();
         settings.setSid(systemSettings.getSid());
 
-        marketplaceComboBox.setModel(new DefaultComboBoxModel<Country>(countries.toArray(new Country[countries.size()])));
+        marketplaceComboBox.setModel(new DefaultComboBoxModel<>(countries.toArray(new Country[countries.size()])));
         if (settings.getMarketplaceName() == null) {
             settings.setMarketplaceName(((Country) marketplaceComboBox.getSelectedItem()).name());
         } else {
@@ -75,12 +75,12 @@ public class RuntimeSettingsPanel extends JPanel {
 
 
         lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"5", "7"}));
-        if (StringUtils.isBlank(settings.getLostLimit())) {
+        if (StringUtils.isNotBlank(settings.getLostLimit())) {
             lostLimitComboBox.setSelectedItem(settings.getLostLimit());
         }
 
         priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"3", "5"}));
-        if (StringUtils.isBlank(settings.getPriceLimit())) {
+        if (StringUtils.isNotBlank(settings.getPriceLimit())) {
             priceLimitComboBox.setSelectedItem(settings.getPriceLimit());
         }
 
@@ -91,21 +91,25 @@ public class RuntimeSettingsPanel extends JPanel {
         finderCodeTextField.setText(settings.getFinderCode());
 
 
+        maxDaysOverEddComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}));
+        if (StringUtils.isNotBlank((settings.getEddLimit()))) {
+            maxDaysOverEddComboBox.setSelectedItem(settings.getEddLimit());
+        }
+
+
         settings.save();
     }
 
     public void initEvents() {
-        marketplaceComboBox.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    if (e.getItem() != Country.valueOf(settings.getMarketplaceName())) {
-                        clearGoogleSheet();
-                        clearSubmitRange();
-                        settings = new RuntimeSettings();
-                        settings.setMarketplaceName(((Country) e.getItem()).name());
-                        settings.save();
-                        initData();
-                    }
+        marketplaceComboBox.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                if (e.getItem() != Country.valueOf(settings.getMarketplaceName())) {
+                    clearGoogleSheet();
+                    clearSubmitRange();
+                    settings = new RuntimeSettings();
+                    settings.setMarketplaceName(((Country) e.getItem()).name());
+                    settings.save();
+                    initData();
                 }
             }
         });
@@ -120,13 +124,7 @@ public class RuntimeSettingsPanel extends JPanel {
         googleSheetTextField.setEditable(false);
         googleSheetTextField.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        selectRangeButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                UITools.setDialogAttr(new SelectRangeDialog(null, true, settings.getAdvancedSubmitSetting()), true);
-                settings = RuntimeSettings.load();
-                selectedRangeLabel.setText(settings.getAdvancedSubmitSetting().toString());
-            }
-        });
+        selectRangeButton.addActionListener(evt -> selectRange());
 
         finderCodeTextField.addMouseListener(new MouseAdapter() {
             @Override
@@ -142,62 +140,57 @@ public class RuntimeSettingsPanel extends JPanel {
             }
         });
 
-        lostLimitComboBox.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    settings.setLostLimit(e.getItem().toString());
-                    settings.save();
+        lostLimitComboBox.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                settings.setLostLimit(e.getItem().toString());
+                settings.save();
+            }
+        });
+
+        priceLimitComboBox.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                settings.setPriceLimit(e.getItem().toString());
+                settings.save();
+            }
+        });
+
+        maxDaysOverEddComboBox.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                settings.setEddLimit(e.getItem().toString());
+                settings.save();
+            }
+        });
+
+        markStatusButton.addActionListener(evt -> {
+            Thread worker = new Thread(() -> {
+                try {
+                    disableAllBtns();
+                    ApplicationContext.getBean(MarkStatusEvent.class).excute();
+                } catch (Exception e) {
+                    UITools.error("ERROR while marking order status:" + e.getMessage(), UIText.title("title.code_error"));
+                    LOGGER.error("ERROR while marking order status:", e);
+                } finally {
+                    restAllBtns();
                 }
-            }
+            });
+            worker.start();
         });
 
-        priceLimitComboBox.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    settings.setPriceLimit(e.getItem().toString());
-                    settings.save();
+        submitButton.addActionListener(evt -> {
+            Thread worker = new Thread(() -> {
+                try {
+                    disableAllBtns();
+                    ApplicationContext.getBean(SubmitOrdersEvent.class).excute();
+                } catch (Exception e) {
+                    UITools.error(UIText.message("message.submit.exception", e.getMessage()), UIText.title("title.code_error"));
+                    LOGGER.error("做单过程中出现异常:", e);
+                } finally {
+                    restAllBtns();
                 }
-            }
-        });
-
-        markStatusButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                Thread worker = new Thread(new Runnable() {
-                    public void run() {
-                        try {
-                            disableAllBtns();
-                            ApplicationContext.getBean(MarkStatusEvent.class).excute();
-                        } catch (Exception e) {
-                            UITools.error("ERROR while marking order status:" + e.getMessage(), UIText.title("title.code_error"));
-                            LOGGER.error("ERROR while marking order status:", e);
-                        } finally {
-                            restAllBtns();
-                        }
-                    }
-                });
-                worker.start();
-            }
-        });
-
-        submitButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                Thread worker = new Thread(new Runnable() {
-                    public void run() {
-                        try {
-                            disableAllBtns();
-                            ApplicationContext.getBean(SubmitOrdersEvent.class).excute();
-                        } catch (Exception e) {
-                            UITools.error(UIText.message("message.submit.exception", e.getMessage()), UIText.title("title.code_error"));
-                            LOGGER.error("做单过程中出现异常:", e);
-                        } finally {
-                            restAllBtns();
-                        }
-                    }
-                });
-                worker.start();
+            });
+            worker.start();
 
 
-            }
         });
 
 
@@ -207,6 +200,7 @@ public class RuntimeSettingsPanel extends JPanel {
         marketplaceComboBox.setEnabled(false);
         googleSheetTextField.setEnabled(false);
         lostLimitComboBox.setEnabled(false);
+        maxDaysOverEddComboBox.setEnabled(false);
         priceLimitComboBox.setEnabled(false);
         selectRangeButton.setEnabled(false);
         markStatusButton.setEnabled(false);
@@ -219,6 +213,7 @@ public class RuntimeSettingsPanel extends JPanel {
     public void restAllBtns() {
         marketplaceComboBox.setEnabled(true);
         googleSheetTextField.setEnabled(true);
+        maxDaysOverEddComboBox.setEnabled(true);
         lostLimitComboBox.setEnabled(true);
         priceLimitComboBox.setEnabled(true);
         selectRangeButton.setEnabled(true);
@@ -230,27 +225,13 @@ public class RuntimeSettingsPanel extends JPanel {
     }
 
     public void selectGoogleSheet() {
-        List<String> spreadsheetIds = Settings.load().listAllSpreadsheets();
-        List<edu.olivet.harvester.spreadsheet.Spreadsheet> spreadsheets = new ArrayList<>();
-
         StringBuilder spreadsheetIdError = new StringBuilder();
         AppScript appScript = new AppScript();
+        Country selectedCountry = (Country) marketplaceComboBox.getSelectedItem();
+        List<edu.olivet.harvester.spreadsheet.Spreadsheet> spreadsheets = Settings.load().listSpreadsheets(selectedCountry, appScript);
 
-        for (String spreadsheetId : spreadsheetIds) {
-            try {
-                Spreadsheet spreadsheet = appScript.getSpreadsheet(spreadsheetId);
-                if (spreadsheet.getSpreadsheetCountry() == marketplaceComboBox.getSelectedItem()) {
-                    spreadsheets.add(spreadsheet);
-                }
-            } catch (Exception e) {
-                LOGGER.error("{} is invalid. {}", spreadsheetId, e.getMessage());
-                spreadsheetIdError.append(String.format("%s is not a valid spreadsheet id, or it's not shared to %s \n",
-                        spreadsheetId, Constants.RND_EMAIL));
-            }
-        }
-
-        if (!spreadsheetIdError.toString().isEmpty()) {
-            UITools.error(spreadsheetIdError.toString(), "Error");
+        if (CollectionUtils.isEmpty(spreadsheets)) {
+            UITools.error("No order update google sheet found. Please make sure it's configured and shared with " + Constants.RND_EMAIL, "Error");
         }
 
         ChooseSheetDialog chooseSheetDialog = new ChooseSheetDialog(spreadsheets, appScript);
@@ -259,8 +240,10 @@ public class RuntimeSettingsPanel extends JPanel {
             chooseSheetDialog.setSelectedSpreadsheet(settings.getSpreadsheetName());
             chooseSheetDialog.setSelectedSheet(settings.getSheetName());
         }
+        chooseSheetDialog.showContinueBtn(true);
         ChooseSheetDialog dialog = UITools.setDialogAttr(chooseSheetDialog);
 
+        dialog.invalidate();
         if (dialog.isOk()) {
             if (CollectionUtils.isNotEmpty(dialog.getSelectedWorksheets())) {
                 if (!dialog.getSelectedWorksheets().get(0).equals(selectedWorksheet)) {
@@ -276,9 +259,18 @@ public class RuntimeSettingsPanel extends JPanel {
             settings.setSheetName(selectedWorksheet.getSheetName());
             settings.setAdvancedSubmitSetting(new AdvancedSubmitSetting());
             settings.save();
+
+            if(dialog.continueToNext) {
+                selectRange();
+            }
         }
     }
 
+    public void selectRange() {
+        UITools.setDialogAttr(new SelectRangeDialog(null, true, settings.getAdvancedSubmitSetting()), true);
+        settings = RuntimeSettings.load();
+        selectedRangeLabel.setText(settings.getAdvancedSubmitSetting().toString());
+    }
     public void setAccounts4Country() {
         Country currentCountry = (Country) marketplaceComboBox.getSelectedItem();
         Settings.Configuration configuration = Settings.load().getConfigByCountry(currentCountry);
@@ -366,6 +358,9 @@ public class RuntimeSettingsPanel extends JPanel {
     private JButton markStatusButton;
     private JButton submitButton;
 
+    private JLabel maxEddLabel;
+    private JComboBox<String> maxDaysOverEddComboBox;
+
     private void initComponents() {
         setBorder(BorderFactory.createTitledBorder(BorderFactory.createTitledBorder("Runtime Settings")));
 
@@ -398,6 +393,9 @@ public class RuntimeSettingsPanel extends JPanel {
         selectedRangeLabel = new JLabel();
         selectedRangeLabel.setForeground(Color.BLUE);
 
+        maxEddLabel = new JLabel();
+        maxDaysOverEddComboBox = new JComboBox<>();
+
         huntSupplierButton = new JButton();
         huntSupplierButton.setText("Hunt Supplier");
         huntSupplierButton.setIcon(UITools.getIcon("find.png"));
@@ -415,12 +413,13 @@ public class RuntimeSettingsPanel extends JPanel {
         primeBookBuyerLabel.setText("Prime Book Buyer");
         prodBuyerLabel.setText("Prod Buyer");
         primeProdBuyerLabel.setText("Prime Prod Buyer");
-        googleSheetLabel.setText("GoogleAddressValidator Sheet");
+        googleSheetLabel.setText("Google Sheet");
         selectRangeLabel.setText("Select Range");
         lostLimitLabel.setText("Lost Limit");
         priceLimitLabel.setText("Price Limit");
         noInvoiceLabel.setText("No Invoice");
         codeFinderLabel.setText("Finder Code");
+        maxEddLabel.setText("EDD Limit");
 
 
         GroupLayout layout = new GroupLayout(this);
@@ -446,7 +445,7 @@ public class RuntimeSettingsPanel extends JPanel {
                                                         .addComponent(selectRangeLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                         .addComponent(lostLimitLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                         .addComponent(priceLimitLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-
+                                                        .addComponent(maxEddLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                         .addComponent(noInvoiceLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                         .addComponent(codeFinderLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                 )
@@ -469,7 +468,7 @@ public class RuntimeSettingsPanel extends JPanel {
 
                                                         .addComponent(lostLimitComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(priceLimitComboBox, labelMinWidth, fieldWidth, fieldWidth)
-
+                                                        .addComponent(maxDaysOverEddComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(noInvoiceTextField, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(finderCodeTextField, labelMinWidth, fieldWidth, fieldWidth)
                                                 )
@@ -477,9 +476,9 @@ public class RuntimeSettingsPanel extends JPanel {
 
                                         ).addGroup(layout.createSequentialGroup()
                                                 .addComponent(huntSupplierButton)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(markStatusButton)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(submitButton))
 
                                 )
@@ -534,6 +533,10 @@ public class RuntimeSettingsPanel extends JPanel {
                                         .addComponent(priceLimitComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(maxEddLabel)
+                                        .addComponent(maxDaysOverEddComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(noInvoiceLabel)
                                         .addComponent(noInvoiceTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
@@ -546,6 +549,11 @@ public class RuntimeSettingsPanel extends JPanel {
                                         .addComponent(markStatusButton)
                                         .addComponent(submitButton)))
         );
+    }
+
+
+    public int getMinWidth() {
+        return huntSupplierButton.getWidth() + markStatusButton.getWidth() + submitButton.getWidth() + 2 * 15;
     }
 
     public static void main(String[] args) {

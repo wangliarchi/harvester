@@ -68,8 +68,6 @@ public class JXBrowserHelper {
             File file = new File(filePath);
             Tools.createFileIfNotExist(file);
             ImageIO.write((RenderedImage) image, "PNG", file);
-//            LOGGER.info("保存JXBrowser当前页面为图片文件{}，大小{}，耗时{}", file.getName(),
-//                    FileUtils.byteCountToDisplaySize(new File(filePath).length()), Strings.formatElapsedTime(start));
         } catch (Exception e) {
             LOGGER.error("尝试保存截图文件到{}失败：", filePath, e);
         }
@@ -82,8 +80,6 @@ public class JXBrowserHelper {
         try {
             File file = new File(filePath);
             Tools.writeStringToFile(file, browserView.getBrowser().getHTML());
-//            LOGGER.info("保存JXBrowser当前页面HTML {}，大小{}，耗时{}", file.getName(),
-//                    FileUtils.byteCountToDisplaySize(new File(filePath).length()), Strings.formatElapsedTime(start));
         } catch (Exception e) {
             LOGGER.error("尝试保存HTML文件到{}失败：", filePath, e);
         }

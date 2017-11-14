@@ -47,8 +47,7 @@ public class ShippingOption {
     //$3.99 - Standard Shipping
     public Money parsePrice(String priceText, Country country) {
         try {
-            Money money = Money.fromText(priceText, country);
-            return money;
+            return Money.fromText(priceText, country);
         } catch (ParseException e) {
             LOGGER.error("Cant parse price text {}", priceText, e);
         }

@@ -194,9 +194,7 @@ public class OrderHelper {
         File file = new File(Harvester.CC_CONFIG_FILE_PATH);
         Map<String, CreditCard> creditCards = new HashMap<>();
         if (file.exists() && file.isFile()) {
-            JSON.parseArray(Tools.readFileToString(file), CreditCard.class).forEach(creditCard -> {
-                creditCards.put(creditCard.getAccountEmail().toLowerCase(), creditCard);
-            });
+            JSON.parseArray(Tools.readFileToString(file), CreditCard.class).forEach(creditCard -> creditCards.put(creditCard.getAccountEmail().toLowerCase(), creditCard));
         }
 
         return creditCards;

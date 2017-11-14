@@ -25,180 +25,180 @@ public enum Remark {
     /**
      * 直寄标识前缀，用于检查非法直寄标识
      */
-    SWITCH_COUNTRY(new String[] {"直寄"}, new String[] {"Shipment"}, false),
+    SWITCH_COUNTRY(new String[]{"直寄"}, new String[]{"Shipment"}, false),
 
     /**
      * 美国直寄
      */
-    FULFILL_FROM_US(new String[] {"US做单", "US直寄"}, new String[] {"US Shipment"}, true),
+    FULFILL_FROM_US(new String[]{"US做单", "US直寄"}, new String[]{"US Shipment"}, true),
     /**
      * 加拿大直寄
      */
-    FULFILL_FROM_CA(new String[] {"CA做单", "CA直寄"}, new String[] {"CA Shipment"}, true),
+    FULFILL_FROM_CA(new String[]{"CA做单", "CA直寄"}, new String[]{"CA Shipment"}, true),
     /**
      * 英国直寄
      */
-    FULFILL_FROM_UK(new String[] {"UK做单", "UK直寄"}, new String[] {"UK Shipment"}, true),
+    FULFILL_FROM_UK(new String[]{"UK做单", "UK直寄"}, new String[]{"UK Shipment"}, true),
     /**
      * 法国直寄
      */
-    FULFILL_FROM_FR(new String[] {"FR做单", "FR直寄"}, new String[] {"FR Shipment"}, true),
+    FULFILL_FROM_FR(new String[]{"FR做单", "FR直寄"}, new String[]{"FR Shipment"}, true),
     /**
      * 德国直寄
      */
-    FULFILL_FROM_DE(new String[] {"DE做单", "DE直寄"}, new String[] {"DE Shipment"}, true),
+    FULFILL_FROM_DE(new String[]{"DE做单", "DE直寄"}, new String[]{"DE Shipment"}, true),
     /**
      * 意大利直寄
      */
-    FULFILL_FROM_IT(new String[] {"IT做单", "IT直寄"}, new String[] {"IT Shipment"}, true),
+    FULFILL_FROM_IT(new String[]{"IT做单", "IT直寄"}, new String[]{"IT Shipment"}, true),
     /**
      * 西班牙直寄
      */
-    FULFILL_FROM_ES(new String[] {"ES做单", "ES直寄"}, new String[] {"ES Shipment"}, true),
+    FULFILL_FROM_ES(new String[]{"ES做单", "ES直寄"}, new String[]{"ES Shipment"}, true),
 
     /**
      * 买回转运，也即先买回到US Warehouse，再发货给客户
      */
-    PURCHASE_BACK(new String[] {"买回", "US买回"}, new String[] {"Purchase It Back", "US FWD"}, true),
+    PURCHASE_BACK(new String[]{"买回", "US买回"}, new String[]{"Purchase It Back", "US FWD"}, true),
     /**
      * 快递买回转运，也即先快递买回到US Warehouse，再发货给客户
      */
-    PURCHASE_BACK_EX(new String[] {"快递买回", "US快递买回"}, new String[] {"US FWD Expedited"}, true),
+    PURCHASE_BACK_EX(new String[]{"快递买回", "US快递买回"}, new String[]{"US FWD Expedited"}, true),
 
     /**
      * UK转运类型，也即先买到UK Warehouse，再发货给客户
      */
-    UK_TRANSFER(new String[] {"UK转运"}, new String[] {"UK FWD"}, true),
+    UK_TRANSFER(new String[]{"UK转运"}, new String[]{"UK FWD"}, true),
 
 
     /**
      * 自买单
      */
-    SELF_ORDER(new String[] {"self-order"}, new String[] {"self order"}, true),
+    SELF_ORDER(new String[]{"self-order"}, new String[]{"self order"}, true),
 
     /**
      * UK转运中Seller为AP，需要直接寄到美国LA WareHouse的特定类型，仅用于多单一做场景，注意，这里无需进行US直寄也即切换到美国亚马逊做单的操作
      */
-    UK_SWITCH_TO_US(new String[] {"UKAP直寄美国"}, new String[] {"UK AP Ship To USLA"}, true),
+    UK_SWITCH_TO_US(new String[]{"UKAP直寄美国"}, new String[]{"UK AP Ship To USLA"}, true),
 
     /**
      * 强行指定运输方式为快递
      */
-    FAST_SHIPPING(new String[] {"kuaidi", "快递"}, new String[] {"Expedited Shipping"}, true),
+    FAST_SHIPPING(new String[]{"kuaidi", "快递"}, new String[]{"Expedited Shipping"}, true),
     /**
      * 强行指定运输方式为普递
      */
-    STANDARD_SHIPPING(new String[] {"pudi", "普递"}, new String[] {"Standard Shipping"}, true),
+    STANDARD_SHIPPING(new String[]{"pudi", "普递"}, new String[]{"Standard Shipping"}, true),
 
     /**
      * 部分Prime Seller要求先登录之后才可加入购物车
      */
-    PRIME_LOGIN_FIRST(new String[] {"PrLogin"}, new String[] {"PrLogin"}, true),
+    PRIME_LOGIN_FIRST(new String[]{"PrLogin"}, new String[]{"PrLogin"}, true),
 
     /**
      * 标识当前产品为AddOn，不能独立下单
      */
-    ADD_ON(new String[] {"AddOn"}, new String[] {"AddOn"}, true),
+    ADD_ON(new String[]{"AddOn"}, new String[]{"AddOn"}, true),
     /**
      * 标识当前产品为电子产品
      */
-    Electronic(new String[] {"Electronic"}, new String[] {"Electronic"}, true),
+    Electronic(new String[]{"Electronic"}, new String[]{"Electronic"}, true),
 
     /**
      * 无视亏损做单
      */
-    FORCE_FULFILL(new String[] {"zuoba", "做吧"}, new String[] {"Please Place The Order"}, true),
+    FORCE_FULFILL(new String[]{"zuoba", "做吧"}, new String[]{"Please Place The Order"}, true),
     /**
      * 跳过运费检查
      */
-    SKIP_SHIPPING_FEE(new String[] {"跳过运费", "跳过运费检查"}, new String[] {"Skip ShippingFee Check"}, true),
+    SKIP_SHIPPING_FEE(new String[]{"跳过运费", "跳过运费检查"}, new String[]{"Skip ShippingFee Check"}, true),
 
     /**
      * 标识当前产品需要先登录Ebates，跳转到亚马逊后做单，以获得少许返现
      */
-    EBATES(new String[] {"Ebates"}, new String[] {"Ebates"}, true),
+    EBATES(new String[]{"Ebates"}, new String[]{"Ebates"}, true),
 
     //----------订单特殊状态标识，通常为客服人员标识，以便制止继续做单---------//
     /**
      * 客户取消了订单, 此时不能再继续做单
      */
-    BUYER_CANCELLED(new String[] {"Buyer Cancel", "Buyer Canceled", "Buyer Cancelled"},
-        new String[] {"Buyer Cancel", "Buyer Canceled", "Buyer Cancelled"}, true),
+    BUYER_CANCELLED(new String[]{"Buyer Cancel", "Buyer Canceled", "Buyer Cancelled"},
+            new String[]{"Buyer Cancel", "Buyer Canceled", "Buyer Cancelled"}, true),
     /**
      * 普通Cancel标识，可能是客户取消，或是Supplier取消
      */
-    CANCELLED(new String[] {"Cancel"}, new String[] {"Cancel"}, true),
+    CANCELLED(new String[]{"Cancel"}, new String[]{"Cancel"}, true),
     /**
      * 程序找单结束后，标识需要人工检查
      */
-    TO_BE_CHECKED(new String[] {"daicheck", "dai check"}, new String[] {"CHCK"}, true),
+    TO_BE_CHECKED(new String[]{"daicheck", "dai check"}, new String[]{"CHCK"}, true),
     /**
      * 订单被Supplier取消了
      */
-    SELLER_CANCELED(new String[] {"Seller Cancel", "Seller Canceled"}, new String[] {"Seller Cancel", "Seller Canceled"}, true),
+    SELLER_CANCELED(new String[]{"Seller Cancel", "Seller Canceled"}, new String[]{"Seller Cancel", "Seller Canceled"}, true),
     /**
      * 客人修改了寄货地址，此时订单需要重做或调整寄送地址等
      */
-    ADDRESS_CHANGED(new String[] {"改变地址", "修改地址"}, new String[] {"Change Shipping Address"}, true),
+    ADDRESS_CHANGED(new String[]{"改变地址", "修改地址"}, new String[]{"Change Shipping Address"}, true),
     /**
      * 标识只退还运费
      */
-    REFUND_SHIPPING_FEE_ONLY(new String[] {"只退运费"}, new String[] {"Refund ShippingFee"}, true),
+    REFUND_SHIPPING_FEE_ONLY(new String[]{"只退运费"}, new String[]{"Refund ShippingFee"}, true),
 
     //----------库存更新相关标识---------//
     /**
      * 产品断货标识
      */
-    INVALID_ITEM(new String[] {"断货"}, new String[] {"Invalid Item"}, true),
+    INVALID_ITEM(new String[]{"断货"}, new String[]{"Invalid Item"}, true),
     /**
      * 合并点标识
      */
-    MERGED_LISTING(new String[] {"合并点"}, new String[] {"Merged Listing"}, true),
+    MERGED_LISTING(new String[]{"合并点"}, new String[]{"Merged Listing"}, true),
     /**
      * 产品图片不符标识
      */
-    WRONG_PICTURE(new String[] {"图片不符"}, new String[] {"Picture Not Matching"}, true),
+    WRONG_PICTURE(new String[]{"图片不符"}, new String[]{"Picture Not Matching"}, true),
     /**
      * 产品错误标识
      */
-    WRONG_LISTING(new String[] {"错点"}, new String[] {"Wrong Listing"}, true),
+    WRONG_LISTING(new String[]{"错点"}, new String[]{"Wrong Listing"}, true),
     /**
      * 因为其他原因需要删除当前产品标识
      */
-    MISC_LISTING_TO_DELETE(new String[] {"其他删点"}, new String[] {"Inappropriate Listing To Delete"}, true),
+    MISC_LISTING_TO_DELETE(new String[]{"其他删点"}, new String[]{"Inappropriate Listing To Delete"}, true),
 
     //----------订单提交失败错误原因概述---------//
-    NO_FAST_SHIPPING(new String[] {"Seller无快递"}, new String[] {"Supplier Does Not Provide Expedited Service"}, false),
-    CANNOT_SHIP_TO(new String[] {"寄不到/限购/无货"}, new String[] {"Cannot Ship To/Restriction/Supplier Has No Stock"}, false),
-    SHIPPING_FEE_TOO_HIGH(new String[] {"运费过高"}, new String[] {"Shipping Fee Too High:"}, false),
-    UNKNOWN_SUBMIT_RESULT(new String[] {"提交结果未知"}, new String[] {"Pending Order with Supplier"}, false),
+    NO_FAST_SHIPPING(new String[]{"Seller无快递"}, new String[]{"Supplier Does Not Provide Expedited Service"}, false),
+    CANNOT_SHIP_TO(new String[]{"寄不到/限购/无货"}, new String[]{"Cannot Ship To/Restriction/Supplier Has No Stock"}, false),
+    SHIPPING_FEE_TOO_HIGH(new String[]{"运费过高"}, new String[]{"Shipping Fee Too High:"}, false),
+    UNKNOWN_SUBMIT_RESULT(new String[]{"提交结果未知"}, new String[]{"Pending Order with Supplier"}, false),
 
-    FORBIDDEN_SUPPLIER_USED(new String[] {"禁选Seller"}, new String[] {"Forbidden Supplier"}, false),
-    BOOK_TITLE_DIFFERENT(new String[] {"书名不一致"}, new String[] {"Different Book Title"}, false),
-    SELLER_DISAPPEAR(new String[] {"Seller消失"}, new String[] {"Supplier Disappeared"}, false),
-    CONDITION_NOT_ACCEPTABLE(new String[] {"Acceptable"}, new String[] {"Acceptable"}, false),
-    SELLER_OUT_OF_STOCK(new String[] {"Seller无货"}, new String[] {"Supplier Has No Stock"}, false),
-    SELLER_PRICE_HIGHER_THAN_ORIGINAL(new String[] {"价格比原价高:"}, new String[] {"Price Higher Than Original:"}, false),
-    SELLER_PRICE_RISE(new String[] {"Seller涨价到"}, new String[] {"Supplier Lifted Price to:"}, false),
-    SELLER_ADJUST_PRIME(new String[] {"Seller实际为Prime"}, new String[] {"Supplier Is Prime"}, false),
-    SELLER_ADJUST_PT(new String[] {"Seller可能为Pt"}, new String[] {"Supplier Might Be Non-Prime"}, false),
-    CONDITION_SWITCHED(new String[] {"Used找不到,尝试New"}, new String[] {"Try New. Used Not Found."}, false),
-    SELLER_TEMPORARILY_OUT_OF_STOCK(new String[] {"Seller暂时无货"}, new String[] {"Supplier Temporarily Has No Stock"}, false),
+    FORBIDDEN_SUPPLIER_USED(new String[]{"禁选Seller"}, new String[]{"Forbidden Supplier"}, false),
+    BOOK_TITLE_DIFFERENT(new String[]{"书名不一致"}, new String[]{"Different Book Title"}, false),
+    SELLER_DISAPPEAR(new String[]{"Seller消失"}, new String[]{"Supplier Disappeared"}, false),
+    CONDITION_NOT_ACCEPTABLE(new String[]{"Acceptable"}, new String[]{"Acceptable"}, false),
+    SELLER_OUT_OF_STOCK(new String[]{"Seller无货"}, new String[]{"Supplier Has No Stock"}, false),
+    SELLER_PRICE_HIGHER_THAN_ORIGINAL(new String[]{"价格比原价高:"}, new String[]{"Price Higher Than Original:"}, false),
+    SELLER_PRICE_RISE(new String[]{"Seller涨价到"}, new String[]{"Supplier Lifted Price to:"}, false),
+    SELLER_ADJUST_PRIME(new String[]{"Seller实际为Prime"}, new String[]{"Supplier Is Prime"}, false),
+    SELLER_ADJUST_PT(new String[]{"Seller可能为Pt"}, new String[]{"Supplier Might Be Non-Prime"}, false),
+    CONDITION_SWITCHED(new String[]{"Used找不到,尝试New"}, new String[]{"Try New. Used Not Found."}, false),
+    SELLER_TEMPORARILY_OUT_OF_STOCK(new String[]{"Seller暂时无货"}, new String[]{"Supplier Temporarily Has No Stock"}, false),
     /**
      * ASIN对应产品在某一国家亚马逊已不存在
      */
-    ITEM_UNAVAILABLE(new String[] {"无货"}, new String[] {" Is Out of Stock"}, false),
+    ITEM_UNAVAILABLE(new String[]{"无货"}, new String[]{" Is Out of Stock"}, false),
 
-    NO_GIFT_OPTION(new String[] {"无GiftOption,差价过高"}, new String[] {"No Gift Option. Big Price Difference."}, false),
-    EMAIL_SELLER_NO_INVOICE(new String[] {"写信去Invoice"}, new String[] {"Email Supplier To Remove Invoice"}, false),
-    MULTI_ITEMS_NOT_PLACED_COMPLETELY(new String[] {"只买了%s本,还需买%s本"}, new String[] {"Only Completed %s, Still Need %s More"}, false),
+    NO_GIFT_OPTION(new String[]{"无GiftOption,差价过高"}, new String[]{"No Gift Option. Big Price Difference."}, false),
+    EMAIL_SELLER_NO_INVOICE(new String[]{"写信去Invoice"}, new String[]{"Email Supplier To Remove Invoice"}, false),
+    MULTI_ITEMS_NOT_PLACED_COMPLETELY(new String[]{"只买了%s本,还需买%s本"}, new String[]{"Only Completed %s, Still Need %s More"}, false),
 
-    RESTORE_FROM_LOG(new String[] {"从日志回写"}, new String[] {"Retrieved from Log"}, false),
+    RESTORE_FROM_LOG(new String[]{"从日志回写"}, new String[]{"Retrieved from Log"}, false),
 
-    BY_ORDER_PORTER(new String[] {"By", "Order", "Porter"}, new String[] {"By", "Order", "Porter"}, false),
+    BY_ORDER_PORTER(new String[]{"By", "Order", "Porter"}, new String[]{"By", "Order", "Porter"}, false),
 
-    MULTI_ORDER(new String[] {"多单"}, new String[] {"MultiItems"}, false),
-    LETTER_INVALID(new String[] {"例信模板不存在或不符合规范"}, new String[] {"Non-Existing/Invalid Notification Letter Template"}, false);
+    MULTI_ORDER(new String[]{"多单"}, new String[]{"MultiItems"}, false),
+    LETTER_INVALID(new String[]{"例信模板不存在或不符合规范"}, new String[]{"Non-Existing/Invalid Notification Letter Template"}, false);
 
     /**
      * 中文文本
@@ -235,7 +235,7 @@ public enum Remark {
 
     private static String removeSpaceAndPunctuation(String source) {
         return StringUtils.defaultString(source).replaceAll(Regex.BLANK.val(), StringUtils.EMPTY)
-            .replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY);
+                .replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY);
     }
 
     /**
@@ -305,11 +305,11 @@ public enum Remark {
      * 做单成功之后，原先存在的异常提醒批注需要一并清除
      */
     private static final Remark[] NEED_REMOVE_AFTER_SUCCESS = {
-        Remark.NO_FAST_SHIPPING, Remark.CANNOT_SHIP_TO,
-        Remark.SELLER_OUT_OF_STOCK, Remark.SELLER_DISAPPEAR,
-        Remark.CONDITION_NOT_ACCEPTABLE, Remark.SHIPPING_FEE_TOO_HIGH,
-        Remark.SELLER_PRICE_HIGHER_THAN_ORIGINAL, Remark.NO_GIFT_OPTION,
-        Remark.SELLER_PRICE_RISE
+            Remark.NO_FAST_SHIPPING, Remark.CANNOT_SHIP_TO,
+            Remark.SELLER_OUT_OF_STOCK, Remark.SELLER_DISAPPEAR,
+            Remark.CONDITION_NOT_ACCEPTABLE, Remark.SHIPPING_FEE_TOO_HIGH,
+            Remark.SELLER_PRICE_HIGHER_THAN_ORIGINAL, Remark.NO_GIFT_OPTION,
+            Remark.SELLER_PRICE_RISE
     };
 
     /**
@@ -342,7 +342,7 @@ public enum Remark {
     /**
      * 检查目标文本是否包含任一批注类型
      *
-     * @param text 目标原始文本
+     * @param text    目标原始文本
      * @param remarks 批注类型，可能有多个
      */
     public static boolean matchAny(String text, Remark... remarks) {
@@ -357,7 +357,7 @@ public enum Remark {
     /**
      * 检查目标文本是否包含<strong>所有</strong>批注类型
      *
-     * @param text 目标原始文本
+     * @param text    目标原始文本
      * @param remarks 批注类型，可能有多个
      */
     public static boolean matchAll(String text, Remark... remarks) {
@@ -376,7 +376,7 @@ public enum Remark {
      */
     public static boolean needASINDeletion(String text) {
         return matchAny(text, Remark.INVALID_ITEM, Remark.MERGED_LISTING,
-            Remark.WRONG_PICTURE, Remark.WRONG_LISTING, Remark.MISC_LISTING_TO_DELETE);
+                Remark.WRONG_PICTURE, Remark.WRONG_LISTING, Remark.MISC_LISTING_TO_DELETE);
     }
 
     /**
@@ -415,16 +415,16 @@ public enum Remark {
      * 部分批注移除时，也需要将附加的金额信息一并移除
      */
     private static final Remark[] NEED_REMOVE_AMOUNT = {
-        Remark.SHIPPING_FEE_TOO_HIGH,
-        Remark.SELLER_PRICE_HIGHER_THAN_ORIGINAL,
-        Remark.NO_GIFT_OPTION,
-        Remark.SELLER_PRICE_RISE
+            Remark.SHIPPING_FEE_TOO_HIGH,
+            Remark.SELLER_PRICE_HIGHER_THAN_ORIGINAL,
+            Remark.NO_GIFT_OPTION,
+            Remark.SELLER_PRICE_RISE
     };
 
     /**
      * 从目标文本中移除指定的多种批注
      *
-     * @param target 目标文本
+     * @param target  目标文本
      * @param remarks 待移除的批注
      */
     public static String removeAll(String target, Remark... remarks) {
@@ -530,7 +530,8 @@ public enum Remark {
 
     /**
      * 通过订单批注判定该条订单是否需要切换到其他国家直寄做单
-     * @param text	订单批注文本
+     *
+     * @param text 订单批注文本
      */
     public static boolean isDirectShip(String text) {
         try {
@@ -554,8 +555,9 @@ public enum Remark {
     }
 
     public static boolean ukFwd(String text) {
-        return 	matchAny(text, Remark.UK_TRANSFER);
+        return matchAny(text, Remark.UK_TRANSFER);
     }
+
     /**
      * 根据给定的国家获取对应的直寄批注文本
      *
@@ -639,7 +641,7 @@ public enum Remark {
             String c = country.name();
             System.out.println("/** " + country.label() + "直寄 */");
             System.out.println(String.format("FULFILL_FROM_%s(new String[] {\"%s做单\", \"%s直寄\"}, " +
-                "new String[] {\"%s Shipment\"}, true),", c, c, c, c));
+                    "new String[] {\"%s Shipment\"}, true),", c, c, c, c));
         }
 
         System.out.println("var REMARKS_EN_US = [");
@@ -656,7 +658,7 @@ public enum Remark {
         System.out.println("代码\t中文特征词\t英文特征词\t出现于下拉框");
         for (Remark r : Remark.values()) {
             System.out.println(r.name() + "\t" + StringUtils.join(r.chinese, ",") + "\t" +
-                StringUtils.join(r.english, ",") + "\t" + (r.inDropdown ? "是" : "否"));
+                    StringUtils.join(r.english, ",") + "\t" + (r.inDropdown ? "是" : "否"));
         }
         for (String s : Remark.GRAY_REMARKS) {
             System.out.println(s + "\t" + s + "\t" + s + "\t" + "是");
@@ -667,7 +669,7 @@ public enum Remark {
         for (Remark r : Remark.values()) {
             if (r.inDropdown) {
                 System.out.println(String.format(format, index++,
-                    StringUtils.join(r.chinese, "<br>"), StringUtils.join(r.english, "<br>"), "Yes"));
+                        StringUtils.join(r.chinese, "<br>"), StringUtils.join(r.english, "<br>"), "Yes"));
             }
         }
         for (String s : Remark.GRAY_REMARKS) {
@@ -676,7 +678,7 @@ public enum Remark {
         for (Remark r : Remark.values()) {
             if (!r.inDropdown) {
                 System.out.println(String.format(format, index++,
-                    StringUtils.join(r.chinese, "<br>"), StringUtils.join(r.english, "<br>"), "No"));
+                        StringUtils.join(r.chinese, "<br>"), StringUtils.join(r.english, "<br>"), "No"));
             }
         }
     }

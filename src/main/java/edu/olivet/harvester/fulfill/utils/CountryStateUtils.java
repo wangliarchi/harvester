@@ -17,6 +17,7 @@ import java.util.Map;
 public class CountryStateUtils {
     private Map<String, String> countryCodes;
     private Map<String, String> usStates;
+
     @Inject
     public void init() {
         countryCodes = Configs.load(Config.CountryCode.fileName());
@@ -26,7 +27,8 @@ public class CountryStateUtils {
 
     /**
      * 根据国家完整名称获取对应国家代码
-     * @param shippingCountry	国家完整名称，比如United States
+     *
+     * @param shippingCountry 国家完整名称，比如United States
      */
     public String getCountryCode(String shippingCountry) {
         if (StringUtils.isBlank(shippingCountry) || Country.US.name().equals(shippingCountry)) {
@@ -46,7 +48,7 @@ public class CountryStateUtils {
     }
 
     public String getUSStateAbbr(String stateName) {
-        if(StringUtils.length(stateName) == 2) {
+        if (StringUtils.length(stateName) == 2) {
             return stateName.toUpperCase();
         }
 

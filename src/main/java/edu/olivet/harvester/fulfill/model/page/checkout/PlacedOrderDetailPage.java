@@ -47,7 +47,7 @@ public class PlacedOrderDetailPage extends FulfillmentPage {
             Money money = Money.fromText(total, country);
             return money.toUSDAmount().toPlainString();
         } catch (ParseException e) {
-
+            //ignore
         }
         return "";
     }

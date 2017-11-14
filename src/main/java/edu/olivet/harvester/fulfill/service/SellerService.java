@@ -32,7 +32,7 @@ public class SellerService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SellerService.class);
 
     public static final I18N I18N_AMAZON = new I18N("i18n/Amazon");
-    private Map<String, Boolean> wareHouseIdCache = new HashMap<String, Boolean>();
+    private Map<String, Boolean> wareHouseIdCache = new HashMap<>();
 
     @Inject
     public void init() throws IOException {
@@ -44,7 +44,7 @@ public class SellerService {
 
     public List<Seller> parseSellers(Browser browser, Country country) {
         String offerListingSelector = "div.a-row.a-spacing-mini.olpOffer";
-        List<Seller> sellers = new ArrayList<Seller>();
+        List<Seller> sellers = new ArrayList<>();
         List<DOMElement> sellerRows = JXBrowserHelper.selectElementsByCssSelector(browser, "div.a-row.a-spacing-mini.olpOffer");
 
         int index = 0;

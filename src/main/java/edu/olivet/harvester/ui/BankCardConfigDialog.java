@@ -65,7 +65,7 @@ public class BankCardConfigDialog extends BaseDialog {
         vsequentialGroup.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE);
         buyerAccountEmails.forEach(buyerEmail -> {
             BankCardPanel bankCardPanel = new BankCardPanel(buyerEmail);
-            if(creditCards.containsKey(buyerEmail)) {
+            if (creditCards.containsKey(buyerEmail)) {
                 bankCardPanel.load(creditCards.get(buyerEmail));
             }
             bankCardPanels.add(bankCardPanel);
@@ -117,9 +117,7 @@ public class BankCardConfigDialog extends BaseDialog {
     public void loadCreditCards() {
         File file = new File(Harvester.CC_CONFIG_FILE_PATH);
         if (file.exists() && file.isFile()) {
-            JSON.parseArray(Tools.readFileToString(file), CreditCard.class).forEach(creditCard -> {
-                creditCards.put(creditCard.getAccountEmail(), creditCard);
-            });
+            JSON.parseArray(Tools.readFileToString(file), CreditCard.class).forEach(creditCard -> creditCards.put(creditCard.getAccountEmail(), creditCard));
         }
 
     }
@@ -180,9 +178,7 @@ public class BankCardConfigDialog extends BaseDialog {
                 return;
             }
         }
-        creditCards.forEach(creditCard -> {
-            this.creditCards.put(creditCard.getAccountEmail(), creditCard);
-        });
+        creditCards.forEach(creditCard -> this.creditCards.put(creditCard.getAccountEmail(), creditCard));
 
         File file = new File(Harvester.CC_CONFIG_FILE_PATH);
         Tools.writeStringToFile(file, JSON.toJSONString(creditCards, true));

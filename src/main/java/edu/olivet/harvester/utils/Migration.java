@@ -8,7 +8,9 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.utils.Directory;
 import edu.olivet.foundations.utils.Tools;
+import edu.olivet.harvester.model.CreditCard;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
+import edu.olivet.harvester.ui.Harvester;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -187,8 +189,48 @@ public class Migration {
         }
     }
 
+    public static void migrateCreditCardSetttings() {
+        File file = new File(Harvester.CC_CONFIG_FILE_PATH);
+        if (file.exists()) {
+            return;
+        }
+
+        String settingFilePath = Directory.Customize.path() + File.separator + "creditcards.js";
+        File orderManConfigFile = new File(settingFilePath);
+        if (!orderManConfigFile.exists()) {
+            orderManConfigFile = new File("C:\\OrderMan\\customize\\creditcards.js");
+        }
+
+        if (!orderManConfigFile.exists()) {
+            LOGGER.error("No credit card config file found.");
+            return;
+        }
+
+        JSONObject creditcards = JSON.parseObject(Tools.readFileToString(orderManConfigFile));
+        List<CreditCard> creditCards = new ArrayList<>();
+
+        creditcards.forEach((k, v) -> {
+            try {
+                CreditCard card = new CreditCard();
+                String[] parts = StringUtils.split(v.toString(), ",");
+                card.setAccountEmail(k.trim());
+                card.setCardNo(parts[0].trim());
+                card.setCvv(parts[1].trim());
+                creditCards.add(card);
+            } catch (Exception e) {
+                LOGGER.error("Failed to migrate credit card info,", e);
+            }
+        });
+
+
+        Tools.writeStringToFile(file, JSON.toJSONString(creditCards, true));
+
+        System.out.println(creditcards);
+    }
+
     public static void main(String[] args) {
-        Migration.loadSettings();
+        Migration.migrateCreditCardSetttings();
+        //Migration.loadSettings();
     }
 
 }

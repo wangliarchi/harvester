@@ -26,7 +26,7 @@ public class OrderFilter {
             return orders;
         }
 
-        List<Order> result = new ArrayList<Order>(orders);
+        List<Order> result = new ArrayList<>(orders);
         ConfigEnums.SubmitRange scopeType = advs.getSubmitRange();
         if (scopeType == ConfigEnums.SubmitRange.LimitCount && advs.getCountLimit() < orders.size()) {
             return result.subList(0, advs.getCountLimit());

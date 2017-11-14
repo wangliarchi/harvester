@@ -6,8 +6,10 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.MWSUtils;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.model.OrderEnums;
+import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.Harvester;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -97,6 +99,26 @@ public class Settings {
         return spreadIds;
     }
 
+    public List<edu.olivet.harvester.spreadsheet.Spreadsheet> listSpreadsheets(Country country, AppScript appScript) {
+        List<String> spreadsheetIds = listAllSpreadsheets();
+        List<edu.olivet.harvester.spreadsheet.Spreadsheet> spreadsheets = new ArrayList<>();
+
+        StringBuilder spreadsheetIdError = new StringBuilder();
+        for (String spreadsheetId : spreadsheetIds) {
+            try {
+                if (getSpreadsheetCountry(spreadsheetId) == country) {
+                    edu.olivet.harvester.spreadsheet.Spreadsheet spreadsheet = appScript.getSpreadsheet(spreadsheetId);
+                    spreadsheets.add(spreadsheet);
+                }
+            } catch (Exception e) {
+                LOGGER.error("{} is invalid. {}", spreadsheetId, e.getMessage());
+                spreadsheetIdError.append(String.format("%s is not a valid spreadsheet id, or it's not shared to %s \n",
+                        spreadsheetId, Constants.RND_EMAIL));
+            }
+        }
+
+        return spreadsheets;
+    }
 
     /**
      * each spreadsheet holds certain type of order items: BOOK, PRODUCT or both

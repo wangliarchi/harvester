@@ -11,7 +11,9 @@ import java.util.Map;
 public class PageUtils {
     public static final String HREF = "href";
 
-    /** 亚马逊页面分页(比如Offering列表、订单历史列表等等)数：{@value} */
+    /**
+     * 亚马逊页面分页(比如Offering列表、订单历史列表等等)数：{@value}
+     */
     public static final int PAGINATION = 10;
 
 
@@ -34,7 +36,7 @@ public class PageUtils {
      * @param url url地址
      */
     public static Map<String, String> getParameters(String url) {
-        Map<String, String> cache = new HashMap<String, String>();
+        Map<String, String> cache = new HashMap<>();
         int index = url.indexOf("?");
         if (index != -1) {
             String params = url.substring(index + 1);

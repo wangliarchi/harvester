@@ -31,7 +31,9 @@ public enum AmazonPage {
     ForcePlaceOrder("buy/duplicate-order"),
     OrderNumber("buy/thankyou"),
     OrderList("gp/css/order-history"),
-    /** 在亚马逊第一次采购Prime Seller货品时，会在支付页面之后弹出是否升级为Prime买家的提示 */
+    /**
+     * 在亚马逊第一次采购Prime Seller货品时，会在支付页面之后弹出是否升级为Prime买家的提示
+     */
     PrimeSuggestion("gp/buy/primeinterstitial"),
     AddtoCart("/gp/product/handle-buy-box/ref=dp_start-bbf_1_glance"),
 
@@ -60,7 +62,6 @@ public enum AmazonPage {
     OrderStatistic("/gp/homepage/orders-widget-internals.html?t=yo");
 
 
-
     /**
      * URL特征标识，可以据此判定当前页面是否处于预期页面
      */
@@ -73,6 +74,7 @@ public enum AmazonPage {
     public String urlMark() {
         return urlMark;
     }
+
     public String desc() {
         return UIText.label("label.amazonpage." + this.name().toLowerCase());
     }

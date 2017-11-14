@@ -9,11 +9,13 @@ import java.util.List;
 
 /**
  * 订单相关枚举
+ *
  * @author <a href="mailto:rnd@olivetuniversity.edu">RnD</a> 09/19/2017 09:00:00
  */
 public class OrderEnums {
     /**
      * google sheet中一行订单背景色定义
+     *
      * @author <a href="mailto:rnd@olivetuniversity.edu">RnD</a> 09/19/2017 09:00:00
      */
     public enum OrderColor {
@@ -48,10 +50,6 @@ public class OrderEnums {
         Fail("#ff0000");
 
 
-
-
-
-
         private final String code;
 
         OrderColor(String code) {
@@ -67,19 +65,21 @@ public class OrderEnums {
 
         /**
          * 判定某一颜色代码是否为标灰色
+         *
          * @param colorCode 颜色代码，一般为订单所在行的背景色
          */
         public static boolean isGray(String colorCode) {
             return DarkGray3.code().equalsIgnoreCase(colorCode) ||
-                DarkGray2.code().equalsIgnoreCase(colorCode) ||
-                DarkGray1.code().equalsIgnoreCase(colorCode) ||
-                Gray.code().equalsIgnoreCase(colorCode) ||
-                LightGray1.code().equalsIgnoreCase(colorCode);
+                    DarkGray2.code().equalsIgnoreCase(colorCode) ||
+                    DarkGray1.code().equalsIgnoreCase(colorCode) ||
+                    Gray.code().equalsIgnoreCase(colorCode) ||
+                    LightGray1.code().equalsIgnoreCase(colorCode);
         }
     }
 
     /**
      * 订单各列枚举，基于Google Sheet各列转换而成
+     *
      * @author <a href="mailto:rnd@olivetuniversity.edu">RnD</a> 09/19/2017 09:00:00
      */
     public enum OrderColumn {
@@ -153,33 +153,58 @@ public class OrderEnums {
 
     /**
      * 订单状态枚举
+     *
      * @author <a href="mailto:rnd@olivetuniversity.edu">RnD</a> 09/19/2017 09:00:00
      */
     public enum Status {
-        /** 已成功提交 */
+        /**
+         * 已成功提交
+         */
         Finish("finish"),
-        /** Seller为Prime */
+        /**
+         * Seller为Prime
+         */
         PrimeSeller("p"),
-        /** 普通Seller */
+        /**
+         * 普通Seller
+         */
         CommonSeller("a"),
-        /** 当前Seller为BetterWorld，做单时需切换到该网站上面 */
+        /**
+         * 当前Seller为BetterWorld，做单时需切换到该网站上面
+         */
         SellerIsBetterWorld("bw"),
-        /** 当前Seller为Half，做单时需切换到该网站上面 */
+        /**
+         * 当前Seller为Half，做单时需切换到该网站上面
+         */
         SellerIsHalf("h"),
-        /** 当前Seller为Ingram，做单时需切换到该网站上面 */
+        /**
+         * 当前Seller为Ingram，做单时需切换到该网站上面
+         */
         SellerIsIngram("in"),
-        /** 国际单 */
+        /**
+         * 国际单
+         */
         International("gj"),
-        /** 产品，Prime买回转运 */
+        /**
+         * 产品，Prime买回转运
+         */
         PrimeBuyAndTransfer("pm"),
-        /** 买回转运 */
+        /**
+         * 买回转运
+         */
         BuyAndTransfer("m"),
-        /** 初始、缺陷等状态，尚未开始做单或已是灰条 */
+        /**
+         * 初始、缺陷等状态，尚未开始做单或已是灰条
+         */
         Initial("n"),
-        /** 找单同事标注f，表明该条需要略过 */
+        /**
+         * 找单同事标注f，表明该条需要略过
+         */
         Skip("f"),
 
-        /** 找单部定义的各种发送例信代码 */
+        /**
+         * 找单部定义的各种发送例信代码
+         */
         NewToGood("ng"),
         DamagedNewToGood("dng"),
         HardCoverToPaperback("hp"),
@@ -224,22 +249,23 @@ public class OrderEnums {
 
         /**
          * 校验当前订单状态在给定的场景下是否合法
-         * @param status	当前订单status一列值
-         * @param scenario	当前操作场景
-         * @return	是否合法
+         *
+         * @param status   当前订单status一列值
+         * @param scenario 当前操作场景
+         * @return 是否合法
          */
         public static boolean isValid(String status, FulfillmentEnum.Action scenario) {
             try {
                 Status sts = Status.get(status);
                 switch (scenario) {
                     case SubmitOrder:
-                        return  sts == CommonSeller || sts == PrimeSeller ||
+                        return sts == CommonSeller || sts == PrimeSeller ||
                                 sts == BuyAndTransfer || sts == PrimeBuyAndTransfer ||
                                 sts == International;
                     case UpdateStatus:
-                        return 	sts == Initial;
+                        return sts == Initial;
                     case HuntSupplier:
-                        return 	sts != Finish && sts != Refund;
+                        return sts != Finish && sts != Refund;
                     default:
                         return true;
                 }
@@ -251,6 +277,7 @@ public class OrderEnums {
 
     /**
      * Seller类型枚举，包括Amazon和Amazon以外的Seller类型
+     *
      * @author <a href="mailto:rnd@olivetuniversity.edu">RnD</a> 09/19/2017 09:00:00
      */
     public enum SellerType {
@@ -283,6 +310,7 @@ public class OrderEnums {
 
         /**
          * 判定给出的Seller类型是否为Prime
+         *
          * @param type Seller类型
          */
         public static boolean isPrime(SellerType type) {

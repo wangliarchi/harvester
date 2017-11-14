@@ -36,7 +36,7 @@ public class ConditionUtils {
         return translated;
     }
 
-    private static Map<String, String> baseConditionCache = new HashMap<String, String>();
+    private static Map<String, String> baseConditionCache = new HashMap<>();
 
     /**
      * 获取Condition的基础Condition，基础condition就是 aaa-bbb横线前面那部分
@@ -68,9 +68,9 @@ public class ConditionUtils {
         String str = cond.replace("-", StringUtils.EMPTY).replace(StringUtils.SPACE, StringUtils.EMPTY).toLowerCase();
         Map<String, String> conditionLvls = Configs.load(Config.ConditionLevel.fileName());
         String lvl = conditionLvls.get(str);
-        if (lvl == null ) {
+        if (lvl == null) {
             throw new IllegalArgumentException(UIText.message("error.condition.invalid", cond));
         }
-        return IntegerUtils.parseInt(lvl,50);
+        return IntegerUtils.parseInt(lvl, 50);
     }
 }

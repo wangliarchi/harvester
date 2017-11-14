@@ -255,25 +255,34 @@ public class Rating {
 
     //	@Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Rating other = (Rating) obj;
-        if (count != other.count)
+        if (count != other.count) {
             return false;
-        if (negative != other.negative)
+        }
+        if (negative != other.negative) {
             return false;
-        if (negativeCount != other.negativeCount)
+        }
+        if (negativeCount != other.negativeCount) {
             return false;
-        if (neutral != other.neutral)
+        }
+        if (neutral != other.neutral) {
             return false;
-        if (neutralCount != other.neutralCount)
+        }
+        if (neutralCount != other.neutralCount) {
             return false;
-        if (positive != other.positive)
+        }
+        if (positive != other.positive) {
             return false;
+        }
         return positiveCount == other.positiveCount;
     }
 

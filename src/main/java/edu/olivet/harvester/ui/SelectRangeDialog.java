@@ -182,18 +182,10 @@ public class SelectRangeDialog extends JDialog {
         JLabel lblTimeUnit = new JLabel();
 
         okBtn.setText(UIText.label("label.ok"));
-        okBtn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                ok();
-            }
-        });
+        okBtn.addActionListener(evt -> ok());
 
         cancelBtn.setText(UIText.label("label.cancel"));
-        cancelBtn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                cancelBtnActionPerformed(evt);
-            }
-        });
+        cancelBtn.addActionListener(evt -> cancelBtnActionPerformed(evt));
 
         typePanel.setBorder(BorderFactory.createTitledBorder(UIText.title("title.filter.ordertype")));
 
@@ -262,11 +254,7 @@ public class SelectRangeDialog extends JDialog {
 
         autoLoop.setText(UIText.label("label.submit.loop.enable"));
         autoLoop.setToolTipText(UIText.tooltip("tooltip.submit.loop.enable"));
-        autoLoop.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                autoLoopActionPerformed(evt);
-            }
-        });
+        autoLoop.addActionListener(evt -> autoLoopActionPerformed(evt));
 
         loopInterval.setToolTipText(UIText.tooltip("tooltip.submit.loop.interval"));
         loopInterval.addFocusListener(selectAll);
@@ -341,23 +329,15 @@ public class SelectRangeDialog extends JDialog {
         scopePanel = new JPanel();
         scopeBtnGroup = new ButtonGroup();
         allBtn = new JRadioButton();
-        allBtn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                switchRadioBtn();
-            }
-        });
+        allBtn.addActionListener(e -> switchRadioBtn());
 
         limitCountBtn = new JRadioButton();
         limitCountTxt = new JTextField();
-        limitCountBtn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                switchRadioBtn();
-            }
-        });
+        limitCountBtn.addActionListener(e -> switchRadioBtn());
         limitCountTxt.setEnabled(false);
         limitCountTxt.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                if (limitCountTxt.isEnabled() == false) {
+                if (!limitCountTxt.isEnabled()) {
                     limitCountTxt.setEnabled(true);
                     limitCountBtn.setSelected(true);
                     switchRadioBtn();
@@ -366,16 +346,12 @@ public class SelectRangeDialog extends JDialog {
         });
 
         singleBtn = new JRadioButton();
-        singleBtn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                switchRadioBtn();
-            }
-        });
+        singleBtn.addActionListener(e -> switchRadioBtn());
         singleTxt = new JTextField();
         singleTxt.setEnabled(false);
         singleTxt.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                if (singleTxt.isEnabled() == false) {
+                if (!singleTxt.isEnabled()) {
                     singleTxt.setEnabled(true);
                     singleBtn.setSelected(true);
                     switchRadioBtn();
@@ -385,11 +361,7 @@ public class SelectRangeDialog extends JDialog {
 
 
         scopeBtn = new JRadioButton();
-        scopeBtn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                switchRadioBtn();
-            }
-        });
+        scopeBtn.addActionListener(e -> switchRadioBtn());
         startRowNo = new JTextField();
         endRowNo = new JTextField();
         startRowNo.setEnabled(false);
@@ -397,7 +369,7 @@ public class SelectRangeDialog extends JDialog {
 
         startRowNo.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                if (startRowNo.isEnabled() == false) {
+                if (!startRowNo.isEnabled()) {
                     startRowNo.setEnabled(true);
                     endRowNo.setEnabled(true);
                     scopeBtn.setSelected(true);
@@ -407,7 +379,7 @@ public class SelectRangeDialog extends JDialog {
         });
         endRowNo.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                if (endRowNo.isEnabled() == false) {
+                if (!endRowNo.isEnabled()) {
                     startRowNo.setEnabled(true);
                     endRowNo.setEnabled(true);
                     scopeBtn.setSelected(true);
@@ -417,18 +389,13 @@ public class SelectRangeDialog extends JDialog {
         });
 
 
-
         multiBtn = new JRadioButton();
-        multiBtn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                switchRadioBtn();
-            }
-        });
+        multiBtn.addActionListener(e -> switchRadioBtn());
         multiRowsTxt = new JTextField();
         multiRowsTxt.setEnabled(false);
         multiRowsTxt.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                if (multiRowsTxt.isEnabled() == false) {
+                if (!multiRowsTxt.isEnabled()) {
                     multiRowsTxt.setEnabled(true);
                     multiBtn.setSelected(true);
                     switchRadioBtn();
@@ -517,7 +484,7 @@ public class SelectRangeDialog extends JDialog {
     public void ok() {
         AdvancedSubmitSetting ass = new AdvancedSubmitSetting();
 
-        List<String> validateErrors = new ArrayList<String>();
+        List<String> validateErrors = new ArrayList<>();
         if (this.allBtn.isSelected()) {
             ass.setSubmitRange(ConfigEnums.SubmitRange.ALL);
         } else if (this.limitCountBtn.isSelected()) {

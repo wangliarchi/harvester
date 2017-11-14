@@ -22,6 +22,7 @@ public class RuntimeSettings {
     private AdvancedSubmitSetting advancedSubmitSetting = new AdvancedSubmitSetting();
     private String lostLimit = "5";
     private String priceLimit = "3";
+    private String eddLimit = "7";
     private String noInvoiceText = "{No Invoice}";
     private String finderCode = "";
 

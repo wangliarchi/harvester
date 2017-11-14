@@ -3,6 +3,7 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.model.ShippingOption;
+import edu.olivet.harvester.fulfill.utils.ShipOptionUtils;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.spreadsheet.service.OrderHelper;
 import edu.olivet.harvester.ui.BuyerPanel;
@@ -38,6 +39,18 @@ public class ShippingMethodOnePage extends ShippingAddressAbstract {
             ShippingOption shippingOption = new ShippingOption(eddText, priceText, buyerPanel.getCountry());
             shippingOptions.add(shippingOption);
         }
+
+        JXBrowserHelper.saveOrderScreenshot(buyerPanel.getOrder(), buyerPanel, "1");
+        List<ShippingOption> validShippingOptions = ShipOptionUtils.getValidateOptions(buyerPanel.getOrder(), shippingOptions);
+
+        for (DOMElement option : options) {
+            String eddText = JXBrowserHelper.selectElementByCssSelector(option, ".a-color-success").getInnerText().trim();
+            if (eddText.equals(validShippingOptions.get(0).getEstimatedDeliveryDate())) {
+                option.click();
+            }
+        }
+
+        JXBrowserHelper.saveOrderScreenshot(buyerPanel.getOrder(), buyerPanel, "2");
         //remove long edd?
     }
 
@@ -61,7 +74,7 @@ public class ShippingMethodOnePage extends ShippingAddressAbstract {
             List<DOMElement> errors = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-row.update-quantity-error .error-message");
             errors.removeIf(it -> StringUtils.containsIgnoreCase(it.getAttribute("style"), "none"));
             if (CollectionUtils.isNotEmpty(errors)) {
-                LOGGER.error("Error updating qty - {}", errors.stream().map(it -> it.getInnerText()).collect(Collectors.toSet()));
+                LOGGER.error("Error updating qty - {}", errors.stream().map(DOMElement::getInnerText).collect(Collectors.toSet()));
             }
         }
 

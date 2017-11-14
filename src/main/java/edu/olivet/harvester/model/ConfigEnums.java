@@ -8,14 +8,17 @@ import edu.olivet.foundations.ui.UIText;
 public class ConfigEnums {
     /**
      * 物品类型: 书类、CD或产品
+     *
      * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Aug 25, 2015 2:56:55 PM
      */
     public enum ItemType {
         BookCD,
         Product
     }
+
     /**
      * Dropshipping业务类型，比如书类/CD、产品以及二者混合
+     *
      * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Aug 24, 2015 2:24:21 PM
      */
     public enum BusinessType {
@@ -31,6 +34,7 @@ public class ConfigEnums {
 
     /**
      * 日期区间枚举定义
+     *
      * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Aug 31, 2015 1:43:56 PM
      */
     public enum DateRange {
@@ -42,9 +46,11 @@ public class ConfigEnums {
         Yearly(365);
 
         private int value;
+
         public int value() {
             return this.value;
         }
+
         DateRange(int range) {
             this.value = range;
         }
@@ -53,6 +59,7 @@ public class ConfigEnums {
 
     /**
      * 数量枚举定义
+     *
      * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Dec 31, 2014 1:19:33 PM
      */
     public enum Quantity {
@@ -76,6 +83,7 @@ public class ConfigEnums {
         public String toString() {
             return UIText.label("label.quantity." + this.name().toLowerCase());
         }
+
         public int value() {
             return this.value;
         }
@@ -93,6 +101,7 @@ public class ConfigEnums {
 
     /**
      * 自动重复次数枚举
+     *
      * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Nov 17, 2014 5:52:27 PM
      */
     public enum Times {
@@ -103,12 +112,15 @@ public class ConfigEnums {
         Five(5);
 
         private int value;
+
         Times(int value) {
             this.value = value;
         }
+
         public String toString() {
             return UIText.label("label.times." + this.name().toLowerCase());
         }
+
         public int value() {
             return this.value;
         }
@@ -117,6 +129,7 @@ public class ConfigEnums {
 
     /**
      * 做单范围枚举
+     *
      * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Nov 19, 2014 11:49:29 AM
      */
     public enum SubmitRange {
@@ -134,9 +147,10 @@ public class ConfigEnums {
             this.desc = desc;
         }
 
-        public String format(Object...params) {
+        public String format(Object... params) {
             return UIText.label(format, params);
         }
+
         public String desc() {
             return UIText.tooltip(desc);
         }
@@ -144,6 +158,7 @@ public class ConfigEnums {
 
     /**
      * 跳过检查类型枚举
+     *
      * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Nov 17, 2014 1:10:35 PM
      */
     public enum SkipValidation {
@@ -162,9 +177,11 @@ public class ConfigEnums {
         All("label.skip.all");
 
         private String label;
+
         SkipValidation(String label) {
             this.label = label;
         }
+
         @Override
         public String toString() {
             return UIText.label(this.label);

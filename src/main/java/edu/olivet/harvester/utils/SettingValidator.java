@@ -55,7 +55,7 @@ public class SettingValidator {
             try {
                 appScript.reloadSpreadsheet(config.getBookDataSourceUrl());
             } catch (Exception e) {
-                LOGGER.error("",e);
+                LOGGER.error("", e);
                 errors.add(String.format("%s BOOK spreadsheet %s is not a valid spreadsheet id, or not shared with %s yet.",
                         country.name(), config.getBookDataSourceUrl(), Constants.RND_EMAIL));
             }
@@ -67,7 +67,7 @@ public class SettingValidator {
             try {
                 appScript.reloadSpreadsheet(config.getProductDataSourceUrl());
             } catch (Exception e) {
-                LOGGER.error("",e);
+                LOGGER.error("", e);
                 errors.add(String.format("%s PRODUCT spreadsheet %s is not a valid spreadsheet id, or not shared with %s yet.",
                         country.name(), config.getProductDataSourceUrl(), Constants.RND_EMAIL));
             }
@@ -100,7 +100,6 @@ public class SettingValidator {
             });
 
         }
-
 
 
         spreadsheetIds.forEach((spreadsheetId, origins) -> {
@@ -177,30 +176,30 @@ public class SettingValidator {
         return errors;
     }
 
-    public List<String> possibleSpreadsheetExistedButNotEntered(String sid, Settings.Configuration config){
+    public List<String> possibleSpreadsheetExistedButNotEntered(String sid, Settings.Configuration config) {
         List<String> errors = new ArrayList<>();
 
-        if(StringUtils.isBlank(config.getBookDataSourceUrl())) {
+        if (StringUtils.isBlank(config.getBookDataSourceUrl())) {
             try {
                 List<File> availableSheets = sheetAPI.getAvailableSheets(sid, config.getCountry(), "BOOK");
                 if (CollectionUtils.isNotEmpty(availableSheets)) {
                     errors.add(String.format("%s does'nt fill BOOK spreadsheet, but possible sheets found. %s",
-                            config.getCountry().name(), availableSheets.stream().map(it->it.getName()).collect(Collectors.toSet())));
+                            config.getCountry().name(), availableSheets.stream().map(File::getName).collect(Collectors.toSet())));
                 }
-            }catch (Exception e) {
-
+            } catch (Exception e) {
+                //ignore
             }
         }
 
-        if(StringUtils.isBlank(config.getProductDataSourceUrl())) {
+        if (StringUtils.isBlank(config.getProductDataSourceUrl())) {
             try {
                 List<File> availableSheets = sheetAPI.getAvailableSheets(sid, config.getCountry(), "ExportedOrder");
                 if (CollectionUtils.isNotEmpty(availableSheets)) {
                     errors.add(String.format("%s does'nt fill PRODUCT spreadsheet, but possible sheets found. %s",
-                            config.getCountry().name(), availableSheets.stream().map(it->it.getName()).collect(Collectors.toSet())));
+                            config.getCountry().name(), availableSheets.stream().map(File::getName).collect(Collectors.toSet())));
                 }
-            }catch (Exception e) {
-
+            } catch (Exception e) {
+                //ignore
             }
         }
 

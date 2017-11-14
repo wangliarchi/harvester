@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 10/27/17 3:49 PM
  */
-abstract public class Step {
+public abstract class Step {
     private static final Logger LOGGER = LoggerFactory.getLogger(Step.class);
     @Getter
     @Setter
@@ -22,9 +22,9 @@ abstract public class Step {
     public String stepName;
 
 
-    abstract public Step createDynamicInstance(FlowState state);
+    public abstract Step createDynamicInstance(FlowState state);
 
-    abstract protected void process(FlowState state);
+    protected abstract void process(FlowState state);
 
     // Step children override with unique processing
     public Step processStep(FlowState state) {

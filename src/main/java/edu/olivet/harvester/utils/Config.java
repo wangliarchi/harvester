@@ -16,12 +16,15 @@ public enum Config {
 
     private String fileName;
     private String desc;
+
     public String fileName() {
         return fileName;
     }
+
     public String desc() {
         return desc;
     }
+
     Config(String fileName, String desc) {
         this.fileName = fileName;
         this.desc = desc;
