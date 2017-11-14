@@ -16,18 +16,20 @@ import edu.olivet.harvester.spreadsheet.service.OrderHelper;
 import edu.olivet.harvester.utils.DateFormat;
 import org.apache.commons.lang3.StringUtils;
 import org.nutz.dao.Cnd;
+import org.slf4j.LoggerFactory;
 import org.testng.collections.Lists;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/8/17 2:56 PM
  */
 public class OrderValidator {
-
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(OrderValidator.class);
     public enum Validator {
         IsFulfilled,
         IsNotFulfilled,
@@ -117,11 +119,14 @@ public class OrderValidator {
                     return result.toString();
                 }
             } catch (NoSuchMethodException e) {
+                LOGGER.error("",e);
                 return "Validator " + validator.name() + " not found.";
             } catch (IllegalAccessException e) {
                 //e.printStackTrace();
+                LOGGER.error("",e);
                 return "Validator " + validator.name() + " is not accessible.";
             } catch (InvocationTargetException e) {
+                LOGGER.error("",e);
                 return "Validator " + validator.name() + " is not valid.";
             }
         }
