@@ -49,12 +49,12 @@ public class ReviewOrderMultiPage extends Step {
                 LOGGER.warn("Address did not pass verification. try to enter again.");
                 ShippingAddressOnePage shippingAddressOnePage = new ShippingAddressOnePage(state.getBuyerPanel());
                 shippingAddressOnePage.execute(state.getOrder());
-                WaitTime.Shortest.execute();
+                WaitTime.Short.execute();
 
 
             } else {
                 LOGGER.info("Address passed review");
-                break;
+                return;
             }
         }
 
