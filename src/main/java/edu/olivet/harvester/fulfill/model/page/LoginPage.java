@@ -91,30 +91,12 @@ public class LoginPage extends FulfillmentPage implements PageObject {
         }
 
         //check if verification code is requested
-        DOMElement codeRequested = JXBrowserHelper.selectElementByCssSelector(browser, "#claimspicker");
+        DOMElement codeRequested = JXBrowserHelper.selectElementByName(browser, "claimspicker");
         if (codeRequested != null) {
             JXBrowserHelper.selectElementByCssSelector(browser, "#continue").click();
             WaitTime.Shortest.execute();
+            enterVerificationCode();
 
-            DOMElement codeField = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, ".cvf-widget-input.cvf-widget-input-code");
-
-            //fetch code from email
-            try {
-                String verificationCode = LoginVerificationService.readVerificationCodeFromGmail(buyer.getEmail());
-                JXBrowserHelper.fillValueForFormField(browser, ".cvf-widget-input.cvf-widget-input-code", verificationCode);
-                WaitTime.Short.execute();
-            } catch (Exception e) {
-                UITools.info("Please enter login verification code.");
-                WaitTime.Short.execute();
-                while (true) {
-                    String enteredCode = codeField.getAttribute("value");
-                    if (StringUtils.length(enteredCode) >= 6) {
-                        break;
-                    }
-                }
-            }
-
-            Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> ((DOMFormControlElement) codeField).getForm().submit());
 
         }
 
@@ -123,6 +105,35 @@ public class LoginPage extends FulfillmentPage implements PageObject {
 
     }
 
+    @Repeat
+    public void enterVerificationCode() {
+
+        //fetch code from email
+        DOMElement codeField = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, ".cvf-widget-input.cvf-widget-input-code");
+
+        try {
+            WaitTime.Long.execute();
+            String verificationCode = LoginVerificationService.readVerificationCodeFromGmail(buyer.getEmail());
+            JXBrowserHelper.fillValueForFormField(browser, ".cvf-widget-input.cvf-widget-input-code", verificationCode);
+            WaitTime.Short.execute();
+        } catch (Exception e) {
+            LOGGER.error("Failed to fetch verification code.",e);
+            UITools.info("Please enter login verification code.");
+            WaitTime.Short.execute();
+            while (true) {
+                String enteredCode = codeField.getAttribute("value");
+                if (StringUtils.length(enteredCode) >= 6) {
+                    break;
+                }
+            }
+        }
+
+        Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> ((DOMFormControlElement) codeField).getForm().submit());
+
+        if(JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, ".cvf-widget-input.cvf-widget-input-code") != null) {
+            throw new BusinessException("Invalid code. Please check your code and try again.");
+        }
+    }
     public static void main(String[] args) {
 
         JFrame frame = new JFrame("Order Submission Demo");
