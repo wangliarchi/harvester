@@ -60,7 +60,7 @@ public class MainPanel extends JPanel {
     public void initEventListeners() {
         this.addComponentListener(new ComponentListener() {
             public void componentResized(ComponentEvent e) {
-                jSplitPane1.setDividerLocation(runtimeSettingsPanel.getPreferredSize().height);
+                jSplitPane1.setDividerLocation(Math.max(runtimeSettingsPanel.getPreferredSize().height,getHeight()-250));
                 jSplitPane2.setDividerLocation(getWidth() - runtimeSettingsPanel.getPreferredSize().width - 20);
                 mainWindowPanel.resetZoomLevel();
             }
