@@ -360,7 +360,7 @@ public class ConfirmShipments {
         if (country.europe()) {
             for(Country c : Country.EURO) {
                 result = _submitFeed(feedFile, c);
-                if (!StringUtils.containsIgnoreCase(result,"rejected")) {
+                if (!StringUtils.containsAny(result.toLowerCase(),"rejected","denied") ) {
                     break;
                 }
             }
