@@ -36,9 +36,9 @@ public class ForbiddenSeller extends AppScript {
     private static final  Map<String, List<String>> REGION_FORBIDDEN_LIST_CACHE = new HashMap<>();
 
     public boolean isForbidden(Seller seller) {
-        List<String> forbiddens = REGION_FORBIDDEN_LIST_CACHE.computeIfAbsent(seller.getCountry_ShippingFrom().name(), key -> load(seller.getCountry_OfferListing()));
+        List<String> forbiddenSellers = REGION_FORBIDDEN_LIST_CACHE.computeIfAbsent(seller.getCountry_OfferListing().name(), key -> load(seller.getCountry_OfferListing()));
 
-        return CollectionUtils.containsAny(forbiddens, Lists.newArrayList(seller.getName().toLowerCase(), seller.getUuid().toLowerCase()));
+        return CollectionUtils.containsAny(forbiddenSellers, Lists.newArrayList(seller.getName().toLowerCase(), seller.getUuid().toLowerCase()));
 
     }
 
