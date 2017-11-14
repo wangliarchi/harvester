@@ -72,4 +72,9 @@ public class Address {
                 Objects.equal(addressSet, oAddressSet);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(city,state,city,getZip(),address1,address2);
+    }
+
 }
