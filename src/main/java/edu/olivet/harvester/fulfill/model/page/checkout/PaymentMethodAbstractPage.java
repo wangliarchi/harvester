@@ -14,7 +14,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.plugin.dom.exception.InvalidStateException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +67,7 @@ public abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract 
 
     }
 
-    @Repeat(expectedExceptions = BusinessException.class)
+    @Repeat
     public void reenterCCNumber(DOMElement paymentRow) {
         //reenter credit card number
 
@@ -92,7 +91,7 @@ public abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract 
             List<DOMElement> creditCardErrors = JXBrowserHelper.selectElementsByCssSelector(browser, "#cc-errors .error-message");
             creditCardErrors.removeIf(it -> !JXBrowserHelper.isVisible(browser, "#" + it.getAttribute("id")));
             if (CollectionUtils.isNotEmpty(creditCardErrors)) {
-                throw new InvalidStateException(creditCardErrors.get(0).getInnerText());
+                throw new BusinessException(creditCardErrors.get(0).getInnerText());
             }
         }
 

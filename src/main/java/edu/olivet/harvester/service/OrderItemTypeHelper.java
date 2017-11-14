@@ -11,6 +11,7 @@ import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.service.mws.ProductAttributesHelper;
 import edu.olivet.harvester.service.mws.ProductClient;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,17 +39,18 @@ public class OrderItemTypeHelper {
 
             type = this.getItemTypeBySku(order);
 
-            LOGGER.info("Order item type for {} found as {} from SKU pattern. ASIN {}, SKU {}",
-                    order.order_id,
-                    type.name(), order.isbn, order.sku);
+            //LOGGER.info("Order item type for {} found as {} from SKU pattern. ASIN {}, SKU {}",
+                    //order.order_id,
+                    //type.name(), order.isbn, order.sku);
 
             return type;
 
         } catch (Exception e) {
-            LOGGER.warn("No product group info found by sku pattern for {}, ASIN {}, SKU {} - {}", order.order_id, order.isbn, order.sku, e);
+            //LOGGER.warn("No product group info found by sku pattern for {}, ASIN {}, SKU {} - {}", order.order_id, order.isbn, order.sku, e);
         }
 
-
+        /**
+         Disable now. API quote has been used up by repricing programs.
         try {
 
             type = this.getItemTypeByMWSAPI(order);
@@ -63,7 +65,7 @@ public class OrderItemTypeHelper {
                     "No product group info found by product api for {}, ASIN {}, SKU {} - {}, will set default to BOOK", order.order_id, order.isbn, order.sku, e
             );
         }
-
+        */
 
         //TODO: defaut to BOOK?
 
@@ -83,7 +85,7 @@ public class OrderItemTypeHelper {
 
 
         for (String keyword : productKeywords) {
-            if (sku.toLowerCase().contains(keyword.toLowerCase())) {
+            if (StringUtils.containsIgnoreCase(sku,keyword)) {
                 return OrderEnums.OrderItemType.PRODUCT;
             }
         }

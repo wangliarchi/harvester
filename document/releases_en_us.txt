@@ -80,3 +80,83 @@
 2. added starting program bat file. it was missed in previous versions
 3. change to check Harvester running status every 4 hours. it was once at 2AM everyday.
 4. other fixes
+
+======================================================================
+版本：1.0-2017-10-12.2,1.0-2017-10-13.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. added context uploader.
+2. other fixes
+
+======================================================================
+版本：1.0-2017-10-13.1,1.0-2017-10-16.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. add order conformation cronjob to db, check to run on program started if missed.
+2. bug fixes
+
+======================================================================
+版本：1.0-2017-10-16.1,1.0-2017-10-17.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. sleep random time to reduce concurrency load of dropbox server when auto upgrading .
+2. upload daily log to Dropbox
+
+======================================================================
+版本：1.0-2017-10-17.1,1.0-2017-10-18.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. add confirmation window when user trying to close Harvester
+2. minor bug fixes
+
+
+======================================================================
+版本：1.0-2017-10-18.1,1.0-2017-10-20.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. check all 5 eu marketplace for active mws credential
+2. minor bug fixes
+
+======================================================================
+版本：1.0-2017-10-20.1,1.0-2017-10-24.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. change order confirmation to between 12:00-2:00pm
+2. minor bug fixes
+
+======================================================================
+版本：1.0-2017-10-24.1,1.0-2017-11-07.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. for order confirmation, use date of marketplace timezone instead of system timezone.
+
+======================================================================
+版本：1.0-2017-11-07.1,1.0-2017-11-08.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. Fixed Harvester cant start on non-english and non-chinese system bug.
+
+======================================================================
+版本：1.0-2017-11-08.1,1.0-2017-11-11.1
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. Not using product api to check product type，rely on sku pattern only.
