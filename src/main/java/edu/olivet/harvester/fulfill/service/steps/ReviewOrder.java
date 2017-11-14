@@ -54,7 +54,7 @@ public class ReviewOrder extends Step {
 
             } else {
                 LOGGER.info("Address passed review");
-                break;
+                return;
             }
         }
 
