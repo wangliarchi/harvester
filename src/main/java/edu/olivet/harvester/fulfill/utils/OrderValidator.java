@@ -1,5 +1,6 @@
 package edu.olivet.harvester.fulfill.utils;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
@@ -16,20 +17,20 @@ import edu.olivet.harvester.spreadsheet.service.OrderHelper;
 import edu.olivet.harvester.utils.DateFormat;
 import org.apache.commons.lang3.StringUtils;
 import org.nutz.dao.Cnd;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.collections.Lists;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
+
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/8/17 2:56 PM
  */
 public class OrderValidator {
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(OrderValidator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderValidator.class);
     public enum Validator {
         IsFulfilled,
         IsNotFulfilled,
