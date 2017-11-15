@@ -1,5 +1,6 @@
 package edu.olivet.harvester.fulfill.model;
 
+import com.google.common.collect.Lists;
 import com.mchange.lang.IntegerUtils;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.BusinessException;
@@ -10,7 +11,6 @@ import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.collections.Lists;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
