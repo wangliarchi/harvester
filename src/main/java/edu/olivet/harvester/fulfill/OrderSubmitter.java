@@ -25,7 +25,6 @@ import edu.olivet.harvester.spreadsheet.service.OrderHelper;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.ui.TabbedBuyerPanel;
 import edu.olivet.harvester.utils.MessageListener;
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -70,7 +69,8 @@ public class OrderSubmitter {
     @Inject
     OrderService orderService;
 
-    private static final Map<String,Boolean> DUPLICATION_CHECK_CACHE = new HashMap<>();
+    private static final Map<String, Boolean> DUPLICATION_CHECK_CACHE = new HashMap<>();
+
     public void execute(RuntimeSettings settings) {
         messageListener.empty();
 
@@ -83,7 +83,7 @@ public class OrderSubmitter {
         }
 
         //check duplication
-        DUPLICATION_CHECK_CACHE.computeIfAbsent(settings.getSpreadsheetId(),k->{
+        DUPLICATION_CHECK_CACHE.computeIfAbsent(settings.getSpreadsheetId(), k -> {
             Spreadsheet spreadsheet = sheetService.getSpreadsheet(settings.getSpreadsheetId());
             List<Order> duplicatedOrders = orderService.findDuplicates(spreadsheet);
             if (CollectionUtils.isNotEmpty(duplicatedOrders)) {
@@ -172,7 +172,9 @@ public class OrderSubmitter {
 
             messageListener.addMsg(order, String.format("start submitting. Buyer account %s, marketplace %s", buyerPanel.getBuyer(), buyerPanel.getCountry().baseUrl()));
             orderFlowEngine.process(order, buyerPanel);
-            messageListener.addMsg(order, "order fulfilled successfully.");
+            if (StringUtils.isNotBlank(order.order_number)) {
+                messageListener.addMsg(order, "order fulfilled successfully.");
+            }
         } catch (Exception e) {
             LOGGER.error("Error submit order {}", order.order_id, e);
 

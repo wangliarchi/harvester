@@ -5,6 +5,7 @@ import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.fulfill.OrderSubmitter;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
+import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.utils.FulfillmentEnum;
 import edu.olivet.harvester.fulfill.utils.RuntimeSettingsValidator;
 import org.apache.commons.collections4.CollectionUtils;
@@ -28,7 +29,7 @@ public class SubmitOrdersEvent extends Observable implements HarvesterUIEvent {
     OrderSubmitter orderSubmitter;
 
     public void excute() {
-
+        PSEventListener.reset();
         RuntimeSettings settings = RuntimeSettings.load();
         RuntimeSettingsValidator.CheckResult result = validator.validate(settings, FulfillmentEnum.Action.UpdateStatus);
 

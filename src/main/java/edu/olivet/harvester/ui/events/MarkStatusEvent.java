@@ -5,6 +5,7 @@ import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.MarkStatusService;
+import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.utils.FulfillmentEnum;
 import edu.olivet.harvester.fulfill.utils.RuntimeSettingsValidator;
 import org.apache.commons.collections4.CollectionUtils;
@@ -28,6 +29,7 @@ public class MarkStatusEvent extends Observable implements HarvesterUIEvent {
 
     public void excute() {
         //validate runtime setting
+        PSEventListener.reset();
         RuntimeSettings settings = RuntimeSettings.load();
         RuntimeSettingsValidator.CheckResult result = validator.validate(settings, FulfillmentEnum.Action.UpdateStatus);
 

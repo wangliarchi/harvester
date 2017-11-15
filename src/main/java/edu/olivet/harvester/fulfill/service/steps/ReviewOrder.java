@@ -67,7 +67,7 @@ public class ReviewOrder extends Step {
             OrderReviewOnePage orderReviewOnePage = new OrderReviewOnePage(state.getBuyerPanel());
             if (orderReviewOnePage.reviewPaymentMethod()) {
                 LOGGER.info("Payment passed review");
-                break;
+                return;
             } else {
                 LOGGER.info("Payment did not pass review");
                 PaymentMethodOnePage paymentMethodOnePage = new PaymentMethodOnePage(state.getBuyerPanel());

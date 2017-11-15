@@ -67,7 +67,7 @@ public class ReviewOrderMultiPage extends Step {
             OrderReviewMultiPage orderReviewMultiPage = new OrderReviewMultiPage(state.getBuyerPanel());
             if (orderReviewMultiPage.reviewPaymentMethod()) {
                 LOGGER.info("Payment passed review");
-                break;
+                return;
             } else {
                 LOGGER.info("Payment did not pass review");
                 PaymentMethodOnePage paymentMethodOnePage = new PaymentMethodOnePage(state.getBuyerPanel());

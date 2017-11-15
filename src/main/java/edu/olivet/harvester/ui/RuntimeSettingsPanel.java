@@ -8,6 +8,7 @@ import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.harvester.fulfill.model.AdvancedSubmitSetting;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
+import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.spreadsheet.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.events.MarkStatusEvent;
@@ -193,7 +194,35 @@ public class RuntimeSettingsPanel extends JPanel {
 
         });
 
+        pauseButton.addActionListener(evt -> {
+            if (PSEventListener.pause) {
+                resetPauseBtn();
+            } else {
+                paused();
+            }
+        });
 
+        stopButton.addActionListener(evt -> {
+            if (UITools.confirmed("Please confirm you want to stop this process.")) {
+                PSEventListener.stop();
+                resetPauseBtn();
+                restAllBtns();
+            }
+        });
+
+
+    }
+
+    public void paused() {
+        PSEventListener.pause();
+        pauseButton.setIcon(UITools.getIcon("resume.png"));
+        pauseButton.setText("Resume");
+    }
+
+    public void resetPauseBtn() {
+        PSEventListener.pause = false;
+        pauseButton.setIcon(UITools.getIcon("pause.png"));
+        pauseButton.setText("Pause");
     }
 
     public void disableAllBtns() {
@@ -208,6 +237,11 @@ public class RuntimeSettingsPanel extends JPanel {
         submitButton.setEnabled(false);
         noInvoiceTextField.setEnabled(false);
         finderCodeTextField.setEnabled(false);
+        pauseButton.setVisible(true);
+        stopButton.setVisible(true);
+        huntSupplierButton.setVisible(false);
+        markStatusButton.setVisible(false);
+        submitButton.setVisible(false);
     }
 
     public void restAllBtns() {
@@ -222,6 +256,11 @@ public class RuntimeSettingsPanel extends JPanel {
         submitButton.setEnabled(true);
         noInvoiceTextField.setEnabled(true);
         finderCodeTextField.setEnabled(true);
+        pauseButton.setVisible(false);
+        stopButton.setVisible(false);
+        huntSupplierButton.setVisible(true);
+        markStatusButton.setVisible(true);
+        submitButton.setVisible(true);
     }
 
     public void selectGoogleSheet() {
@@ -260,7 +299,7 @@ public class RuntimeSettingsPanel extends JPanel {
             settings.setAdvancedSubmitSetting(new AdvancedSubmitSetting());
             settings.save();
 
-            if(dialog.continueToNext) {
+            if (dialog.continueToNext) {
                 selectRange();
             }
         }
@@ -268,13 +307,14 @@ public class RuntimeSettingsPanel extends JPanel {
 
     public void selectRange() {
         //spreadsheet should be selected first.
-        if(StringUtils.isBlank(settings.getSheetName())) {
+        if (StringUtils.isBlank(settings.getSheetName())) {
             return;
         }
         UITools.setDialogAttr(new SelectRangeDialog(null, true, settings.getAdvancedSubmitSetting()), true);
         settings = RuntimeSettings.load();
         selectedRangeLabel.setText(settings.getAdvancedSubmitSetting().toString());
     }
+
     public void setAccounts4Country() {
         Country currentCountry = (Country) marketplaceComboBox.getSelectedItem();
         Settings.Configuration configuration = Settings.load().getConfigByCountry(currentCountry);
@@ -361,6 +401,8 @@ public class RuntimeSettingsPanel extends JPanel {
     private JButton huntSupplierButton;
     private JButton markStatusButton;
     private JButton submitButton;
+    private JButton pauseButton;
+    private JButton stopButton;
 
     private JLabel maxEddLabel;
     private JComboBox<String> maxDaysOverEddComboBox;
@@ -409,6 +451,15 @@ public class RuntimeSettingsPanel extends JPanel {
         submitButton = new JButton();
         submitButton.setText("Submit");
         submitButton.setIcon(UITools.getIcon("start.png"));
+
+        pauseButton = new JButton();
+        pauseButton.setText("Pause");
+        pauseButton.setIcon(UITools.getIcon("pause.png"));
+        pauseButton.setVisible(false);
+        stopButton = new JButton();
+        stopButton.setIcon(UITools.getIcon("stop.png"));
+        stopButton.setText("Stop");
+        stopButton.setVisible(false);
 
 
         marketplaceLabel.setText("Marketplace");
@@ -476,15 +527,18 @@ public class RuntimeSettingsPanel extends JPanel {
                                                         .addComponent(noInvoiceTextField, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(finderCodeTextField, labelMinWidth, fieldWidth, fieldWidth)
                                                 )
-
-
-                                        ).addGroup(layout.createSequentialGroup()
-                                                .addComponent(huntSupplierButton)
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(markStatusButton)
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(submitButton))
-
+                                        ).addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                                                .addGroup(layout.createSequentialGroup()
+                                                        .addComponent(huntSupplierButton)
+                                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                        .addComponent(markStatusButton)
+                                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                        .addComponent(submitButton))
+                                                .addGroup(layout.createSequentialGroup()
+                                                        .addComponent(pauseButton)
+                                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                        .addComponent(stopButton))
+                                        )
                                 )
 
                         )
@@ -551,7 +605,10 @@ public class RuntimeSettingsPanel extends JPanel {
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                         .addComponent(huntSupplierButton)
                                         .addComponent(markStatusButton)
-                                        .addComponent(submitButton)))
+                                        .addComponent(submitButton))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(pauseButton)
+                                        .addComponent(stopButton)))
         );
     }
 
