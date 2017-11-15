@@ -14,14 +14,12 @@ import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.MarkStatusService;
 import edu.olivet.harvester.fulfill.service.OrderFlowEngine;
+import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.service.SheetService;
-import edu.olivet.harvester.fulfill.utils.DailyBudgetHelper;
-import edu.olivet.harvester.fulfill.utils.FulfillmentEnum;
-import edu.olivet.harvester.fulfill.utils.OrderValidator;
+import edu.olivet.harvester.fulfill.utils.*;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.service.OrderService;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
-import edu.olivet.harvester.spreadsheet.service.OrderHelper;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.ui.TabbedBuyerPanel;
 import edu.olivet.harvester.utils.MessageListener;
@@ -78,6 +76,7 @@ public class OrderSubmitter {
             String spreadsheetId = settings.getSpreadsheetId();
             dailyBudgetHelper.getRemainingBudget(spreadsheetId, new Date());
         } catch (Exception e) {
+            LOGGER.error("Error when fetch daily budget", e);
             UITools.error(e.getMessage());
             return;
         }
@@ -91,20 +90,15 @@ public class OrderSubmitter {
                         StringUtils.join(duplicatedOrders.stream().map(it -> it.order_id + " @ " + it.sheetName).collect(Collectors.toSet()).toArray(new String[duplicatedOrders.size()]), ", "));
                 UITools.error(msg + "\n\n Please fix before submitting orders.");
             }
-
             return true;
         });
 
 
         long start = System.currentTimeMillis();
-
-
         //mark status first
         markStatusService.excute(settings, false);
 
-
         List<Order> orders = appScript.readOrders(settings);
-
         String resultSummary = String.format("Finished loading orders to submit for %s, %d orders found, took %s", settings.toString(), orders.size(), Strings.formatElapsedTime(start));
         LOGGER.info(resultSummary);
         messageListener.addLongMsg(resultSummary, orders.size() > 0 ? InformationLevel.Information : InformationLevel.Negative);
@@ -137,23 +131,35 @@ public class OrderSubmitter {
             return;
         }
 
+        //inform event listener.
+        PSEventListener.start();
+
         resultSummary = String.format("%d order(s) to be submitted.", validOrders.size());
         LOGGER.info(resultSummary);
         messageListener.addMsg(resultSummary, validOrders.size() > 0 ? InformationLevel.Information : InformationLevel.Negative);
 
 
         for (Order order : validOrders) {
+            //if stop btn clicked, break the process
+            if (PSEventListener.stopped()) {
+                break;
+            }
+
             try {
-                Account buyer = OrderHelper.getBuyer(order);
-                Country country = OrderHelper.getFulfillementCountry(order);
+                Account buyer = OrderBuyerUtils.getBuyer(order);
+                Country country = OrderCountryUtils.getFulfillementCountry(order);
                 BuyerPanel buyerPanel = TabbedBuyerPanel.getInstance().getOrAddTab(country, buyer);
                 TabbedBuyerPanel.getInstance().highlight(buyerPanel);
+
                 submit(order, buyerPanel);
             } catch (Exception e) {
                 LOGGER.error("Error submit order {}", order.order_id, e);
                 messageListener.addMsg(order, e.getMessage(), InformationLevel.Negative);
             }
         }
+
+        //reset after done
+        PSEventListener.reset();
 
     }
 
@@ -170,7 +176,7 @@ public class OrderSubmitter {
             }
             dailyBudgetHelper.getRemainingBudget(spreadsheetId, new Date());
 
-            messageListener.addMsg(order, String.format("start submitting. Buyer account %s, marketplace %s", buyerPanel.getBuyer(), buyerPanel.getCountry().baseUrl()));
+            messageListener.addMsg(order, String.format("start submitting. Buyer account %s, marketplace %s", buyerPanel.getBuyer().getEmail(), buyerPanel.getCountry().baseUrl()));
             orderFlowEngine.process(order, buyerPanel);
             if (StringUtils.isNotBlank(order.order_number)) {
                 messageListener.addMsg(order, "order fulfilled successfully.");

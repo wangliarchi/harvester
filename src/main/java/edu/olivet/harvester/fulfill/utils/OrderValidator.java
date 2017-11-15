@@ -13,7 +13,6 @@ import edu.olivet.harvester.fulfill.service.ForbiddenSeller;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.model.Remark;
-import edu.olivet.harvester.spreadsheet.service.OrderHelper;
 import edu.olivet.harvester.utils.DateFormat;
 import org.apache.commons.lang3.StringUtils;
 import org.nutz.dao.Cnd;
@@ -146,10 +145,10 @@ public class OrderValidator {
     }
 
     @Inject
-    OrderHelper orderHelper;
+    OrderStatusUtils orderStatusUtils;
 
     public String statusMarkedCorrectForSubmit(Order order) {
-        String status = orderHelper.determineStatus(order);
+        String status = orderStatusUtils.determineStatus(order);
         if (order.status.equals(status)) {
             return "";
         }
@@ -344,7 +343,7 @@ public class OrderValidator {
 
     public String hasValidBuyerAccount(Order order) {
         try {
-            Account buyer = OrderHelper.getBuyer(order);
+            Account buyer = OrderBuyerUtils.getBuyer(order);
         } catch (Exception e) {
             return "order buyer account not set properly.";
         }
@@ -353,7 +352,7 @@ public class OrderValidator {
 
     public String fulfillmentCountryIsValid(Order order) {
         try {
-            Country country = OrderHelper.getFulfillementCountry(order);
+            Country country = OrderCountryUtils.getFulfillementCountry(order);
         } catch (Exception e) {
             return "order fulfillment country is not valid.";
         }
@@ -363,7 +362,7 @@ public class OrderValidator {
 
     public String hasValidCreditCard(Order order) {
         try {
-            OrderHelper.getCreditCard(order);
+            OrderBuyerUtils.getCreditCard(order);
         } catch (Exception e) {
             return e.getMessage();
         }
@@ -437,7 +436,7 @@ public class OrderValidator {
     public String isNotForbiddenSeller(Order order) {
         Seller seller = new Seller();
         seller.setUuid(order.seller_id);
-        seller.setCountry_OfferListing(OrderHelper.getFulfillementCountry(order));
+        seller.setCountry_OfferListing(OrderCountryUtils.getFulfillementCountry(order));
         seller.setName(order.seller);
         if (forbiddenSeller.isForbidden(seller)) {
             return String.format("Seller %s (%s) is forbidden.", seller.getName(), seller.getUuid());

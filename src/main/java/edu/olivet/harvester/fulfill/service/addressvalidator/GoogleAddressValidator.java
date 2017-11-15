@@ -1,4 +1,4 @@
-package edu.olivet.harvester.fulfill.service.AddressValidator;
+package edu.olivet.harvester.fulfill.service.addressvalidator;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/13/17 9:14 AM

@@ -6,9 +6,11 @@ import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Constants;
+import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.model.AdvancedSubmitSetting;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
+import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.spreadsheet.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.events.MarkStatusEvent;
@@ -162,42 +164,16 @@ public class RuntimeSettingsPanel extends JPanel {
             }
         });
 
-        markStatusButton.addActionListener(evt -> {
-            Thread worker = new Thread(() -> {
-                try {
-                    disableAllBtns();
-                    ApplicationContext.getBean(MarkStatusEvent.class).excute();
-                } catch (Exception e) {
-                    UITools.error("ERROR while marking order status:" + e.getMessage(), UIText.title("title.code_error"));
-                    LOGGER.error("ERROR while marking order status:", e);
-                } finally {
-                    restAllBtns();
-                }
-            });
-            worker.start();
-        });
+        markStatusButton.addActionListener(evt -> markStatus());
 
-        submitButton.addActionListener(evt -> {
-            Thread worker = new Thread(() -> {
-                try {
-                    disableAllBtns();
-                    ApplicationContext.getBean(SubmitOrdersEvent.class).excute();
-                } catch (Exception e) {
-                    UITools.error(UIText.message("message.submit.exception", e.getMessage()), UIText.title("title.code_error"));
-                    LOGGER.error("做单过程中出现异常:", e);
-                } finally {
-                    restAllBtns();
-                }
-            });
-            worker.start();
-
-
-        });
+        submitButton.addActionListener(evt -> submitOrders());
 
         pauseButton.addActionListener(evt -> {
-            if (PSEventListener.pause) {
+            if (PSEventListener.status == PSEventListener.Status.Paused) {
+                PSEventListener.resume();
                 resetPauseBtn();
             } else {
+                PSEventListener.pause();
                 paused();
             }
         });
@@ -205,22 +181,89 @@ public class RuntimeSettingsPanel extends JPanel {
         stopButton.addActionListener(evt -> {
             if (UITools.confirmed("Please confirm you want to stop this process.")) {
                 PSEventListener.stop();
-                resetPauseBtn();
-                restAllBtns();
             }
         });
 
 
+        new Thread(() -> {
+            //noinspection InfiniteLoopStatement
+            while (true) {
+                switch (PSEventListener.status) {
+                    case Paused:
+                    case Running:
+                        showPauseBtn();
+                        break;
+                    case Stopped:
+                        hidePauseBtn();
+                        break;
+                    case NotRuning:
+                        hidePauseBtn();
+                        break;
+                    default:
+                        hidePauseBtn();
+                        break;
+                }
+                WaitTime.Shortest.execute();
+            }
+        }, "PSEventListener").start();
+
+    }
+
+
+    public void markStatus() {
+        new Thread(() -> {
+            try {
+                disableAllBtns();
+                ApplicationContext.getBean(MarkStatusEvent.class).excute();
+            } catch (Exception e) {
+                UITools.error("ERROR while marking order status:" + e.getMessage(), UIText.title("title.code_error"));
+                LOGGER.error("ERROR while marking order status:", e);
+            } finally {
+                restAllBtns();
+            }
+        }).start();
+    }
+
+    public void submitOrders() {
+        new Thread(() -> {
+            try {
+                disableAllBtns();
+                ApplicationContext.getBean(SubmitOrdersEvent.class).excute();
+            } catch (Exception e) {
+                UITools.error(UIText.message("message.submit.exception", e.getMessage()), UIText.title("title.code_error"));
+                LOGGER.error("做单过程中出现异常:", e);
+            } finally {
+                restAllBtns();
+            }
+        }).start();
+    }
+
+    public void showPauseBtn() {
+        pauseButton.setVisible(true);
+        stopButton.setVisible(true);
+        pauseButton.setEnabled(true);
+        stopButton.setEnabled(true);
+
+        huntSupplierButton.setVisible(false);
+        markStatusButton.setVisible(false);
+        submitButton.setVisible(false);
+
+    }
+
+    public void hidePauseBtn() {
+        pauseButton.setVisible(false);
+        stopButton.setVisible(false);
+        huntSupplierButton.setVisible(true);
+        markStatusButton.setVisible(true);
+        submitButton.setVisible(true);
     }
 
     public void paused() {
-        PSEventListener.pause();
         pauseButton.setIcon(UITools.getIcon("resume.png"));
         pauseButton.setText("Resume");
     }
 
     public void resetPauseBtn() {
-        PSEventListener.pause = false;
         pauseButton.setIcon(UITools.getIcon("pause.png"));
         pauseButton.setText("Pause");
     }
@@ -237,11 +280,7 @@ public class RuntimeSettingsPanel extends JPanel {
         submitButton.setEnabled(false);
         noInvoiceTextField.setEnabled(false);
         finderCodeTextField.setEnabled(false);
-        pauseButton.setVisible(true);
-        stopButton.setVisible(true);
-        huntSupplierButton.setVisible(false);
-        markStatusButton.setVisible(false);
-        submitButton.setVisible(false);
+
     }
 
     public void restAllBtns() {
@@ -256,11 +295,6 @@ public class RuntimeSettingsPanel extends JPanel {
         submitButton.setEnabled(true);
         noInvoiceTextField.setEnabled(true);
         finderCodeTextField.setEnabled(true);
-        pauseButton.setVisible(false);
-        stopButton.setVisible(false);
-        huntSupplierButton.setVisible(true);
-        markStatusButton.setVisible(true);
-        submitButton.setVisible(true);
     }
 
     public void selectGoogleSheet() {
@@ -282,7 +316,6 @@ public class RuntimeSettingsPanel extends JPanel {
         chooseSheetDialog.showContinueBtn(true);
         ChooseSheetDialog dialog = UITools.setDialogAttr(chooseSheetDialog);
 
-        dialog.invalidate();
         if (dialog.isOk()) {
             if (CollectionUtils.isNotEmpty(dialog.getSelectedWorksheets())) {
                 if (!dialog.getSelectedWorksheets().get(0).equals(selectedWorksheet)) {
@@ -310,34 +343,50 @@ public class RuntimeSettingsPanel extends JPanel {
         if (StringUtils.isBlank(settings.getSheetName())) {
             return;
         }
-        UITools.setDialogAttr(new SelectRangeDialog(null, true, settings.getAdvancedSubmitSetting()), true);
+        SelectRangeDialog dialog = UITools.setDialogAttr(new SelectRangeDialog(null, true, settings.getAdvancedSubmitSetting()), true);
         settings = RuntimeSettings.load();
         selectedRangeLabel.setText(settings.getAdvancedSubmitSetting().toString());
+
+        if (dialog.continueToSubmit) {
+            submitOrders();
+        } else if (dialog.continueToMarkStatus) {
+            markStatus();
+        }
     }
 
     public void setAccounts4Country() {
         Country currentCountry = (Country) marketplaceComboBox.getSelectedItem();
+        String spreadsheetId = settings.getSpreadsheetId();
+
         Settings.Configuration configuration = Settings.load().getConfigByCountry(currentCountry);
 
         Account seller = configuration.getSeller();
         Account[] sellers = seller == null ? new Account[0] : new Account[]{seller};
         sellerComboBox.setModel(new DefaultComboBoxModel<>(sellers));
 
-        Account buyer = configuration.getBuyer();
+
+        if (StringUtils.isBlank(spreadsheetId)) {
+            return;
+        }
+
+        OrderEnums.OrderItemType type = Settings.load().getSpreadsheetType(spreadsheetId);
+
+        Account primeBuyer;
+        Account buyer;
+        if(type == OrderEnums.OrderItemType.BOOK) {
+            buyer = configuration.getBuyer();
+            primeBuyer =  configuration.getPrimeBuyer();
+        } else {
+            buyer = configuration.getProdBuyer();
+            primeBuyer = configuration.getProdPrimeBuyer();
+        }
         Account[] buyers = buyer == null ? new Account[0] : new Account[]{buyer};
-        bookBuyerComboBox.setModel(new DefaultComboBoxModel<>(buyers));
+        buyerComboBox.setModel(new DefaultComboBoxModel<>(buyers));
 
-        Account primeBuyer = configuration.getPrimeBuyer();
         Account[] primeBuyers = primeBuyer == null ? new Account[0] : new Account[]{primeBuyer};
-        primeBookBuyerComboBox.setModel(new DefaultComboBoxModel<>(primeBuyers));
+        primeBuyerComboBox.setModel(new DefaultComboBoxModel<>(primeBuyers));
 
-        Account prodBuyer = configuration.getProdBuyer();
-        Account[] prodBuyers = prodBuyer == null ? new Account[0] : new Account[]{prodBuyer};
-        prodBuyerComboBox.setModel(new DefaultComboBoxModel<>(prodBuyers));
 
-        Account prodPrimeBuyer = configuration.getProdPrimeBuyer();
-        Account[] prodPrimeBuyers = prodPrimeBuyer == null ? new Account[0] : new Account[]{prodPrimeBuyer};
-        primeProdBuyerComboBox.setModel(new DefaultComboBoxModel<>(prodPrimeBuyers));
     }
 
     public void setOrderFinder() {
@@ -374,19 +423,16 @@ public class RuntimeSettingsPanel extends JPanel {
     // Variables declaration - do not modify
     private JComboBox<Country> marketplaceComboBox;
     private JComboBox<Account> sellerComboBox;
-    private JComboBox<Account> bookBuyerComboBox;
-    private JComboBox<Account> primeBookBuyerComboBox;
-    private JComboBox<Account> prodBuyerComboBox;
-    private JComboBox<Account> primeProdBuyerComboBox;
+    private JComboBox<Account> buyerComboBox;
+    private JComboBox<Account> primeBuyerComboBox;
+
     private JButton selectRangeButton;
     private JComboBox<String> lostLimitComboBox;
     private JComboBox<String> priceLimitComboBox;
     private JLabel marketplaceLabel;
     private JLabel sellerLabel;
-    private JLabel bookBuyerLabel;
-    private JLabel primeBookBuyerLabel;
-    private JLabel prodBuyerLabel;
-    private JLabel primeProdBuyerLabel;
+    private JLabel buyerLabel;
+    private JLabel primeBuyerLabel;
     private JLabel selectRangeLabel;
     private JLabel lostLimitLabel;
     private JLabel priceLimitLabel;
@@ -416,14 +462,11 @@ public class RuntimeSettingsPanel extends JPanel {
         sellerLabel = new JLabel();
         sellerComboBox = new JComboBox<>();
 
-        bookBuyerLabel = new JLabel();
-        bookBuyerComboBox = new JComboBox<>();
-        primeBookBuyerLabel = new JLabel();
-        primeBookBuyerComboBox = new JComboBox<>();
-        prodBuyerLabel = new JLabel();
-        prodBuyerComboBox = new JComboBox<>();
-        primeProdBuyerLabel = new JLabel();
-        primeProdBuyerComboBox = new JComboBox<>();
+        buyerLabel = new JLabel();
+        buyerComboBox = new JComboBox<>();
+        primeBuyerLabel = new JLabel();
+        primeBuyerComboBox = new JComboBox<>();
+
         googleSheetLabel = new JLabel();
         googleSheetTextField = new JTextField();
         selectRangeLabel = new JLabel();
@@ -456,18 +499,18 @@ public class RuntimeSettingsPanel extends JPanel {
         pauseButton.setText("Pause");
         pauseButton.setIcon(UITools.getIcon("pause.png"));
         pauseButton.setVisible(false);
+        pauseButton.setEnabled(false);
         stopButton = new JButton();
         stopButton.setIcon(UITools.getIcon("stop.png"));
         stopButton.setText("Stop");
         stopButton.setVisible(false);
+        stopButton.setEnabled(false);
 
 
         marketplaceLabel.setText("Marketplace");
         sellerLabel.setText("Seller");
-        bookBuyerLabel.setText("Book Buyer");
-        primeBookBuyerLabel.setText("Prime Book Buyer");
-        prodBuyerLabel.setText("Prod Buyer");
-        primeProdBuyerLabel.setText("Prime Prod Buyer");
+        buyerLabel.setText("Buyer");
+        primeBuyerLabel.setText("Prime Buyer");
         googleSheetLabel.setText("Google Sheet");
         selectRangeLabel.setText("Select Range");
         lostLimitLabel.setText("Lost Limit");
@@ -483,7 +526,7 @@ public class RuntimeSettingsPanel extends JPanel {
         int fieldWidth = 180;
         int labelMinWidth = 100;
         layout.setHorizontalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                         .addGroup(layout.createSequentialGroup()
                                 .addContainerGap()
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
@@ -492,10 +535,8 @@ public class RuntimeSettingsPanel extends JPanel {
                                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                                         .addComponent(marketplaceLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                         .addComponent(sellerLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(bookBuyerLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(primeBookBuyerLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(prodBuyerLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(primeProdBuyerLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(buyerLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(primeBuyerLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                         .addComponent(googleSheetLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                         .addComponent(selectRangeLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                         .addComponent(lostLimitLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
@@ -504,44 +545,43 @@ public class RuntimeSettingsPanel extends JPanel {
                                                         .addComponent(noInvoiceLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                         .addComponent(codeFinderLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                 )
-
-
                                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                                         .addComponent(marketplaceComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(sellerComboBox, labelMinWidth, fieldWidth, fieldWidth)
-                                                        .addComponent(bookBuyerComboBox, labelMinWidth, fieldWidth, fieldWidth)
-                                                        .addComponent(primeBookBuyerComboBox, labelMinWidth, fieldWidth, fieldWidth)
-                                                        .addComponent(prodBuyerComboBox, labelMinWidth, fieldWidth, fieldWidth)
-                                                        .addComponent(primeProdBuyerComboBox, 0, fieldWidth, fieldWidth)
+                                                        .addComponent(buyerComboBox, labelMinWidth, fieldWidth, fieldWidth)
+                                                        .addComponent(primeBuyerComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(googleSheetTextField, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addGroup(layout.createSequentialGroup()
                                                                 .addComponent(selectRangeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                                 .addComponent(selectedRangeLabel)
                                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-
-
                                                         .addComponent(lostLimitComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(priceLimitComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(maxDaysOverEddComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(noInvoiceTextField, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(finderCodeTextField, labelMinWidth, fieldWidth, fieldWidth)
                                                 )
-                                        ).addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                                                .addGroup(layout.createSequentialGroup()
-                                                        .addComponent(huntSupplierButton)
-                                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                        .addComponent(markStatusButton)
-                                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                        .addComponent(submitButton))
-                                                .addGroup(layout.createSequentialGroup()
-                                                        .addComponent(pauseButton)
-                                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                        .addComponent(stopButton))
                                         )
                                 )
-
+                                .addContainerGap()
+                        ).addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(huntSupplierButton)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(markStatusButton)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(submitButton)
+                                .addContainerGap()
                         )
+                        .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(pauseButton)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(stopButton)
+                                .addContainerGap()
+                        ))
         );
 
         layout.setVerticalGroup(
@@ -558,20 +598,12 @@ public class RuntimeSettingsPanel extends JPanel {
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
 
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(bookBuyerLabel)
-                                        .addComponent(bookBuyerComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(buyerLabel)
+                                        .addComponent(buyerComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(primeBookBuyerLabel)
-                                        .addComponent(primeBookBuyerComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(prodBuyerLabel)
-                                        .addComponent(prodBuyerComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(primeProdBuyerLabel)
-                                        .addComponent(primeProdBuyerComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(primeBuyerLabel)
+                                        .addComponent(primeBuyerComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(googleSheetLabel)

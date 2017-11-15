@@ -1,5 +1,7 @@
-package edu.olivet.harvester.fulfill.service.FlowFactory;
+package edu.olivet.harvester.fulfill.service.flowfactory;
 
+import com.google.inject.Inject;
+import edu.olivet.harvester.utils.MessageListener;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +27,9 @@ public abstract class Step {
     public abstract Step createDynamicInstance(FlowState state);
 
     protected abstract void process(FlowState state);
+
+    @Inject
+    MessageListener messageListener;
 
     // Step children override with unique processing
     public Step processStep(FlowState state) {

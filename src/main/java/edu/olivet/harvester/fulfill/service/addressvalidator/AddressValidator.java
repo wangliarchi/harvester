@@ -1,4 +1,4 @@
-package edu.olivet.harvester.fulfill.service.AddressValidator;
+package edu.olivet.harvester.fulfill.service.addressvalidator;
 
 import edu.olivet.harvester.fulfill.model.Address;
 

@@ -1,26 +1,20 @@
 package edu.olivet.harvester.spreadsheet.service;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
-import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Configs;
 import edu.olivet.foundations.utils.Configs.KeyCase;
 import edu.olivet.foundations.utils.Strings;
-import edu.olivet.foundations.utils.Tools;
-import edu.olivet.harvester.fulfill.utils.ConditionUtils;
-import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
-import edu.olivet.harvester.model.*;
+import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums.OrderColumn;
-import edu.olivet.harvester.ui.Harvester;
-import edu.olivet.harvester.utils.Settings;
+import edu.olivet.harvester.model.Remark;
+import edu.olivet.harvester.model.State;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
@@ -153,76 +147,6 @@ public class OrderHelper {
         }
     }
 
-    public static Country getFulfillementCountry(Order order) {
-        //todo UK & US FWD & Shipment
-        Country salesChannelCountry = Country.fromSalesChanel(order.getSales_chanel());
-
-        boolean isDirect = Remark.isDirectShip(order.remark);
-        // 批注中直寄和买回同时存在的情况下，先考虑直寄，随后考虑买回
-        if (isDirect) {
-            return Remark.getDirectShipFromCountry(order.remark);
-        } else if (Remark.purchaseBack(order.remark)) {
-            return Country.US;
-        } else if (Remark.ukFwd(order.remark)) {
-            return Country.UK;
-        } else {
-            return salesChannelCountry;
-        }
-    }
-
-    public static Account getBuyer(Order order) {
-        //todo book or product
-        Settings.Configuration config = Settings.load().getConfigByCountry(getFulfillementCountry(order));
-
-        if (order.sellerIsPrime() && !order.switchCountry()) {
-            return config.getPrimeBuyer();
-        }
-
-        return config.getBuyer();
-    }
-
-    public static CreditCard getCreditCard(Order order) {
-        Account buyer = getBuyer(order);
-        Map<String, CreditCard> creditCards = loadCreditCards();
-        if (creditCards.containsKey(buyer.getEmail().toLowerCase())) {
-            return creditCards.get(buyer.getEmail().toLowerCase());
-        }
-        throw new BusinessException("No credit card configed for buyer account " + buyer.getEmail());
-    }
-
-    public static Map<String, CreditCard> loadCreditCards() {
-        File file = new File(Harvester.CC_CONFIG_FILE_PATH);
-        Map<String, CreditCard> creditCards = new HashMap<>();
-        if (file.exists() && file.isFile()) {
-            JSON.parseArray(Tools.readFileToString(file), CreditCard.class).forEach(creditCard -> creditCards.put(creditCard.getAccountEmail().toLowerCase(), creditCard));
-        }
-
-        return creditCards;
-
-    }
-
-    private static final String IMAGE_PRIME_URL_PATTERN = "/gp/offer-listing/${ISBN}/ref=ref=olp_fsf?ie=UTF8&condition=${CONDITION}&freeShipping=1";
-    private static final String IMAGE_PT_URL_PATTERN = "/gp/offer-listing/${ISBN}/ref=olp_tab_${CONDITION}?ie=UTF8&condition=${CONDITION}&mv_style_name=1";
-    private static final String PRIME_URL_PATTERN = "/gp/offer-listing/${ISBN}/ref=olp_prime_${CONDITION}?ie=UTF8&condition=${CONDITION}&shipPromoFilter=1";
-    private static final String PT_URL_PATTERN = "/gp/offer-listing/${ISBN}/ref=olp_tab_${CONDITION}?ie=UTF8&condition=${CONDITION}";
-    private static final int MIN_SELLERID_LENGTH = 10;
-
-    public static String getOfferListingUrl(Order order) {
-        String condition = ConditionUtils.getMasterCondtion(order.condition);
-        order.isbn = Strings.fillMissingZero(order.isbn);
-        String urlTemplate = order.sellerIsPrime() ? PRIME_URL_PATTERN : PT_URL_PATTERN;
-
-
-        String result = urlTemplate.replace("${ISBN}", order.isbn).replace("${CONDITION}", condition);
-        if (StringUtils.isNotBlank(order.seller_id) && order.seller_id.length() >= MIN_SELLERID_LENGTH) {
-            result += "&seller=" + order.seller_id;
-        }
-
-        return getFulfillementCountry(order).baseUrl() + "/" + result;
-
-    }
-
-
     /**
      * 当订单的预期购买数量与实际购买数量不一致时，添加批注提示
      *
@@ -242,45 +166,5 @@ public class OrderHelper {
     }
 
 
-    @Inject
-    CountryStateUtils countryStateUtils;
 
-    /**
-     * 根据当前订单数据决定需要标识的状态，注意：分支判断的顺序<strong>不能颠倒!</strong>
-     */
-    public String determineStatus(Order order) {
-        if (OrderEnums.Status.Finish.value().equalsIgnoreCase(order.status) || OrderEnums.Status.Skip.value().equalsIgnoreCase(order.status) || order.toBeChecked()) {
-            return null;
-        }
-
-        Country finalAmazonCountry = null;
-        try {
-            finalAmazonCountry = OrderHelper.getFulfillementCountry(order);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-
-        // 客户改变地址、灰条等情况目前略过
-        if (order.needBuyAndTransfer()) {
-            if (order.sellerIsPrime()) {
-                return OrderEnums.Status.PrimeBuyAndTransfer.value();
-            } else {
-                return OrderEnums.Status.BuyAndTransfer.value();
-            }
-        } else if (order.seller.toLowerCase().startsWith("bw-") || order.seller.toLowerCase().equals("bw")) {
-            return OrderEnums.Status.SellerIsBetterWorld.value();
-        } else if (order.seller.toLowerCase().startsWith("half-") || order.seller.toLowerCase().equals("half")) {
-            return OrderEnums.Status.SellerIsHalf.value();
-        } else if (order.seller.toLowerCase().startsWith("in-") || order.seller.toLowerCase().equals("in")) {
-            return OrderEnums.Status.SellerIsIngram.value();
-        } else if (!finalAmazonCountry.code().equals(countryStateUtils.getCountryCode(order.ship_country))) {
-            return OrderEnums.Status.International.value();
-        } else if (order.sellerIsPrime()) {
-            return OrderEnums.Status.PrimeSeller.value();
-        } else if (order.sellerIsPt()) {
-            return OrderEnums.Status.CommonSeller.value();
-        } else {
-            return null;
-        }
-    }
 }

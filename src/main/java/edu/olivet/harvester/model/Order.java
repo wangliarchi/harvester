@@ -9,6 +9,7 @@ import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.model.OrderEnums.OrderColor;
+import edu.olivet.harvester.utils.Settings;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -108,7 +109,6 @@ public class Order implements Keyable {
 
     public String sid;
 
-    public String sheetName;
 
     /**
      * Sales chanel of order, which will be useful in multiple marketplaces scenario
@@ -130,6 +130,11 @@ public class Order implements Keyable {
         return OrderColor.isGray(this.color);
     }
 
+    @JSONField(serialize = false)
+    public String spreadsheetId;
+
+    @JSONField(serialize = false)
+    public String sheetName;
 
     /**
      * 做单时的上下文：账号-国家-sheet名称
@@ -203,10 +208,17 @@ public class Order implements Keyable {
     }
 
     /**
+     * 判定当前订单是否为切换国家直寄(<b>不同于买回转运</b>), DE Shipment, etc..
+     */
+    public boolean isDirectShip() {
+        return Remark.isDirectShip(this.remark);
+    }
+
+    /**
      * 判定当前订单是否为切换国家直寄(<b>不同于买回转运</b>)
      */
     public boolean switchCountry() {
-        return Remark.needFulfillInOtherCountry(this.remark);
+        return isDirectShip();
     }
 
     /**
@@ -386,6 +398,14 @@ public class Order implements Keyable {
         return OrderEnums.SellerType.AP.name().equalsIgnoreCase(this.seller) || OrderEnums.SellerType.AP.abbrev().equalsIgnoreCase(this.character);
     }
 
+    OrderEnums.OrderItemType type;
+    public OrderEnums.OrderItemType type() {
+        if (type == null) {
+            type = Settings.load().getSpreadsheetType(spreadsheetId);
+        }
+
+        return type;
+    }
 
     @Override
     public String getKey() {

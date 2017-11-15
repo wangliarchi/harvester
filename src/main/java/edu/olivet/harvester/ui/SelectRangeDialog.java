@@ -1,6 +1,7 @@
 package edu.olivet.harvester.ui;
 
 import edu.olivet.deploy.Language;
+import edu.olivet.foundations.ui.BaseDialog;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.fulfill.model.AdvancedSubmitSetting;
@@ -22,10 +23,12 @@ import java.util.List;
  *
  * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Oct 21, 2014 3:08:49 PM
  */
-public class SelectRangeDialog extends JDialog {
+public class SelectRangeDialog extends BaseDialog {
     private static final long serialVersionUID = -4173627453729748332L;
     private FocusListener selectAll;
 
+    public boolean continueToSubmit = false;
+    public boolean continueToMarkStatus = false;
 
     /**
      * 按下Tab键定位到textfield的时候默认全部选中，方便输入
@@ -155,7 +158,13 @@ public class SelectRangeDialog extends JDialog {
     }
 
     private void initComponents() {
-        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        this.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                doClose();
+            }
+        });
+
         setTitle(UIText.label("title.range.customize"));
         setResizable(false);
 
@@ -187,6 +196,23 @@ public class SelectRangeDialog extends JDialog {
         cancelBtn.setText(UIText.label("label.cancel"));
         cancelBtn.addActionListener(evt -> cancelBtnActionPerformed(evt));
 
+        markStatusButton = new JButton();
+        markStatusButton.setText("Mark Status");
+        markStatusButton.setIcon(UITools.getIcon("status.png"));
+        submitButton = new JButton();
+        submitButton.setText("Submit");
+        submitButton.setIcon(UITools.getIcon("start.png"));
+
+
+        markStatusButton.addActionListener(evt -> {
+            continueToMarkStatus = true;
+            ok();
+        });
+
+        submitButton.addActionListener(evt -> {
+            continueToSubmit = true;
+            ok();
+        });
         typePanel.setBorder(BorderFactory.createTitledBorder(UIText.title("title.filter.ordertype")));
 
         typeGroup.add(typeAll);
@@ -294,9 +320,15 @@ public class SelectRangeDialog extends JDialog {
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(okBtn, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH)
-                                .addGap(10)
                                 .addComponent(cancelBtn, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH)
+                                .addGap(10)
+                                .addComponent(markStatusButton)
+                                .addGap(10)
+                                .addComponent(submitButton)
+                                .addGap(10)
+                                .addComponent(okBtn, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH)
+
+
                                 .addContainerGap())
                         .addGroup(layout.createSequentialGroup()
                                 .addContainerGap()
@@ -318,7 +350,12 @@ public class SelectRangeDialog extends JDialog {
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(cancelBtn)
-                                        .addComponent(okBtn))
+                                        .addComponent(markStatusButton)
+                                        .addComponent(submitButton)
+                                        .addComponent(okBtn)
+
+
+                                )
                                 .addContainerGap())
         );
         getRootPane().setDefaultButton(okBtn);
@@ -601,6 +638,8 @@ public class SelectRangeDialog extends JDialog {
     private JRadioButton typePrime;
     private JRadioButton typePt;
     private JPanel scopePanel;
+    private JButton markStatusButton;
+    private JButton submitButton;
 
     public static void main(String[] args) {
 

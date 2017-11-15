@@ -7,7 +7,7 @@ import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.model.page.FulfillmentPage;
-import edu.olivet.harvester.fulfill.service.AddressValidator.AddressValidator;
+import edu.olivet.harvester.fulfill.service.addressvalidator.AddressValidator;
 import edu.olivet.harvester.fulfill.utils.DailyBudgetHelper;
 import edu.olivet.harvester.fulfill.utils.ProfitLostControl;
 import edu.olivet.harvester.model.Money;

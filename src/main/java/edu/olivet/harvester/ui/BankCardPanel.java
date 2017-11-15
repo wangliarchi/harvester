@@ -24,7 +24,7 @@ public class BankCardPanel extends JPanel {
         final JLabel cvvLabel = new JLabel("CVV:");
 
         buyerAccountField.setText(accountEmail);
-        buyerAccountField.enableInputMethods(false);
+        buyerAccountField.setEnabled(false);
 
         GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);

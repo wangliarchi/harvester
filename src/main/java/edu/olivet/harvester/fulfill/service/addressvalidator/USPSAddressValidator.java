@@ -1,4 +1,4 @@
-package edu.olivet.harvester.fulfill.service.AddressValidator;
+package edu.olivet.harvester.fulfill.service.addressvalidator;
 
 import com.google.inject.Inject;
 import edu.olivet.foundations.aop.Repeat;

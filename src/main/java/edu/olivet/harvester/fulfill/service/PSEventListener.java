@@ -7,21 +7,43 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class PSEventListener {
-    public static boolean stop = false;
-    public static boolean pause = false;
+    public enum Status {
+        NotRuning,
+        Running,
+        Paused,
+        Stopped
+    }
+    public static Status status = Status.NotRuning;
+
 
     public static void reset() {
-        stop = false;
-        pause = false;
+        status = Status.NotRuning;
     }
 
     public static void stop() {
-        stop = true;
-        pause = false;
+        status = Status.Stopped;
     }
 
     public static void pause() {
-        pause = true;
-        stop = false;
+        status = Status.Paused;
     }
+
+    public static void start() {
+        status = Status.Running;
+    }
+
+    public static void resume() {
+        status = Status.Running;
+    }
+
+    public static boolean stopped() {
+        return status == Status.Stopped;
+    }
+
+    public static boolean paused() {
+        return status == Status.Paused;
+    }
+
+
+
 }

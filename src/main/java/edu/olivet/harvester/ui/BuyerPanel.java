@@ -10,8 +10,9 @@ import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.Constants;
+import edu.olivet.harvester.fulfill.utils.OrderBuyerUtils;
+import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.spreadsheet.service.OrderHelper;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Getter;
@@ -67,7 +68,7 @@ public class BuyerPanel extends JPanel {
     }
 
     public BuyerPanel(Order order) {
-        this(0, OrderHelper.getFulfillementCountry(order), OrderHelper.getBuyer(order), 1);
+        this(0, OrderCountryUtils.getFulfillementCountry(order), OrderBuyerUtils.getBuyer(order), 1);
     }
 
     private String profilePathName() {

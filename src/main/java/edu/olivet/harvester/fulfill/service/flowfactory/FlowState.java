@@ -1,9 +1,10 @@
-package edu.olivet.harvester.fulfill.service.FlowFactory;
+package edu.olivet.harvester.fulfill.service.flowfactory;
 
 import edu.olivet.foundations.utils.Directory;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
+import edu.olivet.harvester.utils.MessageListener;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ public class FlowState {
     public boolean stopFlag = false;
     private BuyerPanel buyerPanel;
     private Order order;
+    private MessageListener messageListener;
 
     public FlowState() {
         this.steps = new ArrayList<>();

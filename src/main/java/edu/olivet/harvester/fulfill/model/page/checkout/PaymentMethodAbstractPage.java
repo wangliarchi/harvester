@@ -5,9 +5,9 @@ import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.foundations.utils.WaitTime;
+import edu.olivet.harvester.fulfill.utils.OrderBuyerUtils;
 import edu.olivet.harvester.model.CreditCard;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.spreadsheet.service.OrderHelper;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import org.apache.commons.collections4.CollectionUtils;
@@ -34,7 +34,7 @@ public abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract 
     public void selectCreditCard(Order order) {
 
         //load all available cards
-        creditCard = OrderHelper.getCreditCard(order);
+        creditCard = OrderBuyerUtils.getCreditCard(order);
 
         if (creditCard == null) {
             throw new BusinessException("Credit card for buyer account " + buyer.getEmail() + " not found.");

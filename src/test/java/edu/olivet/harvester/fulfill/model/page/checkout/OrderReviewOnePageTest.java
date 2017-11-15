@@ -7,7 +7,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.BaseTest;
-import edu.olivet.harvester.fulfill.service.AddressValidator.USPSAddressValidator;
+import edu.olivet.harvester.fulfill.service.addressvalidator.USPSAddressValidator;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.BuyerPanel;
 import org.testng.annotations.Test;

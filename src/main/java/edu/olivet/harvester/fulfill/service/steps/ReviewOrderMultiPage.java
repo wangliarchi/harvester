@@ -8,9 +8,9 @@ import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.model.page.checkout.OrderReviewMultiPage;
 import edu.olivet.harvester.fulfill.model.page.checkout.PaymentMethodOnePage;
 import edu.olivet.harvester.fulfill.model.page.checkout.ShippingAddressOnePage;
-import edu.olivet.harvester.fulfill.service.AddressValidator.USPSAddressValidator;
-import edu.olivet.harvester.fulfill.service.FlowFactory.FlowState;
-import edu.olivet.harvester.fulfill.service.FlowFactory.Step;
+import edu.olivet.harvester.fulfill.service.addressvalidator.USPSAddressValidator;
+import edu.olivet.harvester.fulfill.service.flowfactory.FlowState;
+import edu.olivet.harvester.fulfill.service.flowfactory.Step;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

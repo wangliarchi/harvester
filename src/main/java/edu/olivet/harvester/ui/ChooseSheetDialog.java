@@ -13,9 +13,7 @@ import lombok.Getter;
 
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -144,8 +142,13 @@ public class ChooseSheetDialog extends BaseDialog {
     }
 
     private void initEvents() {
-        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-
+        //setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        this.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                doClose();
+            }
+        });
         MouseListener mouseListener = new MouseAdapter() {
             public void mouseClicked(MouseEvent mouseEvent) {
                 if (mouseEvent.getClickCount() == 2) {
@@ -153,6 +156,7 @@ public class ChooseSheetDialog extends BaseDialog {
                 }
             }
         };
+
         sheetNameList.addMouseListener(mouseListener);
 
         spreadList.addListSelectionListener(evt -> {

@@ -4,9 +4,9 @@ import com.google.inject.Inject;
 import edu.olivet.harvester.fulfill.model.page.FulfillmentPage;
 import edu.olivet.harvester.fulfill.model.page.checkout.CheckoutEnum;
 import edu.olivet.harvester.fulfill.model.page.checkout.CheckoutStepFactory;
-import edu.olivet.harvester.fulfill.service.FlowFactory.FlowState;
-import edu.olivet.harvester.fulfill.service.FlowFactory.Step;
 import edu.olivet.harvester.fulfill.service.StepHelper;
+import edu.olivet.harvester.fulfill.service.flowfactory.FlowState;
+import edu.olivet.harvester.fulfill.service.flowfactory.Step;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

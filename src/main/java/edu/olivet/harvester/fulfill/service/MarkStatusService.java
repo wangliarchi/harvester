@@ -68,8 +68,8 @@ public class MarkStatusService {
         List<Order> validOrders = new ArrayList<>();
         for (Order order : orders) {
             String error = orderValidator.isValid(order, FulfillmentEnum.Action.UpdateStatus);
-            if (StringUtils.isNotBlank(error) ) {
-                if(showErrorMsg) {
+            if (StringUtils.isNotBlank(error)) {
+                if (showErrorMsg) {
                     messageListener.addMsg(order, error, InformationLevel.Negative);
                 }
             } else {
@@ -90,8 +90,11 @@ public class MarkStatusService {
         LOGGER.info(resultSummary);
         if (showErrorMsg) {
             messageListener.addMsg(resultSummary);
+        }
 
-            Map<String, List<String>> results = sheetService.updateStatus(settings.getSpreadsheetId(), validOrders);
+        Map<String, List<String>> results = sheetService.updateStatus(settings.getSpreadsheetId(), validOrders);
+
+        if (showErrorMsg) {
             if (results == null) {
                 messageListener.addMsg("Failed to update order status.", InformationLevel.Negative);
             }

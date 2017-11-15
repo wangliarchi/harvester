@@ -6,6 +6,7 @@ import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.model.ShippingOption;
 import edu.olivet.harvester.fulfill.model.page.AmazonPage;
+import edu.olivet.harvester.fulfill.utils.OrderBuyerUtils;
 import edu.olivet.harvester.fulfill.utils.ShipOptionUtils;
 import edu.olivet.harvester.model.CreditCard;
 import edu.olivet.harvester.model.Order;
@@ -122,7 +123,7 @@ public class OrderReviewMultiPage extends OrderReviewAbstractPage {
     public boolean reviewPaymentMethod() {
         String lastDigits = JXBrowserHelper.text(browser, "#payment-information");
         lastDigits.replaceAll(RegexUtils.Regex.NON_DIGITS.val(), lastDigits);
-        CreditCard creditCard = OrderHelper.getCreditCard(buyerPanel.getOrder());
+        CreditCard creditCard = OrderBuyerUtils.getCreditCard(buyerPanel.getOrder());
         return creditCard.getCardNo().endsWith(lastDigits);
     }
 

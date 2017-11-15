@@ -11,8 +11,8 @@ import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.model.Seller;
 import edu.olivet.harvester.fulfill.model.SellerEnums;
 import edu.olivet.harvester.fulfill.service.SellerService;
+import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.spreadsheet.service.OrderHelper;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import org.apache.commons.lang3.StringUtils;
@@ -48,7 +48,7 @@ public class OfferListingPage extends FulfillmentPage {
     }
 
     public void enter(Order order) {
-        String url = OrderHelper.getOfferListingUrl(order);
+        String url = OrderCountryUtils.getOfferListingUrl(order);
         JXBrowserHelper.loadPage(browser, url);
 
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
@@ -72,7 +72,7 @@ public class OfferListingPage extends FulfillmentPage {
 
         LOGGER.info("Finding seller for order {}", order.order_id);
 
-        Country currentCountry = OrderHelper.getFulfillementCountry(order);
+        Country currentCountry = OrderCountryUtils.getFulfillementCountry(order);
         List<Seller> sellers = sellerService.parseSellers(browser, currentCountry);
 
         List<Seller> results = new ArrayList<>();

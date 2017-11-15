@@ -142,19 +142,19 @@ public class BankCardConfigDialog extends BaseDialog {
 
         if (settings != null && CollectionUtils.isNotEmpty(settings.getConfigs())) {
             settings.getConfigs().forEach(config -> {
-                if (config.getBuyer() != null) {
+                if (config.getBuyer() != null && StringUtils.isNotBlank(config.getBuyer().getEmail())) {
                     buyerAccounts.add(config.getBuyer().getEmail());
                 }
 
-                if (config.getPrimeBuyer() != null) {
+                if (config.getPrimeBuyer() != null && StringUtils.isNotBlank(config.getPrimeBuyer().getEmail())) {
                     buyerAccounts.add(config.getPrimeBuyer().getEmail());
                 }
 
-                if (config.getProdBuyer() != null) {
+                if (config.getProdBuyer() != null && StringUtils.isNotBlank(config.getProdBuyer().getEmail())) {
                     buyerAccounts.add(config.getProdBuyer().getEmail());
                 }
 
-                if (config.getProdPrimeBuyer() != null) {
+                if (config.getProdPrimeBuyer() != null && StringUtils.isNotBlank(config.getProdPrimeBuyer().getEmail())) {
                     buyerAccounts.add(config.getProdPrimeBuyer().getEmail());
                 }
             });

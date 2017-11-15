@@ -2,9 +2,9 @@ package edu.olivet.harvester.fulfill.service.steps;
 
 import com.google.inject.Inject;
 import edu.olivet.harvester.fulfill.model.page.OfferListingPage;
-import edu.olivet.harvester.fulfill.service.FlowFactory.FlowState;
-import edu.olivet.harvester.fulfill.service.FlowFactory.Step;
 import edu.olivet.harvester.fulfill.service.SellerService;
+import edu.olivet.harvester.fulfill.service.flowfactory.FlowState;
+import edu.olivet.harvester.fulfill.service.flowfactory.Step;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

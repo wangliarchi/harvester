@@ -216,7 +216,10 @@ public class AppScript {
         String json = this.processResult(this.get(params));
 
         List<Order> orders = this.parse(json);
-        orders.forEach(it -> it.setSheetName(sheetName));
+        orders.forEach(it -> {
+            it.setSheetName(sheetName);
+            it.setSpreadsheetId(spreadId);
+        });
 
         LOGGER.info("Read {} orders from sheet {} via in {}", orders.size(), sheetName, Strings.formatElapsedTime(start));
         return orders;

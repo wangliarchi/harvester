@@ -4,9 +4,10 @@ import com.google.inject.Inject;
 import edu.olivet.harvester.fulfill.model.page.checkout.CheckoutEnum;
 import edu.olivet.harvester.fulfill.model.page.checkout.OrderReviewMultiPage;
 import edu.olivet.harvester.fulfill.model.page.checkout.OrderReviewOnePage;
-import edu.olivet.harvester.fulfill.service.FlowFactory.FlowState;
-import edu.olivet.harvester.fulfill.service.FlowFactory.Step;
 import edu.olivet.harvester.fulfill.service.StepHelper;
+import edu.olivet.harvester.fulfill.service.flowfactory.FlowState;
+import edu.olivet.harvester.fulfill.service.flowfactory.Step;
+import edu.olivet.harvester.utils.MessageListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,9 +20,11 @@ public class PlaceOrder extends Step {
 
     @Inject
     StepHelper stepHelper;
-
+    @Inject
+    MessageListener messageListener;
     //dispatcher method
     protected void process(FlowState state) {
+
         if (stepHelper.detectCurrentPage(state) == CheckoutEnum.CheckoutPage.ShippingMethodOnePage) {
             OrderReviewOnePage orderReviewOnePage = new OrderReviewOnePage(state.getBuyerPanel());
             orderReviewOnePage.placeOrder(state.getOrder());

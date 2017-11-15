@@ -34,7 +34,7 @@ public class SettingValidatorTest extends BaseTest {
     @Test
     public void testSpreadsheetCountryAndTitleShouldMatch() throws Exception {
         Settings.Configuration config = Settings.load(testConfigFilePath).getConfigByCountry(Country.MX);
-        List<String> errors = settingValidator.spreadsheetCountryAndTitleShouldMatch(config);
+        List<String> errors = settingValidator.spreadsheetAccountCountryAndTitleShouldMatch("714",config);
 
         assertEquals(errors.size(), 1);
     }

@@ -1,8 +1,8 @@
 package edu.olivet.harvester.fulfill.service.steps;
 
 import edu.olivet.foundations.utils.BusinessException;
-import edu.olivet.harvester.fulfill.service.FlowFactory.FlowState;
-import edu.olivet.harvester.fulfill.service.FlowFactory.Step;
+import edu.olivet.harvester.fulfill.service.flowfactory.FlowState;
+import edu.olivet.harvester.fulfill.service.flowfactory.Step;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/9/17 3:32 PM

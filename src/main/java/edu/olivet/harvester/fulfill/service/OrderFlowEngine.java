@@ -2,9 +2,9 @@ package edu.olivet.harvester.fulfill.service;
 
 import com.google.inject.Inject;
 import edu.olivet.foundations.utils.BusinessException;
-import edu.olivet.harvester.fulfill.service.FlowFactory.FlowParent;
-import edu.olivet.harvester.fulfill.service.FlowFactory.FlowState;
-import edu.olivet.harvester.fulfill.service.FlowFactory.Step;
+import edu.olivet.harvester.fulfill.service.flowfactory.FlowParent;
+import edu.olivet.harvester.fulfill.service.flowfactory.FlowState;
+import edu.olivet.harvester.fulfill.service.flowfactory.Step;
 import edu.olivet.harvester.fulfill.service.steps.ClearShoppingCart;
 import edu.olivet.harvester.fulfill.service.steps.Login;
 import edu.olivet.harvester.model.Order;
@@ -36,6 +36,7 @@ public class OrderFlowEngine extends FlowParent {
         buyerPanel.setOrder(order);
         state.setOrder(order);
         state.setBuyerPanel(buyerPanel);
+        state.setMessageListener(messageListener);
         Step step = login;
         step.stepName = login.getClass().toString();
 

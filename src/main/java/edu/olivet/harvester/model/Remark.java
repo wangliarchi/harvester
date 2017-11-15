@@ -513,23 +513,10 @@ public enum Remark {
         throw new IllegalArgumentException("Failed to get fulfill country via analyzing text: " + text);
     }
 
-    /**
-     * 通过订单批注判定该条订单是否需要切换到其他国家直寄做单
-     *
-     * @param text 订单批注文本
-     */
-    public static boolean needFulfillInOtherCountry(String text) {
-        try {
-            getDirectShipFromCountry(text);
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-    }
 
 
     /**
-     * 通过订单批注判定该条订单是否需要切换到其他国家直寄做单
+     * 通过订单批注判定该条订单是否需要切换到其他国家直寄做单, DE Shipment, FR Shipment...
      *
      * @param text 订单批注文本
      */
@@ -551,7 +538,7 @@ public enum Remark {
      * @param text 订单批注
      */
     public static boolean purchaseBack(String text) {
-        return matchAny(text, Remark.PURCHASE_BACK, Remark.PURCHASE_BACK_EX) && !Remark.needFulfillInOtherCountry(text);
+        return matchAny(text, Remark.PURCHASE_BACK, Remark.PURCHASE_BACK_EX) && !Remark.isDirectShip(text);
     }
 
     public static boolean ukFwd(String text) {
