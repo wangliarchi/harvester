@@ -48,7 +48,7 @@ public class ShippingOption {
     public Money parsePrice(String priceText, Country country) {
         try {
             return Money.fromText(priceText, country);
-        } catch (ParseException e) {
+        } catch (Exception e) {
             LOGGER.error("Cant parse price text {}", priceText, e);
         }
 

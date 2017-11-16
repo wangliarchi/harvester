@@ -31,12 +31,12 @@ import java.util.stream.Collectors;
  */
 public class ForbiddenSeller extends AppScript {
     private static final Logger LOGGER = LoggerFactory.getLogger(ForbiddenSeller.class);
-    private static final  String APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJd7lVCPpKiezuF1-CbYXCw6zbY8UQbYHqMdSJZ1X3kDD4diBX/exec?method=getsellers";
+    private static final String APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJd7lVCPpKiezuF1-CbYXCw6zbY8UQbYHqMdSJZ1X3kDD4diBX/exec?method=getsellers";
 
-    private static final  Map<String, List<String>> REGION_FORBIDDEN_LIST_CACHE = new HashMap<>();
+    private static final Map<String, List<String>> REGION_FORBIDDEN_LIST_CACHE = new HashMap<>();
 
     public boolean isForbidden(Seller seller) {
-        List<String> forbiddenSellers = REGION_FORBIDDEN_LIST_CACHE.computeIfAbsent(seller.getCountry_OfferListing().name(), key -> load(seller.getCountry_OfferListing()));
+        List<String> forbiddenSellers = REGION_FORBIDDEN_LIST_CACHE.computeIfAbsent(seller.getOfferListingCountry().name(), key -> load(seller.getOfferListingCountry()));
 
         return CollectionUtils.containsAny(forbiddenSellers, Lists.newArrayList(seller.getName().toLowerCase(), seller.getUuid().toLowerCase()));
 

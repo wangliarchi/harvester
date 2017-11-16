@@ -49,12 +49,15 @@ public class StepHelper {
     @Inject
     CantShipToAddress cantShipToAddress;
 
+
     public Step detectStep(FlowState state) {
 
 
         CheckoutPage page = detectCurrentPage(state);
 
         switch (page) {
+            case AmazonPrimeAd:
+
             case OrderReview: //we are on order review page
                 //if from checkout, which is the first step, then we need to change shipping address
                 if (Checkout.class.getName().equals(state.getPrevStep().stepName)) {

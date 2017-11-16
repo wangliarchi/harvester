@@ -73,13 +73,17 @@ public class JXBrowserHelper {
         }
     }
 
-    public static void saveHTMLSourceFile(String filePath, BrowserView browserView) {
+    public static void saveHTMLSourceFile(Browser browser) {
+        String title = browser.getTitle().replaceAll(" ", "");
+        String filePath = Directory.WebPage.path() + "/specials/" + System.currentTimeMillis() + title + ".html";
+        saveHTMLSourceFile(filePath, browser);
+    }
+
+    public static void saveHTMLSourceFile(String filePath, Browser browser) {
         final long start = System.currentTimeMillis();
-        LightWeightWidget lightWeightWidget = (LightWeightWidget) browserView.getComponent(0);
-        Image image = lightWeightWidget.getImage();
         try {
             File file = new File(filePath);
-            Tools.writeStringToFile(file, browserView.getBrowser().getHTML());
+            Tools.writeStringToFile(file, browser.getHTML());
         } catch (Exception e) {
             LOGGER.error("尝试保存HTML文件到{}失败：", filePath, e);
         }
@@ -91,10 +95,10 @@ public class JXBrowserHelper {
         String title = buyerPanel.getBrowserView().getBrowser().getTitle().replaceAll(" ", "");
         title = RegexUtils.getMatched(title, "[A-Za-z-]");
         String filePath = Directory.WebPage.path() + "/orders/" + order.sheetName.replaceAll("/", "") + "/" + order.row + "_" + order.order_id + "/images/" + step + "-" + title + ".png";
-        JXBrowserHelper.saveScreenshot(filePath, buyerPanel.getBrowserView());
+        saveScreenshot(filePath, buyerPanel.getBrowserView());
 
         String htmlFilePath = filePath.replaceAll(".png", ".html").replaceAll("/images/", "/html/");
-        JXBrowserHelper.saveHTMLSourceFile(htmlFilePath, buyerPanel.getBrowserView());
+        saveHTMLSourceFile(htmlFilePath, buyerPanel.getBrowserView().getBrowser());
 
     }
 
@@ -147,6 +151,7 @@ public class JXBrowserHelper {
         }
 
         if (browser.getDocument().findElement(by) == null) {
+            saveHTMLSourceFile(browser);
             throw new BusinessException(String.format("等待%d次，%d秒之后，期待的Dom元素%s(%s)仍未出现",
                     Constants.MAX_REPEAT_TIMES, Constants.MAX_REPEAT_TIMES * WaitTime.Shorter.val(), by.getValue(), by.getType()));
         }
@@ -163,6 +168,7 @@ public class JXBrowserHelper {
                 timeConsumed += WaitTime.Shortest.val();
 
                 if (timeConsumed > TIME_OUT_SECONDS) {
+                    saveHTMLSourceFile(browser);
                     throw new BusinessException(String.format("等待%d秒之后，期待的Dom元素%s还不可见",
                             timeConsumed, selector));
                 }
@@ -173,6 +179,23 @@ public class JXBrowserHelper {
 
     }
 
+
+    @InvokedExternally
+    //insert an element to page, and wait until it's gone
+    public static void waitUntilNewPageLoaded(Browser browser) {
+
+        //insert tracker
+        DOMDocument document = browser.getDocument();
+        DOMNode root = document.findElement(By.tagName("body"));
+        DOMNode textNode = document.createTextNode("Loading...");
+        DOMElement paragraph = document.createElement("p");
+        paragraph.setAttribute("id", "loading-checker");
+        paragraph.appendChild(textNode);
+        root.appendChild(paragraph);
+
+        //check tracker
+        waitUntilNotFound(browser, "#loading-checker");
+    }
 
     @InvokedExternally
     public static void waitUntilNotFound(Browser browser, String selector) {
@@ -189,6 +212,7 @@ public class JXBrowserHelper {
                 timeConsumed += WaitTime.Shortest.val();
 
                 if (timeConsumed > TIME_OUT_SECONDS) {
+                    saveHTMLSourceFile(browser);
                     throw new BusinessException(String.format("等待%d秒之后，期待的Dom元素%s还在",
                             timeConsumed, selector));
                 }
@@ -214,6 +238,7 @@ public class JXBrowserHelper {
                 timeConsumed += WaitTime.Shortest.val();
 
                 if (timeConsumed > TIME_OUT_SECONDS) {
+                    saveHTMLSourceFile(browser);
                     throw new BusinessException(String.format("等待%d秒之后，期待的Dom元素%s仍未出现",
                             timeConsumed, selector));
                 }
@@ -248,7 +273,7 @@ public class JXBrowserHelper {
         return cookieStore;
     }
 
-    private void forwardKeyEvent(Browser browser, BrowserKeyEvent.KeyCode code, char character) {
+    public static void forwardKeyEvent(Browser browser, BrowserKeyEvent.KeyCode code, char character) {
         browser.forwardKeyEvent(new BrowserKeyEvent(PRESSED, code, character));
         browser.forwardKeyEvent(new BrowserKeyEvent(TYPED, code, character));
         browser.forwardKeyEvent(new BrowserKeyEvent(RELEASED, code, character));
@@ -304,6 +329,22 @@ public class JXBrowserHelper {
         return selectElementsByCssSelector(element, selector);
     }
 
+    public static DOMElement selectVisibleElement(Browser browser, String selector) {
+        List<DOMElement> elements = selectElementsByCssSelector(browser, selector);
+        for (DOMElement element : elements) {
+            Rectangle r = element.getBoundingClientRect();
+            if (!r.isEmpty()) {
+                return element;
+            }
+        }
+
+        return null;
+    }
+
+
+    public static boolean isVisible(DOMElement element) {
+        return !element.getBoundingClientRect().isEmpty();
+    }
 
     public static String text(DOMElement doc, String selector) {
         DOMElement element = selectElementByCssSelector(doc, selector);

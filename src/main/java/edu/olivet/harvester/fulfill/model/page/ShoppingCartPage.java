@@ -8,6 +8,7 @@ import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
+import edu.olivet.harvester.utils.order.PageUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -44,15 +45,22 @@ public class ShoppingCartPage extends FulfillmentPage {
     }
 
     public void processToCheckout() {
+
+        DOMElement checkoutLink = JXBrowserHelper.selectElementByCssSelector(browser, "#hlb-ptc-btn-native");
+        if (checkoutLink != null) {
+            JXBrowserHelper.loadPage(browser, checkoutLink.getAttribute(PageUtils.HREF));
+            return;
+        }
+
         //redirect to shopping cart page
         if (!StringUtils.containsIgnoreCase(browser.getURL(), AmazonPage.ShoppingCart.urlMark())) {
             enter();
         }
-        LOGGER.info("Current at {} - {}",browser.getTitle(), browser.getURL());
+        LOGGER.info("Current at {} - {}", browser.getTitle(), browser.getURL());
         DOMElement checkoutBtn = JXBrowserHelper.selectElementByName(browser, "proceedToCheckout");
         checkoutBtn.click();
-        WaitTime.Short.execute();
-        LOGGER.info("Current at {} - {}",browser.getTitle(), browser.getURL());
+        JXBrowserHelper.waitUntilNewPageLoaded(browser);
+        LOGGER.info("Current at {} - {}", browser.getTitle(), browser.getURL());
     }
 
     @Repeat(expectedExceptions = BusinessException.class)

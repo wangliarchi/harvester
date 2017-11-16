@@ -35,7 +35,7 @@ public class Login extends Step {
             return processToCheckout;
         }
 
-        //
+        //check if there are items in cart
         DOMElement navCartCountSpan = JXBrowserHelper.selectElementByCssSelector(state.getBuyerPanel().getBrowserView().getBrowser(), "#nav-cart-count");
         if (!"0".equals(navCartCountSpan.getInnerText())) {
             LOGGER.info("Next step is to clear shopping cart");

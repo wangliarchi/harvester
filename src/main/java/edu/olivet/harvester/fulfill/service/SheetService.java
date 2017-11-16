@@ -27,13 +27,20 @@ public class SheetService extends SheetAPI {
         List<ValueRange> dateToUpdate = new ArrayList<>();
         String range = String.format("%s!AC%d:AF%d", order.sheetName, order.row, order.row);
 
+        //statys
         ValueRange statusData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList("finish")))
                 .setRange(String.format("%s!A%d", order.sheetName, order.row));
         dateToUpdate.add(statusData);
 
+        //fulfilled order info
         ValueRange rowData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(order.cost, order.order_number, order.account, order.last_code)))
                 .setRange(range);
         dateToUpdate.add(rowData);
+
+        //remark
+        ValueRange remarkData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(order.remark)))
+                .setRange(String.format("%s!S%d", order.sheetName, order.row));
+        dateToUpdate.add(remarkData);
 
         try {
             this.batchUpdateValues(spreadsheetId, dateToUpdate);

@@ -11,10 +11,9 @@ import edu.olivet.harvester.fulfill.model.Rating;
 import edu.olivet.harvester.fulfill.model.Seller;
 import edu.olivet.harvester.fulfill.model.SellerEnums;
 import edu.olivet.harvester.fulfill.utils.ConditionUtils;
-import edu.olivet.harvester.fulfill.utils.CurrencyUtils;
+import edu.olivet.harvester.model.Money;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.order.PageUtils;
-import edu.olivet.harvester.utils.order.RatingUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +69,7 @@ public class SellerService {
 
     private Seller parseSeller(DOMElement row, Country country) {
         Seller seller = new Seller();
-        seller.setCountry_OfferListing(country);
+        seller.setOfferListingCountry(country);
 
         // 是否有Prime标记
         boolean prime =
@@ -82,30 +81,30 @@ public class SellerService {
         String price = JXBrowserHelper.text(row, "span.a-size-large.a-color-price.olpOfferPrice.a-text-bold");
 
         if (StringUtils.isNotBlank(price)) {
-            seller.setPrice(Float.parseFloat(CurrencyUtils.getCurrencyValue(price)));
+            seller.setPrice(Money.fromText(price, country));
         } else {
-            seller.setPrice(ZERO);
+            seller.setPrice(new Money(ZERO, country));
         }
 
         // 运费
         String shippingFee = JXBrowserHelper.text(row, "span.olpShippingPrice");
-        seller.setShippingFee(Float.parseFloat(CurrencyUtils.getCurrencyValue(shippingFee)));
+        if (StringUtils.isNotBlank(shippingFee)) {
+            seller.setShippingFee(Money.fromText(shippingFee, country));
+        } else {
+            seller.setShippingFee(new Money(ZERO, country));
+        }
 
         // Condition和详情
         seller.setCondition(ConditionUtils.translateCondition(JXBrowserHelper.text(row, ".olpCondition")));
+        seller.setConditionDetail(JXBrowserHelper.text(row, "div.a-column.a-span3 > div.comments"));
+
 
         // Seller名称和UUID
         seller.setName(JXBrowserHelper.text(row, ".olpSellerName"));
-
-        // condition 详情
-        seller.setConditionDetail(JXBrowserHelper.text(row, "div.a-column.a-span3 > div.comments"));
-
         DOMElement sellerLink = JXBrowserHelper.selectElementByCssSelector(row, ".olpSellerName a");
         if (sellerLink != null) {
-
             String sellerId = PageUtils.getSellerUUID(sellerLink.getAttribute(PageUtils.HREF));
             seller.setUuid(sellerId);
-
             if (StringUtils.isBlank(seller.getName()) && StringUtils.isNotBlank(sellerId) && Boolean.TRUE.equals(wareHouseIdCache.get(sellerId))) {
                 seller.setType(SellerEnums.SellerType.APWareHouse);
             }
@@ -113,40 +112,6 @@ public class SellerService {
             seller.setType(SellerEnums.SellerType.AP);
             seller.setName(SellerEnums.SellerType.AP.name());
             seller.setUuid(StringUtils.EMPTY);
-        }
-
-        // 综合Ratings及Ratings总数，AP一般没有这项属性
-        if (seller.getType() == SellerEnums.SellerType.AP) {
-            seller.setRating(Rating.AP_POSITIVE);
-            seller.setRatingCount(Rating.AP_COUNT);
-
-            seller.setMonthRating(new Rating(Rating.AP_POSITIVE, 0, 0, Rating.AP_COUNT));
-            seller.setYearRating(new Rating(Rating.AP_POSITIVE, 0, 0, Rating.AP_COUNT));
-        } else {
-            try {
-                Integer rating_int = Integer.parseInt(JXBrowserHelper.text(row, "div.a-column.a-span2.olpSellerColumn > p:nth-child(2) > a").replaceAll(RegexUtils.Regex.NON_DIGITS.val(), StringUtils.EMPTY).trim());
-                seller.setRating(rating_int);
-            } catch (Exception e) {
-                //e.printStackTrace();
-                LOGGER.error("Cant get rating number for seller {}", seller.getName());
-            }
-
-            // 拼接Seller的Rating地址形如:http://www.amazon.com/gp/aag/main/ref=olp_merch_rating?ie=UTF8&seller=A1TJP2EKS10VL4
-            if (seller.getType() != SellerEnums.SellerType.AP) {
-                seller.setRatingUrl(RatingUtils.sellerRatingUrl(seller));
-            }
-
-            String ratingText = JXBrowserHelper.text(row, "div.a-column.a-span2.olpSellerColumn > p:nth-child(2)");
-
-            if (ratingText.indexOf('(') != -1 && ratingText.indexOf(')') != -1) {
-                try {
-                    Integer ratingCount_int = Integer.parseInt(ratingText.substring(ratingText.indexOf('(')).replaceAll(RegexUtils.Regex.NON_DIGITS.val(), StringUtils.EMPTY));
-                    seller.setRatingCount(ratingCount_int);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            }
         }
 
         // 库存信息
@@ -193,9 +158,9 @@ public class SellerService {
                 String[] arr = StringUtils.split(from, ',');
                 if (arr.length >= 2) {
                     seller.setShippingFromState(arr[0].trim());
-                    seller.setShippingFrom_Country(arr[1].trim());
+                    seller.setShipFromCountry(arr[1].trim());
                 } else {
-                    seller.setShippingFrom_Country(arr[0].trim());
+                    seller.setShipFromCountry(arr[0].trim());
                 }
 
 
@@ -208,7 +173,7 @@ public class SellerService {
 
 
         if (seller.getShippingFromCountry() == null && StringUtils.isBlank(seller.getShippingFromState())) {
-            seller.setShippingFrom_Country(JXBrowserHelper.text(row, "div.a-column.a-span3.olpDeliveryColumn"));
+            seller.setShipFromCountry(JXBrowserHelper.text(row, "div.a-column.a-span3.olpDeliveryColumn"));
         }
 
         if (SellerEnums.SellerType.isPrime(seller.getType())) {
@@ -218,7 +183,38 @@ public class SellerService {
             seller.setIntlShippingAvailable(true);
         }
 
+
+        // 综合Ratings及Ratings总数，AP一般没有这项属性
+        if (seller.getType() == SellerEnums.SellerType.AP) {
+            seller.setRating(Rating.AP_POSITIVE);
+            seller.setRatingCount(Rating.AP_COUNT);
+        } else {
+            try {
+                Integer rating = Integer.parseInt(JXBrowserHelper.text(row, "div.a-column.a-span2.olpSellerColumn > p:nth-child(2) > a").replaceAll(RegexUtils.Regex.NON_DIGITS.val(), StringUtils.EMPTY).trim());
+                seller.setRating(rating);
+            } catch (Exception e) {
+                LOGGER.error("Cant get rating number for seller {}", seller.getName());
+            }
+
+            String ratingText = JXBrowserHelper.text(row, "div.a-column.a-span2.olpSellerColumn > p:nth-child(2)");
+
+            if (ratingText.indexOf('(') != -1 && ratingText.indexOf(')') != -1) {
+                try {
+                    Integer ratingCount = Integer.parseInt(ratingText.substring(ratingText.indexOf('(')).replaceAll(RegexUtils.Regex.NON_DIGITS.val(), StringUtils.EMPTY));
+                    seller.setRatingCount(ratingCount);
+                } catch (Exception e) {
+                    //e.printStackTrace();
+                }
+
+            }
+        }
+
+
         seller.autoCorrect();
+
         return seller;
+
     }
+
+
 }

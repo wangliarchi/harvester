@@ -35,7 +35,7 @@ public class FlowState {
         JXBrowserHelper.saveScreenshot(filePath, buyerPanel.getBrowserView());
 
         String htmlFilePath = filePath.replaceAll(".png", ".html").replaceAll("/images/", "/html/");
-        JXBrowserHelper.saveHTMLSourceFile(htmlFilePath, buyerPanel.getBrowserView());
+        JXBrowserHelper.saveHTMLSourceFile(htmlFilePath, buyerPanel.getBrowserView().getBrowser());
 
     }
 

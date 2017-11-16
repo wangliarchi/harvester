@@ -50,7 +50,6 @@ public class OfferListingPage extends FulfillmentPage {
     public void enter(Order order) {
         String url = OrderCountryUtils.getOfferListingUrl(order);
         JXBrowserHelper.loadPage(browser, url);
-
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
     }
 
@@ -59,7 +58,9 @@ public class OfferListingPage extends FulfillmentPage {
         //go to offerlisting page
         enter(order);
 
+        //find seller
         Seller seller = findSeller(order);
+
         LOGGER.info("Found seller {} for order {}", seller.getName(), order.order_id);
         _addToCart(browser, seller.getIndex());
         LOGGER.info("Added to shopping cart successfully, now at {} -> {}, took {}", browser.getTitle(), browser.getURL(), Strings.formatElapsedTime(start));
@@ -79,12 +80,12 @@ public class OfferListingPage extends FulfillmentPage {
         for (Seller seller : sellers) {
             String sellerName = seller.getName();
 
-            boolean sellerEq = (StringUtils.isNotBlank(sellerName) && StringUtils.isNotBlank(order.seller) && sellerName.equalsIgnoreCase(order.seller)) ||
-                    (StringUtils.isNotBlank(seller.getUuid()) && StringUtils.isNotBlank(order.seller_id) && seller.getUuid().equalsIgnoreCase(order.seller_id)) ||
+            boolean sellerEq = (StringUtils.isNotBlank(seller.getUuid()) && StringUtils.isNotBlank(order.seller_id) && seller.getUuid().equalsIgnoreCase(order.seller_id) && seller.getType().abbrev().equalsIgnoreCase(order.character)) ||
+                    (StringUtils.isNotBlank(sellerName) && StringUtils.isNotBlank(order.seller) && sellerName.equalsIgnoreCase(order.seller) && seller.getType().abbrev().equalsIgnoreCase(order.character)) ||
                     (seller.getType() == SellerEnums.SellerType.AP && order.sellerIsAP()) ||
                     (seller.getType() == SellerEnums.SellerType.APWareHouse && order.sellerIsAPWarehouse());
 
-            if (sellerEq) {
+            if (sellerEq && order.condition.equalsIgnoreCase(seller.getCondition())) {
                 return seller;
             }
         }
@@ -101,7 +102,7 @@ public class OfferListingPage extends FulfillmentPage {
         Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> addToCartBtn.click());
 
         JXBrowserHelper.wait(browser, By.cssSelector("#hlb-ptc-btn-native"));
-
+        //JXBrowserHelper.waitUntilNewPageLoaded(browser);
 
     }
 

@@ -30,6 +30,7 @@ import java.util.List;
  */
 public class OrderValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderValidator.class);
+
     public enum Validator {
         IsFulfilled,
         IsNotFulfilled,
@@ -119,14 +120,14 @@ public class OrderValidator {
                     return result.toString();
                 }
             } catch (NoSuchMethodException e) {
-                LOGGER.error("",e);
+                LOGGER.error("", e);
                 return "Validator " + validator.name() + " not found.";
             } catch (IllegalAccessException e) {
                 //e.printStackTrace();
-                LOGGER.error("",e);
+                LOGGER.error("", e);
                 return "Validator " + validator.name() + " is not accessible.";
             } catch (InvocationTargetException e) {
-                LOGGER.error("",e);
+                LOGGER.error("", e);
                 return "Validator " + validator.name() + " is not valid.";
             }
         }
@@ -436,7 +437,7 @@ public class OrderValidator {
     public String isNotForbiddenSeller(Order order) {
         Seller seller = new Seller();
         seller.setUuid(order.seller_id);
-        seller.setCountry_OfferListing(OrderCountryUtils.getFulfillementCountry(order));
+        seller.setOfferListingCountry(OrderCountryUtils.getFulfillementCountry(order));
         seller.setName(order.seller);
         if (forbiddenSeller.isForbidden(seller)) {
             return String.format("Seller %s (%s) is forbidden.", seller.getName(), seller.getUuid());

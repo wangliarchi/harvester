@@ -72,19 +72,17 @@ public class LoginPage extends FulfillmentPage implements PageObject {
         ((DOMFormControlElement) email).setValue(buyer.getEmail());
         WaitTime.Shortest.execute();
 
+        //amazon sometimes split login process into 2 pages, one page to enter email and next page to enter pw.
         DOMElement continueBtn = JXBrowserHelper.selectElementByCssSelector(browser, CONTINUE_BTN_SELECTOR);
-
         if (continueBtn != null) {
             Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> ((DOMFormControlElement) email).getForm().submit());
         }
 
         DOMElement pawssword = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, PASSWORD_SELECTOR);
-
         ((DOMFormControlElement) pawssword).setValue(buyer.getPassword());
-
         WaitTime.Shortest.execute();
-
         Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> ((DOMFormControlElement) pawssword).getForm().submit());
+
 
         if (StringUtils.containsIgnoreCase(browser.getURL(), AmazonPage.Login.urlMark())) {
             throw new IllegalStateException("Error while logging in");
@@ -96,9 +94,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
             JXBrowserHelper.selectElementByCssSelector(browser, "#continue").click();
             WaitTime.Shortest.execute();
             enterVerificationCode();
-
-
-        }
+       }
 
 
         LOGGER.info("{} logged in successfully, now at {} -> {}, took {}", country.name(), browser.getTitle(), browser.getURL(), Strings.formatElapsedTime(start));
@@ -134,6 +130,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
             throw new BusinessException("Invalid code. Please check your code and try again.");
         }
     }
+
     public static void main(String[] args) {
 
         JFrame frame = new JFrame("Order Submission Demo");

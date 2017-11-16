@@ -22,7 +22,6 @@ public class ProcessToCheckout extends Step {
 
     @Inject Checkout checkout;
     public Step createDynamicInstance(FlowState state) {
-        state.setPrevStep(this);
-        return checkout;
+       return checkout;
     }
 }

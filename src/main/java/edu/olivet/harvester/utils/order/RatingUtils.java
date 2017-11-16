@@ -10,6 +10,6 @@ public class RatingUtils {
     public static final String SELLER_RATING_URL = "%s/gp/aag/main/ref=olp_merch_rating?ie=UTF8&seller=%s";
 
     public static String sellerRatingUrl(Seller seller) {
-        return String.format(seller.getCountry_OfferListing().baseUrl(), seller.getUuid());
+        return String.format(seller.getOfferListingCountry().baseUrl(), seller.getUuid());
     }
 }

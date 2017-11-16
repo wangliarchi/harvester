@@ -2,6 +2,7 @@ package edu.olivet.harvester.model;
 
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.CurrencyRateCalculator;
 import edu.olivet.foundations.utils.RegexUtils;
 import lombok.Data;
@@ -45,7 +46,7 @@ public class Money {
     }
 
     //
-    public static Money fromText(String text, Country country) throws ParseException {
+    public static Money fromText(String text, Country country) {
         String amt = RegexUtils.getMatched(text.replaceAll(" ", ""), RegexUtils.Regex.AMOUNT);
 
         if (StringUtils.isBlank(amt)) {
@@ -60,7 +61,12 @@ public class Money {
         if (format instanceof DecimalFormat) {
             ((DecimalFormat) format).setParseBigDecimal(true);
         }
-        BigDecimal amount = (BigDecimal) format.parse(amt);
+        BigDecimal amount = null;
+        try {
+            amount = (BigDecimal) format.parse(amt);
+        } catch (ParseException e) {
+            throw new BusinessException("Failed to parse money from text " + text + " " + e.getMessage());
+        }
         return new Money(amount, country);
     }
 

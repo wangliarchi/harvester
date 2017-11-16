@@ -25,8 +25,9 @@ public class CheckoutEnum {
         PaymentMethodOnePage(".a-container.page-container #payment #cc-popover-link"),
         ShippingMethod("#shippingOptionFormId"),
         ShippingMethodOnePage(".a-container.page-container #spc-orders"),
-
-        OrderReview(".checkout.spc");
+        OrderReview(".checkout.spc"),
+        AmazonPrimeAd("#mom-no-thanks")
+        ;
 
         @Getter
         private String idSelector;

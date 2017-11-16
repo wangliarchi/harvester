@@ -44,7 +44,7 @@ public class OrderFlowEngine extends FlowParent {
             processSteps(step, state);
         } catch (Exception e) {
             //clear shopping cart
-            state.setStopFlag(true);
+            PSEventListener.stopped();
             clearShoppingCart.processStep(state);
             throw new BusinessException(e);
         }

@@ -1,6 +1,7 @@
 package edu.olivet.harvester.fulfill.model;
 
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.harvester.model.Money;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
@@ -14,7 +15,7 @@ public class Seller {
 
     public static final DecimalFormat DOUBLE_FORMAT = new DecimalFormat("0.00");
 
-    /** 寻找Seller过程中所得分数 */
+    /**寻找Seller过程中所得分数*/
     /**
      * Seller 有两个国家属性，
      * 第一个是seller所在offerlisting国家，country_OfferListing
@@ -27,7 +28,7 @@ public class Seller {
      * 获取Seller基本信息文本
      */
     public String toSimpleString() {
-        return "[" + this.country_OfferListing.toString() + ", " + this.name + ", " + this.uuid + ", " + DOUBLE_FORMAT.format(this.price) + ", " +
+        return "[" + this.offerListingCountry.name() + ", " + this.name + ", " + this.uuid + ", " + DOUBLE_FORMAT.format(this.price) + ", " +
                 DOUBLE_FORMAT.format(this.shippingFee) + ", " + this.condition + ", " + this.type.abbrev() + ", " +
                 this.rating + "%, " + this.ratingCount + ", " + (this.determinedStatus == null ? StringUtils.EMPTY : this.determinedStatus.desc()) + "]";
     }
@@ -45,7 +46,7 @@ public class Seller {
      * Seller 有两个国家属性，第一个是seller所在offerlisting国家，第二个是seller描述里面的实际发货国家。
      * 这个country是offerlisting所在国家。
      */
-    private Country country_OfferListing;
+    private Country offerListingCountry;
     /**
      * Seller编号，主要用于日志显示
      */
@@ -69,19 +70,19 @@ public class Seller {
     /**
      * 当前定价
      */
-    private float price;
+    private Money price;
     /**
      * 综合花费，包含了运费、收税等累计结果
      */
-    private float estimatedCost;
+    private Money estimatedCost;
     /**
      * 网页上面显示的运费
      */
-    private float shippingFee;
+    private Money shippingFee;
     /**
      * 用于计算参考利润的运费，可能不同于{@link #shippingFee}
      */
-    private float shippingFee4Profit;
+    private Money shippingFee4Profit;
     /**
      * 产品新旧情况
      */
@@ -138,9 +139,7 @@ public class Seller {
      * 发货地所在国, 这个国家大部分时候和seller所在卖场一致，但是少部分时候，seller描述中说明是此卖场以外的国家发货的
      * 这个参数会很大地影响发货时间，所以需要考虑
      */
-    private String country_ShippingFrom_Str;
-    //
-    private Country country_ShippingFrom;
+    private Country shipFromCountry;
     /**
      * 本月顾客反馈rating情况
      */
@@ -182,44 +181,41 @@ public class Seller {
      * 第二个是seller描述里面的实际发货国家。country_ShippingFrom
      */
     public Country getShippingFromCountry() {
-        if (country_ShippingFrom == null) {
-            country_ShippingFrom = this.country_OfferListing;
+        if (shipFromCountry == null) {
+            shipFromCountry = this.offerListingCountry;
         }
 
-        return country_ShippingFrom;
+        return shipFromCountry;
     }
 
 
-    public void setShippingFrom_Country(String shippingFromCountry) {
-
-        country_ShippingFrom_Str = shippingFromCountry;
-
-        if (shippingFromCountry.contains("United States")) {
-            this.country_ShippingFrom = Country.US;
-        } else if (shippingFromCountry.contains("United Kingdom") || shippingFromCountry.contains("Vereinigtes Königreich")) {
+    public void setShipFromCountry(String shipFromCountryString) {
+        if (shipFromCountryString.contains("United States")) {
+            this.shipFromCountry = Country.US;
+        } else if (shipFromCountryString.contains("United Kingdom") || shipFromCountryString.contains("Vereinigtes Königreich")) {
             // Vereinigtes Königreich 是德语
-            this.country_ShippingFrom = Country.UK;
-        } else if (shippingFromCountry.contains("France")) {
-            this.country_ShippingFrom = Country.FR;
-        } else if (shippingFromCountry.contains("Germany") || shippingFromCountry.contains("Deutschland")) {
-            this.country_ShippingFrom = Country.DE;
-        } else if (shippingFromCountry.contains("Spanish")) {
-            this.country_ShippingFrom = Country.ES;
-        } else if (shippingFromCountry.contains("Italy")) {
-            this.country_ShippingFrom = Country.IT;
-        } else if (shippingFromCountry.contains("Japan")) {
-            this.country_ShippingFrom = Country.JP;
-        } else if (shippingFromCountry.contains("Canada")) {
-            this.country_ShippingFrom = Country.CA;
-        } else if (shippingFromCountry.contains("Mexico")) {
-            this.country_ShippingFrom = Country.MX;
-        } else if (shippingFromCountry.contains("Thailand")) {
-            this.country_ShippingFrom = null;
-        } else if (shippingFromCountry.length() > 1) {
-            this.country_ShippingFrom = null;
+            this.shipFromCountry = Country.UK;
+        } else if (shipFromCountryString.contains("France")) {
+            this.shipFromCountry = Country.FR;
+        } else if (shipFromCountryString.contains("Germany") || shipFromCountryString.contains("Deutschland")) {
+            this.shipFromCountry = Country.DE;
+        } else if (shipFromCountryString.contains("Spanish")) {
+            this.shipFromCountry = Country.ES;
+        } else if (shipFromCountryString.contains("Italy")) {
+            this.shipFromCountry = Country.IT;
+        } else if (shipFromCountryString.contains("Japan")) {
+            this.shipFromCountry = Country.JP;
+        } else if (shipFromCountryString.contains("Canada")) {
+            this.shipFromCountry = Country.CA;
+        } else if (shipFromCountryString.contains("Mexico")) {
+            this.shipFromCountry = Country.MX;
+        } else if (shipFromCountryString.contains("Thailand")) {
+            this.shipFromCountry = null;
+        } else if (shipFromCountryString.length() > 1) {
+            this.shipFromCountry = null;
         } else {
             // 如果没有任何发货国家描述，那应该是发货国家就是seller所在amazon
-            this.country_ShippingFrom = this.country_OfferListing;
+            this.shipFromCountry = this.offerListingCountry;
         }
     }
 
@@ -243,8 +239,6 @@ public class Seller {
         this.uuid = StringUtils.defaultString(this.uuid);
         this.condition = StringUtils.defaultString(this.condition);
         this.conditionDetail = StringUtils.defaultString(this.conditionDetail);
-        this.country_ShippingFrom_Str = StringUtils.defaultString(this.country_ShippingFrom_Str);
-        this.setShippingFrom_Country(country_ShippingFrom_Str);
     }
 
     //	@Override
@@ -252,7 +246,7 @@ public class Seller {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((condition == null) ? 0 : condition.hashCode());
-        result = prime * result + ((country_OfferListing == null) ? 0 : country_OfferListing.hashCode());
+        result = prime * result + ((offerListingCountry == null) ? 0 : offerListingCountry.hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((sortId == null) ? 0 : sortId.hashCode());
         result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
@@ -270,6 +264,7 @@ public class Seller {
         if (getClass() != obj.getClass()) {
             return false;
         }
+
         Seller other = (Seller) obj;
         if (condition == null) {
             if (other.condition != null) {
@@ -278,7 +273,7 @@ public class Seller {
         } else if (!condition.equals(other.condition)) {
             return false;
         }
-        if (country_OfferListing != other.country_OfferListing) {
+        if (offerListingCountry != other.offerListingCountry) {
             return false;
         }
         if (name == null) {

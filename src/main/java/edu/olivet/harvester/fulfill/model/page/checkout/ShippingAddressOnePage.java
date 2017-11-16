@@ -2,6 +2,7 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 
 import com.teamdev.jxbrowser.chromium.dom.By;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
+import com.teamdev.jxbrowser.chromium.dom.DOMInputElement;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.BuyerPanel;
@@ -20,6 +21,7 @@ public class ShippingAddressOnePage extends ShippingAddressAbstract {
 
     public void execute(Order order) {
 
+
         DOMElement changeAddressLink = JXBrowserHelper.selectElementByCssSelector(browser, "#addressChangeLinkId");
         if (changeAddressLink != null) {
             changeAddressLink.click();
@@ -34,11 +36,26 @@ public class ShippingAddressOnePage extends ShippingAddressAbstract {
         WaitTime.Shortest.execute();
         fillNewAddressForm(order);
         WaitTime.Shortest.execute();
-        DOMElement useThisAddressBtn = JXBrowserHelper.selectElementByCssSelector(browser, ".a-popover-footer .a-button-input");
-        useThisAddressBtn.click();
-        WaitTime.Shortest.execute();
 
-        JXBrowserHelper.wait(browser,By.cssSelector("#addressChangeLinkId"));
+        //amazon may pop up address verification after clicking "use this address" btn, use user's original input by default.
+        while (true) {
+            DOMElement useThisAddressBtn = JXBrowserHelper.selectVisibleElement(browser, ".a-popover-footer .a-button-primary .a-button-input");
+
+            if (useThisAddressBtn == null) {
+                break;
+            }
+
+            DOMInputElement selectOrigin = (DOMInputElement) JXBrowserHelper.selectElementByName(browser, "addr");
+            if (selectOrigin != null && JXBrowserHelper.isVisible(selectOrigin)) {
+                selectOrigin.setChecked(true);
+            }
+
+            useThisAddressBtn.click();
+
+            WaitTime.Shortest.execute();
+        }
+
+        //JXBrowserHelper.wait(browser, By.cssSelector("#addressChangeLinkId"));
 
 
     }

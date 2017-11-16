@@ -23,6 +23,7 @@ public class OrderPlacedSucessPage extends FulfillmentPage {
         JXBrowserHelper.saveOrderScreenshot(order,buyerPanel,"1");
 
         viewLink.click();
+        JXBrowserHelper.waitUntilNewPageLoaded(browser);
         //JXBrowserHelper.waitUntilNotFound(browser,".a-alert-content a.a-link-emphasis");
     }
 }

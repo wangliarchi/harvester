@@ -72,6 +72,7 @@ public class OrderSubmitter {
     public void execute(RuntimeSettings settings) {
         messageListener.empty();
 
+        //check daily budget
         try {
             String spreadsheetId = settings.getSpreadsheetId();
             dailyBudgetHelper.getRemainingBudget(spreadsheetId, new Date());
@@ -94,10 +95,9 @@ public class OrderSubmitter {
         });
 
 
-        long start = System.currentTimeMillis();
         //mark status first
+        long start = System.currentTimeMillis();
         markStatusService.excute(settings, false);
-
         List<Order> orders = appScript.readOrders(settings);
         String resultSummary = String.format("Finished loading orders to submit for %s, %d orders found, took %s", settings.toString(), orders.size(), Strings.formatElapsedTime(start));
         LOGGER.info(resultSummary);
@@ -111,7 +111,14 @@ public class OrderSubmitter {
         //remove if not valid
         List<Order> validOrders = new ArrayList<>();
         for (Order order : orders) {
-            String error = orderValidator.isValid(order, FulfillmentEnum.Action.SubmitOrder);
+            String error = "";
+            if(OrderCountryUtils.getFulfillementCountry(order) != Country.US || order.purchaseBack()) {
+                error = "Harvest can only support US marketplace at this moment. Sorry for inconvenience.";
+            } else {
+                error = orderValidator.isValid(order, FulfillmentEnum.Action.SubmitOrder);
+            }
+
+
             if (StringUtils.isNotBlank(error)) {
                 messageListener.addMsg(order, error, InformationLevel.Negative);
             } else {
@@ -165,7 +172,7 @@ public class OrderSubmitter {
 
     public void submit(Order order, BuyerPanel buyerPanel) {
         String spreadsheetId = RuntimeSettings.load().getSpreadsheetId();
-
+        long start = System.currentTimeMillis();
         try {
 
             //validate again!
@@ -174,12 +181,14 @@ public class OrderSubmitter {
                 messageListener.addMsg(order, error);
                 return;
             }
-            dailyBudgetHelper.getRemainingBudget(spreadsheetId, new Date());
+            //dailyBudgetHelper.getRemainingBudget(spreadsheetId, new Date());
 
             messageListener.addMsg(order, String.format("start submitting. Buyer account %s, marketplace %s", buyerPanel.getBuyer().getEmail(), buyerPanel.getCountry().baseUrl()));
+
             orderFlowEngine.process(order, buyerPanel);
+
             if (StringUtils.isNotBlank(order.order_number)) {
-                messageListener.addMsg(order, "order fulfilled successfully.");
+                messageListener.addMsg(order, "order fulfilled successfully. took " + Strings.formatElapsedTime(start));
             }
         } catch (Exception e) {
             LOGGER.error("Error submit order {}", order.order_id, e);

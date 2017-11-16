@@ -10,8 +10,6 @@ import edu.olivet.harvester.utils.JXBrowserHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.ParseException;
-
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/9/17 4:38 PM
  */
@@ -46,7 +44,7 @@ public class PlacedOrderDetailPage extends FulfillmentPage {
         try {
             Money money = Money.fromText(total, country);
             return money.toUSDAmount().toPlainString();
-        } catch (ParseException e) {
+        } catch (Exception e) {
             //ignore
         }
         return "";

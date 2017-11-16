@@ -3,10 +3,10 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
-import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.model.page.FulfillmentPage;
+import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.service.addressvalidator.AddressValidator;
 import edu.olivet.harvester.fulfill.utils.DailyBudgetHelper;
 import edu.olivet.harvester.fulfill.utils.ProfitLostControl;
@@ -18,7 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -37,7 +37,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         Money grandTotal;
         try {
             grandTotal = Money.fromText(grandTotalText, buyerPanel.getCountry());
-        } catch (ParseException e) {
+        } catch (Exception e) {
             LOGGER.error("Error reading grand total. ", e);
             throw new BusinessException("Can read grand total - " + e.getMessage());
         }
@@ -55,24 +55,6 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
 
     }
 
-    public void placeOrder(Order order) {
-        checkTotalCost(order);
-
-        DOMElement placeOrderBtn = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, "#submitOrderButtonId .a-button-input, .place-your-order-button");
-        placeOrderBtn.click();
-        WaitTime.Shortest.execute();
-
-        DOMElement forceDuplicate = JXBrowserHelper.selectElementByName(browser, "forcePlaceOrder");
-        if (forceDuplicate != null) {
-            JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
-            forceDuplicate.click();
-            WaitTime.Shortest.execute();
-        }
-
-        JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
-
-    }
-
 
     public boolean reviewShippingAddress(AddressValidator addressValidator) {
         String name = JXBrowserHelper.text(browser, ".displayAddressUL .displayAddressFullName");
@@ -82,8 +64,8 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         String[] parts = StringUtils.split(cityStateZip, ",");
         String city = parts[0].trim();
         String[] regionZip = StringUtils.split(parts[1].trim(), " ");
-        String state = regionZip[0];
-        String zip = regionZip[1];
+        String zip = regionZip[regionZip.length - 1];
+        String state = StringUtils.join(Arrays.copyOf(regionZip, regionZip.length - 1), " ");
 
         Address enteredAddress = new Address();
         enteredAddress.setAddress1(addressLine1);
@@ -99,4 +81,28 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
 
         return true;
     }
+
+
+    public void placeOrder(Order order) {
+        //checkTotalCost(order);
+        if (PSEventListener.stopped()) {
+            throw new BusinessException("Process stoped as requested.");
+        }
+
+        DOMElement placeOrderBtn = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, "#submitOrderButtonId .a-button-input, .place-your-order-button");
+        placeOrderBtn.click();
+
+        JXBrowserHelper.waitUntilNewPageLoaded(browser);
+
+        DOMElement forceDuplicate = JXBrowserHelper.selectElementByName(browser, "forcePlaceOrder");
+        if (forceDuplicate != null) {
+            JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
+            forceDuplicate.click();
+            JXBrowserHelper.waitUntilNewPageLoaded(browser);
+        }
+
+        JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
+
+    }
+
 }
