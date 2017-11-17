@@ -12,6 +12,7 @@ import edu.olivet.harvester.fulfill.model.Seller;
 import edu.olivet.harvester.fulfill.model.SellerEnums;
 import edu.olivet.harvester.fulfill.service.SellerService;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
+import edu.olivet.harvester.fulfill.utils.OrderValidator;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
@@ -61,6 +62,13 @@ public class OfferListingPage extends FulfillmentPage {
         //find seller
         Seller seller = findSeller(order);
 
+        if (OrderValidator.needCheck(OrderValidator.SkipValidation.SellerPrice)) {
+            String result = OrderValidator.sellerPriceChangeNotExceedConfiguration(order, seller);
+            if (StringUtils.isNotBlank(result)) {
+                throw new BusinessException(result);
+            }
+        }
+
         LOGGER.info("Found seller {} for order {}", seller.getName(), order.order_id);
         _addToCart(browser, seller.getIndex());
         LOGGER.info("Added to shopping cart successfully, now at {} -> {}, took {}", browser.getTitle(), browser.getURL(), Strings.formatElapsedTime(start));
@@ -79,7 +87,6 @@ public class OfferListingPage extends FulfillmentPage {
         List<Seller> results = new ArrayList<>();
         for (Seller seller : sellers) {
             String sellerName = seller.getName();
-
             boolean sellerEq = (StringUtils.isNotBlank(seller.getUuid()) && StringUtils.isNotBlank(order.seller_id) && seller.getUuid().equalsIgnoreCase(order.seller_id) && seller.getType().abbrev().equalsIgnoreCase(order.character)) ||
                     (StringUtils.isNotBlank(sellerName) && StringUtils.isNotBlank(order.seller) && sellerName.equalsIgnoreCase(order.seller) && seller.getType().abbrev().equalsIgnoreCase(order.character)) ||
                     (seller.getType() == SellerEnums.SellerType.AP && order.sellerIsAP()) ||
@@ -95,15 +102,13 @@ public class OfferListingPage extends FulfillmentPage {
 
     @Repeat(expectedExceptions = BusinessException.class)
     public void _addToCart(Browser browser, int sellerIndex) {
-
         List<DOMElement> rows = JXBrowserHelper.selectElementsByCssSelector(browser, "div.a-row.olpOffer");
         DOMElement sellerRow = rows.get(sellerIndex);
+
         DOMElement addToCartBtn = JXBrowserHelper.selectElementByCssSelector(sellerRow, ".olpBuyColumn .a-button-input");
-        Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> addToCartBtn.click());
-
+        addToCartBtn.click();
+        //wait until new page loaded
         JXBrowserHelper.wait(browser, By.cssSelector("#hlb-ptc-btn-native"));
-        //JXBrowserHelper.waitUntilNewPageLoaded(browser);
-
     }
 
     public static void main(String[] args) {

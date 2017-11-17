@@ -12,7 +12,7 @@ import edu.olivet.harvester.spreadsheet.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.Actions;
-import edu.olivet.harvester.ui.ChooseSheetDialog;
+import edu.olivet.harvester.ui.dialog.ChooseSheetDialog;
 import edu.olivet.harvester.utils.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

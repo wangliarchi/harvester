@@ -11,6 +11,7 @@ import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Strings;
+import edu.olivet.harvester.fulfill.model.ItemCompareResult;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.MarkStatusService;
 import edu.olivet.harvester.fulfill.service.OrderFlowEngine;
@@ -22,6 +23,7 @@ import edu.olivet.harvester.service.OrderService;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.ui.TabbedBuyerPanel;
+import edu.olivet.harvester.ui.dialog.ItemCheckResultDialog;
 import edu.olivet.harvester.utils.MessageListener;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -112,7 +114,7 @@ public class OrderSubmitter {
         List<Order> validOrders = new ArrayList<>();
         for (Order order : orders) {
             String error = "";
-            if(OrderCountryUtils.getFulfillementCountry(order) != Country.US || order.purchaseBack()) {
+            if (OrderCountryUtils.getFulfillementCountry(order) != Country.US || order.purchaseBack()) {
                 error = "Harvest can only support US marketplace at this moment. Sorry for inconvenience.";
             } else {
                 error = orderValidator.isValid(order, FulfillmentEnum.Action.SubmitOrder);
@@ -133,6 +135,26 @@ public class OrderSubmitter {
             return;
         }
 
+
+        if (OrderValidator.needCheck(OrderValidator.SkipValidation.ItemName)) {
+            List<ItemCompareResult> results = PreValidator.compareItemNames4Orders(orders);
+            ItemCheckResultDialog dialog = UITools.setDialogAttr(new ItemCheckResultDialog(null, true, results));
+
+            if (dialog.isValidReturn()) {
+                List<ItemCompareResult> sync = dialog.getIsbn2Sync();
+                sync.forEach(it -> {
+                    messageListener.addMsg(it.getOrder(), "Failed item name check. " + it.getPreCheckReport(),InformationLevel.Negative);
+                    validOrders.remove(it.getOrder());
+                });
+            }
+
+            if (CollectionUtils.isEmpty(validOrders)) {
+                LOGGER.info("No valid orders to submit.");
+                UITools.error("No valid orders to be submitted. See failed record log for more detail.");
+                messageListener.addMsg("No valid orders to be submited.");
+                return;
+            }
+        }
 
         if (!UITools.confirmed(UIText.message("message.info.statusupdated", validOrders.size(), Strings.formatElapsedTime(start)))) {
             return;

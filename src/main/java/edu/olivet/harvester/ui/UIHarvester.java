@@ -7,6 +7,7 @@ import edu.olivet.foundations.job.TaskScheduler;
 import edu.olivet.foundations.ui.*;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.harvester.job.BackgroundJob;
+import edu.olivet.harvester.ui.dialog.BankCardConfigDialog;
 import edu.olivet.harvester.ui.events.ConfirmShipmentEvent;
 import edu.olivet.harvester.ui.events.OrderConfirmationHistoryEvent;
 import edu.olivet.harvester.ui.events.SettingEvent;

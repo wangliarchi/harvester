@@ -1,4 +1,4 @@
-package edu.olivet.harvester.utils;
+package edu.olivet.harvester.utils.common;
 
 import java.text.DecimalFormat;
 

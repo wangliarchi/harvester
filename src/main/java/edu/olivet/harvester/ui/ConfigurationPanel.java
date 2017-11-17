@@ -22,7 +22,7 @@ public class ConfigurationPanel extends JPanel {
 
     @Getter private final Country country;
 
-    ConfigurationPanel(Country country) {
+    public ConfigurationPanel(Country country) {
         this.country = country;
         this.initComponents();
     }
@@ -178,7 +178,7 @@ public class ConfigurationPanel extends JPanel {
     private JTextField prodBuyerFld = new JTextField();
     private JTextField ebatesBuyerFld = new JTextField();
 
-    Configuration collect() {
+    public Configuration collect() {
         Configuration cfg = new Configuration();
 
         cfg.setCountry(this.country);
@@ -205,7 +205,7 @@ public class ConfigurationPanel extends JPanel {
         return cfg;
     }
 
-    void load(@Nullable Configuration cfg) {
+    public void load(@Nullable Configuration cfg) {
         if (cfg == null) {
             return;
         }

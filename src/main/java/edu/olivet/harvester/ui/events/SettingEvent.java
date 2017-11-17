@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
-import edu.olivet.harvester.ui.SettingsDialog;
+import edu.olivet.harvester.ui.dialog.SettingsDialog;
 import edu.olivet.harvester.utils.SettingValidator;
 
 /**

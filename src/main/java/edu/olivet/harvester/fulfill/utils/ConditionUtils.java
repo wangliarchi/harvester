@@ -21,6 +21,39 @@ public class ConditionUtils {
     private static Map<String, String> conditionI18N;
 
 
+    public enum Condition {
+        New("New"),
+        Collectible("Collectible"),
+        OpenBox("OpenBox"),
+        Refurbished("Refurbished"),
+        Used("Used"),
+        UsedLikeNew("Used - Like New"),
+        UsedVeryGood("Used - Very Good"),
+        UsedGood("Used - Good"),
+        UsedAcceptable("Used - Acceptable");
+
+        private String text;
+
+        public String text() {
+            return text;
+        }
+
+        Condition(String text) {
+            this.text = text;
+        }
+
+        /**
+         * 根据baseCondition判定是否为Used
+         *
+         * @param baseCondition
+         */
+        public static boolean used(String baseCondition) {
+            return Condition.Used.name().equalsIgnoreCase(baseCondition) ||
+                    Condition.OpenBox.name().equalsIgnoreCase(baseCondition) ||
+                    Condition.Refurbished.name().equalsIgnoreCase(baseCondition);
+        }
+    }
+
     public static String translateCondition(String str) {
         conditionI18N = Configs.load("conditions.properties", Configs.KeyCase.LowerCase);
 

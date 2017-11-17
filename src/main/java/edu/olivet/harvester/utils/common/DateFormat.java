@@ -1,4 +1,4 @@
-package edu.olivet.harvester.utils;
+package edu.olivet.harvester.utils.common;
 
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.nutz.lang.Lang;

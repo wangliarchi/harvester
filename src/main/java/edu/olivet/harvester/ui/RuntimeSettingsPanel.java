@@ -10,14 +10,18 @@ import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.model.AdvancedSubmitSetting;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
+import edu.olivet.harvester.fulfill.utils.OrderValidator;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.spreadsheet.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
+import edu.olivet.harvester.ui.dialog.ChooseSheetDialog;
+import edu.olivet.harvester.ui.dialog.SelectRangeDialog;
 import edu.olivet.harvester.ui.events.MarkStatusEvent;
 import edu.olivet.harvester.ui.events.SubmitOrdersEvent;
 import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,6 +104,11 @@ public class RuntimeSettingsPanel extends JPanel {
         }
 
 
+        skipCheckComboBox.setModel(new DefaultComboBoxModel<OrderValidator.SkipValidation>(OrderValidator.SkipValidation.values()));
+        if (settings.getSkipValidation() != null) {
+            skipCheckComboBox.setSelectedItem(settings.getSkipValidation());
+        }
+
         settings.save();
     }
 
@@ -121,7 +130,9 @@ public class RuntimeSettingsPanel extends JPanel {
         googleSheetTextField.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                selectGoogleSheet();
+                if (googleSheetTextField.isEnabled()) {
+                    selectGoogleSheet();
+                }
             }
         });
         googleSheetTextField.setEditable(false);
@@ -160,6 +171,20 @@ public class RuntimeSettingsPanel extends JPanel {
         maxDaysOverEddComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 settings.setEddLimit(e.getItem().toString());
+                settings.save();
+            }
+        });
+
+
+        skipCheckComboBox.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                if (e.getItem() != OrderValidator.SkipValidation.None) {
+                    skipCheckComboBox.setToolTipText(UIText.tooltip("tooltip.skip.selected", skipCheckComboBox.getSelectedItem()));
+                } else {
+                    skipCheckComboBox.setToolTipText(null);
+                }
+
+                settings.setSkipValidation((OrderValidator.SkipValidation) e.getItem());
                 settings.save();
             }
         });
@@ -280,7 +305,7 @@ public class RuntimeSettingsPanel extends JPanel {
         submitButton.setEnabled(false);
         noInvoiceTextField.setEnabled(false);
         finderCodeTextField.setEnabled(false);
-
+        skipCheckComboBox.setEnabled(false);
     }
 
     public void restAllBtns() {
@@ -295,9 +320,11 @@ public class RuntimeSettingsPanel extends JPanel {
         submitButton.setEnabled(true);
         noInvoiceTextField.setEnabled(true);
         finderCodeTextField.setEnabled(true);
+        skipCheckComboBox.setEnabled(true);
     }
 
     public void selectGoogleSheet() {
+
         StringBuilder spreadsheetIdError = new StringBuilder();
         AppScript appScript = new AppScript();
         Country selectedCountry = (Country) marketplaceComboBox.getSelectedItem();
@@ -373,9 +400,9 @@ public class RuntimeSettingsPanel extends JPanel {
 
         Account primeBuyer;
         Account buyer;
-        if(type == OrderEnums.OrderItemType.BOOK) {
+        if (type == OrderEnums.OrderItemType.BOOK) {
             buyer = configuration.getBuyer();
-            primeBuyer =  configuration.getPrimeBuyer();
+            primeBuyer = configuration.getPrimeBuyer();
         } else {
             buyer = configuration.getProdBuyer();
             primeBuyer = configuration.getProdPrimeBuyer();
@@ -453,6 +480,9 @@ public class RuntimeSettingsPanel extends JPanel {
     private JLabel maxEddLabel;
     private JComboBox<String> maxDaysOverEddComboBox;
 
+    private JLabel skipCheckLabel;
+    private JComboBox<OrderValidator.SkipValidation> skipCheckComboBox;
+
     private void initComponents() {
         setBorder(BorderFactory.createTitledBorder(BorderFactory.createTitledBorder("Runtime Settings")));
 
@@ -519,6 +549,18 @@ public class RuntimeSettingsPanel extends JPanel {
         codeFinderLabel.setText("Finder Code");
         maxEddLabel.setText("EDD Limit");
 
+        skipCheckLabel = new JLabel();
+        skipCheckLabel.setText("Skip Check");
+        skipCheckLabel.setForeground(Color.RED);
+        Font font = noInvoiceLabel.getFont();
+        if (SystemUtils.IS_OS_WINDOWS) {
+            skipCheckLabel.setFont(new Font(font.getName(), Font.BOLD, font.getSize() - 2));
+        } else if (SystemUtils.IS_OS_LINUX) {
+            skipCheckLabel.setFont(new Font(Constants.LINUX_TEXT_FONT, Font.BOLD, font.getSize() - 2));
+        }
+
+        skipCheckComboBox = new JComboBox<>();
+
 
         GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);
@@ -544,6 +586,7 @@ public class RuntimeSettingsPanel extends JPanel {
                                                         .addComponent(maxEddLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                         .addComponent(noInvoiceLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                         .addComponent(codeFinderLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(skipCheckLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                 )
                                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                                         .addComponent(marketplaceComboBox, labelMinWidth, fieldWidth, fieldWidth)
@@ -561,6 +604,7 @@ public class RuntimeSettingsPanel extends JPanel {
                                                         .addComponent(maxDaysOverEddComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(noInvoiceTextField, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(finderCodeTextField, labelMinWidth, fieldWidth, fieldWidth)
+                                                        .addComponent(skipCheckComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                                 )
                                         )
                                 )
@@ -633,6 +677,11 @@ public class RuntimeSettingsPanel extends JPanel {
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(codeFinderLabel)
                                         .addComponent(finderCodeTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(skipCheckLabel)
+                                        .addComponent(skipCheckComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+
                                 .addGap(10, 10, 10)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                         .addComponent(huntSupplierButton)
@@ -642,6 +691,8 @@ public class RuntimeSettingsPanel extends JPanel {
                                         .addComponent(pauseButton)
                                         .addComponent(stopButton)))
         );
+
+
     }
 
 

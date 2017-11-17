@@ -1,6 +1,10 @@
 package edu.olivet.harvester.model;
 
 import edu.olivet.foundations.ui.UIText;
+import edu.olivet.foundations.utils.Dates;
+import edu.olivet.foundations.utils.Directory;
+
+import java.io.File;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/7/17 11:09 AM
@@ -156,35 +160,61 @@ public class ConfigEnums {
         }
     }
 
+    public static final long ZERO_BYTES = 0l;
+
     /**
-     * 跳过检查类型枚举
+     * 当前系统日志类型枚举
      *
-     * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Nov 17, 2014 1:10:35 PM
+     * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Nov 17, 2014 11:32:55 AM
      */
-    public enum SkipValidation {
-        None("label.skip.none"),
-        ItemName("label.skip.itemname"),
-        ForbiddenSupplier("label.skip.forbidden.supplier"),
-        SellerOutOfStock("label.skip.stock"),
-        UrlNotMatch("label.skip.url"),
-        SellerPrice("label.skip.price"),
-        GiftOption("label.skip.giftoption"),
-        Profit("label.skip.profit"),
-        ShippingFee("label.skip.shippingfee"),
-        Address("label.skip.address"),
-        RefundMultiCheck("label.skip.multirefund"),
-        OperationSuccessCheck("label.skip.opersuccess"),
-        All("label.skip.all");
+    public enum Log {
+        Error("error.log"),
+        OrderMan("orderman.%s.log"),
+        Success("success.log"),
+        FailReason("failreason.%s.log"),
+        Profile("profile.%s.log"),
+        Hunt("hunter.%s.log"),
+        Transfer("transfer.%s.csv"),
+        ISBN("isbn.txt"),
+        ASINDeletion("asin.%s.log"),
+        ASINHistory("asinhistory.txt"),
+        InventoryLoader("inv.%s.log"),
+        Statistic("statistic.log"),
+        Service("service.%s.log"),
+        Deploy("deploy.log"),
+        MailMan("mailman.%s.log"),
+        ReturnRequestFollowUp("returnreq.%s.log"),
+        Infringements("infringements.txt");
 
-        private String label;
+        private String fileName;
 
-        SkipValidation(String label) {
-            this.label = label;
+        Log(String fileName) {
+            this.fileName = fileName;
         }
 
-        @Override
-        public String toString() {
-            return UIText.label(this.label);
+        public String fileName() {
+            return this.fileName;
+        }
+
+        public File file() {
+            return new File(this.filePath());
+        }
+
+        public boolean valid() {
+            File log = this.file();
+            return log.exists() && log.length() > ZERO_BYTES;
+        }
+
+        /**
+         * 获取当前(当天)日志文件所在路径，按照yyyy-M-d的日期约定替换文件名中占位符
+         */
+        public String filePath() {
+            String path = Directory.Log.path() + File.separator + this.fileName;
+            return path.replace("%s", Dates.nowAsFileName());
+        }
+
+        public String desc() {
+            return UIText.label("label.log." + this.name().toLowerCase());
         }
     }
 

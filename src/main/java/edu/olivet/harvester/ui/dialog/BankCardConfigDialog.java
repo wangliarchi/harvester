@@ -1,4 +1,4 @@
-package edu.olivet.harvester.ui;
+package edu.olivet.harvester.ui.dialog;
 
 import com.alibaba.fastjson.JSON;
 import edu.olivet.deploy.Language;
@@ -7,6 +7,8 @@ import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.model.CreditCard;
+import edu.olivet.harvester.ui.BankCardPanel;
+import edu.olivet.harvester.ui.Harvester;
 import edu.olivet.harvester.utils.Migration;
 import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.collections4.CollectionUtils;

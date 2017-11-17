@@ -30,11 +30,14 @@ public class OrderCountryUtils {
     }
 
 
-    private static final String IMAGE_PRIME_URL_PATTERN = "/gp/offer-listing/${ISBN}/ref=ref=olp_fsf?ie=UTF8&condition=${CONDITION}&freeShipping=1";
-    private static final String IMAGE_PT_URL_PATTERN = "/gp/offer-listing/${ISBN}/ref=olp_tab_${CONDITION}?ie=UTF8&condition=${CONDITION}&mv_style_name=1";
-    private static final String PRIME_URL_PATTERN = "/gp/offer-listing/${ISBN}/ref=olp_prime_${CONDITION}?ie=UTF8&condition=${CONDITION}&shipPromoFilter=1";
-    private static final String PT_URL_PATTERN = "/gp/offer-listing/${ISBN}/ref=olp_tab_${CONDITION}?ie=UTF8&condition=${CONDITION}";
-    private static final int MIN_SELLERID_LENGTH = 10;
+    public static final String OFFER_LIST_URL_PATTERN = "/gp/offer-listing/%s/ref=olp_tab_%s?ie=UTF8&condition=%s&startIndex=%s&sr=8-1";
+    public static final String OFFER_LIST_URL_ALL = "/gp/offer-listing/%s/ref=olp_f_used?ie=UTF8&f_new=true&f_used=true&f_usedAcceptable=true&f_usedGood=true&f_usedLikeNew=true&f_usedVeryGood=true"
+            + "&startIndex=%s";
+    public static final String IMAGE_PRIME_URL_PATTERN = "/gp/offer-listing/${ISBN}/ref=ref=olp_fsf?ie=UTF8&condition=${CONDITION}&freeShipping=1";
+    public static final String IMAGE_PT_URL_PATTERN = "/gp/offer-listing/${ISBN}/ref=olp_tab_${CONDITION}?ie=UTF8&condition=${CONDITION}&mv_style_name=1";
+    public static final String PRIME_URL_PATTERN = "/gp/offer-listing/${ISBN}/ref=olp_prime_${CONDITION}?ie=UTF8&condition=${CONDITION}&shipPromoFilter=1";
+    public static final String PT_URL_PATTERN = "/gp/offer-listing/${ISBN}/ref=olp_tab_${CONDITION}?ie=UTF8&condition=${CONDITION}";
+    public static final int MIN_SELLERID_LENGTH = 10;
 
     public static String getOfferListingUrl(Order order) {
         String condition = ConditionUtils.getMasterCondtion(order.condition);

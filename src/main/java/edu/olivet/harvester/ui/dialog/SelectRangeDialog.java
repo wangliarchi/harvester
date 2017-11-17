@@ -1,4 +1,4 @@
-package edu.olivet.harvester.ui;
+package edu.olivet.harvester.ui.dialog;
 
 import edu.olivet.deploy.Language;
 import edu.olivet.foundations.ui.BaseDialog;
@@ -8,6 +8,7 @@ import edu.olivet.harvester.fulfill.model.AdvancedSubmitSetting;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.model.ConfigEnums;
 import edu.olivet.harvester.model.OrderEnums;
+import edu.olivet.harvester.ui.Harvester;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 

@@ -1,4 +1,4 @@
-package edu.olivet.harvester.ui;
+package edu.olivet.harvester.ui.dialog;
 
 import com.alibaba.fastjson.JSON;
 import edu.olivet.deploy.Language;
@@ -11,6 +11,8 @@ import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
+import edu.olivet.harvester.ui.ConfigurationPanel;
+import edu.olivet.harvester.ui.Harvester;
 import edu.olivet.harvester.utils.Migration;
 import edu.olivet.harvester.utils.SettingValidator;
 import edu.olivet.harvester.utils.Settings;

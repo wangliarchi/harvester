@@ -11,6 +11,7 @@ import edu.olivet.harvester.fulfill.model.page.checkout.ShippingAddressOnePage;
 import edu.olivet.harvester.fulfill.service.addressvalidator.USPSAddressValidator;
 import edu.olivet.harvester.fulfill.service.flowfactory.FlowState;
 import edu.olivet.harvester.fulfill.service.flowfactory.Step;
+import edu.olivet.harvester.fulfill.utils.OrderValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,16 +28,20 @@ public class ReviewOrderMultiPage extends Step {
     protected void process(FlowState state) {
         OrderReviewMultiPage orderReviewMultiPage = new OrderReviewMultiPage(state.getBuyerPanel());
 
-        reviewAddress(state);
+        if (OrderValidator.needCheck(OrderValidator.SkipValidation.Address)) {
+            reviewAddress(state);
+        }
 
         reviewPayment(state);
 
-        try {
-            orderReviewMultiPage.checkTotalCost(state.getOrder());
-            LOGGER.info("Passed cost check.");
-        } catch (Exception e) {
-            LOGGER.error("Failed cost check. ", e);
-            throw e;
+        if (OrderValidator.needCheck(OrderValidator.SkipValidation.Profit)) {
+            try {
+                orderReviewMultiPage.checkTotalCost(state.getOrder());
+                LOGGER.info("Passed cost check.");
+            } catch (Exception e) {
+                LOGGER.error("Failed cost check. ", e);
+                throw e;
+            }
         }
 
     }

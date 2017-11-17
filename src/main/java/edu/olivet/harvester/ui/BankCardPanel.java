@@ -13,7 +13,7 @@ public class BankCardPanel extends JPanel {
     @Getter
     private final String accountEmail;
 
-    BankCardPanel(String accountEmail) {
+    public BankCardPanel(String accountEmail) {
         this.accountEmail = accountEmail;
         this.initComponents();
     }
@@ -69,7 +69,7 @@ public class BankCardPanel extends JPanel {
     private JTextField bankCardNoField = new JTextField();
     private JTextField cvvField = new JTextField();
 
-    CreditCard collect() {
+    public CreditCard collect() {
         return new CreditCard(buyerAccountField.getText(), bankCardNoField.getText(), cvvField.getText());
     }
 

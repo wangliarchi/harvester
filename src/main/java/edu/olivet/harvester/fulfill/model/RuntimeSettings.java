@@ -3,6 +3,7 @@ package edu.olivet.harvester.fulfill.model;
 import com.alibaba.fastjson.JSON;
 import com.google.inject.Singleton;
 import edu.olivet.foundations.utils.Tools;
+import edu.olivet.harvester.fulfill.utils.OrderValidator;
 import edu.olivet.harvester.ui.Harvester;
 import lombok.Data;
 
@@ -25,6 +26,7 @@ public class RuntimeSettings {
     private String eddLimit = "7";
     private String noInvoiceText = "{No Invoice}";
     private String finderCode = "";
+    private OrderValidator.SkipValidation skipValidation = OrderValidator.SkipValidation.None;
 
     public void save() {
         File file = new File(Harvester.RUNTIME_SETTINGS_FILE_PATH);

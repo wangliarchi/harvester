@@ -2,9 +2,11 @@ package edu.olivet.harvester.fulfill.utils;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
+import com.mchange.lang.FloatUtils;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.db.DBManager;
+import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.model.OrderFulfillmentRecord;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
@@ -13,7 +15,7 @@ import edu.olivet.harvester.fulfill.service.ForbiddenSeller;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.model.Remark;
-import edu.olivet.harvester.utils.DateFormat;
+import edu.olivet.harvester.utils.common.DateFormat;
 import org.apache.commons.lang3.StringUtils;
 import org.nutz.dao.Cnd;
 import org.slf4j.Logger;
@@ -53,8 +55,48 @@ public class OrderValidator {
         HasEnoughBudgetToFulfill,
         NotDuplicatedOrder,
         IsNotForbiddenSeller
+
     }
 
+
+    /**
+     * 跳过检查类型枚举
+     */
+    public enum SkipValidation {
+        None("label.skip.none"),
+        ItemName("label.skip.itemname"),
+        ForbiddenSupplier("label.skip.forbidden.supplier"),
+        SellerOutOfStock("label.skip.stock"),
+        UrlNotMatch("label.skip.url"),
+        SellerPrice("label.skip.price"),
+        GiftOption("label.skip.giftoption"),
+        Profit("label.skip.profit"),
+        //ShippingFee("label.skip.shippingfee"),
+        Address("label.skip.address"),
+        //RefundMultiCheck("label.skip.multirefund"),
+        //OperationSuccessCheck("label.skip.opersuccess"),
+        All("label.skip.all");
+
+        private String label;
+
+        SkipValidation(String label) {
+            this.label = label;
+        }
+
+        @Override
+        public String toString() {
+            return UIText.label(this.label);
+        }
+    }
+
+    public static boolean skipCheck(SkipValidation skipValidation) {
+        RuntimeSettings settings = RuntimeSettings.load();
+        return settings.getSkipValidation() == skipValidation || settings.getSkipValidation() == SkipValidation.All;
+    }
+
+    public static boolean needCheck(SkipValidation skipValidation) {
+        return !skipCheck(skipValidation);
+    }
 
     public String isValid(Order order, FulfillmentEnum.Action scenario) {
         switch (scenario) {
@@ -435,6 +477,10 @@ public class OrderValidator {
     ForbiddenSeller forbiddenSeller;
 
     public String isNotForbiddenSeller(Order order) {
+        if (OrderValidator.skipCheck(SkipValidation.ForbiddenSupplier)) {
+            return "";
+        }
+
         Seller seller = new Seller();
         seller.setUuid(order.seller_id);
         seller.setOfferListingCountry(OrderCountryUtils.getFulfillementCountry(order));
@@ -442,6 +488,18 @@ public class OrderValidator {
         if (forbiddenSeller.isForbidden(seller)) {
             return String.format("Seller %s (%s) is forbidden.", seller.getName(), seller.getUuid());
         }
+        return "";
+    }
+
+
+    public static String sellerPriceChangeNotExceedConfiguration(Order order, Seller seller) {
+        RuntimeSettings settings = RuntimeSettings.load();
+        float maxAllowed = Float.parseFloat(settings.getPriceLimit());
+        float priceRaised = seller.getPrice().toUSDAmount().floatValue() - Float.parseFloat(order.seller_price);
+        if (maxAllowed > priceRaised) {
+            return "Seller price raised " + FloatUtils.floatToString(priceRaised, 2) + " to " + seller.getPrice().usdText();
+        }
+
         return "";
     }
 }

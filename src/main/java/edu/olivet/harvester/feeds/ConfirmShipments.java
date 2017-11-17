@@ -501,7 +501,7 @@ public class ConfirmShipments {
                 if (orders.size() > 0) {
                     //send email
                     String subject = String.format("Alert: %d %s created before %s %s not been confirmed.",
-                            orders.size(), orders.size() == 1 ? "order" : "orders", edu.olivet.harvester.utils.DateFormat.DATE_TIME.format(createBefore),
+                            orders.size(), orders.size() == 1 ? "order" : "orders", edu.olivet.harvester.utils.common.DateFormat.DATE_TIME.format(createBefore),
                             orders.size() == 1 ? "has" : "have");
 
                     StringBuilder content = new StringBuilder(subject).append("\n\n");

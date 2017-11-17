@@ -45,6 +45,7 @@ public class Money {
         return rounded(amount.multiply(new BigDecimal(Float.toString(exchangeRate))));
     }
 
+
     //
     public static Money fromText(String text, Country country) {
         String amt = RegexUtils.getMatched(text.replaceAll(" ", ""), RegexUtils.Regex.AMOUNT);
@@ -73,6 +74,10 @@ public class Money {
 
     public String toString() {
         return currency.getSymbol() + amount.toString();
+    }
+
+    public String usdText() {
+        return "$" + toUSDAmount().toString();
     }
 
     /**

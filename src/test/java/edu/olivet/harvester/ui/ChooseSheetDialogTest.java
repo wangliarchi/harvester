@@ -4,6 +4,7 @@ import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.spreadsheet.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.Worksheet;
+import edu.olivet.harvester.ui.dialog.ChooseSheetDialog;
 import edu.olivet.harvester.utils.Settings;
 import org.testng.annotations.Test;
 

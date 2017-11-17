@@ -9,6 +9,7 @@ import edu.olivet.foundations.utils.Directory;
 import edu.olivet.harvester.job.ContextUploadJob;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
+import edu.olivet.harvester.ui.dialog.SettingsDialog;
 import edu.olivet.harvester.utils.MessageListener;
 import edu.olivet.harvester.utils.Migration;
 import edu.olivet.harvester.utils.SettingValidator;
