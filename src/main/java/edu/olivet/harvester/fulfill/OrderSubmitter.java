@@ -113,7 +113,7 @@ public class OrderSubmitter {
         //remove if not valid
         List<Order> validOrders = new ArrayList<>();
         for (Order order : orders) {
-            String error = "";
+            String error;
             if (OrderCountryUtils.getFulfillementCountry(order) != Country.US || order.purchaseBack()) {
                 error = "Harvest can only support US marketplace at this moment. Sorry for inconvenience.";
             } else {

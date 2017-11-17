@@ -24,7 +24,7 @@ public class Predicates {
     public static class OrderIdPredicate implements Predicate {
         @Override
         public boolean evaluate(Object object) {
-            String orderId = null;
+            String orderId;
             if (object instanceof Order) {
                 orderId = ((Order) object).order_id;
             } else {
@@ -60,7 +60,7 @@ public class Predicates {
     public static class OrderNoPredicate implements Predicate {
         @Override
         public boolean evaluate(Object object) {
-            String orderId = null;
+            String orderId;
             if (object instanceof Order) {
                 orderId = ((Order) object).order_number;
             } else {

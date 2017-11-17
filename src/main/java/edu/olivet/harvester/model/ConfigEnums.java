@@ -160,7 +160,7 @@ public class ConfigEnums {
         }
     }
 
-    public static final long ZERO_BYTES = 0l;
+    public static final long ZERO_BYTES = 0L;
 
     /**
      * 当前系统日志类型枚举

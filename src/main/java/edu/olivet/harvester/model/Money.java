@@ -62,7 +62,7 @@ public class Money {
         if (format instanceof DecimalFormat) {
             ((DecimalFormat) format).setParseBigDecimal(true);
         }
-        BigDecimal amount = null;
+        BigDecimal amount;
         try {
             amount = (BigDecimal) format.parse(amt);
         } catch (ParseException e) {

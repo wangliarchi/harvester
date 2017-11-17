@@ -4,6 +4,7 @@ import edu.olivet.foundations.ui.UIText;
 import edu.olivet.harvester.fulfill.model.ItemCompareResult;
 import edu.olivet.harvester.fulfill.service.ItemValidator;
 import org.apache.commons.collections.CollectionUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,7 +101,7 @@ public class ItemCheckResultDialog extends javax.swing.JDialog {
             private static final long serialVersionUID = -7996493405307614317L;
 
             @Override
-            public String getToolTipText(MouseEvent e) {
+            public String getToolTipText(@NotNull MouseEvent e) {
                 Point p = e.getPoint();
                 int rowIndex = rowAtPoint(p);
                 int colIndex = columnAtPoint(p);
@@ -126,36 +127,24 @@ public class ItemCheckResultDialog extends javax.swing.JDialog {
         scrollPanel.setViewportView(resultTable);
 
         okBtn.setText(UIText.label("label.ok"));
-        okBtn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                okBtnActionPerformed(evt);
-            }
-        });
+        okBtn.addActionListener(evt -> okBtnActionPerformed(evt));
 
         cancelBtn.setText(UIText.label("label.cancel"));
-        cancelBtn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                setValidReturn(false);
-                dispose();
-            }
+        cancelBtn.addActionListener(evt -> {
+            setValidReturn(false);
+            dispose();
         });
 
         passAllBtn = new JCheckBox(UIText.label("label.pass.manually.all"));
         passAllBtn.setVisible(false);
-        passAllBtn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                passAllManual();
-            }
-        });
+        passAllBtn.addActionListener(e -> passAllManual());
 
         filterCheckbox = new JCheckBox(UIText.label("label.filter.notpass"));
-        filterCheckbox.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                filterResults();
-                passAllBtn.setVisible(filterCheckbox.isSelected());
-                if (!filterCheckbox.isSelected()) {
-                    passAllBtn.setSelected(false);
-                }
+        filterCheckbox.addActionListener(e -> {
+            filterResults();
+            passAllBtn.setVisible(filterCheckbox.isSelected());
+            if (!filterCheckbox.isSelected()) {
+                passAllBtn.setSelected(false);
             }
         });
 
@@ -245,8 +234,8 @@ public class ItemCheckResultDialog extends javax.swing.JDialog {
     private void passAllManual() {
         Boolean result = passAllBtn.isSelected();
         Vector vector = this.tableModel.getDataVector();
-        for (Iterator iter = vector.iterator(); iter.hasNext(); ) {
-            Vector row = (Vector) iter.next();
+        for (Object aVector : vector) {
+            Vector row = (Vector) aVector;
             if (Boolean.FALSE.equals(row.elementAt(4)) && !result.equals(row.elementAt(6))) {
                 row.set(6, result);
             }
@@ -261,8 +250,8 @@ public class ItemCheckResultDialog extends javax.swing.JDialog {
         Vector<?> vector = this.tableModel.getDataVector();
 
         int rowNo = 0;
-        for (Iterator<?> iter = vector.iterator(); iter.hasNext(); ) {
-            Vector<?> row = (Vector<?>) iter.next();
+        for (Object aVector : vector) {
+            Vector<?> row = (Vector<?>) aVector;
             if (Boolean.TRUE.equals(row.elementAt(6))) {
                 logger.debug("第{}行订单已人工检查通过，确定后订单书名将同步写入", row.elementAt(0));
                 ItemCompareResult result = results.get(rowNo);

@@ -136,7 +136,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
         JFrame frame = new JFrame("Order Submission Demo");
         Account buyer = new Account("jxiang@olivetuniversity.edu/q1w2e3AA", Account.AccountType.Buyer);
 
-        buyer = new Account("reviewsstudy@gmail.com/q1w2e3AA", Account.AccountType.Buyer);
+        //buyer = new Account("reviewsstudy@gmail.com/q1w2e3AA", Account.AccountType.Buyer);
         BuyerPanel buyerPanel = new BuyerPanel(0, Country.US, buyer, 1);
 
         frame.getContentPane().add(buyerPanel);

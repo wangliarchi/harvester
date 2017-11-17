@@ -59,6 +59,7 @@ public class RuntimeSettingsPanel extends JPanel {
 
         marketplaceComboBox.setModel(new DefaultComboBoxModel<>(countries.toArray(new Country[countries.size()])));
         if (settings.getMarketplaceName() == null) {
+            assert ((Country) marketplaceComboBox.getSelectedItem()) != null;
             settings.setMarketplaceName(((Country) marketplaceComboBox.getSelectedItem()).name());
         } else {
             marketplaceComboBox.setSelectedItem(Country.valueOf(settings.getMarketplaceName()));

@@ -57,8 +57,8 @@ public class HttpUtils {
 
         HttpPost post = new HttpPost(url);
         CloseableHttpResponse response = null;
-        HttpEntity entity = null;
-        String result = null;
+        HttpEntity entity;
+        String result;
         try {
             post.setEntity(new UrlEncodedFormEntity(nvps));
             response = client.execute(post);

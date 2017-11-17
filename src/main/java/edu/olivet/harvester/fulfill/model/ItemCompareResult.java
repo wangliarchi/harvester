@@ -2,6 +2,7 @@ package edu.olivet.harvester.fulfill.model;
 
 import edu.olivet.harvester.model.Order;
 import lombok.Data;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * 书名比较结果
@@ -99,7 +100,7 @@ public class ItemCompareResult implements Comparable<ItemCompareResult> {
     }
 
     @Override
-    public int compareTo(ItemCompareResult o) {
+    public int compareTo(@NotNull ItemCompareResult o) {
         return this.row - o.row;
     }
 

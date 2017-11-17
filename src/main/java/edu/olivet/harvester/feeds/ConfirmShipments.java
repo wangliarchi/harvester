@@ -305,6 +305,7 @@ public class ConfirmShipments {
     }
 
     public int getLastOrderRow(List<Order> orders) {
+        //noinspection ConstantConditions
         return CollectionUtils.isEmpty(orders) ? 3 : orders.stream().mapToInt(Order::getRow).max().getAsInt();
     }
 

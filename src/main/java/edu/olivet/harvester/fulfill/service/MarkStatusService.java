@@ -99,6 +99,7 @@ public class MarkStatusService {
                 messageListener.addMsg("Failed to update order status.", InformationLevel.Negative);
             }
 
+            assert results != null;
             if (results.containsKey("s")) {
                 messageListener.addMsg(results.get("s"));
             }

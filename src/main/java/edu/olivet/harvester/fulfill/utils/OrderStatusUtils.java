@@ -20,7 +20,7 @@ public class OrderStatusUtils {
             return null;
         }
 
-        Country finalAmazonCountry = null;
+        Country finalAmazonCountry;
         try {
             finalAmazonCountry = OrderCountryUtils.getFulfillementCountry(order);
         } catch (IllegalArgumentException e) {

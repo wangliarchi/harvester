@@ -122,7 +122,7 @@ public class OrderReviewMultiPage extends OrderReviewAbstractPage {
 
     public boolean reviewPaymentMethod() {
         String lastDigits = JXBrowserHelper.text(browser, "#payment-information");
-        lastDigits.replaceAll(RegexUtils.Regex.NON_DIGITS.val(), lastDigits);
+        lastDigits = lastDigits.replaceAll(RegexUtils.Regex.NON_DIGITS.val(), "");
         CreditCard creditCard = OrderBuyerUtils.getCreditCard(buyerPanel.getOrder());
         return creditCard.getCardNo().endsWith(lastDigits);
     }

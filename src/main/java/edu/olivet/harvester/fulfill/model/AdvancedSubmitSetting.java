@@ -194,9 +194,6 @@ public class AdvancedSubmitSetting {
         if (startRowNo != other.startRowNo) {
             return false;
         }
-        if (statusFilterValue != other.statusFilterValue) {
-            return false;
-        }
-        return submitRange == other.submitRange;
+        return statusFilterValue == other.statusFilterValue && submitRange == other.submitRange;
     }
 }

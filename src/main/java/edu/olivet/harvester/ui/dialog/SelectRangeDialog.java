@@ -138,11 +138,7 @@ public class SelectRangeDialog extends BaseDialog {
             multiRowsTxt.setEnabled(false);
             limitCountTxt.setEnabled(true);
         } else if (singleBtn.isSelected()) {
-            singleTxt.setEnabled(true);
-            startRowNo.setEnabled(false);
-            endRowNo.setEnabled(false);
-            multiRowsTxt.setEnabled(false);
-            limitCountTxt.setEnabled(false);
+            enableSingMode();
         } else if (scopeBtn.isSelected()) {
             startRowNo.setEnabled(true);
             endRowNo.setEnabled(true);
@@ -150,14 +146,26 @@ public class SelectRangeDialog extends BaseDialog {
             multiRowsTxt.setEnabled(false);
             limitCountTxt.setEnabled(false);
         } else if (multiBtn.isSelected()) {
-            multiRowsTxt.setEnabled(true);
-            singleTxt.setEnabled(false);
-            startRowNo.setEnabled(false);
-            endRowNo.setEnabled(false);
-            limitCountTxt.setEnabled(false);
+            enableMulMode();
         }
     }
 
+    private void enableMulMode() {
+        singleTxt.setEnabled(false);
+        startRowNo.setEnabled(false);
+
+
+        endRowNo.setEnabled(false);
+        multiRowsTxt.setEnabled(true);
+        limitCountTxt.setEnabled(false);
+    }
+    private void enableSingMode() {
+        singleTxt.setEnabled(true);
+        startRowNo.setEnabled(false);
+        endRowNo.setEnabled(false);
+        multiRowsTxt.setEnabled(false);
+        limitCountTxt.setEnabled(false);
+    }
     private void initComponents() {
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
@@ -195,7 +203,7 @@ public class SelectRangeDialog extends BaseDialog {
         okBtn.addActionListener(evt -> ok());
 
         cancelBtn.setText(UIText.label("label.cancel"));
-        cancelBtn.addActionListener(evt -> cancelBtnActionPerformed(evt));
+        cancelBtn.addActionListener(this::cancelBtnActionPerformed);
 
         markStatusButton = new JButton();
         markStatusButton.setText("Mark Status");
@@ -281,7 +289,7 @@ public class SelectRangeDialog extends BaseDialog {
 
         autoLoop.setText(UIText.label("label.submit.loop.enable"));
         autoLoop.setToolTipText(UIText.tooltip("tooltip.submit.loop.enable"));
-        autoLoop.addActionListener(evt -> autoLoopActionPerformed(evt));
+        autoLoop.addActionListener(this::autoLoopActionPerformed);
 
         loopInterval.setToolTipText(UIText.tooltip("tooltip.submit.loop.interval"));
         loopInterval.addFocusListener(selectAll);

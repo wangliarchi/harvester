@@ -280,10 +280,7 @@ public class Rating {
         if (neutralCount != other.neutralCount) {
             return false;
         }
-        if (positive != other.positive) {
-            return false;
-        }
-        return positiveCount == other.positiveCount;
+        return positive == other.positive && positiveCount == other.positiveCount;
     }
 
     //	@Override

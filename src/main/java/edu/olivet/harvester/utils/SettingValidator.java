@@ -163,7 +163,8 @@ public class SettingValidator {
             }
 
             if (spreadsheet != null && StringUtils.containsIgnoreCase(spreadsheet.getTitle(), "product")) {
-
+                errors.add(String.format("%s PRODUCT spreadsheet %s(%s) seems a book order sheet.",
+                        country.name(), config.getBookDataSourceUrl(), spreadsheet.getTitle()));
             }
 
         }
@@ -195,10 +196,10 @@ public class SettingValidator {
                 List<File> availableSheets = sheetAPI.getAvailableSheets(sid, config.getCountry(), "BOOK");
                 if (CollectionUtils.isNotEmpty(availableSheets)) {
                     errors.add(String.format("%s does'nt fill BOOK spreadsheet, but possible sheets found. %s",
-                            config.getCountry().name(), availableSheets.stream().map(it->it.getName()).collect(Collectors.toSet())));
+                            config.getCountry().name(), availableSheets.stream().map(File::getName).collect(Collectors.toSet())));
                 }
             }catch (Exception e) {
-
+                //ignore
             }
         }
 
@@ -207,10 +208,10 @@ public class SettingValidator {
                 List<File> availableSheets = sheetAPI.getAvailableSheets(sid, config.getCountry(), "ExportedOrder");
                 if (CollectionUtils.isNotEmpty(availableSheets)) {
                     errors.add(String.format("%s does'nt fill PRODUCT spreadsheet, but possible sheets found. %s",
-                            config.getCountry().name(), availableSheets.stream().map(it->it.getName()).collect(Collectors.toSet())));
+                            config.getCountry().name(), availableSheets.stream().map(File::getName).collect(Collectors.toSet())));
                 }
             }catch (Exception e) {
-
+                //ignore
             }
         }
 

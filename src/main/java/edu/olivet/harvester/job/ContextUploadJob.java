@@ -1,7 +1,6 @@
 package edu.olivet.harvester.job;
 
 import com.alibaba.fastjson.JSON;
-import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.job.AbstractBackgroundJob;
 import edu.olivet.foundations.release.Version;

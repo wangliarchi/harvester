@@ -43,7 +43,8 @@ public enum BackgroundJob {
     public String getCron() {
 
         if (this == ShipmentConfirmation) {
-            int hour = new Random().ints(1, 12, 14).findFirst().getAsInt();
+            @SuppressWarnings("ConstantConditions") int hour = new Random().ints(1, 12, 14).findFirst().getAsInt();
+            //noinspection ConstantConditions
             int min = new Random().ints(1, 0, 55).findFirst().getAsInt();
             return String.format("0 %d %d ? * MON,TUE,WED,THU,FRI,SAT *", min, hour);
         }

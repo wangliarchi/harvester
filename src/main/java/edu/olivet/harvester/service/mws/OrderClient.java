@@ -45,6 +45,7 @@ public class OrderClient {
     public List<Order> listOrders(Country country, @Nullable Map<OrderFetcher.DateRangeType, Date> dateMap, String... statuses) {
         MarketWebServiceIdentity credential = Settings.load().getConfigByCountry(country).getMwsCredential();
 
+        assert dateMap != null;
         return orderFetcher.readOrders(dateMap, credential, statuses);
     }
 
