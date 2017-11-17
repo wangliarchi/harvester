@@ -143,8 +143,10 @@ public class OrderSubmitter {
             if (dialog.isValidReturn()) {
                 List<ItemCompareResult> sync = dialog.getIsbn2Sync();
                 sync.forEach(it -> {
-                    messageListener.addMsg(it.getOrder(), "Failed item name check. " + it.getPreCheckReport(),InformationLevel.Negative);
-                    validOrders.remove(it.getOrder());
+                    if(it.isManualCheckPass() == false ) {
+                        messageListener.addMsg(it.getOrder(), "Failed item name check. " + it.getPreCheckReport(), InformationLevel.Negative);
+                        validOrders.remove(it.getOrder());
+                    }
                 });
             }
 

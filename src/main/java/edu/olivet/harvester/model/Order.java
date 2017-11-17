@@ -412,7 +412,23 @@ public class Order implements Keyable {
         return this.order_id;
     }
 
-
+    public boolean equalsLite(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Order order = (Order) o;
+        return Objects.equal(order_id, order.order_id) &&
+                Objects.equal(sku, order.sku) &&
+                Objects.equal(quantity_purchased, order.quantity_purchased) &&
+                Objects.equal(isbn, order.isbn) &&
+                Objects.equal(seller, order.seller) &&
+                Objects.equal(seller_id, order.seller_id) &&
+                Objects.equal(condition, order.condition) &&
+                Objects.equal(character, order.character);
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) {

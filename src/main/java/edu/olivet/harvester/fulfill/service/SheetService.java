@@ -150,12 +150,14 @@ public class SheetService extends SheetAPI {
         RuntimeSettings settings = RuntimeSettings.load();
         List<Order> orders = appScript.readOrders(settings);
         for(Order o : orders) {
-            if(order.equals(o)) {
+            if(order.equalsLite(o)) {
                 return o.row;
             }
         }
         throw new BusinessException("Cant find order on order " + order + " sheet");
     }
+
+
 
 
 }
