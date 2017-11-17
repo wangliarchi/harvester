@@ -131,7 +131,7 @@ public class HttpUtils {
     public static CloseableHttpClient buildHttpClient() {
         initConnManager();
 
-        RequestConfig globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.BEST_MATCH)
+        RequestConfig globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.DEFAULT)
                 .setConnectTimeout(TIME_OUT).build();
         CloseableHttpClient client = HttpClients.custom().setConnectionManager(connectionManager).setDefaultRequestConfig(globalConfig).build();
 

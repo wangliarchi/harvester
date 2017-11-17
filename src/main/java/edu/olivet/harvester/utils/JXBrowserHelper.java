@@ -6,6 +6,7 @@ import com.teamdev.jxbrowser.chromium.events.FinishLoadingEvent;
 import com.teamdev.jxbrowser.chromium.events.LoadAdapter;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import com.teamdev.jxbrowser.chromium.swing.internal.LightWeightWidget;
+import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.*;
 import edu.olivet.harvester.model.Order;
@@ -61,7 +62,6 @@ public class JXBrowserHelper {
     private static final double DEFAULT_ZOOM_OUT_LEVEL = -3.6;
 
     public static void saveScreenshot(String filePath, BrowserView browserView) {
-        final long start = System.currentTimeMillis();
         LightWeightWidget lightWeightWidget = (LightWeightWidget) browserView.getComponent(0);
         Image image = lightWeightWidget.getImage();
         try {
@@ -75,12 +75,12 @@ public class JXBrowserHelper {
 
     public static void saveHTMLSourceFile(Browser browser) {
         String title = browser.getTitle().replaceAll(" ", "");
+        title = RegexUtils.getMatched(title, "[A-Za-z-]");
         String filePath = Directory.WebPage.path() + "/specials/" + System.currentTimeMillis() + title + ".html";
         saveHTMLSourceFile(filePath, browser);
     }
 
     public static void saveHTMLSourceFile(String filePath, Browser browser) {
-        final long start = System.currentTimeMillis();
         try {
             File file = new File(filePath);
             Tools.writeStringToFile(file, browser.getHTML());
@@ -283,6 +283,7 @@ public class JXBrowserHelper {
         Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> it.loadURL(url));
     }
 
+    @Repeat(expectedExceptions = BusinessException.class)
     public static DOMElement selectElementByName(Browser browser, String name) {
         return browser.getDocument().findElement(By.name(name));
     }
@@ -291,7 +292,7 @@ public class JXBrowserHelper {
         return selectElementByCssSelector(browser.getDocument(), selector);
     }
 
-
+    @Repeat(expectedExceptions = BusinessException.class)
     public static DOMElement selectElementByCssSelector(DOMDocument document, String selector) {
         return document.findElement(By.cssSelector(selector));
     }
@@ -300,6 +301,7 @@ public class JXBrowserHelper {
         return element.findElement(By.cssSelector(selector));
     }
 
+    @Repeat(expectedExceptions = BusinessException.class)
     public static List<DOMElement> selectElementsByCssSelector(DOMDocument document, String selector) {
         return document.findElements(By.cssSelector(selector));
     }

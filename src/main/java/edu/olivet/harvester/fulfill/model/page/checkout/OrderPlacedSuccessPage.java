@@ -9,9 +9,9 @@ import edu.olivet.harvester.utils.JXBrowserHelper;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/9/17 4:35 PM
  */
-public class OrderPlacedSucessPage extends FulfillmentPage {
+public class OrderPlacedSuccessPage extends FulfillmentPage {
 
-    public OrderPlacedSucessPage(BuyerPanel buyerPanel) {
+    public OrderPlacedSuccessPage(BuyerPanel buyerPanel) {
         super(buyerPanel);
     }
 
@@ -24,6 +24,5 @@ public class OrderPlacedSucessPage extends FulfillmentPage {
 
         viewLink.click();
         JXBrowserHelper.waitUntilNewPageLoaded(browser);
-        //JXBrowserHelper.waitUntilNotFound(browser,".a-alert-content a.a-link-emphasis");
     }
 }

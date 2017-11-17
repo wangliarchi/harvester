@@ -553,15 +553,15 @@ public class RuntimeSettingsPanel extends JPanel {
         skipCheckLabel = new JLabel();
         skipCheckLabel.setText("Skip Check");
         skipCheckLabel.setForeground(Color.RED);
-        Font font = noInvoiceLabel.getFont();
-        if (SystemUtils.IS_OS_WINDOWS) {
-            skipCheckLabel.setFont(new Font(font.getName(), Font.BOLD, font.getSize() - 2));
-        } else if (SystemUtils.IS_OS_LINUX) {
-            skipCheckLabel.setFont(new Font(Constants.LINUX_TEXT_FONT, Font.BOLD, font.getSize() - 2));
-        }
+
 
         skipCheckComboBox = new JComboBox<>();
-
+        Font font = skipCheckLabel.getFont();
+        if (SystemUtils.IS_OS_WINDOWS) {
+            skipCheckComboBox.setFont(new Font(font.getName(), Font.BOLD, font.getSize() - 1));
+        } else if (SystemUtils.IS_OS_LINUX) {
+            skipCheckComboBox.setFont(new Font(Constants.LINUX_TEXT_FONT, Font.BOLD, font.getSize() - 1));
+        }
 
         GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);

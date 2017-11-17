@@ -9,7 +9,7 @@ import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.harvester.fulfill.model.OrderFulfillmentRecord;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
-import edu.olivet.harvester.fulfill.model.page.checkout.OrderPlacedSucessPage;
+import edu.olivet.harvester.fulfill.model.page.checkout.OrderPlacedSuccessPage;
 import edu.olivet.harvester.fulfill.model.page.checkout.PlacedOrderDetailPage;
 import edu.olivet.harvester.fulfill.service.SheetService;
 import edu.olivet.harvester.fulfill.service.flowfactory.FlowState;
@@ -65,8 +65,8 @@ public class AfterOrderPlaced extends Step {
     @Repeat(expectedExceptions = BusinessException.class)
     private void readOrderInfo(FlowState state) {
         //navigate to order detail page
-        OrderPlacedSucessPage orderPlacedSucessPage = new OrderPlacedSucessPage(state.getBuyerPanel());
-        orderPlacedSucessPage.execute(state.getOrder());
+        OrderPlacedSuccessPage orderPlacedSuccessPage = new OrderPlacedSuccessPage(state.getBuyerPanel());
+        orderPlacedSuccessPage.execute(state.getOrder());
 
         //read data from order detail page to order object
         PlacedOrderDetailPage placedOrderDetailPage = new PlacedOrderDetailPage(state.getBuyerPanel());
