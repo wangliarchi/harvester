@@ -497,7 +497,7 @@ public class OrderValidator {
         float maxAllowed = Float.parseFloat(settings.getPriceLimit());
         float priceRaised = seller.getPrice().toUSDAmount().floatValue() - Float.parseFloat(order.seller_price);
         if (maxAllowed < priceRaised) {
-            return "Seller price raised " + FloatUtils.floatToString(priceRaised, 2) + " to " + seller.getPrice().usdText();
+            return "Seller price raised " + String.format("%.2f", priceRaised) + " to " + seller.getPrice().usdText();
         }
 
         return "";

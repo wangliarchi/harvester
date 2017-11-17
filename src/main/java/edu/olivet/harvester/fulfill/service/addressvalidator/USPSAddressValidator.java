@@ -2,6 +2,7 @@ package edu.olivet.harvester.fulfill.service.addressvalidator;
 
 import com.google.inject.Inject;
 import edu.olivet.foundations.aop.Repeat;
+import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
@@ -145,22 +146,22 @@ public class USPSAddressValidator implements AddressValidator {
     }
 
     public static void main(String[] args) {
-        USPSAddressValidator validator = new USPSAddressValidator();
+        USPSAddressValidator validator = ApplicationContext.getBean(USPSAddressValidator.class);
 
         Address address = new Address();
-        address.setAddress1("836 Birkshire road");
-        address.setAddress2("");
-        address.setCity("wingdale");
-        address.setState("NY");
-        address.setZip("12594");
+        address.setAddress1("#25A");
+        address.setAddress2("1211 E. Denny Way");
+        address.setCity("Seattle");
+        address.setState("WA");
+        address.setZip("98122");
         address.setCountry("United States");
 
         Address enteredAddress = new Address();
-        enteredAddress.setAddress1("836 BERKSHIRE RD");
+        enteredAddress.setAddress1("1211 E DENNY WAY # 25A");
         enteredAddress.setAddress2("");
-        enteredAddress.setCity("WINGDALE");
-        enteredAddress.setState("NY");
-        enteredAddress.setZip("12594-1205");
+        enteredAddress.setCity("SEATTLE");
+        enteredAddress.setState("WA");
+        enteredAddress.setZip("98122-2516");
         enteredAddress.setCountry("United States");
 
         System.out.println(validator.verify(address, enteredAddress));

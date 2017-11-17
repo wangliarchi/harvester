@@ -3,9 +3,13 @@ package edu.olivet.harvester.fulfill.service;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
+import com.sun.org.apache.xpath.internal.operations.Or;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.utils.OrderStatusUtils;
 import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.service.OrderService;
+import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.service.OrderHelper;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import org.apache.commons.collections4.CollectionUtils;
@@ -20,26 +24,30 @@ import java.util.*;
  */
 public class SheetService extends SheetAPI {
     private static final Logger LOGGER = LoggerFactory.getLogger(SheetService.class);
+
     @Inject
-    OrderHelper orderHelper;
+    AppScript appScript;
 
     public void fillFulfillmentOrderInfo(String spreadsheetId, Order order) {
-        List<ValueRange> dateToUpdate = new ArrayList<>();
-        String range = String.format("%s!AC%d:AF%d", order.sheetName, order.row, order.row);
+        //need to relocate order row on google sheet, as it may be arranged during order fulfillment process.
+        int row = locateOrder(order);
 
-        //statys
+        List<ValueRange> dateToUpdate = new ArrayList<>();
+
+        //status
         ValueRange statusData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList("finish")))
-                .setRange(String.format("%s!A%d", order.sheetName, order.row));
+                .setRange(String.format("%s!A%d", order.sheetName, row));
         dateToUpdate.add(statusData);
 
         //fulfilled order info
+        String range = String.format("%s!AC%d:AF%d", order.sheetName, row, row);
         ValueRange rowData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(order.cost, order.order_number, order.account, order.last_code)))
                 .setRange(range);
         dateToUpdate.add(rowData);
 
         //remark
         ValueRange remarkData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(order.remark)))
-                .setRange(String.format("%s!S%d", order.sheetName, order.row));
+                .setRange(String.format("%s!S%d", order.sheetName, row));
         dateToUpdate.add(remarkData);
 
         try {
@@ -52,13 +60,13 @@ public class SheetService extends SheetAPI {
 
 
     public void fillUnsuccessfulMsg(String spreadsheetId, Order order, String msg) {
-
-
+        //need to relocate order row on google sheet, as it may be arranged during order fulfillment process.
+        int row = locateOrder(order);
 
         List<ValueRange> dateToUpdate = new ArrayList<>();
 
         ValueRange statusData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(order.remark + " " + msg)))
-                .setRange(String.format("%s!S%d", order.sheetName, order.row));
+                .setRange(String.format("%s!S%d", order.sheetName, row));
         dateToUpdate.add(statusData);
 
         try {
@@ -72,15 +80,12 @@ public class SheetService extends SheetAPI {
 
     @Inject
     OrderStatusUtils orderStatusUtils;
+
     public Map<String, List<String>> updateStatus(String spreadsheetId, List<Order> orders) {
         if (CollectionUtils.isEmpty(orders)) {
             return null;
         }
 
-        long start = System.currentTimeMillis();
-
-        int total = orders.size();
-        int validCount = 0;
 
         List<ValueRange> dateToUpdate = new ArrayList<>();
 
@@ -137,6 +142,19 @@ public class SheetService extends SheetAPI {
         }
 
         return statusMap;
+    }
+
+
+    public int locateOrder(Order order) {
+        //id, sku, seller, price, remark
+        RuntimeSettings settings = RuntimeSettings.load();
+        List<Order> orders = appScript.readOrders(settings);
+        for(Order o : orders) {
+            if(order.equals(o)) {
+                return o.row;
+            }
+        }
+        throw new BusinessException("Cant find order on order " + order + " sheet");
     }
 
 
