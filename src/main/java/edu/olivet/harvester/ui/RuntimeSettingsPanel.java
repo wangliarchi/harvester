@@ -326,7 +326,6 @@ public class RuntimeSettingsPanel extends JPanel {
 
     public void selectGoogleSheet() {
 
-        StringBuilder spreadsheetIdError = new StringBuilder();
         AppScript appScript = new AppScript();
         Country selectedCountry = (Country) marketplaceComboBox.getSelectedItem();
         List<edu.olivet.harvester.spreadsheet.Spreadsheet> spreadsheets = Settings.load().listSpreadsheets(selectedCountry, appScript);
@@ -359,6 +358,8 @@ public class RuntimeSettingsPanel extends JPanel {
             settings.setSheetName(selectedWorksheet.getSheetName());
             settings.setAdvancedSubmitSetting(new AdvancedSubmitSetting());
             settings.save();
+
+            setAccounts4Country();
 
             if (dialog.continueToNext) {
                 selectRange();
@@ -559,8 +560,6 @@ public class RuntimeSettingsPanel extends JPanel {
         Font font = skipCheckLabel.getFont();
         if (SystemUtils.IS_OS_WINDOWS) {
             skipCheckComboBox.setFont(new Font(font.getName(), Font.BOLD, font.getSize() - 1));
-        } else if (SystemUtils.IS_OS_LINUX) {
-            skipCheckComboBox.setFont(new Font(Constants.LINUX_TEXT_FONT, Font.BOLD, font.getSize() - 1));
         }
 
         GroupLayout layout = new GroupLayout(this);

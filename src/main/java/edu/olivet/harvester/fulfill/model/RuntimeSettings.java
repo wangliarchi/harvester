@@ -31,18 +31,23 @@ public class RuntimeSettings {
     public void save() {
         File file = new File(Harvester.RUNTIME_SETTINGS_FILE_PATH);
         Tools.writeStringToFile(file, JSON.toJSONString(this, true));
+
+        //clear cache
+        instance = null;
     }
 
+    private static RuntimeSettings instance;
     public static RuntimeSettings load() {
-        File file = new File(Harvester.RUNTIME_SETTINGS_FILE_PATH);
-        RuntimeSettings settings;
-        if (file.exists() && file.isFile()) {
-            settings = JSON.parseObject(Tools.readFileToString(file), RuntimeSettings.class);
-        } else {
-            settings = new RuntimeSettings();
+        if( instance == null) {
+            File file = new File(Harvester.RUNTIME_SETTINGS_FILE_PATH);
+            if (file.exists() && file.isFile()) {
+                instance = JSON.parseObject(Tools.readFileToString(file), RuntimeSettings.class);
+            } else {
+                instance = new RuntimeSettings();
+            }
         }
 
-        return settings;
+        return instance;
     }
 
     public String context() {
