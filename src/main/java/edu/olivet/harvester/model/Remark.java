@@ -74,7 +74,7 @@ public enum Remark {
     /**
      * 自买单
      */
-    SELF_ORDER(new String[]{"self-order"}, new String[]{"self order"}, true),
+    SELF_ORDER(new String[]{"自買單"}, new String[]{"self order","self-order"}, true),
 
     /**
      * UK转运中Seller为AP，需要直接寄到美国LA WareHouse的特定类型，仅用于多单一做场景，注意，这里无需进行US直寄也即切换到美国亚马逊做单的操作
