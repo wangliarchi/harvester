@@ -18,23 +18,28 @@ public class MainPanel extends JPanel {
 
     private void initComponents() {
 
+        runtimeSettingsPanel = RuntimeSettingsPanel.getInstance();
+        mainWindowPanel = TabbedBuyerPanel.getInstance();
+        progressLogsPanel = ProgressLogsPanel.getInstance();
+        progressLogsPanel.setMinimumSize(new Dimension(100,150));
+
         jSplitPane1 = new JSplitPane();
         jSplitPane2 = new JSplitPane();
 
         jSplitPane1.setDividerLocation(400);
         jSplitPane1.setDividerSize(5);
-        jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
-        jSplitPane1.setTopComponent(jSplitPane2);
+        jSplitPane1.setOrientation(JSplitPane.VERTICAL_SPLIT);
         jSplitPane1.setBorder(null);
-        runtimeSettingsPanel = RuntimeSettingsPanel.getInstance();
-        mainWindowPanel = TabbedBuyerPanel.getInstance();
-        progressLogsPanel = ProgressLogsPanel.getInstance();
+        jSplitPane2.setDividerSize(5);
+        jSplitPane2.setBorder(null);
 
+
+        jSplitPane1.setTopComponent(jSplitPane2);
         jSplitPane1.setBottomComponent(progressLogsPanel);
         jSplitPane2.setLeftComponent(mainWindowPanel);
         jSplitPane2.setRightComponent(runtimeSettingsPanel);
-        jSplitPane2.setDividerSize(5);
-        jSplitPane2.setBorder(null);
+
+
 
         javax.swing.GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);

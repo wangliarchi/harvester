@@ -184,7 +184,9 @@ public class OrderValidator {
     }
 
     public String basicInfoValidation(Order order) {
-        List<Validator> validators = Lists.newArrayList(Validator.AddressInfoValid, Validator.ValidZipCode, Validator.ItemInfoValid);
+        List<Validator> validators = Lists.newArrayList(
+                Validator.NotSelfOrder,
+                Validator.AddressInfoValid, Validator.ValidZipCode, Validator.ItemInfoValid);
         return validWithValidators(order, validators);
     }
 
