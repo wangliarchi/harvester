@@ -119,9 +119,10 @@ public class OrderValidator {
         return validWithValidators(order,
                 Validator.NotGrayOrder,
                 Validator.NotSelfOrder,
+                Validator.IsNotUKForward,
                 Validator.StatusIsInitial,
-                Validator.IsSupplierHunted,
-                Validator.IsNotUKForward
+                Validator.IsSupplierHunted
+
         );
 
     }
@@ -137,8 +138,8 @@ public class OrderValidator {
                 Validator.NotDuplicatedOrder,
                 Validator.NotGrayOrder,
                 Validator.NotSelfOrder,
-                Validator.IsSupplierHunted,
                 Validator.IsNotUKForward,
+                Validator.IsSupplierHunted,
                 Validator.StatusMarkedCorrectForSubmit,
                 Validator.HasValidBuyerAccount,
                 Validator.HasValidCreditCard,

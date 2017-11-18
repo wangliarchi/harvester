@@ -113,11 +113,10 @@ public class OrderSubmitter {
         //remove if not valid
         List<Order> validOrders = new ArrayList<>();
         for (Order order : orders) {
-            String error;
-            if (OrderCountryUtils.getFulfillementCountry(order) != Country.US || order.purchaseBack()) {
+            String error = orderValidator.isValid(order, FulfillmentEnum.Action.SubmitOrder);
+
+            if (StringUtils.isBlank(error) && (OrderCountryUtils.getFulfillementCountry(order) != Country.US || order.purchaseBack())) {
                 error = "Harvest can only support US marketplace at this moment. Sorry for inconvenience.";
-            } else {
-                error = orderValidator.isValid(order, FulfillmentEnum.Action.SubmitOrder);
             }
 
 
@@ -137,7 +136,7 @@ public class OrderSubmitter {
 
 
         if (OrderValidator.needCheck(OrderValidator.SkipValidation.ItemName)) {
-            List<ItemCompareResult> results = PreValidator.compareItemNames4Orders(orders);
+            List<ItemCompareResult> results = PreValidator.compareItemNames4Orders(validOrders);
             ItemCheckResultDialog dialog = UITools.setDialogAttr(new ItemCheckResultDialog(null, true, results));
 
             if (dialog.isValidReturn()) {
