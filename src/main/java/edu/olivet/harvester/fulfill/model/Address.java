@@ -87,15 +87,14 @@ public class Address {
     public Set<String> addressSet() {
         String a1 = cleanAddress(address1);
         String a2 = cleanAddress(address2);
-        return new HashSet<>(Arrays.asList((a1 + " " + a2).toUpperCase().trim(), (a2 + " " + a1).toUpperCase().trim()));
+        return new HashSet<>(Arrays.asList(a1 + " " + a2, a2 + " " + a1));
     }
 
 
     public String cleanAddress(String addr) {
         String a1 = addr.replaceAll(RegexUtils.Regex.PUNCTUATION.val(), StringUtils.EMPTY);
-        List<String> list = Arrays.asList(StringUtils.split(a1, " "));
-        list.removeIf(it->StringUtils.isBlank(it));
-        return StringUtils.join(list, " ");
+        a1 = a1.replaceAll(" ","");
+        return a1.toUpperCase();
     }
     @Override
     public int hashCode() {
