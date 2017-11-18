@@ -68,6 +68,7 @@ public class OfferListingPage extends FulfillmentPage {
             if (StringUtils.isNotBlank(result)) {
                 throw new BusinessException(result);
             }
+
         }
 
         LOGGER.info("Found seller {} for order {}", seller.getName(), order.order_id);

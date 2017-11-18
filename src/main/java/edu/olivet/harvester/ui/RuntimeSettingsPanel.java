@@ -590,7 +590,7 @@ public class RuntimeSettingsPanel extends JPanel {
         progressLabel.setText("Progress");
 
         progressTextLabel = new JLabel();
-        progressTextLabel.setText("");
+        progressTextLabel.setText("progress text placeholder");
         progressTextLabel.setForeground(Color.BLUE);
         progressTextLabel.setFont(new Font(font.getName(), Font.PLAIN, font.getSize() - 2));
 
@@ -601,14 +601,13 @@ public class RuntimeSettingsPanel extends JPanel {
         GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);
 
-        int fieldWidth = 180;
+        int fieldWidth = 200;
         int labelMinWidth = 100;
         layout.setHorizontalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(layout.createSequentialGroup()
                                 .addContainerGap()
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                                         .addGroup(layout.createSequentialGroup()
                                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                                         .addComponent(marketplaceLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
@@ -646,31 +645,33 @@ public class RuntimeSettingsPanel extends JPanel {
 
                                                 )
                                         )
-                                )
-                                .addContainerGap()
-                        ).addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
 
-                        .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(progressTextLabel)
+                                                .addGroup(layout.createSequentialGroup()
+                                                        .addContainerGap()
+                                                        .addComponent(progressTextLabel)
+                                                        .addContainerGap()
+                                                )
+                                                .addGroup(layout.createSequentialGroup()
+                                                        .addContainerGap()
+                                                        .addComponent(huntSupplierButton)
+                                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                        .addComponent(markStatusButton)
+                                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                        .addComponent(submitButton)
+                                                        .addContainerGap()
+                                                )
+                                                .addGroup(layout.createSequentialGroup()
+                                                        .addContainerGap()
+                                                        .addComponent(pauseButton)
+                                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                        .addComponent(stopButton)
+                                                        .addContainerGap()
+                                                ))
+                                )
+
                                 .addContainerGap()
                         )
-                        .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(huntSupplierButton)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(markStatusButton)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(submitButton)
-                                .addContainerGap()
-                        )
-                        .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(pauseButton)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(stopButton)
-                                .addContainerGap()
-                        ))
         );
 
         layout.setVerticalGroup(
@@ -760,9 +761,12 @@ public class RuntimeSettingsPanel extends JPanel {
         JFrame frame = new JFrame();
         frame.setTitle("Runtime Settings");
         frame.setSize(400, 580);
-        frame.getContentPane().add(new RuntimeSettingsPanel());
+        RuntimeSettingsPanel runtimeSettingsPanel = RuntimeSettingsPanel.getInstance();
+        frame.getContentPane().add(runtimeSettingsPanel);
         frame.setVisible(true);
+        runtimeSettingsPanel.showPauseBtn();
         ProgressUpdator.success();
+
     }
 
 }
