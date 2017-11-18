@@ -49,7 +49,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         RuntimeSettings settings = RuntimeSettings.load();
         float remainingBudget = ApplicationContext.getBean(DailyBudgetHelper.class).getRemainingBudget(settings.getSpreadsheetId(), new Date());
         if (remainingBudget < grandTotal.toUSDAmount().floatValue()) {
-            throw new BusinessException("You don't have enough fund to process this order. Need $" + grandTotal.toUSDAmount() + ", only have $" + remainingBudget);
+            throw new BusinessException("You don't have enough fund to process this order. Need $" + grandTotal.toUSDAmount() + ", only have $" + String.format("%.2f", remainingBudget));
         }
 
 

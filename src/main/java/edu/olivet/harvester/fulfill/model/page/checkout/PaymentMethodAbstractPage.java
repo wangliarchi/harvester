@@ -11,11 +11,9 @@ import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -41,28 +39,28 @@ public abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract 
         }
 
         List<DOMElement> cards = JXBrowserHelper.selectElementsByCssSelector(browser, ".payment-row");
-        List<String> cardEndingDigits = new ArrayList<>();
 
-        boolean creditCardSelected = false;
-        if (CollectionUtils.isNotEmpty(cards)) {
-            for (DOMElement paymentRow : cards) {
-                String lastDigits = JXBrowserHelper.selectElementByCssSelector(paymentRow, ".card-info").getInnerText().replaceAll(RegexUtils.Regex.NON_DIGITS.val(), "");
-                if (creditCard.getCardNo().endsWith(lastDigits)) {
+        if (CollectionUtils.isEmpty(cards)) {
+            throw new BusinessException("No credit card info fdound for buyer account " + buyer.getEmail());
+        }
 
-                    creditCardSelected = true;
-                    paymentRow.click();
-                    WaitTime.Shortest.execute();
-
-                    reenterCCNumber(paymentRow);
-                    break;
-                }
+        for (DOMElement paymentRow : cards) {
+            String lastDigits = JXBrowserHelper.selectElementByCssSelector(paymentRow, ".card-info").getInnerText().replaceAll(RegexUtils.Regex.NON_DIGITS.val(), "");
+            if (creditCard.getCardNo().endsWith(lastDigits)) {
+                paymentRow.click();
+                WaitTime.Shortest.execute();
+                //sometime amazon requires reenter cc number
+                reenterCCNumber(paymentRow);
+                //sometimes amazon requires reselect card currency.
+                selectCurrency(paymentRow);
+                return;
             }
         }
 
+
         //credit card not found
-        if (!creditCardSelected) {
-            throw new BusinessException(String.format("Credit card with no %s not found.", creditCard.getCardNo()));
-        }
+
+        throw new BusinessException(String.format("Credit card with no %s not found.", creditCard.getCardNo()));
 
 
     }
@@ -72,7 +70,7 @@ public abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract 
         //reenter credit card number
 
         DOMElement addrChalllenage = JXBrowserHelper.selectElementByCssSelector(paymentRow, ".addr-challenge");
-        if (addrChalllenage == null || StringUtils.containsIgnoreCase(addrChalllenage.getAttribute("style"), "none")) {
+        if (addrChalllenage == null || JXBrowserHelper.isHidden(addrChalllenage)) {
             return;
         }
 
@@ -89,11 +87,24 @@ public abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract 
             WaitTime.Shortest.execute();
 
             List<DOMElement> creditCardErrors = JXBrowserHelper.selectElementsByCssSelector(browser, "#cc-errors .error-message");
-            creditCardErrors.removeIf(it -> !JXBrowserHelper.isVisible(browser, "#" + it.getAttribute("id")));
+            creditCardErrors.removeIf(it -> JXBrowserHelper.isHidden(it));
+
             if (CollectionUtils.isNotEmpty(creditCardErrors)) {
                 throw new BusinessException(creditCardErrors.get(0).getInnerText());
             }
         }
+
+
+    }
+
+    public void selectCurrency(DOMElement paymentRow) {
+        DOMElement currencyList = JXBrowserHelper.selectElementByCssSelector(paymentRow, ".a-row.currency-list");
+        if (currencyList == null || JXBrowserHelper.isHidden(currencyList)) {
+            return;
+        }
+
+        DOMElement firstCurrency = JXBrowserHelper.selectElementByCssSelector(paymentRow, ".a-row.currency-list input.a-declarative");
+        firstCurrency.click();
 
 
     }

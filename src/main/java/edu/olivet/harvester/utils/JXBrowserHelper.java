@@ -345,7 +345,11 @@ public class JXBrowserHelper {
 
 
     public static boolean isVisible(DOMElement element) {
-        return !element.getBoundingClientRect().isEmpty();
+        return !isHidden(element);
+    }
+
+    public static boolean isHidden(DOMElement element) {
+        return element.getBoundingClientRect().isEmpty();
     }
 
     public static String text(DOMElement doc, String selector) {
