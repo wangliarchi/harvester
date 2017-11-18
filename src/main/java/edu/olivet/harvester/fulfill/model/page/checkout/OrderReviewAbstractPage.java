@@ -74,9 +74,11 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         enteredAddress.setState(state);
         enteredAddress.setZip(zip);
 
+        if (!StringUtils.equalsIgnoreCase(name, getBuyerPanel().getOrder().recipient_name)) {
+            throw new BusinessException("Recipient name entered is not correct. Origin " + buyerPanel.getOrder().recipient_name + ", entered " + name);
+        }
         if (!addressValidator.verify(Address.loadFromOrder(buyerPanel.getOrder()), enteredAddress)) {
-            LOGGER.error("Address failed review. Entered {}, origin {}", enteredAddress, Address.loadFromOrder(buyerPanel.getOrder()));
-            return false;
+            throw new BusinessException(String.format("Address failed review. Entered %s, origin %s", enteredAddress, Address.loadFromOrder(buyerPanel.getOrder())));
         }
 
         return true;

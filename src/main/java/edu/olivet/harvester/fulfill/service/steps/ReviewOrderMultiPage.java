@@ -7,7 +7,7 @@ import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.model.page.checkout.OrderReviewMultiPage;
 import edu.olivet.harvester.fulfill.model.page.checkout.PaymentMethodOnePage;
-import edu.olivet.harvester.fulfill.model.page.checkout.ShippingAddressOnePage;
+import edu.olivet.harvester.fulfill.model.page.checkout.ShippingAddressMultiPage;
 import edu.olivet.harvester.fulfill.service.addressvalidator.USPSAddressValidator;
 import edu.olivet.harvester.fulfill.service.flowfactory.FlowState;
 import edu.olivet.harvester.fulfill.service.flowfactory.Step;
@@ -48,22 +48,27 @@ public class ReviewOrderMultiPage extends Step {
 
 
     private void reviewAddress(FlowState state) {
+
+        String errorMsg = "";
         for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
             OrderReviewMultiPage orderReviewMultiPage = new OrderReviewMultiPage(state.getBuyerPanel());
-            if (!orderReviewMultiPage.reviewShippingAddress(uspsAddressValidator)) {
-                LOGGER.warn("Address did not pass verification. try to enter again.");
-                ShippingAddressOnePage shippingAddressOnePage = new ShippingAddressOnePage(state.getBuyerPanel());
-                shippingAddressOnePage.execute(state.getOrder());
-                WaitTime.Short.execute();
-
-
-            } else {
+            try {
+                orderReviewMultiPage.reviewShippingAddress(uspsAddressValidator);
                 LOGGER.info("Address passed review");
                 return;
+            } catch (Exception e) {
+                errorMsg = e.getMessage();
+                LOGGER.warn("", e.getMessage());
+                ShippingAddressMultiPage shippingAddressMultiPage = new ShippingAddressMultiPage(state.getBuyerPanel());
+                shippingAddressMultiPage.execute(state.getOrder());
+                WaitTime.Shortest.execute();
             }
+
         }
 
-        throw new BusinessException("Address did not pass verification. try to enter again.");
+        throw new BusinessException(errorMsg);
+
+
     }
 
     @Repeat

@@ -28,7 +28,7 @@ public class ReviewOrder extends Step {
     protected void process(FlowState state) {
         OrderReviewOnePage orderReviewOnePage = new OrderReviewOnePage(state.getBuyerPanel());
 
-        if(OrderValidator.needCheck(OrderValidator.SkipValidation.Address)) {
+        if (OrderValidator.needCheck(OrderValidator.SkipValidation.Address)) {
             reviewAddress(state);
         }
 
@@ -46,22 +46,26 @@ public class ReviewOrder extends Step {
 
     }
 
-
+    @Repeat
     private void reviewAddress(FlowState state) {
+        String errorMsg = "";
         for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
             OrderReviewOnePage orderReviewOnePage = new OrderReviewOnePage(state.getBuyerPanel());
-            if (!orderReviewOnePage.reviewShippingAddress(uspsAddressValidator)) {
-                LOGGER.warn("Address did not pass verification. try to enter again.");
+            try {
+                orderReviewOnePage.reviewShippingAddress(uspsAddressValidator);
+                LOGGER.info("Address passed review");
+                return;
+            } catch (Exception e) {
+                errorMsg = e.getMessage();
+                LOGGER.warn("", e.getMessage());
                 ShippingAddressOnePage shippingAddressOnePage = new ShippingAddressOnePage(state.getBuyerPanel());
                 shippingAddressOnePage.execute(state.getOrder());
                 WaitTime.Shortest.execute();
-            } else {
-                LOGGER.info("Address passed review");
-                return;
             }
+
         }
 
-        throw new BusinessException("Address did not pass verification. try to enter again.");
+        throw new BusinessException(errorMsg);
     }
 
     @Repeat
