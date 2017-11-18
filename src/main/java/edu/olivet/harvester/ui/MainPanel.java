@@ -26,7 +26,7 @@ public class MainPanel extends JPanel {
         jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
         jSplitPane1.setTopComponent(jSplitPane2);
         jSplitPane1.setBorder(null);
-        runtimeSettingsPanel = new RuntimeSettingsPanel();
+        runtimeSettingsPanel = RuntimeSettingsPanel.getInstance();
         mainWindowPanel = TabbedBuyerPanel.getInstance();
         progressLogsPanel = ProgressLogsPanel.getInstance();
 
@@ -60,7 +60,7 @@ public class MainPanel extends JPanel {
     public void initEventListeners() {
         this.addComponentListener(new ComponentListener() {
             public void componentResized(ComponentEvent e) {
-                jSplitPane1.setDividerLocation(Math.max(runtimeSettingsPanel.getPreferredSize().height,getHeight()-250));
+                jSplitPane1.setDividerLocation(Math.max(runtimeSettingsPanel.getPreferredSize().height + 40, getHeight() - 250));
                 jSplitPane2.setDividerLocation(getWidth() - runtimeSettingsPanel.getPreferredSize().width - 20);
                 mainWindowPanel.resetZoomLevel();
             }

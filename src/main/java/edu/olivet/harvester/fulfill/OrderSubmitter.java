@@ -13,15 +13,13 @@ import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.model.ItemCompareResult;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
-import edu.olivet.harvester.fulfill.service.MarkStatusService;
-import edu.olivet.harvester.fulfill.service.OrderFlowEngine;
-import edu.olivet.harvester.fulfill.service.PSEventListener;
-import edu.olivet.harvester.fulfill.service.SheetService;
+import edu.olivet.harvester.fulfill.service.*;
 import edu.olivet.harvester.fulfill.utils.*;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.service.OrderService;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.BuyerPanel;
+import edu.olivet.harvester.ui.RuntimeSettingsPanel;
 import edu.olivet.harvester.ui.TabbedBuyerPanel;
 import edu.olivet.harvester.ui.dialog.ItemCheckResultDialog;
 import edu.olivet.harvester.utils.MessageListener;
@@ -142,7 +140,7 @@ public class OrderSubmitter {
             if (dialog.isValidReturn()) {
                 List<ItemCompareResult> sync = dialog.getIsbn2Sync();
                 sync.forEach(it -> {
-                    if(it.isManualCheckPass() == false ) {
+                    if (it.isManualCheckPass() == false) {
                         messageListener.addMsg(it.getOrder(), "Failed item name check. " + it.getPreCheckReport(), InformationLevel.Negative);
                         validOrders.remove(it.getOrder());
                     }
@@ -168,10 +166,11 @@ public class OrderSubmitter {
         LOGGER.info(resultSummary);
         messageListener.addMsg(resultSummary, validOrders.size() > 0 ? InformationLevel.Information : InformationLevel.Negative);
 
-
+        ProgressUpdator.init(validOrders);
         for (Order order : validOrders) {
             //if stop btn clicked, break the process
             if (PSEventListener.stopped()) {
+                ProgressUpdator.stopped();
                 break;
             }
 
@@ -182,7 +181,10 @@ public class OrderSubmitter {
                 TabbedBuyerPanel.getInstance().highlight(buyerPanel);
 
                 submit(order, buyerPanel);
+
+
             } catch (Exception e) {
+
                 LOGGER.error("Error submit order {}", order.order_id, e);
                 messageListener.addMsg(order, e.getMessage(), InformationLevel.Negative);
             }
@@ -213,14 +215,16 @@ public class OrderSubmitter {
             if (StringUtils.isNotBlank(order.order_number)) {
                 messageListener.addMsg(order, "order fulfilled successfully. took " + Strings.formatElapsedTime(start));
             }
+
+            ProgressUpdator.success();
         } catch (Exception e) {
             LOGGER.error("Error submit order {}", order.order_id, e);
-
+            ProgressUpdator.failed();
             Pattern pattern = Pattern.compile(Pattern.quote("xception:"));
             String[] parts = pattern.split(e.getMessage());
             String msg = parts[parts.length - 1].trim();
 
-            messageListener.addMsg(order, msg, InformationLevel.Negative);
+            messageListener.addMsg(order, msg + " - took " + Strings.formatElapsedTime(start), InformationLevel.Negative);
             sheetService.fillUnsuccessfulMsg(spreadsheetId, order, msg);
         }
 

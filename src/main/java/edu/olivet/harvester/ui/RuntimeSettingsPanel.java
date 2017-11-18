@@ -10,6 +10,7 @@ import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.model.AdvancedSubmitSetting;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
+import edu.olivet.harvester.fulfill.service.ProgressUpdator;
 import edu.olivet.harvester.fulfill.utils.OrderValidator;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.spreadsheet.Worksheet;
@@ -42,7 +43,17 @@ public class RuntimeSettingsPanel extends JPanel {
     private Worksheet selectedWorksheet;
     private RuntimeSettings settings;
 
-    public RuntimeSettingsPanel() {
+    private static RuntimeSettingsPanel instance;
+
+    public static RuntimeSettingsPanel getInstance() {
+        if(instance==null) {
+            instance = new RuntimeSettingsPanel();
+        }
+
+        return instance;
+    }
+
+    private RuntimeSettingsPanel() {
         initComponents();
         initData();
         initEvents();
@@ -274,6 +285,10 @@ public class RuntimeSettingsPanel extends JPanel {
         markStatusButton.setVisible(false);
         submitButton.setVisible(false);
 
+        progressTextLabel.setVisible(true);
+        progressLabel.setVisible(true);
+        progressBar.setVisible(true);
+
     }
 
     public void hidePauseBtn() {
@@ -282,6 +297,10 @@ public class RuntimeSettingsPanel extends JPanel {
         huntSupplierButton.setVisible(true);
         markStatusButton.setVisible(true);
         submitButton.setVisible(true);
+
+        progressTextLabel.setVisible(false);
+        progressLabel.setVisible(false);
+        progressBar.setVisible(false);
     }
 
     public void paused() {
@@ -485,6 +504,10 @@ public class RuntimeSettingsPanel extends JPanel {
     private JLabel skipCheckLabel;
     private JComboBox<OrderValidator.SkipValidation> skipCheckComboBox;
 
+    private JLabel progressLabel;
+    public JProgressBar progressBar;
+    public JLabel progressTextLabel;
+
     private void initComponents() {
         setBorder(BorderFactory.createTitledBorder(BorderFactory.createTitledBorder("Runtime Settings")));
 
@@ -562,6 +585,17 @@ public class RuntimeSettingsPanel extends JPanel {
             skipCheckComboBox.setFont(new Font(font.getName(), Font.BOLD, font.getSize() - 1));
         }
 
+
+        progressBar = new JProgressBar();
+        progressBar.setStringPainted(true);
+        progressLabel = new JLabel();
+        progressLabel.setText("Progress");
+
+        progressTextLabel = new JLabel();
+        progressTextLabel.setText("");
+        progressTextLabel.setForeground(Color.BLUE);
+        progressTextLabel.setFont(new Font(font.getName(), Font.PLAIN, font.getSize() - 2));
+
         GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);
 
@@ -587,6 +621,7 @@ public class RuntimeSettingsPanel extends JPanel {
                                                         .addComponent(noInvoiceLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                         .addComponent(codeFinderLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                         .addComponent(skipCheckLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(progressLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                 )
                                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                                         .addComponent(marketplaceComboBox, labelMinWidth, fieldWidth, fieldWidth)
@@ -596,20 +631,28 @@ public class RuntimeSettingsPanel extends JPanel {
                                                         .addComponent(googleSheetTextField, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addGroup(layout.createSequentialGroup()
                                                                 .addComponent(selectRangeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                                                 .addComponent(selectedRangeLabel)
-                                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                                         .addComponent(lostLimitComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(priceLimitComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(maxDaysOverEddComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(noInvoiceTextField, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(finderCodeTextField, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(skipCheckComboBox, labelMinWidth, fieldWidth, fieldWidth)
+                                                        .addComponent(progressBar, labelMinWidth, fieldWidth, fieldWidth)
+
                                                 )
                                         )
                                 )
                                 .addContainerGap()
                         ).addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+
+                        .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(progressTextLabel)
+                                .addContainerGap()
+                        )
                         .addGroup(layout.createSequentialGroup()
                                 .addContainerGap()
                                 .addComponent(huntSupplierButton)
@@ -687,9 +730,19 @@ public class RuntimeSettingsPanel extends JPanel {
                                         .addComponent(huntSupplierButton)
                                         .addComponent(markStatusButton)
                                         .addComponent(submitButton))
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(progressLabel)
+                                        .addComponent(progressBar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(progressTextLabel))
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                         .addComponent(pauseButton)
-                                        .addComponent(stopButton)))
+                                        .addComponent(stopButton))
+                                .addContainerGap()
+
+                        )
         );
 
 
@@ -707,6 +760,7 @@ public class RuntimeSettingsPanel extends JPanel {
         frame.setSize(400, 580);
         frame.getContentPane().add(new RuntimeSettingsPanel());
         frame.setVisible(true);
+        ProgressUpdator.success();
     }
 
 }

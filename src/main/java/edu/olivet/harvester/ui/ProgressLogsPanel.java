@@ -11,10 +11,13 @@ import org.apache.commons.lang3.SystemUtils;
 import javax.swing.*;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultCaret;
 import javax.swing.text.Document;
 import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+
+import static javax.swing.text.DefaultCaret.ALWAYS_UPDATE;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/6/17 7:32 PM
@@ -48,6 +51,8 @@ public class ProgressLogsPanel extends JPanel implements MessagePanel {
         jScrollPane2 = new JScrollPane();
         failedRecordsTextPanel = new JTextPane();
 
+
+
         jScrollPane1.setBorder(BorderFactory.createTitledBorder("Success Records"));
         successRecordsTextPanel.setEditable(false);
         jScrollPane1.setViewportView(successRecordsTextPanel);
@@ -55,6 +60,8 @@ public class ProgressLogsPanel extends JPanel implements MessagePanel {
         jScrollPane2.setBorder(BorderFactory.createTitledBorder("Failed Records"));
         failedRecordsTextPanel.setEditable(false);
         jScrollPane2.setViewportView(failedRecordsTextPanel);
+
+
 
 
         jSplitPane1.setDividerLocation(0.5);
@@ -145,6 +152,7 @@ public class ProgressLogsPanel extends JPanel implements MessagePanel {
             // -> Ignore
         }
 
-        textArea.select(textArea.getHeight() + 100, 0);
+        textArea.setCaretPosition(textArea.getDocument().getLength());
+
     }
 }

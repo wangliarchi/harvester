@@ -29,11 +29,11 @@ public class UIHarvester extends AbstractApplicationUI {
     @SuppressWarnings("FieldCanBeLocal")
     private JTextPane statusPane;
 
+    private static final String APP_TITLE = "Harvester: Automated Order Fulfillment - %s";
 
     public UIHarvester() {
         this.initComponents();
         UIElements.getInstance().registerListener(new ActionController(this, UIElements.getInstance()));
-        this.settings = Settings.load();
     }
 
 
@@ -44,7 +44,7 @@ public class UIHarvester extends AbstractApplicationUI {
         //maximized by default
         setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-        this.setTitle("Harvester: Automated Order Fulfillment");
+        this.setTitle(String.format(APP_TITLE,Settings.load().getSid()));
         UITools.setIcon(this, "harvester.png");
 
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -66,8 +66,6 @@ public class UIHarvester extends AbstractApplicationUI {
         statusPane = new JTextPane();
         statusPane.setEditable(false);
 
-
-        //JLabel icon = new JLabel(UITools.getIcon("harvester.jpg"));
         JPanel mainPanel = new MainPanel();
         GroupLayout layout = new GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -123,15 +121,13 @@ public class UIHarvester extends AbstractApplicationUI {
     }
 
 
-    private Settings settings;
-
     @Inject
     SettingEvent settingEvent;
 
     @UIEvent
     public void settings() {
         settingEvent.excute();
-
+        this.setTitle(String.format(APP_TITLE,Settings.load().getSid()));
     }
 
 
