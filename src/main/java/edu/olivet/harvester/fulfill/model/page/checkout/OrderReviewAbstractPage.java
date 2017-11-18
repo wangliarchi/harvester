@@ -28,7 +28,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderReviewAbstractPage.class);
 
-    public OrderReviewAbstractPage(BuyerPanel buyerPanel) {
+    OrderReviewAbstractPage(BuyerPanel buyerPanel) {
         super(buyerPanel);
     }
 
@@ -56,7 +56,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
     }
 
 
-    public boolean reviewShippingAddress(AddressValidator addressValidator) {
+    public void reviewShippingAddress(AddressValidator addressValidator) {
         String name = JXBrowserHelper.text(browser, ".displayAddressUL .displayAddressFullName");
         String addressLine1 = JXBrowserHelper.text(browser, ".displayAddressUL .displayAddressAddressLine1");
         String addressLine2 = JXBrowserHelper.text(browser, ".displayAddressUL .displayAddressAddressLine2");
@@ -74,14 +74,13 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         enteredAddress.setState(state);
         enteredAddress.setZip(zip);
 
-        if (!StringUtils.equalsIgnoreCase(name, getBuyerPanel().getOrder().recipient_name)) {
+        if (!StringUtils.equalsIgnoreCase(name.replace(RuntimeSettings.load().getNoInvoiceText(),""), getBuyerPanel().getOrder().recipient_name)) {
             throw new BusinessException("Recipient name entered is not correct. Origin " + buyerPanel.getOrder().recipient_name + ", entered " + name);
         }
         if (!addressValidator.verify(Address.loadFromOrder(buyerPanel.getOrder()), enteredAddress)) {
             throw new BusinessException(String.format("Address failed review. Entered %s, origin %s", enteredAddress, Address.loadFromOrder(buyerPanel.getOrder())));
         }
 
-        return true;
     }
 
 
