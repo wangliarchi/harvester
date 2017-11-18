@@ -158,21 +158,21 @@ public class USPSAddressValidator implements AddressValidator {
 
         // Entered Address(address1=10248 PRINCE PL APT T1, address2=, city=UPPER MARLBORO, state=MD, zip=20774-1220, zip5=20774, zip4=1220, country=United States),
         //origin Address(address1=10248 Prince Place, address2=T1, city=Upper Marlboro, state=MD, zip=20774, zip5=20774, zip4=, country=United States)
-
+        //3142 W George St C3, address2=, city=Chicago, state=IL, zip=60618, zip5=60618, zip4=, country=United States
         Address address = new Address();
-        address.setAddress1("10248 Prince Place");
-        address.setAddress2("T1");
-        address.setCity("Upper Marlboro");
-        address.setState("MD");
-        address.setZip("20774");
+        address.setAddress1("3142 W George St C3");
+        address.setAddress2("");
+        address.setCity("Chicago");
+        address.setState("Illinois");
+        address.setZip("60618");
         address.setCountry("United States");
 
         Address enteredAddress = new Address();
-        enteredAddress.setAddress1("10248 PRINCE PL APT T1");
+        enteredAddress.setAddress1("3142 W GEORGE ST C3");
         enteredAddress.setAddress2("");
-        enteredAddress.setCity("UPPER MARLBORO");
-        enteredAddress.setState("MD");
-        enteredAddress.setZip("20774-1220");
+        enteredAddress.setCity("CHICAGO");
+        enteredAddress.setState("IL");
+        enteredAddress.setZip("60618-7626");
         enteredAddress.setCountry("United States");
 
         System.out.println(validator.verify(address, enteredAddress));

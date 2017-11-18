@@ -1,12 +1,14 @@
 package edu.olivet.harvester.fulfill.model;
 
 import com.google.common.base.Objects;
+import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.harvester.model.Order;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -63,20 +65,18 @@ public class Address {
             return false;
         }
         Address address = (Address) o;
-        Set<String> addressSet = new HashSet<>(Arrays.asList((address1 +" "+address2).toUpperCase().trim(),(address2 +" "+address1).toUpperCase().trim()));
-        Set<String> oAddressSet = new HashSet<>(Arrays.asList((address.address1 +" "+address.address2).toUpperCase().trim(),(address.address2 +" "+address.address1).toUpperCase().trim()));
+        Set<String> addressSet = addressSet();
+        Set<String> oAddressSet = address.addressSet();
 
         boolean sameAddressLines = false;
-        for(String a : addressSet) {
-            if(oAddressSet.contains(a)) {
+        for (String a : addressSet) {
+            if (oAddressSet.contains(a)) {
                 sameAddressLines = true;
                 break;
             }
-
         }
 
-//        boolean cityE = StringUtils.equalsIgnoreCase(city, address.getCity());
-//        boolean ze = StringUtils.equalsIgnoreCase(getZip5(), address.getZip5());
+        //todo State full and abbr
         return sameAddressLines &&
                 //StringUtils.equalsIgnoreCase(city, address.getCity()) &&
                 StringUtils.equalsIgnoreCase(state, address.getState()) &&
@@ -84,9 +84,22 @@ public class Address {
                 StringUtils.equalsIgnoreCase(getZip5(), address.getZip5());
     }
 
+    public Set<String> addressSet() {
+        String a1 = cleanAddress(address1);
+        String a2 = cleanAddress(address2);
+        return new HashSet<>(Arrays.asList((a1 + " " + a2).toUpperCase().trim(), (a2 + " " + a1).toUpperCase().trim()));
+    }
+
+
+    public String cleanAddress(String addr) {
+        String a1 = addr.replaceAll(RegexUtils.Regex.PUNCTUATION.val(), StringUtils.EMPTY);
+        List<String> list = Arrays.asList(StringUtils.split(a1, " "));
+        list.removeIf(it->StringUtils.isBlank(it));
+        return StringUtils.join(list, " ");
+    }
     @Override
     public int hashCode() {
-        return Objects.hashCode(city,state,city,getZip(),address1,address2);
+        return Objects.hashCode(city, state, city, getZip(), address1, address2);
     }
 
 }
