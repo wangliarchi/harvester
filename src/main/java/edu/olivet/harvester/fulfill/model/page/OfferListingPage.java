@@ -11,6 +11,7 @@ import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.model.Seller;
 import edu.olivet.harvester.fulfill.model.SellerEnums;
 import edu.olivet.harvester.fulfill.service.SellerService;
+import edu.olivet.harvester.fulfill.utils.ConditionUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.fulfill.utils.OrderValidator;
 import edu.olivet.harvester.model.Order;
@@ -92,7 +93,8 @@ public class OfferListingPage extends FulfillmentPage {
                     (seller.getType() == SellerEnums.SellerType.AP && order.sellerIsAP()) ||
                     (seller.getType() == SellerEnums.SellerType.APWareHouse && order.sellerIsAPWarehouse());
 
-            if (sellerEq && order.condition.equalsIgnoreCase(seller.getCondition())) {
+            //ConditionUtils
+            if (sellerEq && ConditionUtils.goodToGo(order.condition, seller.getCondition())) {
                 return seller;
             }
         }
