@@ -53,14 +53,22 @@ public class USPSAddressValidator implements AddressValidator {
 
     }
 
+    @Repeat
     public Address getCorrectedAddress(Address address) {
         String xmlRequest = addressToXMLRequest(address);
         String endpoint = USPS_ADDRESS_VRF_ENDPOINT + Strings.encode(xmlRequest);
         String response = get(endpoint);
-        System.out.println(response);
+        LOGGER.info(response);
+        if (StringUtils.contains(response, "The address you entered was found but more information is needed")) {
+            address.setAddress2("APT " + address.getAddress2());
+            throw new BusinessException("The address you entered was found but more information is needed. " + response);
+        }
+
 
         Address correctedAddress = parseResponse(response);
         correctedAddress.setCountry(address.getCountry());
+
+
         return correctedAddress;
     }
 
@@ -141,27 +149,30 @@ public class USPSAddressValidator implements AddressValidator {
 
         return String.format(request,
                 USERNAME,
-                address.getAddress1(), address.getAddress2(), address.getCity(),
-                countryStateUtils.getUSStateAbbr(address.getState()), address.getZip4(), address.getZip5());
+                address.getAddress2(), address.getAddress1(), address.getCity(),
+                countryStateUtils.getUSStateAbbr(address.getState()), address.getZip5(), address.getZip4());
     }
 
     public static void main(String[] args) {
         USPSAddressValidator validator = ApplicationContext.getBean(USPSAddressValidator.class);
 
+        // Entered Address(address1=10248 PRINCE PL APT T1, address2=, city=UPPER MARLBORO, state=MD, zip=20774-1220, zip5=20774, zip4=1220, country=United States),
+        //origin Address(address1=10248 Prince Place, address2=T1, city=Upper Marlboro, state=MD, zip=20774, zip5=20774, zip4=, country=United States)
+
         Address address = new Address();
-        address.setAddress1("#25A");
-        address.setAddress2("1211 E. Denny Way");
-        address.setCity("Seattle");
-        address.setState("WA");
-        address.setZip("98122");
+        address.setAddress1("10248 Prince Place");
+        address.setAddress2("T1");
+        address.setCity("Upper Marlboro");
+        address.setState("MD");
+        address.setZip("20774");
         address.setCountry("United States");
 
         Address enteredAddress = new Address();
-        enteredAddress.setAddress1("1211 E DENNY WAY # 25A");
+        enteredAddress.setAddress1("10248 PRINCE PL APT T1");
         enteredAddress.setAddress2("");
-        enteredAddress.setCity("SEATTLE");
-        enteredAddress.setState("WA");
-        enteredAddress.setZip("98122-2516");
+        enteredAddress.setCity("UPPER MARLBORO");
+        enteredAddress.setState("MD");
+        enteredAddress.setZip("20774-1220");
         enteredAddress.setCountry("United States");
 
         System.out.println(validator.verify(address, enteredAddress));

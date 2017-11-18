@@ -63,8 +63,8 @@ public class Address {
             return false;
         }
         Address address = (Address) o;
-        Set<String> addressSet = new HashSet<>(Arrays.asList((address1 +" "+address2).trim(),(address2 +" "+address1).trim()));
-        Set<String> oAddressSet = new HashSet<>(Arrays.asList((address.address1 +" "+address.address2).trim(),(address.address2 +" "+address.address1).trim()));
+        Set<String> addressSet = new HashSet<>(Arrays.asList((address1 +" "+address2).toUpperCase().trim(),(address2 +" "+address1).toUpperCase().trim()));
+        Set<String> oAddressSet = new HashSet<>(Arrays.asList((address.address1 +" "+address.address2).toUpperCase().trim(),(address.address2 +" "+address.address1).toUpperCase().trim()));
 
         boolean sameAddressLines = false;
         for(String a : addressSet) {
@@ -75,11 +75,13 @@ public class Address {
 
         }
 
-        return Objects.equal(city, address.getCity()) &&
-                Objects.equal(state, address.getState()) &&
-                Objects.equal(country, address.getCountry()) &&
-                Objects.equal(getZip(), address.getZip()) &&
-                sameAddressLines;
+//        boolean cityE = StringUtils.equalsIgnoreCase(city, address.getCity());
+//        boolean ze = StringUtils.equalsIgnoreCase(getZip5(), address.getZip5());
+        return sameAddressLines &&
+                //StringUtils.equalsIgnoreCase(city, address.getCity()) &&
+                StringUtils.equalsIgnoreCase(state, address.getState()) &&
+                StringUtils.equalsIgnoreCase(country, address.getCountry()) &&
+                StringUtils.equalsIgnoreCase(getZip5(), address.getZip5());
     }
 
     @Override
