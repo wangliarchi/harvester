@@ -109,7 +109,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
 
         try {
             WaitTime.Long.execute();
-            String verificationCode = LoginVerificationService.readVerificationCodeFromGmail(buyer.getEmail());
+            String verificationCode = LoginVerificationService.readVerificationCodeFromGmail(buyer);
             JXBrowserHelper.fillValueForFormField(browser, ".cvf-widget-input.cvf-widget-input-code", verificationCode);
             WaitTime.Short.execute();
         } catch (Exception e) {
