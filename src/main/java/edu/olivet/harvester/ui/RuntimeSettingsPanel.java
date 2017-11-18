@@ -70,7 +70,7 @@ public class RuntimeSettingsPanel extends JPanel {
 
         marketplaceComboBox.setModel(new DefaultComboBoxModel<>(countries.toArray(new Country[countries.size()])));
         if (settings.getMarketplaceName() == null) {
-            assert ((Country) marketplaceComboBox.getSelectedItem()) != null;
+            assert marketplaceComboBox.getSelectedItem() != null;
             settings.setMarketplaceName(((Country) marketplaceComboBox.getSelectedItem()).name());
         } else {
             marketplaceComboBox.setSelectedItem(Country.valueOf(settings.getMarketplaceName()));
@@ -298,9 +298,7 @@ public class RuntimeSettingsPanel extends JPanel {
         markStatusButton.setVisible(true);
         submitButton.setVisible(true);
 
-        progressTextLabel.setVisible(false);
-        progressLabel.setVisible(false);
-        progressBar.setVisible(false);
+
     }
 
     public void paused() {
@@ -595,6 +593,10 @@ public class RuntimeSettingsPanel extends JPanel {
         progressTextLabel.setText("");
         progressTextLabel.setForeground(Color.BLUE);
         progressTextLabel.setFont(new Font(font.getName(), Font.PLAIN, font.getSize() - 2));
+
+        progressTextLabel.setVisible(false);
+        progressLabel.setVisible(false);
+        progressBar.setVisible(false);
 
         GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);

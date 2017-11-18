@@ -38,7 +38,7 @@ public class ProgressUpdator {
     private static void update() {
         int total = successCount + failedCount;
         progressBar.setValue(total);
-        progressTextLabel.setText(String.format("%d of %d. %d success, %d failed, took %s", total, progressBar.getMaximum(), successCount, failedCount, Strings.formatElapsedTime(start)));
+        progressTextLabel.setText(String.format("%d ofgot %d. %d success, %d failed, took %s", total, progressBar.getMaximum(), successCount, failedCount, Strings.formatElapsedTime(start)));
     }
 
     public static void stopped() {
