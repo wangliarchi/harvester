@@ -53,7 +53,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
     public boolean isLoggedIn() {
 
         //let the browser go to order history page
-        JXBrowserHelper.loadPage(browser, country.baseUrl() + "/" + AmazonPage.OrderList.urlMark());
+        JXBrowserHelper.loadPage(browser, country.baseUrl() + "/" + AmazonPage.CanceledOrderList.urlMark());
 
         DOMElement email = JXBrowserHelper.selectElementByCssSelector(browser, EMAIL_SELECTOR);
 
