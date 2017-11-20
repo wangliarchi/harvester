@@ -11,6 +11,7 @@ import edu.olivet.harvester.fulfill.model.AdvancedSubmitSetting;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.service.ProgressUpdator;
+import edu.olivet.harvester.fulfill.utils.DailyBudgetHelper;
 import edu.olivet.harvester.fulfill.utils.OrderValidator;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.spreadsheet.Worksheet;
@@ -31,7 +32,9 @@ import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -46,7 +49,7 @@ public class RuntimeSettingsPanel extends JPanel {
     private static RuntimeSettingsPanel instance;
 
     public static RuntimeSettingsPanel getInstance() {
-        if(instance==null) {
+        if (instance == null) {
             instance = new RuntimeSettingsPanel();
         }
 
@@ -121,6 +124,9 @@ public class RuntimeSettingsPanel extends JPanel {
             skipCheckComboBox.setSelectedItem(settings.getSkipValidation());
         }
 
+        Map<String, Float> budgets = ApplicationContext.getBean(DailyBudgetHelper.class).getData(settings.getSpreadsheetId(), new Date());
+        todayBudgetTextField.setText(budgets.get("budget").toString());
+        todayUsedTextField.setText(budgets.get("cost").toString());
         settings.save();
     }
 
@@ -198,6 +204,14 @@ public class RuntimeSettingsPanel extends JPanel {
 
                 settings.setSkipValidation((OrderValidator.SkipValidation) e.getItem());
                 settings.save();
+            }
+        });
+
+        finderCodeTextField.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseExited(MouseEvent e) {
+                Float budget = Float.parseFloat(todayBudgetTextField.getText());
+                ApplicationContext.getBean(DailyBudgetHelper.class).updateBudget(settings.getSpreadsheetId(),new Date(),budget);
             }
         });
 
@@ -506,6 +520,10 @@ public class RuntimeSettingsPanel extends JPanel {
     public JProgressBar progressBar;
     public JLabel progressTextLabel;
 
+    private JLabel todayBudgetLabel;
+    private JTextField todayBudgetTextField;
+    public JTextField todayUsedTextField;
+
     private void initComponents() {
         setBorder(BorderFactory.createTitledBorder(BorderFactory.createTitledBorder("Runtime Settings")));
 
@@ -598,6 +616,15 @@ public class RuntimeSettingsPanel extends JPanel {
         progressLabel.setVisible(false);
         progressBar.setVisible(false);
 
+
+        todayBudgetLabel = new JLabel();
+        todayBudgetLabel.setText("Today's Budget");
+        JLabel todayUsedLabel = new JLabel();
+        todayUsedLabel.setText("Used");
+        todayBudgetTextField = new JTextField();
+        todayUsedTextField = new JTextField();
+        todayUsedTextField.setEnabled(false);
+
         GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);
 
@@ -622,7 +649,9 @@ public class RuntimeSettingsPanel extends JPanel {
                                                         .addComponent(noInvoiceLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                         .addComponent(codeFinderLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                         .addComponent(skipCheckLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(todayBudgetLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                         .addComponent(progressLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+
                                                 )
                                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                                         .addComponent(marketplaceComboBox, labelMinWidth, fieldWidth, fieldWidth)
@@ -641,6 +670,13 @@ public class RuntimeSettingsPanel extends JPanel {
                                                         .addComponent(noInvoiceTextField, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(finderCodeTextField, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(skipCheckComboBox, labelMinWidth, fieldWidth, fieldWidth)
+                                                        .addGroup(layout.createSequentialGroup()
+                                                                .addComponent(todayBudgetTextField)
+                                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(todayUsedLabel)
+                                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(todayUsedTextField)
+                                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED))
                                                         .addComponent(progressBar, labelMinWidth, fieldWidth, fieldWidth)
 
                                                 )
@@ -727,6 +763,13 @@ public class RuntimeSettingsPanel extends JPanel {
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(skipCheckLabel)
                                         .addComponent(skipCheckComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(todayBudgetLabel)
+                                        .addComponent(todayBudgetTextField)
+                                        .addComponent(todayUsedLabel)
+                                        .addComponent(todayUsedTextField)
+                                )
 
                                 .addGap(10, 10, 10)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)

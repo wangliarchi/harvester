@@ -125,6 +125,7 @@ public class SelectRangeDialog extends BaseDialog {
     }
 
     private void switchRadioBtn() {
+
         if (allBtn.isSelected()) {
             singleTxt.setEnabled(false);
             startRowNo.setEnabled(false);
@@ -154,11 +155,11 @@ public class SelectRangeDialog extends BaseDialog {
         singleTxt.setEnabled(false);
         startRowNo.setEnabled(false);
 
-
         endRowNo.setEnabled(false);
         multiRowsTxt.setEnabled(true);
         limitCountTxt.setEnabled(false);
     }
+
     private void enableSingMode() {
         singleTxt.setEnabled(true);
         startRowNo.setEnabled(false);
@@ -166,6 +167,7 @@ public class SelectRangeDialog extends BaseDialog {
         multiRowsTxt.setEnabled(false);
         limitCountTxt.setEnabled(false);
     }
+
     private void initComponents() {
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
@@ -384,9 +386,9 @@ public class SelectRangeDialog extends BaseDialog {
         limitCountTxt.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (!limitCountTxt.isEnabled()) {
-                    limitCountTxt.setEnabled(true);
                     limitCountBtn.setSelected(true);
                     switchRadioBtn();
+                    limitCountTxt.requestFocus();
                 }
             }
         });
@@ -398,9 +400,9 @@ public class SelectRangeDialog extends BaseDialog {
         singleTxt.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (!singleTxt.isEnabled()) {
-                    singleTxt.setEnabled(true);
                     singleBtn.setSelected(true);
                     switchRadioBtn();
+                    singleTxt.requestFocus();
                 }
             }
         });
@@ -416,20 +418,18 @@ public class SelectRangeDialog extends BaseDialog {
         startRowNo.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (!startRowNo.isEnabled()) {
-                    startRowNo.setEnabled(true);
-                    endRowNo.setEnabled(true);
                     scopeBtn.setSelected(true);
                     switchRadioBtn();
+                    startRowNo.requestFocus();
                 }
             }
         });
         endRowNo.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (!endRowNo.isEnabled()) {
-                    startRowNo.setEnabled(true);
-                    endRowNo.setEnabled(true);
                     scopeBtn.setSelected(true);
                     switchRadioBtn();
+                    endRowNo.requestFocus();
                 }
             }
         });
@@ -442,9 +442,9 @@ public class SelectRangeDialog extends BaseDialog {
         multiRowsTxt.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (!multiRowsTxt.isEnabled()) {
-                    multiRowsTxt.setEnabled(true);
                     multiBtn.setSelected(true);
                     switchRadioBtn();
+                    multiRowsTxt.requestFocus();
                 }
             }
         });
