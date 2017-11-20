@@ -18,6 +18,8 @@ public class ProgressUpdator {
     static long start;
 
     public static void init(List<Order> orders) {
+        successCount = 0;
+        failedCount = 0;
         progressBar.setMinimum(0);
         progressBar.setMaximum(orders.size());
         progressBar.setValue(0);
