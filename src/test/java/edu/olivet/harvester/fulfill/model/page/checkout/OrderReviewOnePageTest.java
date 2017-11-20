@@ -45,11 +45,12 @@ public class OrderReviewOnePageTest extends BaseTest {
     OrderService orderService;
     List<Order> orders;
     Map<String, List<Order>> orderMap;
+    BuyerPanel buyerPanel;
     File[] directories;
 
     public void prepareData() {
         Account buyer = new Account("jxiang@olivetuniversity.edu/q1w2e3AA", Account.AccountType.Buyer);
-        BuyerPanel buyerPanel = new BuyerPanel(0, Country.US, buyer, 1);
+        buyerPanel = new BuyerPanel(0, Country.US, buyer, 1);
         orderReviewOnePage = new OrderReviewOnePage(buyerPanel);
         browser = buyerPanel.getBrowserView().getBrowser();
 
@@ -84,6 +85,7 @@ public class OrderReviewOnePageTest extends BaseTest {
                 String orderId = RegexUtils.getMatched(file.getName(), RegexUtils.Regex.AMAZON_ORDER_NUMBER);
                 if (orderMap.containsKey(orderId)) {
                     Order order = orderMap.get(orderId).get(0);
+                    buyerPanel.setOrder(order);
                     browser.loadHTML(Tools.readFileToString(file));
                     WaitTime.Short.execute();
                     Address address = orderReviewOnePage.parseEnteredAddress();

@@ -75,7 +75,7 @@ public class JXBrowserHelper {
 
     public static void saveHTMLSourceFile(Browser browser) {
         String title = browser.getTitle().replaceAll(" ", "");
-        title = RegexUtils.getMatched(title, "[A-Za-z-]");
+        title = title.replaceAll(RegexUtils.Regex.NON_ALPHA_LETTER_DIGIT.val(), "");
         String filePath = Directory.WebPage.path() + "/specials/" + System.currentTimeMillis() + title + ".html";
         saveHTMLSourceFile(filePath, browser);
     }
@@ -93,7 +93,7 @@ public class JXBrowserHelper {
     public static void saveOrderScreenshot(Order order, BuyerPanel buyerPanel, String step) {
 
         String title = buyerPanel.getBrowserView().getBrowser().getTitle().replaceAll(" ", "");
-        title = RegexUtils.getMatched(title, "[A-Za-z-]");
+        title = title.replaceAll(RegexUtils.Regex.NON_ALPHA_LETTER_DIGIT.val(), "");
         String filePath = Directory.WebPage.path() + "/orders/" + order.sheetName.replaceAll("/", "") + "/" + order.row + "_" + order.order_id + "/images/" + step + "-" + title + ".png";
         saveScreenshot(filePath, buyerPanel.getBrowserView());
 
@@ -407,6 +407,10 @@ public class JXBrowserHelper {
     }
 
     public static void main(String[] args) {
+        String title = "https://www.amazon.com/MAIRICO-Premium-Kitchen-Purpose-Scissors/dp/B01HEPY216/ref=br_msw_pdt-2/131-7729985-1997618?_encoding=UTF8&smid=AXMKZ0APSAWJU&pf_rd_m=ATVPDKIKX0DER&pf_rd_s=&pf_rd_r=V563FE5ZVK4QCH3FVHQ0&pf_rd_t=36701&pf_rd_p=3c84e109-52be-4449-91bb-95cb9b9b2a9f&pf_rd_i=desktop";
+        title = title.replaceAll(RegexUtils.Regex.NON_ALPHA_LETTER_DIGIT.val(), "");
+        System.out.println(title);
+
         Tools.switchLogMode(Configs.LogMode.Development);
         JFrame frame = new JFrame("Prototype of Harvester Web");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
