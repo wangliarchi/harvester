@@ -126,9 +126,7 @@ public class OrderSubmitter {
         }
 
         if (CollectionUtils.isEmpty(validOrders)) {
-            LOGGER.info("No valid orders to submit.");
-            UITools.error("No valid orders to be submitted. See failed record log for more detail.");
-            messageListener.addMsg("No valid orders to be submited.");
+            _noOrders();
             return;
         }
 
@@ -148,16 +146,14 @@ public class OrderSubmitter {
             }
 
             if (CollectionUtils.isEmpty(validOrders)) {
-                LOGGER.info("No valid orders to submit.");
-                UITools.error("No valid orders to be submitted. See failed record log for more detail.");
-                messageListener.addMsg("No valid orders to be submited.");
+                _noOrders();
                 return;
             }
         }
 
-        if (!UITools.confirmed(UIText.message("message.info.statusupdated", validOrders.size(), Strings.formatElapsedTime(start)))) {
-            return;
-        }
+//        if (!UITools.confirmed(UIText.message("message.info.statusupdated", validOrders.size(), Strings.formatElapsedTime(start)))) {
+//            return;
+//        }
 
         //inform event listener.
         PSEventListener.start();
@@ -184,7 +180,6 @@ public class OrderSubmitter {
 
 
             } catch (Exception e) {
-
                 LOGGER.error("Error submit order {}", order.order_id, e);
                 messageListener.addMsg(order, e.getMessage(), InformationLevel.Negative);
             }
@@ -230,6 +225,11 @@ public class OrderSubmitter {
 
     }
 
+    public void _noOrders() {
+        LOGGER.info("No valid orders to submit.");
+        UITools.error("No valid orders to be submitted. See failed record log for more detail.");
+        messageListener.addMsg("No valid orders to be submitted.");
+    }
     public static void main(String[] args) {
         UITools.setTheme();
 
