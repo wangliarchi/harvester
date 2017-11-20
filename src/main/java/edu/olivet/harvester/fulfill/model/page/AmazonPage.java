@@ -32,6 +32,7 @@ public enum AmazonPage {
     OrderNumber("buy/thankyou"),
     OrderList("gp/css/order-history"),
     CanceledOrderList("gp/your-account/order-history/ref=oh_aui_menu_cancelled?ie=UTF8&orderFilter=cancelled"),
+    DigitalOrderList("gp/your-account/order-history?digitalOrders=1&unifiedOrders=0"),
     /**
      * 在亚马逊第一次采购Prime Seller货品时，会在支付页面之后弹出是否升级为Prime买家的提示
      */

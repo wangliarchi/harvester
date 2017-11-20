@@ -5,7 +5,10 @@ import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.model.ShippingOption;
+import edu.olivet.harvester.fulfill.utils.OrderValidator.SkipValidation;
+import edu.olivet.harvester.fulfill.utils.OrderValidator.Validator;
 import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.model.Remark;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.Comparator;
@@ -23,9 +26,12 @@ public class ShipOptionUtils {
         Date orderEdd = order.latestEdd();
         int maxDays = IntegerUtils.parseInt(RuntimeSettings.load().getEddLimit(), 7);
         List<ShippingOption> validShippingOptions = shippingOptions.stream().filter(it -> {
+            if(OrderValidator.skipCheck(SkipValidation.EDD) || Remark.isDN(order.remark)) {
+                return true;
+            }
             Date latestDate = it.getLatestDeliveryDate();
             int days = Dates.daysBetween(latestDate, orderEdd);
-            return latestDate.before(orderEdd) || Math.abs(Dates.daysBetween(latestDate, orderEdd)) <= maxDays;
+            return latestDate.before(orderEdd) || Math.abs(days) <= maxDays;
         }).collect(Collectors.toList());
 
 

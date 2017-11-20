@@ -620,6 +620,16 @@ public enum Remark {
         return ArrayUtils.contains(GRAY_REMARKS, converted);
     }
 
+    public static boolean isDN(String remark) {
+        if (StringUtils.isBlank(remark)) {
+            return false;
+        }
+
+        if(remark.contains("dn")) {
+            return true;
+        }
+        return false;
+    }
     public static void main(String[] args) {
         for (Country country : Country.values()) {
             if (country.ordinal() >= Country.JP.ordinal()) {

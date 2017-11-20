@@ -75,6 +75,7 @@ public class OrderValidator {
         Address("label.skip.address"),
         //RefundMultiCheck("label.skip.multirefund"),
         //OperationSuccessCheck("label.skip.opersuccess"),
+        EDD("Skip EDD Check"),
         All("label.skip.all");
 
         private String label;
