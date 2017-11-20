@@ -32,15 +32,10 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         super(buyerPanel);
     }
 
+
     public void checkTotalCost(Order order) {
-        String grandTotalText = JXBrowserHelper.text(browser, "#subtotals-marketplace-table .grand-total-price");
-        Money grandTotal;
-        try {
-            grandTotal = Money.fromText(grandTotalText, buyerPanel.getCountry());
-        } catch (Exception e) {
-            LOGGER.error("Error reading grand total. ", e);
-            throw new BusinessException("Can read grand total - " + e.getMessage());
-        }
+
+        Money grandTotal = parseTotal();
 
         if (!ProfitLostControl.canPlaceOrder(order, grandTotal.toUSDAmount().floatValue())) {
             throw new BusinessException("Order cost exceed maximum limit.");
@@ -56,27 +51,52 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
     }
 
 
-    public void reviewShippingAddress(AddressValidator addressValidator) {
-        String name = JXBrowserHelper.text(browser, ".displayAddressUL .displayAddressFullName");
-        String addressLine1 = JXBrowserHelper.text(browser, ".displayAddressUL .displayAddressAddressLine1");
-        String addressLine2 = JXBrowserHelper.text(browser, ".displayAddressUL .displayAddressAddressLine2");
-        String cityStateZip = JXBrowserHelper.text(browser, ".displayAddressUL .displayAddressCityStateOrRegionPostalCode");
-        String[] parts = StringUtils.split(cityStateZip, ",");
-        String city = parts[0].trim();
-        String[] regionZip = StringUtils.split(parts[1].trim(), " ");
-        String zip = regionZip[regionZip.length - 1];
-        String state = StringUtils.join(Arrays.copyOf(regionZip, regionZip.length - 1), " ");
-
-        Address enteredAddress = new Address();
-        enteredAddress.setAddress1(addressLine1);
-        enteredAddress.setAddress2(addressLine2);
-        enteredAddress.setCity(city);
-        enteredAddress.setState(state);
-        enteredAddress.setZip(zip);
-
-        if (!StringUtils.equalsIgnoreCase(name.replace(RuntimeSettings.load().getNoInvoiceText(),""), getBuyerPanel().getOrder().recipient_name)) {
-            throw new BusinessException("Recipient name entered is not correct. Origin " + buyerPanel.getOrder().recipient_name + ", entered " + name);
+    public Money parseTotal() {
+        String grandTotalText = JXBrowserHelper.text(browser, "#subtotals-marketplace-table .grand-total-price");
+        Money grandTotal;
+        try {
+            grandTotal = Money.fromText(grandTotalText, buyerPanel.getCountry());
+        } catch (Exception e) {
+            LOGGER.error("Error reading grand total. ", e);
+            throw new BusinessException("Can read grand total - " + e.getMessage());
         }
+
+        return grandTotal;
+    }
+
+    public Address parseEnteredAddress() {
+        try {
+            String name = JXBrowserHelper.text(browser, ".displayAddressUL .displayAddressFullName");
+            String addressLine1 = JXBrowserHelper.text(browser, ".displayAddressUL .displayAddressAddressLine1");
+            String addressLine2 = JXBrowserHelper.text(browser, ".displayAddressUL .displayAddressAddressLine2");
+            String cityStateZip = JXBrowserHelper.text(browser, ".displayAddressUL .displayAddressCityStateOrRegionPostalCode");
+            String[] parts = StringUtils.split(cityStateZip, ",");
+            String city = parts[0].trim();
+            String[] regionZip = StringUtils.split(parts[1].trim(), " ");
+            String zip = regionZip[regionZip.length - 1];
+            String state = StringUtils.join(Arrays.copyOf(regionZip, regionZip.length - 1), " ");
+
+            Address enteredAddress = new Address();
+            enteredAddress.setName(name.replace(RuntimeSettings.load().getNoInvoiceText(), ""));
+            enteredAddress.setAddress1(addressLine1);
+            enteredAddress.setAddress2(addressLine2);
+            enteredAddress.setCity(city);
+            enteredAddress.setState(state);
+            enteredAddress.setZip(zip);
+
+            return enteredAddress;
+
+        } catch (Exception e) {
+
+            throw new BusinessException("Error parse shipping address for " + buyerPanel.getOrder().order_id);
+        }
+
+
+    }
+
+    public void reviewShippingAddress(AddressValidator addressValidator) {
+        Address enteredAddress = parseEnteredAddress();
+
         if (!addressValidator.verify(Address.loadFromOrder(buyerPanel.getOrder()), enteredAddress)) {
             throw new BusinessException(String.format("Address failed review. Entered %s, origin %s", enteredAddress, Address.loadFromOrder(buyerPanel.getOrder())));
         }

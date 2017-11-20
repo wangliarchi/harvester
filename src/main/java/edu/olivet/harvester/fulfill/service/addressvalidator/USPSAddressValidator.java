@@ -8,6 +8,7 @@ import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
+import edu.olivet.harvester.message.ErrorAlertService;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.nutz.lang.Lang;
@@ -35,19 +36,38 @@ public class USPSAddressValidator implements AddressValidator {
     @Inject
     CountryStateUtils countryStateUtils;
 
+    @Inject
+    ErrorAlertService errorAlertService;
+
     public boolean verify(Address old, Address entered) {
+
+        if (!StringUtils.equalsAnyIgnoreCase(old.getCountry().toLowerCase(), "us", "united states")) {
+            throw new BusinessException("USPS address validation can only work for US addresses");
+        }
+
         if (StringUtils.isBlank(entered.getCountry())) {
             entered.setCountry(old.getCountry());
         }
 
+
         if (old.equals(entered)) {
             return true;
         }
+
+
         try {
             Address corrected = getCorrectedAddress(old);
-            return corrected.equals(entered);
+            boolean result = corrected.equals(entered);
+
+            //log error if failed
+            if (result == false) {
+                LOGGER.error("Address failed verification. Entered " + entered + ", original " + old + ", USPS returned " + corrected);
+                errorAlertService.sendMessage("Address failed verification", "Entered\n " + entered + "\n\n Original\n " + old + "\n\nUSPS returned\n" + corrected);
+            }
+
+            return result;
         } catch (Exception e) {
-            LOGGER.error("", e);
+            LOGGER.error("{}",old, e);
         }
         return false;
 
@@ -58,7 +78,7 @@ public class USPSAddressValidator implements AddressValidator {
         String xmlRequest = addressToXMLRequest(address);
         String endpoint = USPS_ADDRESS_VRF_ENDPOINT + Strings.encode(xmlRequest);
         String response = get(endpoint);
-        LOGGER.info(response);
+        //LOGGER.info(response);
         if (StringUtils.contains(response, "The address you entered was found but more information is needed")) {
             address.setAddress2("APT " + address.getAddress2());
             throw new BusinessException("The address you entered was found but more information is needed. " + response);
@@ -66,6 +86,7 @@ public class USPSAddressValidator implements AddressValidator {
 
 
         Address correctedAddress = parseResponse(response);
+        correctedAddress.setName(address.getName());
         correctedAddress.setCountry(address.getCountry());
 
 
@@ -160,19 +181,19 @@ public class USPSAddressValidator implements AddressValidator {
         //origin Address(address1=10248 Prince Place, address2=T1, city=Upper Marlboro, state=MD, zip=20774, zip5=20774, zip4=, country=United States)
         //3142 W George St C3, address2=, city=Chicago, state=IL, zip=60618, zip5=60618, zip4=, country=United States
         Address address = new Address();
-        address.setAddress1("3142 W George St C3");
+        address.setAddress1("7852 WEST 600 NORTH");
         address.setAddress2("");
-        address.setCity("Chicago");
-        address.setState("Illinois");
-        address.setZip("60618");
+        address.setCity("PETERSBORO");
+        address.setState("UT");
+        address.setZip("84325");
         address.setCountry("United States");
 
         Address enteredAddress = new Address();
-        enteredAddress.setAddress1("3142 W GEORGE ST C3");
+        enteredAddress.setAddress1("7852 W 600 N");
         enteredAddress.setAddress2("");
-        enteredAddress.setCity("CHICAGO");
-        enteredAddress.setState("IL");
-        enteredAddress.setZip("60618-7626");
+        enteredAddress.setCity("MENDON");
+        enteredAddress.setState("UT");
+        enteredAddress.setZip("84325-9706");
         enteredAddress.setCountry("United States");
 
         System.out.println(validator.verify(address, enteredAddress));

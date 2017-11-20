@@ -3,27 +3,31 @@ package edu.olivet.harvester.fulfill.model;
 import com.google.common.base.Objects;
 import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.harvester.model.Order;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/13/17 8:54 AM
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Address {
+    private String name;
     private String address1;
     private String address2 = "";
     private String city;
     private String state;
     private String zip = "";
+    private String country;
     private String zip5 = "";
     private String zip4 = "";
-    private String country;
 
 
     public void setZip(String zip) {
@@ -52,6 +56,7 @@ public class Address {
         address.setAddress1(order.ship_address_1);
         address.setAddress2(order.ship_address_2);
         address.setZip(order.ship_zip);
+        address.setName(order.recipient_name);
         return address;
     }
 
@@ -65,6 +70,13 @@ public class Address {
             return false;
         }
         Address address = (Address) o;
+
+
+        //check recipient name first
+        if (!StringUtils.equalsIgnoreCase(getRecipient(), address.getRecipient())) {
+            return false;
+        }
+
         Set<String> addressSet = addressSet();
         Set<String> oAddressSet = address.addressSet();
 
@@ -84,21 +96,32 @@ public class Address {
                 StringUtils.equalsIgnoreCase(getZip5(), address.getZip5());
     }
 
+
+    public String getRecipient() {
+        return name.replaceAll(RegexUtils.Regex.PUNCTUATION.val(), "").replaceAll(" ", "");
+    }
+
     public Set<String> addressSet() {
         String a1 = cleanAddress(address1);
         String a2 = cleanAddress(address2);
-        return new HashSet<>(Arrays.asList(a1 + " " + a2, a2 + " " + a1));
+        return new HashSet<>(Arrays.asList(a1 + "" + a2, a2 + "" + a1));
     }
 
 
     public String cleanAddress(String addr) {
         String a1 = addr.replaceAll(RegexUtils.Regex.PUNCTUATION.val(), StringUtils.EMPTY);
-        a1 = a1.replaceAll(" ","");
+        a1 = a1.replaceAll(" ", "");
         return a1.toUpperCase();
     }
+
     @Override
     public int hashCode() {
-        return Objects.hashCode(city, state, city, getZip(), address1, address2);
+        return Objects.hashCode(name, city, state, city, getZip(), address1, address2);
+    }
+
+    @Override
+    public String toString() {
+        return name + (StringUtils.isNotBlank(address1) ? ", " + address1 : "") + (StringUtils.isNotBlank(address2) ? ", " + address2 : "") + ", " + city + ", " + state + " " + getZip() + ", " + country;
     }
 
 }
