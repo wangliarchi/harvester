@@ -48,7 +48,10 @@ public class StepHelper {
 
     @Inject
     CantShipToAddress cantShipToAddress;
-    @Inject AmazonPrimeAd amazonPrimeAd;
+    @Inject
+    AmazonPrimeAd amazonPrimeAd;
+    @Inject
+    AfterOrderPlaced afterOrderPlaced;
 
     public Step detectStep(FlowState state) {
 
@@ -111,6 +114,8 @@ public class StepHelper {
 
             case AmazonPrimeAdAfterPlaceOrderBtnClicked:
                 return amazonPrimeAd;
+            case OrderPlacedSuccessPage:
+                return afterOrderPlaced;
             default:
                 return null;
 
