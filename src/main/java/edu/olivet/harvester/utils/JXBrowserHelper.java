@@ -91,14 +91,17 @@ public class JXBrowserHelper {
 
 
     public static void saveOrderScreenshot(Order order, BuyerPanel buyerPanel, String step) {
+        try {
+            String title = buyerPanel.getBrowserView().getBrowser().getTitle().replaceAll(" ", "");
+            title = title.replaceAll(RegexUtils.Regex.NON_ALPHA_LETTER_DIGIT.val(), "");
+            String filePath = Directory.WebPage.path() + "/orders/" + order.sheetName.replaceAll("/", "") + "/" + order.row + "_" + order.order_id + "/images/" + step + "-" + title + ".png";
+            saveScreenshot(filePath, buyerPanel.getBrowserView());
 
-        String title = buyerPanel.getBrowserView().getBrowser().getTitle().replaceAll(" ", "");
-        title = title.replaceAll(RegexUtils.Regex.NON_ALPHA_LETTER_DIGIT.val(), "");
-        String filePath = Directory.WebPage.path() + "/orders/" + order.sheetName.replaceAll("/", "") + "/" + order.row + "_" + order.order_id + "/images/" + step + "-" + title + ".png";
-        saveScreenshot(filePath, buyerPanel.getBrowserView());
-
-        String htmlFilePath = filePath.replaceAll(".png", ".html").replaceAll("/images/", "/html/");
-        saveHTMLSourceFile(htmlFilePath, buyerPanel.getBrowserView().getBrowser());
+            String htmlFilePath = filePath.replaceAll(".png", ".html").replaceAll("/images/", "/html/");
+            saveHTMLSourceFile(htmlFilePath, buyerPanel.getBrowserView().getBrowser());
+        } catch (Exception e) {
+            LOGGER.error("尝试保存HTML文件失败：", e);
+        }
 
     }
 
@@ -162,8 +165,8 @@ public class JXBrowserHelper {
 
         int timeConsumed = 0;
         while (true) {
-
-            if (!isVisible(browser, selector)) {
+            DOMElement element = selectElementByCssSelector(browser, selector);
+            if (element == null || isHidden(element)) {
                 WaitTime.Shortest.execute();
                 timeConsumed += WaitTime.Shortest.val();
 

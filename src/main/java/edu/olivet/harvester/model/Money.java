@@ -73,7 +73,7 @@ public class Money {
 
 
     public String toString() {
-        return currency.getSymbol() + amount.toString();
+        return currency.getSymbol() + rounded(amount).toString();
     }
 
     public String usdText() {

@@ -1,6 +1,8 @@
 package edu.olivet.harvester.fulfill.model.page.checkout;
 
 import com.teamdev.jxbrowser.chromium.dom.By;
+import edu.olivet.foundations.aop.Repeat;
+import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.harvester.fulfill.model.page.FulfillmentPage;
 import edu.olivet.harvester.model.Money;
@@ -21,16 +23,20 @@ public class PlacedOrderDetailPage extends FulfillmentPage {
     }
 
     @Override
+    @Repeat
     public void execute(Order order) {
-        JXBrowserHelper.wait(browser, By.cssSelector("#orderDetails"));
-        JXBrowserHelper.saveOrderScreenshot(order,buyerPanel,"1");
         try {
+            JXBrowserHelper.wait(browser, By.cssSelector("#orderDetails"));
+            JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
             order.order_number = parseOrderId();
             order.cost = parseTotalCost();
             order.last_code = parseLastCode();
             order.account = buyer.getEmail();
         } catch (Exception e) {
             LOGGER.error("Error parse data on order detail page", e);
+            //reload page
+            JXBrowserHelper.loadPage(browser, String.format("%s/gp/css/summary/edit.html/ref=typ_rev_edit?ie=UTF8&orderID=%s", buyerPanel.getCountry().baseUrl(), order.order_number));
+            throw new BusinessException(e);
         }
     }
 

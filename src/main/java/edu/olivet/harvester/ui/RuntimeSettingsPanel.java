@@ -133,6 +133,9 @@ public class RuntimeSettingsPanel extends JPanel {
             Map<String, Float> budgets = ApplicationContext.getBean(DailyBudgetHelper.class).getData(settings.getSpreadsheetId(), new Date());
             todayBudgetTextField.setText(budgets.get("budget").toString());
             todayUsedTextField.setText(budgets.get("cost").toString());
+            todayBudgetTextField.setEnabled(true);
+        } else {
+            todayBudgetTextField.setEnabled(false);
         }
     }
     public void initEvents() {

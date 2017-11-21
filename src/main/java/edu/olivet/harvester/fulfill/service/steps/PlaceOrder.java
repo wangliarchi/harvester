@@ -17,11 +17,9 @@ import org.slf4j.LoggerFactory;
 public class PlaceOrder extends Step {
     private static final Logger LOGGER = LoggerFactory.getLogger(PlaceOrder.class);
 
-
-    @Inject
-    StepHelper stepHelper;
     @Inject
     MessageListener messageListener;
+
     //dispatcher method
     protected void process(FlowState state) {
 
@@ -38,9 +36,9 @@ public class PlaceOrder extends Step {
     }
 
     @Inject
-    AfterOrderPlaced afterOrderPlaced;
+    StepHelper stepHelper;
 
     public Step createDynamicInstance(FlowState state) {
-        return afterOrderPlaced;
+        return stepHelper.detectStep(state);
     }
 }

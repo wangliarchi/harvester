@@ -4,7 +4,6 @@ import com.teamdev.jxbrowser.chromium.dom.By;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.foundations.utils.WaitTime;
-import edu.olivet.harvester.fulfill.model.ShippingOption;
 import edu.olivet.harvester.fulfill.model.page.AmazonPage;
 import edu.olivet.harvester.fulfill.utils.OrderBuyerUtils;
 import edu.olivet.harvester.fulfill.utils.ShipOptionUtils;
@@ -18,7 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,7 +32,7 @@ public class OrderReviewMultiPage extends OrderReviewAbstractPage {
     }
 
     public void execute(Order order) {
-
+        //placeholder
     }
 
     public void changeShippingAddress() {
@@ -53,25 +51,7 @@ public class OrderReviewMultiPage extends OrderReviewAbstractPage {
         //get all available options
         JXBrowserHelper.saveOrderScreenshot(buyerPanel.getOrder(), buyerPanel, "1");
 
-        List<DOMElement> options = JXBrowserHelper.selectElementsByCssSelector(browser, ".shipping-speed.ship-option");
-
-        List<ShippingOption> shippingOptions = new ArrayList<>();
-        for (DOMElement option : options) {
-            String eddText = JXBrowserHelper.selectElementByCssSelector(option, ".a-color-success").getInnerText().trim();
-            String priceText = JXBrowserHelper.selectElementByCssSelector(option, ".a-color-secondary").getInnerText().trim();
-            ShippingOption shippingOption = new ShippingOption(eddText, priceText, buyerPanel.getCountry());
-            shippingOptions.add(shippingOption);
-        }
-
-        JXBrowserHelper.saveOrderScreenshot(buyerPanel.getOrder(), buyerPanel, "1");
-        List<ShippingOption> validShippingOptions = ShipOptionUtils.getValidateOptions(buyerPanel.getOrder(), shippingOptions);
-
-        for (DOMElement option : options) {
-            String eddText = JXBrowserHelper.selectElementByCssSelector(option, ".a-color-success").getInnerText().trim();
-            if (eddText.equals(validShippingOptions.get(0).getEstimatedDeliveryDate())) {
-                option.click();
-            }
-        }
+        ShipOptionUtils.selectShipOption(buyerPanel);
 
         JXBrowserHelper.saveOrderScreenshot(buyerPanel.getOrder(), buyerPanel, "2");
 

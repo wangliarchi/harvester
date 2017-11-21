@@ -13,6 +13,7 @@ import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.ui.ConfigurationPanel;
 import edu.olivet.harvester.ui.Harvester;
+import edu.olivet.harvester.ui.RuntimeSettingsPanel;
 import edu.olivet.harvester.utils.Migration;
 import edu.olivet.harvester.utils.SettingValidator;
 import edu.olivet.harvester.utils.Settings;
@@ -248,6 +249,8 @@ public class SettingsDialog extends BaseDialog {
         Tools.writeStringToFile(file, JSON.toJSONString(this.settings, true));
         //clear cache
 
+        //update info on runtime settings panel
+        RuntimeSettingsPanel.getInstance().setAccounts4Country();
 
         //UITools.info(String.format("Congratulations! Harvester configuration successfully saved into%n%s", file.getAbsolutePath()));
         UITools.info("Configuration has been saved successfully.");

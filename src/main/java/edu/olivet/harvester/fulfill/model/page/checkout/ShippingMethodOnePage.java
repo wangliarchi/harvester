@@ -2,7 +2,6 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.utils.WaitTime;
-import edu.olivet.harvester.fulfill.model.ShippingOption;
 import edu.olivet.harvester.fulfill.utils.ShipOptionUtils;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.spreadsheet.service.OrderHelper;
@@ -13,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,24 +29,9 @@ public class ShippingMethodOnePage extends ShippingAddressAbstract {
 
     public void execute(Order order) {
         //get all available options
-        List<DOMElement> options = JXBrowserHelper.selectElementsByCssSelector(browser, ".shipping-speed.ship-option");
-        List<ShippingOption> shippingOptions = new ArrayList<>();
-        for (DOMElement option : options) {
-            String eddText = JXBrowserHelper.selectElementByCssSelector(option, ".a-color-success.a-text-bold").getInnerText();
-            String priceText = JXBrowserHelper.selectElementByCssSelector(option, ".a-color-secondary").getInnerText();
-            ShippingOption shippingOption = new ShippingOption(eddText, priceText, buyerPanel.getCountry());
-            shippingOptions.add(shippingOption);
-        }
-
         JXBrowserHelper.saveOrderScreenshot(buyerPanel.getOrder(), buyerPanel, "1");
-        List<ShippingOption> validShippingOptions = ShipOptionUtils.getValidateOptions(buyerPanel.getOrder(), shippingOptions);
 
-        for (DOMElement option : options) {
-            String eddText = JXBrowserHelper.selectElementByCssSelector(option, ".a-color-success").getInnerText().trim();
-            if (eddText.equals(validShippingOptions.get(0).getEstimatedDeliveryDate())) {
-                option.click();
-            }
-        }
+        ShipOptionUtils.selectShipOption(buyerPanel);
 
         JXBrowserHelper.saveOrderScreenshot(buyerPanel.getOrder(), buyerPanel, "2");
         //remove long edd?
@@ -87,7 +70,6 @@ public class ShippingMethodOnePage extends ShippingAddressAbstract {
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
 
     }
-
 
 
 }

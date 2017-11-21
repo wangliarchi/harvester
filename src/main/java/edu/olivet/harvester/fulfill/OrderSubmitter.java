@@ -19,7 +19,6 @@ import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.service.OrderService;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.BuyerPanel;
-import edu.olivet.harvester.ui.RuntimeSettingsPanel;
 import edu.olivet.harvester.ui.TabbedBuyerPanel;
 import edu.olivet.harvester.ui.dialog.ItemCheckResultDialog;
 import edu.olivet.harvester.utils.MessageListener;
@@ -113,7 +112,7 @@ public class OrderSubmitter {
         for (Order order : orders) {
             String error = orderValidator.isValid(order, FulfillmentEnum.Action.SubmitOrder);
 
-            if (StringUtils.isBlank(error) && (OrderCountryUtils.getFulfillementCountry(order) != Country.US || order.purchaseBack())) {
+            if (StringUtils.isBlank(error) && (OrderCountryUtils.getFulfillementCountry(order) != Country.US)) {
                 error = "Harvest can only support US marketplace at this moment. Sorry for inconvenience.";
             }
 

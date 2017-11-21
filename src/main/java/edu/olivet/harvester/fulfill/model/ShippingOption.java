@@ -30,13 +30,29 @@ public class ShippingOption {
     Date latestDeliveryDate;
     String title;
     Money price;
+    Date now;
 
 
-    public ShippingOption(String eddText, String priceText, Country country) {
+    public ShippingOption(String eddText, String priceText, Country country, Date today) {
+        now = today;
         estimatedDeliveryDate = eddText;
         title = priceText;
         latestDeliveryDate = parseEDD(eddText, country);
         price = parsePrice(priceText, country);
+
+    }
+
+    public ShippingOption(String eddText, String priceText, Country country) {
+        this(eddText, priceText, country, new Date());
+    }
+
+
+    public boolean isExpedited() {
+        if (now == null) {
+            now = new Date();
+        }
+        int days = Dates.daysBetween(now, latestDeliveryDate);
+        return days <= 10 || (StringUtils.containsAny(title, "Priority", "Expedited", "Two-Day"));
     }
 
     public BigDecimal getPriceAmount() {
@@ -89,9 +105,12 @@ public class ShippingOption {
                 String daysString = dateString.replaceAll(RegexUtils.Regex.NON_DIGITS.val(), "");
                 int days = IntegerUtils.parseInt(daysString, 1);
 
-                Date date = new Date();
+                if (now == null) {
+                    now = new Date();
+                }
+
                 Calendar calendar = Calendar.getInstance();
-                calendar.setTime(date);
+                calendar.setTime(now);
                 for (int i = 0; i <= days; ) {
                     calendar.add(Calendar.DAY_OF_MONTH, 1);
                     //here even sat and sun are added
@@ -103,7 +122,7 @@ public class ShippingOption {
 
                 }
 
-                date = calendar.getTime();
+                Date date = calendar.getTime();
                 return date;
             } catch (Exception e) {
                 //
@@ -114,12 +133,7 @@ public class ShippingOption {
     }
 
     public static void main(String[] args) {
-        ShippingOption shippingOption = new ShippingOption("Friday, Nov. 17 - Monday, Jan. 27", "$3.99 - Standard Shipping", Country.US);
-        System.out.println(shippingOption.parseEDD("averages 9-12 business days ", Country.US));
-        System.out.println(shippingOption.parseEDD("Friday, Nov. 17 - Monday, Jan. 27", Country.US));
-        System.out.println(shippingOption.parseEDD("Monday, Nov. 13", Country.US));
-        System.out.println(shippingOption.parsePrice("FREE Two-Day Shipping", Country.US));
-        System.out.println(shippingOption.parsePrice("$3.99 - Standard Shipping", Country.US));
+
         //
     }
 

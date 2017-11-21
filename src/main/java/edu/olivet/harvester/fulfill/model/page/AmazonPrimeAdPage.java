@@ -16,8 +16,20 @@ public class AmazonPrimeAdPage extends FulfillmentPage implements PageObject {
 
     @Override
     public void execute(Order order) {
+
         DOMElement noLink = JXBrowserHelper.selectElementByCssSelector(browser, "#mom-no-thanks");
-        noLink.click();
-        JXBrowserHelper.waitUntilNewPageLoaded(browser);
+        if (noLink != null && JXBrowserHelper.isVisible(noLink)) {
+            noLink.click();
+            JXBrowserHelper.waitUntilNewPageLoaded(browser);
+            return;
+        }
+
+        noLink = JXBrowserHelper.selectElementByCssSelector(browser, ".prime-popover-actions button.primary");
+        if (noLink != null && JXBrowserHelper.isVisible(noLink)) {
+            noLink.click();
+            JXBrowserHelper.waitUntilNewPageLoaded(browser);
+        }
+
+
     }
 }
