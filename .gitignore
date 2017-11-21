@@ -3,3 +3,20 @@
 /harvester.iml
 /.idea
 /document/harvester
+Harvester Updater.exe
+Harvester.exe
+lib/deps/
+lib/harvester.jar
+src/.DS_Store
+src/main/java/edu/olivet/harvester/fulfill/model/page/checkout/.DS_Store
+src/main/resources/.DS_Store
+src/test/.DS_Store
+src/test/resources/.DS_Store
+src/test/resources/data4test/.DS_Store
+src/test/resources/data4test/pages/.DS_Store
+src/test/resources/data4test/pages/720US2017-11-10/.DS_Store
+src/test/resources/data4test/pages/720US2017-11-15/.DS_Store
+src/test/resources/data4test/pages/720US2017-11-16/.DS_Store
+src/test/resources/data4test/pages/720US2017-11-17/.DS_Store
+src/test/resources/data4test/pages/720US2017-11-8/.DS_Store
+src/test/resources/data4test/pages/720US2017-11-9/.DS_Store
