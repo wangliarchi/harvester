@@ -3,14 +3,10 @@ package edu.olivet.harvester.fulfill.service;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-import com.sun.org.apache.xpath.internal.operations.Or;
 import edu.olivet.foundations.utils.BusinessException;
-import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.utils.OrderStatusUtils;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.service.OrderService;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
-import edu.olivet.harvester.spreadsheet.service.OrderHelper;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -147,14 +143,13 @@ public class SheetService extends SheetAPI {
 
     public int locateOrder(Order order) {
         //id, sku, seller, price, remark
-        RuntimeSettings settings = RuntimeSettings.load();
-        List<Order> orders = appScript.readOrders(settings);
+        List<Order> orders = appScript.readOrders(order.spreadsheetId,order.sheetName);
         for(Order o : orders) {
             if(order.equalsLite(o)) {
                 return o.row;
             }
         }
-        throw new BusinessException("Cant find order on order " + order + " sheet");
+        throw new BusinessException("Cant find order " + order + "on order sheet");
     }
 
 

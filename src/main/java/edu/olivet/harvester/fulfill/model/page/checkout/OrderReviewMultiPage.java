@@ -13,7 +13,6 @@ import edu.olivet.harvester.spreadsheet.service.OrderHelper;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +81,7 @@ public class OrderReviewMultiPage extends OrderReviewAbstractPage {
 
             //check errors
             List<DOMElement> errors = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-row.update-quantity-error .error-message");
-            errors.removeIf(it -> StringUtils.containsIgnoreCase(it.getAttribute("style"), "none"));
+            errors.removeIf(it -> JXBrowserHelper.isHidden(it));
             if (CollectionUtils.isNotEmpty(errors)) {
                 LOGGER.error("Error updating qty - {}", errors.stream().map(DOMElement::getInnerText).collect(Collectors.toSet()));
             }
