@@ -124,12 +124,17 @@ public class RuntimeSettingsPanel extends JPanel {
             skipCheckComboBox.setSelectedItem(settings.getSkipValidation());
         }
 
-        Map<String, Float> budgets = ApplicationContext.getBean(DailyBudgetHelper.class).getData(settings.getSpreadsheetId(), new Date());
-        todayBudgetTextField.setText(budgets.get("budget").toString());
-        todayUsedTextField.setText(budgets.get("cost").toString());
+        loadBudget();
         settings.save();
     }
 
+    public void loadBudget() {
+        if(StringUtils.isNotBlank(settings.getSpreadsheetId())) {
+            Map<String, Float> budgets = ApplicationContext.getBean(DailyBudgetHelper.class).getData(settings.getSpreadsheetId(), new Date());
+            todayBudgetTextField.setText(budgets.get("budget").toString());
+            todayUsedTextField.setText(budgets.get("cost").toString());
+        }
+    }
     public void initEvents() {
         marketplaceComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -207,11 +212,15 @@ public class RuntimeSettingsPanel extends JPanel {
             }
         });
 
-        finderCodeTextField.addMouseListener(new MouseAdapter() {
+
+
+        todayBudgetTextField.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseExited(MouseEvent e) {
-                Float budget = Float.parseFloat(todayBudgetTextField.getText());
-                ApplicationContext.getBean(DailyBudgetHelper.class).updateBudget(settings.getSpreadsheetId(),new Date(),budget);
+                if(StringUtils.isNotBlank(settings.getSpreadsheetId())) {
+                    Float budget = Float.parseFloat(todayBudgetTextField.getText());
+                    ApplicationContext.getBean(DailyBudgetHelper.class).updateBudget(settings.getSpreadsheetId(), new Date(), budget);
+                }
             }
         });
 
@@ -391,6 +400,8 @@ public class RuntimeSettingsPanel extends JPanel {
             settings.save();
 
             setAccounts4Country();
+
+            loadBudget();
 
             if (dialog.continueToNext) {
                 selectRange();
