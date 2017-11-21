@@ -9,7 +9,6 @@ import edu.olivet.harvester.fulfill.utils.OrderBuyerUtils;
 import edu.olivet.harvester.fulfill.utils.ShipOptionUtils;
 import edu.olivet.harvester.model.CreditCard;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.spreadsheet.service.OrderHelper;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import org.apache.commons.collections4.CollectionUtils;
@@ -89,10 +88,6 @@ public class OrderReviewMultiPage extends OrderReviewAbstractPage {
             //get the qty now
             String qty = JXBrowserHelper.text(browser, ".quantity-display");
             order.quantity_fulfilled = qty;
-            if (!order.quantity_purchased.equals(qty)) {
-                OrderHelper.addQuantChangeRemark(order, qty);
-            }
-
 
         }
 

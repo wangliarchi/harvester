@@ -7,6 +7,7 @@ import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.harvester.fulfill.model.page.FulfillmentPage;
 import edu.olivet.harvester.model.Money;
 import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.spreadsheet.service.OrderHelper;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import org.slf4j.Logger;
@@ -32,6 +33,11 @@ public class PlacedOrderDetailPage extends FulfillmentPage {
             order.cost = parseTotalCost();
             order.last_code = parseLastCode();
             order.account = buyer.getEmail();
+
+            if (!order.quantity_purchased.equals(order.quantity_fulfilled)) {
+                OrderHelper.addQuantChangeRemark(order, order.quantity_fulfilled);
+            }
+
         } catch (Exception e) {
             LOGGER.error("Error parse data on order detail page", e);
             //reload page

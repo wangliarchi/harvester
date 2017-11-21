@@ -4,7 +4,6 @@ import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.utils.ShipOptionUtils;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.spreadsheet.service.OrderHelper;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import org.apache.commons.collections4.CollectionUtils;
@@ -64,9 +63,7 @@ public class ShippingMethodOnePage extends ShippingAddressAbstract {
 
         //get the qty now
         String qty = JXBrowserHelper.text(browser, ".quantity-dropdown .a-dropdown-prompt");
-        if (!order.quantity_purchased.equals(qty)) {
-            OrderHelper.addQuantChangeRemark(order, qty);
-        }
+        order.quantity_fulfilled = qty;
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
 
     }
