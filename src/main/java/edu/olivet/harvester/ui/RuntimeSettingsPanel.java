@@ -764,6 +764,7 @@ public class RuntimeSettingsPanel extends JPanel {
                                         .addComponent(skipCheckLabel)
                                         .addComponent(skipCheckComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(todayBudgetLabel)
                                         .addComponent(todayBudgetTextField)
