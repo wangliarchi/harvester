@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,14 +31,6 @@ import java.util.List;
  */
 public class OfferListingPage extends FulfillmentPage {
     private static final Logger LOGGER = LoggerFactory.getLogger(OfferListingPage.class);
-    private static final String SELLER_SELECTOR = ".olpSellerName";
-    private static final String OFFER_TABLE_SELECTOR = "#olpTabContent";
-    private static final int NOT_FOUND_BUT_CONTINUE = -1;
-    private static final int NOT_FOUND_NOT_CONTINUE = -2;
-    private static final int MAX_PAGE_INDEX = 4;
-    private static final float CONDITION_PRICE_PLUS = 1.0f;
-    private static final float ADDON_CAN_SUBMIT_LIMIT = 25.0f;
-    public static final DecimalFormat DOUBLE_FORMAT = new DecimalFormat("0.00");
 
 
     private SellerService sellerService;
@@ -51,6 +42,7 @@ public class OfferListingPage extends FulfillmentPage {
 
     public void enter(Order order) {
         String url = OrderCountryUtils.getOfferListingUrl(order);
+        LOGGER.info("Offer listing page {}",url);
         JXBrowserHelper.loadPage(browser, url);
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
     }

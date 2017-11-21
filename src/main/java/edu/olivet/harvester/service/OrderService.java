@@ -351,7 +351,7 @@ public class OrderService {
         final List<Order> setToReturn = new ArrayList<>();
         Map<String, List<Order>> map = new HashMap<>();
         orders.forEach(it -> {
-            String key = it.getKey() + " " + originalRemark(it.remark);
+            String key = it.order_id + it.sku + originalRemark(it.remark);
             List<Order> list = map.get(key);
             if (list == null) {
                 list = new ArrayList<>();

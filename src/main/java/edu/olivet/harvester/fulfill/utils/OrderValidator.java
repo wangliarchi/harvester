@@ -2,7 +2,6 @@ package edu.olivet.harvester.fulfill.utils;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-import com.mchange.lang.FloatUtils;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.db.DBManager;
@@ -54,7 +53,8 @@ public class OrderValidator {
         HasValidCreditCard,
         HasEnoughBudgetToFulfill,
         NotDuplicatedOrder,
-        IsNotForbiddenSeller
+        IsNotForbiddenSeller,
+        StatusNeedUpdate
 
     }
 
@@ -120,9 +120,10 @@ public class OrderValidator {
         return validWithValidators(order,
                 Validator.NotGrayOrder,
                 Validator.NotSelfOrder,
+                Validator.IsSupplierHunted,
                 Validator.IsNotUKForward,
-                Validator.StatusIsInitial,
-                Validator.IsSupplierHunted
+                Validator.StatusNeedUpdate
+
 
         );
 
@@ -191,8 +192,6 @@ public class OrderValidator {
         return validWithValidators(order, validators);
     }
 
-    @Inject
-    OrderStatusUtils orderStatusUtils;
 
     public String statusMarkedCorrectForSubmit(Order order) {
         String status = orderStatusUtils.determineStatus(order);
@@ -200,7 +199,7 @@ public class OrderValidator {
             return "";
         }
 
-        return "Order status is not marked for submision.";
+        return "Order status is not marked for submission.";
     }
 
     public String statusIsInitial(Order order) {
@@ -210,6 +209,18 @@ public class OrderValidator {
 
         return "Order status is not " + OrderEnums.Status.Initial.value();
 
+    }
+
+    @Inject
+    OrderStatusUtils orderStatusUtils;
+
+    public String statusNeedUpdate(Order order) {
+
+        if (StringUtils.equals(orderStatusUtils.determineStatus(order), order.status)) {
+            return "Order status has already been updated.";
+        }
+
+        return "";
     }
 
     public String isFulfilled(Order order) {

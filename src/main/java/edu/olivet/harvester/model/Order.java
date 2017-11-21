@@ -386,7 +386,7 @@ public class Order implements Keyable {
      * 判断当前订单对应Seller是否为Prime
      */
     public boolean sellerIsPrime() {
-        return OrderEnums.Status.PrimeSeller.value().equalsIgnoreCase(this.status) ||
+        return  OrderEnums.Status.PrimeSeller.value().equalsIgnoreCase(this.status) ||
                 OrderEnums.Status.PrimeBuyAndTransfer.value().equalsIgnoreCase(this.status) ||
                 OrderEnums.SellerType.Prime.abbrev().equalsIgnoreCase(this.character) ||
                 OrderEnums.SellerType.ImagePrime.abbrev().equalsIgnoreCase(this.character) ||
