@@ -10,6 +10,7 @@ import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.spreadsheet.service.OrderHelper;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +34,10 @@ public class PlacedOrderDetailPage extends FulfillmentPage {
             order.cost = parseTotalCost();
             order.last_code = parseLastCode();
             order.account = buyer.getEmail();
+
+            if (StringUtils.isBlank(order.quantity_fulfilled)) {
+                order.quantity_fulfilled = order.quantity_purchased;
+            }
 
             if (!order.quantity_purchased.equals(order.quantity_fulfilled)) {
                 OrderHelper.addQuantChangeRemark(order, order.quantity_fulfilled);
