@@ -21,7 +21,7 @@ public class OrderAddressUtils {
 
         if (order.purchaseBack()) {
             Address address = Address.USFwdAddress();
-            address.setName(usFwdBookRecipent(order));
+            address.setName(usFwdBookRecipient(order));
             return address;
         }
 
@@ -31,7 +31,7 @@ public class OrderAddressUtils {
 
     }
 
-    public static String usFwdBookRecipent(Order order) {
+    public static String usFwdBookRecipient(Order order) {
 
         if (OrderCountryUtils.getFulfillementCountry(order) == Country.US) {
             return String.format("zhuanyun/%s/%s", RuntimeSettings.load().getSid(), order.order_id.substring(order.order_id.lastIndexOf('-') + 1));
