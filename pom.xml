@@ -51,7 +51,7 @@
         </repository>
         <repository>
             <id>thirdparty</id>
-            <url>http://54.68.136.179:8081/nexus/content/repositories/thirdparty</url>
+            <url>http://35.166.131.3:8082/nexus/content/repositories/thirdparty</url>
         </repository>
     </repositories>
 
