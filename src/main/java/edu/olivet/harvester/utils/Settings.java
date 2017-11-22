@@ -262,7 +262,7 @@ public class Settings {
 
         }
 
-        public MarketWebServiceIdentity getMwsCredential() {
+        public MarketWebServiceIdentity getValidMwsCredential() {
             if (country.europe()) {
                 for (Country country : Country.EURO) {
                     mwsCredential.setMarketPlaceId(country.marketPlaceId());
@@ -274,7 +274,6 @@ public class Settings {
 
             return mwsCredential;
         }
-
 
     }
 

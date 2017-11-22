@@ -170,13 +170,13 @@ public class ConfirmShipments {
             try {
                 List<FeedSubmissionInfo> submissionInfo = getUnprocessedFeedSubmission(country);
                 if (submissionInfo.size() > 0) {
-                    messagePanel.wrapLineMsg(String.format("%s processing/unporcessed order confirmation found. Wait 5 mins to try again.",submissionInfo.size()),LOGGER,InformationLevel.Information);
+                    messagePanel.wrapLineMsg(String.format("%s processing/unporcessed order confirmation found. Wait 5 mins to try again.", submissionInfo.size()), LOGGER, InformationLevel.Information);
                     Tools.sleep(5, TimeUnit.MINUTES);
                 } else {
                     break;
                 }
             } catch (Exception e) {
-                LOGGER.error("Failed to load unprocessed feed submission. ",e);
+                LOGGER.error("Failed to load unprocessed feed submission. ", e);
                 break;
             }
         }
@@ -357,17 +357,34 @@ public class ConfirmShipments {
 
         messagePanel.displayMsg("Feed submitted to Amazon... It may take few minutes for Amazon to process.");
 
-        MarketWebServiceIdentity credential = Settings.load().getConfigByCountry(country).getMwsCredential();
+        String result = "";
+        if (country.europe()) {
+            for(Country c : Country.EURO) {
+                result = _submitFeed(feedFile, c);
+                if (!StringUtils.containsAny(result.toLowerCase(),"rejected","denied") ) {
+                    break;
+                }
+            }
+        } else {
+            result = _submitFeed(feedFile, country);
+        }
 
-        LOGGER.info("Submitting order confirmation feeed to amzazon {}, using credential {}", country.name(), credential.toString());
-
-        String result = feedUploader.execute(feedFile, FeedGenerator.BatchFileType.ShippingConfirmation.feedType(), credential, 1);
 
         messagePanel.wrapLineMsg("Feed has been submitted successfully. " + result, LOGGER, InformationLevel.Important);
 
         return result;
 
 
+    }
+
+    public String _submitFeed(File feedFile, Country country) {
+        MarketWebServiceIdentity credential = Settings.load().getConfigByCountry(country).getMwsCredential();
+
+        LOGGER.info("Submitting order confirmation feeed to amzazon {}, using credential {}", country.name(), credential.toString());
+
+        String result = feedUploader.execute(feedFile, FeedGenerator.BatchFileType.ShippingConfirmation.feedType(), credential, 1);
+
+        return result;
     }
 
     /**

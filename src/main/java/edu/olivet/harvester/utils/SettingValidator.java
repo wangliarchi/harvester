@@ -165,6 +165,7 @@ public class SettingValidator {
             if (spreadsheet != null && StringUtils.containsIgnoreCase(spreadsheet.getTitle(), "product")) {
                 errors.add(String.format("%s PRODUCT spreadsheet %s(%s) seems a book order sheet.",
                         country.name(), config.getBookDataSourceUrl(), spreadsheet.getTitle()));
+
             }
 
         }
