@@ -13,7 +13,8 @@ public enum Config {
     ProfileList("profileList.properties", "性能监控列表"),
     Condition("conditions.properties", "Condition转换表"),
     ForbiddenSellers("forbidden_sellers.json", "Forbidden Sellers"),
-    StopWords("stopwords.json","Stopwords");
+    StopWords("stopwords.json", "Stopwords"),
+    USForwardAddress("usBookTransAddr.json", "US FWD Address");
 
     private String fileName;
     private String desc;

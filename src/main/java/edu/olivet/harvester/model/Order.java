@@ -236,6 +236,10 @@ public class Order implements Keyable {
     }
 
 
+    public boolean isUKForward() {
+        return Remark.ukFwd(this.remark);
+    }
+
     /**
      * <pre>
      * 判定当前订单是否需要买回转运，根据其状态和Remark，用于<strong>做单</strong>场景
@@ -386,7 +390,7 @@ public class Order implements Keyable {
      * 判断当前订单对应Seller是否为Prime
      */
     public boolean sellerIsPrime() {
-        return  OrderEnums.Status.PrimeSeller.value().equalsIgnoreCase(this.status) ||
+        return OrderEnums.Status.PrimeSeller.value().equalsIgnoreCase(this.status) ||
                 OrderEnums.Status.PrimeBuyAndTransfer.value().equalsIgnoreCase(this.status) ||
                 OrderEnums.SellerType.Prime.abbrev().equalsIgnoreCase(this.character) ||
                 OrderEnums.SellerType.ImagePrime.abbrev().equalsIgnoreCase(this.character) ||
@@ -399,6 +403,7 @@ public class Order implements Keyable {
     }
 
     OrderEnums.OrderItemType type;
+
     public OrderEnums.OrderItemType type() {
         if (type == null) {
             type = Settings.load().getSpreadsheetType(spreadsheetId);
@@ -429,6 +434,7 @@ public class Order implements Keyable {
                 Objects.equal(condition, order.condition) &&
                 Objects.equal(character, order.character);
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

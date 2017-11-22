@@ -1,8 +1,11 @@
 package edu.olivet.harvester.fulfill.model;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.base.Objects;
+import edu.olivet.foundations.utils.Configs;
 import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.utils.Config;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,6 +31,7 @@ public class Address {
     private String country;
     private String zip5 = "";
     private String zip4 = "";
+    private String phoneNumber = "";
 
 
     public void setZip(String zip) {
@@ -57,6 +61,12 @@ public class Address {
         address.setAddress2(order.ship_address_2);
         address.setZip(order.ship_zip);
         address.setName(order.recipient_name);
+        address.setPhoneNumber(order.ship_phone_number);
+        return address;
+    }
+
+    public static Address USFwdAddress() {
+        Address address = JSON.parseObject(Configs.read(Config.USForwardAddress.fileName()), Address.class);
         return address;
     }
 

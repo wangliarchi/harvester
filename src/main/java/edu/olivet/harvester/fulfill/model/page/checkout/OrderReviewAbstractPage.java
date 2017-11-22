@@ -9,6 +9,7 @@ import edu.olivet.harvester.fulfill.model.page.FulfillmentPage;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.service.addressvalidator.AddressValidator;
 import edu.olivet.harvester.fulfill.utils.DailyBudgetHelper;
+import edu.olivet.harvester.fulfill.utils.OrderAddressUtils;
 import edu.olivet.harvester.fulfill.utils.ProfitLostControl;
 import edu.olivet.harvester.model.Money;
 import edu.olivet.harvester.model.Order;
@@ -97,7 +98,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
     public void reviewShippingAddress(AddressValidator addressValidator) {
         Address enteredAddress = parseEnteredAddress();
 
-        if (!addressValidator.verify(Address.loadFromOrder(buyerPanel.getOrder()), enteredAddress)) {
+        if (!addressValidator.verify(OrderAddressUtils.orderShippingAddress(buyerPanel.getOrder()), enteredAddress)) {
             throw new BusinessException(String.format("Address failed review. Entered %s, origin %s", enteredAddress, Address.loadFromOrder(buyerPanel.getOrder())));
         }
 
