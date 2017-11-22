@@ -122,9 +122,7 @@ public class OrderValidator {
                 Validator.NotSelfOrder,
                 Validator.IsSupplierHunted,
                 Validator.IsNotUKForward,
-                Validator.StatusNeedUpdate
-
-
+                Validator.StatusIsInitial
         );
 
     }
@@ -215,7 +213,7 @@ public class OrderValidator {
     OrderStatusUtils orderStatusUtils;
 
     public String statusNeedUpdate(Order order) {
-
+        String s = orderStatusUtils.determineStatus(order);
         if (StringUtils.equals(orderStatusUtils.determineStatus(order), order.status)) {
             return "Order status has already been updated.";
         }
