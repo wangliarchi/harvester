@@ -34,7 +34,7 @@ public class OrderAddressUtils {
     public static String usFwdBookRecipient(Order order) {
 
         if (OrderCountryUtils.getFulfillementCountry(order) == Country.US) {
-            return String.format("zhuanyun/%s/%s", RuntimeSettings.load().getSid(), order.order_id.substring(order.order_id.lastIndexOf('-') + 1));
+            return String.format("zhuanyun/%s/%s", order.getContext().substring(0, order.getContext().length() - 2), order.order_id.substring(order.order_id.lastIndexOf('-') + 1));
         } else {
             return order.url;
         }

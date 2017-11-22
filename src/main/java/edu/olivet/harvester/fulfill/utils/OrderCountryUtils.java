@@ -22,8 +22,12 @@ public class OrderCountryUtils {
             return Country.UK;
         } else {
             // 产品目前默认都是US买回转运，Remark 没有标记
-            if (order.type() == OrderEnums.OrderItemType.PRODUCT) {
-                return Country.US;
+            try {
+                if (order.type() == OrderEnums.OrderItemType.PRODUCT) {
+                    return Country.US;
+                }
+            } catch (Exception e) {
+                //ignore
             }
             return Country.fromSalesChanel(order.getSales_chanel());
         }

@@ -37,8 +37,9 @@ public class RuntimeSettings {
     }
 
     private static RuntimeSettings instance;
+
     public static RuntimeSettings load() {
-        if( instance == null) {
+        if (instance == null) {
             File file = new File(Harvester.RUNTIME_SETTINGS_FILE_PATH);
             if (file.exists() && file.isFile()) {
                 instance = JSON.parseObject(Tools.readFileToString(file), RuntimeSettings.class);
