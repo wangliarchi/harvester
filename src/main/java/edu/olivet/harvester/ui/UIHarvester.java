@@ -7,10 +7,13 @@ import edu.olivet.foundations.job.TaskScheduler;
 import edu.olivet.foundations.ui.*;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.harvester.job.BackgroundJob;
+import edu.olivet.harvester.model.ConfigEnums;
 import edu.olivet.harvester.ui.dialog.BankCardConfigDialog;
 import edu.olivet.harvester.ui.events.ConfirmShipmentEvent;
 import edu.olivet.harvester.ui.events.OrderConfirmationHistoryEvent;
+import edu.olivet.harvester.ui.events.OrderSubmissionLogEvent;
 import edu.olivet.harvester.ui.events.SettingEvent;
+import edu.olivet.harvester.utils.LogViewer;
 import edu.olivet.harvester.utils.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,7 +123,24 @@ public class UIHarvester extends AbstractApplicationUI {
         orderConfirmationHistoryEvent.excute();
     }
 
+    @Inject
+    OrderSubmissionLogEvent orderSubmissionLogEvent;
+    @UIEvent
+    public void orderSubmissionLog() {
+        orderSubmissionLogEvent.excute();
+    }
 
+    @Inject
+    LogViewer logViewer;
+    @UIEvent
+    public void orderSuccessLog() {
+        logViewer.displayLogs(ConfigEnums.Log.Success);
+    }
+
+    @UIEvent
+    public void orderStatisticLog() {
+        logViewer.displayLogs(ConfigEnums.Log.Statistic);
+    }
     @Inject
     SettingEvent settingEvent;
 

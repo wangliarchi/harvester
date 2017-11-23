@@ -21,13 +21,14 @@ public class UIElements extends AbstractUIContainer {
     }
 
     private final Menu harvester = new Menu("Harvester", "H");
-
+    private final Menu submitOrder = new Menu("Submit Order", "O");
     private final Menu confirmShipment = new Menu("Confirm Shipment", "C");
 
     @Override
     public Menu[] getMenus() {
         return new Menu[]{
                 harvester,
+                submitOrder,
                 confirmShipment,
                 Menu.Settings,
                 Menu.Help
@@ -38,9 +39,16 @@ public class UIElements extends AbstractUIContainer {
     public Map<Menu, Action[]> getMenuActions() {
         Map<Menu, Action[]> map = new HashMap<>();
         map.put(harvester, new Action[]{
-                Actions.SubmitOrder,
-                Action.Separator,
+
                 Actions.FindSupplier
+
+        });
+
+        map.put(submitOrder, new Action[]{
+                //Actions.DuplicatedOrders,
+                Actions.OrderSubmissionLog,
+                Actions.OrderSuccessLog,
+                Actions.OrderStatisticLog
 
         });
 
