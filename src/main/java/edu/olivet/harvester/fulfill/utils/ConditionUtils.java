@@ -98,9 +98,10 @@ public class ConditionUtils {
     }
 
     public static boolean goodToGo(String sellerCondition, String actualCondition) {
-        return getConditionLevel(sellerCondition) <= getConditionLevel(actualCondition);
+        return getConditionLevel(actualCondition) - getConditionLevel(sellerCondition) >= -10;
 
     }
+
     public static int getConditionLevel(String cond) {
         String str = cond.replace("-", StringUtils.EMPTY).replace(StringUtils.SPACE, StringUtils.EMPTY).toLowerCase();
         Map<String, String> conditionLvls = Configs.load(Config.ConditionLevel.fileName());
