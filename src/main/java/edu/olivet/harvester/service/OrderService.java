@@ -362,7 +362,8 @@ public class OrderService {
 
         map.forEach((k, v) -> {
             if (v.size() > 1) {
-                if (v.stream().map(Order::getSheetName).collect(Collectors.toSet()).size() > 1) {
+                Set<String> sheetNames = v.stream().filter(it -> RegexUtils.Regex.COMMON_ORDER_SHEET_NAME.isMatched(it.sheetName)).map(Order::getSheetName).collect(Collectors.toSet());
+                if (sheetNames.size() > 1) {
                     setToReturn.addAll(v);
                 }
 
