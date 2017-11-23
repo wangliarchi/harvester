@@ -95,7 +95,20 @@ public class Address {
             if (oAddressSet.contains(a)) {
                 sameAddressLines = true;
                 break;
+            } else {
+                for (String b : oAddressSet) {
+                    String com = StringUtils.getCommonPrefix(b, a);
+                    String ar = a.replace(com, "");
+                    String br = b.replace(com, "");
+
+                    if (sameChars(ar, br)) {
+                        sameAddressLines = true;
+                        break;
+                    }
+
+                }
             }
+
         }
 
         //todo State full and abbr
@@ -106,6 +119,13 @@ public class Address {
                 StringUtils.equalsIgnoreCase(getZip5(), address.getZip5());
     }
 
+    private boolean sameChars(String firstStr, String secondStr) {
+        char[] first = firstStr.toCharArray();
+        char[] second = secondStr.toCharArray();
+        Arrays.sort(first);
+        Arrays.sort(second);
+        return Arrays.equals(first, second);
+    }
 
     public String getRecipient() {
         String r = name.replace(RuntimeSettings.load().getNoInvoiceText(), "")
@@ -137,5 +157,6 @@ public class Address {
     public String toString() {
         return name + (StringUtils.isNotBlank(address1) ? ", " + address1 : "") + (StringUtils.isNotBlank(address2) ? ", " + address2 : "") + ", " + city + ", " + state + " " + getZip() + ", " + country;
     }
+
 
 }

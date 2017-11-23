@@ -30,11 +30,13 @@ public class USPSAddressValidatorTest extends BaseTest {
         newAddress.setCountry("United States");
 
         oldAddress.setAddress1("4350 N. 84 Place");
+        oldAddress.setAddress2("Apt 3c");
         oldAddress.setCity("Scottsdale");
         oldAddress.setState("AZ");
         oldAddress.setZip("85251");
 
         newAddress.setAddress1("4350 N 84TH PL");
+        newAddress.setAddress2("Apt c3");
         newAddress.setCity(oldAddress.getCity());
         newAddress.setState(oldAddress.getState());
         newAddress.setZip(oldAddress.getZip());
