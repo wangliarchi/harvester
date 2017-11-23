@@ -29,9 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ItemEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -183,6 +181,20 @@ public class RuntimeSettingsPanel extends JPanel {
             }
         });
 
+        finderCodeTextField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                finderCodeTextFieldActionPerformed();
+            }
+        });
+
+
+        noInvoiceTextField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                noInvoiceTextFieldActionPerformed();
+            }
+        });
+
+
         lostLimitComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 settings.setLostLimit(e.getItem().toString());
@@ -219,14 +231,18 @@ public class RuntimeSettingsPanel extends JPanel {
         });
 
 
+        todayBudgetTextField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                updateBudget();
+            }
+        });
+
         todayBudgetTextField.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseExited(MouseEvent e) {
-                if (StringUtils.isNotBlank(settings.getSpreadsheetId())) {
-                    Float budget = Float.parseFloat(todayBudgetTextField.getText());
-                    ApplicationContext.getBean(DailyBudgetHelper.class).updateBudget(settings.getSpreadsheetId(), new Date(), budget);
-                }
+                updateBudget();
             }
+
         });
 
         markStatusButton.addActionListener(evt -> markStatus());
@@ -306,6 +322,13 @@ public class RuntimeSettingsPanel extends JPanel {
         }).start();
 
         psEventListenerThread.start();
+    }
+
+    public void updateBudget() {
+        if (StringUtils.isNotBlank(settings.getSpreadsheetId())) {
+            Float budget = Float.parseFloat(todayBudgetTextField.getText());
+            ApplicationContext.getBean(DailyBudgetHelper.class).updateBudget(settings.getSpreadsheetId(), new Date(), budget);
+        }
     }
 
     public void showPauseBtn() {
