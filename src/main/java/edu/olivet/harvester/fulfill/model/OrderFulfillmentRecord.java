@@ -15,7 +15,7 @@ import org.nutz.dao.entity.annotation.Table;
 
 import java.util.Date;
 
-@Table(value = "order_fulfillment_record")
+@Table(value = "order_fulfillment_logs")
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class OrderFulfillmentRecord extends PrimaryKey implements ArrayConvertable {
