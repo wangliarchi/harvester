@@ -36,5 +36,8 @@ CREATE TABLE IF NOT EXISTS order_fulfillment_record (
   orderNumber    VARCHAR(25)             NOT NULL DEFAULT '',
   buyerAccount    VARCHAR(100)             NOT NULL DEFAULT '',
   lastCode    VARCHAR(10)             NOT NULL DEFAULT '',
+  fulfillAddress TEXT    NOT NULL DEFAULT '',
+  shippingAddress TEXT    NOT NULL DEFAULT '',
+  fulfilledASIN    VARCHAR(10)             NOT NULL DEFAULT '',
   fulfillDate    DATETIME                NOT NULL
 );
