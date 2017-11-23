@@ -60,6 +60,15 @@ public class OrderFulfillmentRecord extends PrimaryKey implements ArrayConvertab
     @Column
     private Date fulfillDate;
 
+    @Column
+    private String shippingAddress;
+
+    @Column
+    private String fulfilledAddress;
+    @Column
+    private String fulfilledASIN;
+
+
     @Override
     public String getPK() {
         return this.id;
@@ -70,8 +79,11 @@ public class OrderFulfillmentRecord extends PrimaryKey implements ArrayConvertab
         return new Object[]{DateFormat.DATE_TIME.format(this.fulfillDate), orderId, sku, quantityPurchased, quantityBought, orderNumber, cost, buyerAccount, lastCode, purchaseDate, isbn, seller, character, condition, spreadsheetId, sheetName};
     }
 
-    public static final String[] COLUMNS = {"Fulfill Date", "OrderId", "sku", "quantityPurchased", "quantityBought", "orderNumber", "cost", "buyerAccount",
-            "lastCode", "purchaseDate", "isbn", "seller", "character", "condition", "spreadsheetId", "sheetName"};
 
-    //public static final int[] WIDTHS = {250, 150};
+    public static final String[] COLUMNS = {"Fulfill Date", "OrderId", "sku", "quantityPurchased", "quantityBought", "orderNumber", "cost", "buyerAccount",
+            "lastCode", "purchaseDate", "isbn", "seller", "character", "condition", "spreadsheetId", "sheetName","shippingAddress","fulfilledAddress","fulfilledASIN"};
+
+    public static final int[] WIDTHS = {100, 100, 50, 20, 20, 70, 50, 100, 30, 100, 60, 60, 10, 50, 100, 50,150,150,50};
+
+
 }

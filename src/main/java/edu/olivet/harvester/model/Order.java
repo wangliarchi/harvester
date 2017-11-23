@@ -5,9 +5,11 @@ import com.google.common.base.Objects;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.db.Keyable;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.foundations.utils.Strings;
+import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.model.OrderEnums.OrderColor;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Data;
@@ -152,6 +154,18 @@ public class Order implements Keyable {
      */
     @JSONField(serialize = false)
     public String quantity_fulfilled;
+
+    /**
+     * 实际做单是的邮寄地址，从order confirmation 页面获取, 用来检查，纪录log
+     */
+    @JSONField(serialize = false)
+    private Address fulfilledAddress;
+
+    /**
+     * 实际做单是的买单ASIN／ISBN，从order confirmation 页面获取, 用来检查，纪录log
+     */
+    @JSONField(serialize = false)
+    private String fulfilledASIN;
 
     /**
      * Determine whether a order number is valid or not by detecting whether it matches Amazon, BetterWorld or Ingram Order Number Pattern
@@ -408,6 +422,32 @@ public class Order implements Keyable {
 
         return type;
     }
+
+
+    /**
+     * 一条订单提交成功时的相关信息: 原单基本信息、新单提交结果、提交时间
+     */
+    public String successRecord() {
+        return Dates.now() + Constants.TAB +
+                StringUtils.defaultString(this.sheetName) + Constants.TAB +
+                this.row + Constants.TAB +
+                StringUtils.defaultString(this.status) + Constants.TAB +
+                StringUtils.defaultString(this.order_id) + Constants.TAB +
+                StringUtils.defaultString(this.isbn) + Constants.TAB +
+                StringUtils.defaultString(this.seller) + Constants.TAB +
+                StringUtils.defaultString(this.seller_id) + Constants.TAB +
+                StringUtils.defaultString(this.cost) + Constants.TAB +
+                StringUtils.defaultString(this.order_number) + Constants.TAB +
+                StringUtils.defaultString(this.account) + Constants.TAB +
+                StringUtils.defaultString(this.last_code) + Constants.TAB +
+                StringUtils.defaultString(this.profit) + Constants.TAB +
+                StringUtils.defaultString(this.remark.replace(StringUtils.LF, StringUtils.SPACE)) + Constants.TAB +
+                StringUtils.defaultString(this.spreadsheetId) + Constants.TAB +
+                StringUtils.defaultString(Address.loadFromOrder(this).toString()) + Constants.TAB +
+                StringUtils.defaultString(this.fulfilledAddress.toString()) + Constants.TAB +
+                StringUtils.defaultString(this.fulfilledASIN) + Constants.TAB;
+    }
+
 
     @Override
     public String getKey() {

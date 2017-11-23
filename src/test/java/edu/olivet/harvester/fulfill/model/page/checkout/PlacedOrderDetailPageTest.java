@@ -6,10 +6,13 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.BaseTest;
+import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.ui.BuyerPanel;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertEquals;
 
@@ -17,6 +20,8 @@ import static org.testng.Assert.assertEquals;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/9/17 5:55 PM
  */
 public class PlacedOrderDetailPageTest extends BaseTest {
+
+
     PlacedOrderDetailPage placedOrderDetailPage;
 
 
@@ -35,17 +40,40 @@ public class PlacedOrderDetailPageTest extends BaseTest {
     public void testParseOrderId() throws Exception {
         prepareBrowser();
         String orderId = placedOrderDetailPage.parseOrderId();
-        assertEquals(orderId, "113-8838701-9669824");
+        assertEquals(orderId, "114-2738105-8609821");
     }
 
     @Test void testParseTotalCost() {
         prepareBrowser();
-        assertEquals(placedOrderDetailPage.parseTotalCost(),"10.58");
+        assertEquals(placedOrderDetailPage.parseTotalCost(),"10.94");
     }
 
     @Test void testParseLastCode() {
         prepareBrowser();
-        assertEquals(placedOrderDetailPage.parseLastCode(),"1003");
+        assertEquals(placedOrderDetailPage.parseLastCode(),"3576");
     }
 
+    @Test
+    public void testParseShippingAddress() throws Exception {
+        prepareBrowser();
+        Address address = placedOrderDetailPage.parseShippingAddress();
+        assertEquals(address.getName(),"zhuanyun/720/4907401");
+        assertEquals(address.getAddress1(),"501 BROAD AVE STE 13");
+        assertEquals(address.getAddress2(),"");
+        assertEquals(address.getCity(),"RIDGEFIELD");
+        assertEquals(address.getState(),"NJ");
+        assertEquals(address.getZip(),"07657-2348");
+        assertEquals(address.getCountry(),"United States");
+
+
+    }
+
+    @Test
+    public void testParseItems() throws Exception {
+        prepareBrowser();
+        Map<String, String> items = placedOrderDetailPage.parseItems();
+        String key = items.keySet().stream().collect(Collectors.toList()).get(0);
+        assertEquals(key,"1598695274");
+        assertEquals(items.get(key).toString(),"$6.95");
+    }
 }

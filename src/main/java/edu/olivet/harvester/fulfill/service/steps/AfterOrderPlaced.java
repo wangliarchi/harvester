@@ -7,6 +7,7 @@ import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.model.OrderFulfillmentRecord;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.model.page.checkout.OrderPlacedSuccessPage;
@@ -15,7 +16,9 @@ import edu.olivet.harvester.fulfill.service.SheetService;
 import edu.olivet.harvester.fulfill.service.flowfactory.FlowState;
 import edu.olivet.harvester.fulfill.service.flowfactory.Step;
 import edu.olivet.harvester.fulfill.utils.DailyBudgetHelper;
+import edu.olivet.harvester.logger.SuccessLogger;
 import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.model.Remark;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +37,8 @@ public class AfterOrderPlaced extends Step {
 
     @Override
     protected void process(FlowState state) {
+        Order order = state.getOrder();
+        order.remark = Remark.removeFailedRemark(order.remark);
 
         try {
             readOrderInfo(state);
@@ -45,18 +50,24 @@ public class AfterOrderPlaced extends Step {
         RuntimeSettings settings = RuntimeSettings.load();
         //fill data back to google sheet
         try {
-            updateInfoToOrderSheet(settings.getSpreadsheetId(), state.getOrder());
+            updateInfoToOrderSheet(settings.getSpreadsheetId(), order);
         } catch (Exception e) {
             LOGGER.error("Failed to update order fulfillment info to order update sheet", e);
         }
         try {
-            saveToDB(state.getOrder());
+            saveToDB(order);
         } catch (Exception e) {
             LOGGER.error("Failed to save order fulfillment info into database.", e);
         }
 
         try {
-            updateSpending(settings.getSpreadsheetId(), state.getOrder());
+            updateSpending(settings.getSpreadsheetId(), order);
+        } catch (Exception e) {
+            LOGGER.error("Failed to update spending.", e);
+        }
+
+        try{
+            SuccessLogger.log(order);
         } catch (Exception e) {
             //ignore
         }
@@ -102,6 +113,9 @@ public class AfterOrderPlaced extends Step {
         record.setRemark(order.remark);
         record.setQuantityPurchased(IntegerUtils.parseInt(order.quantity_purchased, 1));
         record.setQuantityBought(IntegerUtils.parseInt(order.quantity_fulfilled, 1));
+        record.setShippingAddress(Address.loadFromOrder(order).toString());
+        record.setFulfilledAddress(order.getFulfilledAddress().toString());
+        record.setFulfilledASIN(order.getFulfilledASIN());
         record.setFulfillDate(new Date());
 
         DBManager dbManager = ApplicationContext.getBean(DBManager.class);
