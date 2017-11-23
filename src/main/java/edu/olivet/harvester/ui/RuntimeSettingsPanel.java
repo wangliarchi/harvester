@@ -14,6 +14,7 @@ import edu.olivet.harvester.fulfill.service.ProgressUpdator;
 import edu.olivet.harvester.fulfill.utils.DailyBudgetHelper;
 import edu.olivet.harvester.fulfill.utils.OrderValidator;
 import edu.olivet.harvester.model.OrderEnums;
+import edu.olivet.harvester.model.OrderEnums.OrderItemType;
 import edu.olivet.harvester.spreadsheet.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.dialog.ChooseSheetDialog;
@@ -468,12 +469,14 @@ public class RuntimeSettingsPanel extends JPanel {
         Account[] sellers = seller == null ? new Account[0] : new Account[]{seller};
         sellerComboBox.setModel(new DefaultComboBoxModel<>(sellers));
 
-
+        //default to book
+        OrderEnums.OrderItemType type;
         if (StringUtils.isBlank(spreadsheetId)) {
-            return;
+            type = OrderItemType.BOOK;
+        } else {
+            type = Settings.load().getSpreadsheetType(spreadsheetId);
         }
 
-        OrderEnums.OrderItemType type = Settings.load().getSpreadsheetType(spreadsheetId);
 
         Account primeBuyer;
         Account buyer;

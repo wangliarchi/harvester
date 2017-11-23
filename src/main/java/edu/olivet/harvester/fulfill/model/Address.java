@@ -108,7 +108,9 @@ public class Address {
 
 
     public String getRecipient() {
-        return name.replaceAll(RegexUtils.Regex.PUNCTUATION.val(), "").replaceAll(" ", "");
+        String r =  name.replaceAll(RegexUtils.Regex.PUNCTUATION.val(), "").replaceAll(" ", "");
+        r = r.replace(RuntimeSettings.load().getNoInvoiceText(),"");
+        return r;
     }
 
     public Set<String> addressSet() {

@@ -99,7 +99,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         Address enteredAddress = parseEnteredAddress();
 
         if (!addressValidator.verify(OrderAddressUtils.orderShippingAddress(buyerPanel.getOrder()), enteredAddress)) {
-            throw new BusinessException(String.format("Address failed review. Entered %s, origin %s", enteredAddress, Address.loadFromOrder(buyerPanel.getOrder())));
+            throw new BusinessException(String.format("Address failed review. Entered %s, origin %s", enteredAddress, OrderAddressUtils.orderShippingAddress(buyerPanel.getOrder())));
         }
 
     }

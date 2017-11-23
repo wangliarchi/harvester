@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.harvester.fulfill.utils.OrderStatusUtils;
 import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.model.OrderEnums.OrderColor;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import org.apache.commons.collections4.CollectionUtils;
@@ -52,7 +53,10 @@ public class SheetService extends SheetAPI {
             LOGGER.error("Fail to update order update sheet status {} - {}", spreadsheetId, e);
             throw new BusinessException(e);
         }
+
+        appScript.markColor(spreadsheetId,order.sheetName,row, OrderColor.Finished);
     }
+
 
 
     public void fillUnsuccessfulMsg(String spreadsheetId, Order order, String msg) {
@@ -71,6 +75,8 @@ public class SheetService extends SheetAPI {
             LOGGER.error("Fail to update order error msg {} - {}", spreadsheetId, e);
             throw new BusinessException(e);
         }
+
+        appScript.markColor(spreadsheetId,order.sheetName,row, OrderColor.InvalidByCode);
     }
 
 

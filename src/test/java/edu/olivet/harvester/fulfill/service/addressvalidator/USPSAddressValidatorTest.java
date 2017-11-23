@@ -26,13 +26,14 @@ public class USPSAddressValidatorTest extends BaseTest {
 
         oldAddress.setName("test");
         oldAddress.setCountry("United States");
-        newAddress.setName("test");
+        newAddress.setName("test{No Invoice}");
         newAddress.setCountry("United States");
 
         oldAddress.setAddress1("4350 N. 84 Place");
         oldAddress.setCity("Scottsdale");
         oldAddress.setState("AZ");
         oldAddress.setZip("85251");
+
         newAddress.setAddress1("4350 N 84TH PL");
         newAddress.setCity(oldAddress.getCity());
         newAddress.setState(oldAddress.getState());

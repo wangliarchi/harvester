@@ -169,12 +169,7 @@ public class SelectRangeDialog extends BaseDialog {
     }
 
     private void initComponents() {
-        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-        this.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                doClose();
-            }
-        });
+
 
         setTitle(UIText.label("title.range.customize"));
         setResizable(false);
@@ -371,6 +366,15 @@ public class SelectRangeDialog extends BaseDialog {
         );
         getRootPane().setDefaultButton(okBtn);
         pack();
+
+
+        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        this.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                doClose();
+            }
+        });
+
     }
 
     public void initScopePane() {
