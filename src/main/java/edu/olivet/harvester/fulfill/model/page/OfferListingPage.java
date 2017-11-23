@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -78,7 +77,7 @@ public class OfferListingPage extends FulfillmentPage {
         Country currentCountry = OrderCountryUtils.getFulfillementCountry(order);
         List<Seller> sellers = sellerService.parseSellers(browser, currentCountry);
 
-        List<Seller> results = new ArrayList<>();
+        //List<Seller> results = new ArrayList<>();
         for (Seller seller : sellers) {
             String sellerName = seller.getName();
             boolean sellerEq = (StringUtils.isNotBlank(seller.getUuid()) && StringUtils.isNotBlank(order.seller_id) && seller.getUuid().equalsIgnoreCase(order.seller_id) && seller.getType().abbrev().equalsIgnoreCase(order.character)) ||

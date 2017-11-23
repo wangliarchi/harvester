@@ -48,6 +48,8 @@ public class RuntimeSettingsPanel extends JPanel {
 
     private static RuntimeSettingsPanel instance;
 
+    private Thread psEventListenerThread;
+
     public static RuntimeSettingsPanel getInstance() {
         if (instance == null) {
             instance = new RuntimeSettingsPanel();
@@ -129,7 +131,7 @@ public class RuntimeSettingsPanel extends JPanel {
     }
 
     public void loadBudget() {
-        if(StringUtils.isNotBlank(settings.getSpreadsheetId())) {
+        if (StringUtils.isNotBlank(settings.getSpreadsheetId())) {
             Map<String, Float> budgets = ApplicationContext.getBean(DailyBudgetHelper.class).getData(settings.getSpreadsheetId(), new Date());
             todayBudgetTextField.setText(budgets.get("budget").toString());
             todayUsedTextField.setText(budgets.get("cost").toString());
@@ -138,6 +140,7 @@ public class RuntimeSettingsPanel extends JPanel {
             todayBudgetTextField.setEnabled(false);
         }
     }
+
     public void initEvents() {
         marketplaceComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -216,11 +219,10 @@ public class RuntimeSettingsPanel extends JPanel {
         });
 
 
-
         todayBudgetTextField.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseExited(MouseEvent e) {
-                if(StringUtils.isNotBlank(settings.getSpreadsheetId())) {
+                if (StringUtils.isNotBlank(settings.getSpreadsheetId())) {
                     Float budget = Float.parseFloat(todayBudgetTextField.getText());
                     ApplicationContext.getBean(DailyBudgetHelper.class).updateBudget(settings.getSpreadsheetId(), new Date(), budget);
                 }
@@ -248,7 +250,7 @@ public class RuntimeSettingsPanel extends JPanel {
         });
 
 
-        new Thread(() -> {
+        psEventListenerThread = new Thread(() -> {
             //noinspection InfiniteLoopStatement
             while (true) {
                 switch (PSEventListener.status) {
@@ -257,8 +259,10 @@ public class RuntimeSettingsPanel extends JPanel {
                         showPauseBtn();
                         break;
                     case Stopped:
+                    case Ended:
                         hidePauseBtn();
-                        break;
+                        return;
+
                     case NotRuning:
                         hidePauseBtn();
                         break;
@@ -268,7 +272,7 @@ public class RuntimeSettingsPanel extends JPanel {
                 }
                 WaitTime.Shortest.execute();
             }
-        }, "PSEventListener").start();
+        }, "PSEventListener");
 
     }
 
@@ -288,6 +292,7 @@ public class RuntimeSettingsPanel extends JPanel {
     }
 
     public void submitOrders() {
+        PSEventListener.reset();
         new Thread(() -> {
             try {
                 disableAllBtns();
@@ -299,6 +304,8 @@ public class RuntimeSettingsPanel extends JPanel {
                 restAllBtns();
             }
         }).start();
+
+        psEventListenerThread.start();
     }
 
     public void showPauseBtn() {

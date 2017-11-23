@@ -11,8 +11,10 @@ public class PSEventListener {
         NotRuning,
         Running,
         Paused,
-        Stopped
+        Stopped,
+        Ended,
     }
+
     public static Status status = Status.NotRuning;
 
 
@@ -44,6 +46,13 @@ public class PSEventListener {
         return status == Status.Paused;
     }
 
+    public static boolean ended() {
+        return status == Status.Ended;
+    }
+
+    public static void end() {
+        status = Status.Ended;
+    }
 
 
 }

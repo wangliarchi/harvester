@@ -9,12 +9,12 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
-import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.model.ItemCompareResult;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.*;
 import edu.olivet.harvester.fulfill.utils.*;
+import edu.olivet.harvester.logger.StatisticLogger;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.service.OrderService;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
@@ -27,10 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.*;
-import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -82,16 +79,16 @@ public class OrderSubmitter {
         }
 
         //check duplication
-        DUPLICATION_CHECK_CACHE.computeIfAbsent(settings.getSpreadsheetId(), k -> {
+        if (!DUPLICATION_CHECK_CACHE.containsKey(settings.getSpreadsheetId())) {
             Spreadsheet spreadsheet = sheetService.getSpreadsheet(settings.getSpreadsheetId());
             List<Order> duplicatedOrders = orderService.findDuplicates(spreadsheet);
             if (CollectionUtils.isNotEmpty(duplicatedOrders)) {
                 String msg = String.format("%s duplicated orders found in %s, %s", duplicatedOrders.size(), spreadsheet.getProperties().getTitle(),
                         StringUtils.join(duplicatedOrders.stream().map(it -> it.order_id + " @ " + it.sheetName).collect(Collectors.toSet()).toArray(new String[duplicatedOrders.size()]), ", "));
                 UITools.error(msg + "\n\n Please fix before submitting orders.");
+                return;
             }
-            return true;
-        });
+        }
 
 
         //mark status first
@@ -165,7 +162,6 @@ public class OrderSubmitter {
         for (Order order : validOrders) {
             //if stop btn clicked, break the process
             if (PSEventListener.stopped()) {
-                ProgressUpdator.stopped();
                 break;
             }
 
@@ -184,8 +180,10 @@ public class OrderSubmitter {
             }
         }
 
+        StatisticLogger.log(String.format("%s\t%s", ProgressUpdator.toTable(), Strings.formatElapsedTime(start)));
+
         //reset after done
-        PSEventListener.reset();
+        PSEventListener.end();
 
     }
 
@@ -210,10 +208,10 @@ public class OrderSubmitter {
                 messageListener.addMsg(order, "order fulfilled successfully. took " + Strings.formatElapsedTime(start));
             }
 
-            ProgressUpdator.success();
+
         } catch (Exception e) {
             LOGGER.error("Error submit order {}", order.order_id, e);
-            ProgressUpdator.failed();
+
             Pattern pattern = Pattern.compile(Pattern.quote("xception:"));
             String[] parts = pattern.split(e.getMessage());
             String msg = parts[parts.length - 1].trim();
@@ -222,6 +220,13 @@ public class OrderSubmitter {
             sheetService.fillUnsuccessfulMsg(spreadsheetId, order, msg);
         }
 
+        if (StringUtils.isNotBlank(order.order_number)) {
+            ProgressUpdator.success();
+        } else {
+            ProgressUpdator.failed();
+        }
+
+
     }
 
     public void _noOrders() {
@@ -229,55 +234,6 @@ public class OrderSubmitter {
         UITools.error("No valid orders to be submitted. See failed record log for more detail.");
         messageListener.addMsg("No valid orders to be submitted.");
     }
-    public static void main(String[] args) {
-        UITools.setTheme();
 
-        Order order = new Order();
-        order.row = 1;
-        order.status = "n";
-        order.order_id = "002-1578027-1397838";
-        order.recipient_name = "Nicholas Adamo";
-        order.purchase_date = "10/24/2014 21:00:00";
-        order.sku_address = "https://sellercentral.amazon.com/myi/search/OpenListingsSummary?keyword=new18140915a160118";
-        order.sku = "new18140915a160118";
-        order.price = "14.48";
-        order.quantity_purchased = "2";
-        order.shipping_fee = "16.95";
-        order.ship_state = "NY";
-        order.isbn_address = "http://www.amazon.com/dp/0545521378";
-        order.isbn = "0545521378";
-        //order.seller = "AP";
-        order.seller = "BigHeartedBooks";
-        order.seller_id = "A1CRANICB1QVV0";
-        order.seller_price = "4.94";
-        order.url = "/";
-        order.condition = "Used - Good";
-        order.character = "pr";
-        order.remark = "无Remark";
-        order.reference = "1.018";
-        order.code = "29";
-        order.profit = "7.488";
-        order.item_name = "[ NOWHERE TO RUN (39 CLUES: UNSTOPPABLE #01) ] By Watson. Jude ( Author) 2013...";
-        order.ship_address_1 = "Ernst  Young";
-        order.ship_address_2 = "836 Berkshire Road";
-        order.ship_city = "Wingdale";
-        order.ship_zip = "12594";
-        order.ship_phone_number = "123456";
-        order.cost = "20.42";
-        order.order_number = "102-0780405-2545043";
-        order.account = "joshjohnsonsf007@gmail.com";
-        order.last_code = "10.48";
-        order.setShip_country("United States");
-        order.sales_chanel = "Amazon.com";
-
-        JFrame frame = new JFrame("Order Submission Demo");
-        BuyerPanel buyerPanel = new BuyerPanel(order);
-        frame.getContentPane().add(buyerPanel);
-        frame.setVisible(true);
-        frame.setSize(new Dimension(1260, 736));
-
-
-        ApplicationContext.getBean(OrderSubmitter.class).submit(order, buyerPanel);
-    }
 
 }
