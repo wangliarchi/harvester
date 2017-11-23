@@ -158,5 +158,4 @@ public class Address {
         return name + (StringUtils.isNotBlank(address1) ? ", " + address1 : "") + (StringUtils.isNotBlank(address2) ? ", " + address2 : "") + ", " + city + ", " + state + " " + getZip() + ", " + country;
     }
 
-
 }

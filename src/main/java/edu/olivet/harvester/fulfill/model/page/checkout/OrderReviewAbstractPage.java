@@ -3,6 +3,7 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.model.page.FulfillmentPage;
@@ -115,14 +116,14 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         placeOrderBtn.click();
 
         JXBrowserHelper.waitUntilNewPageLoaded(browser);
-
+        WaitTime.Short.execute();
         DOMElement forceDuplicate = JXBrowserHelper.selectElementByName(browser, "forcePlaceOrder");
         if (forceDuplicate != null) {
             JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
             forceDuplicate.click();
             JXBrowserHelper.waitUntilNewPageLoaded(browser);
         }
-
+        WaitTime.Short.execute();
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
 
     }

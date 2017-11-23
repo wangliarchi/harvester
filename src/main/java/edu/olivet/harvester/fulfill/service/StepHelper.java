@@ -127,13 +127,13 @@ public class StepHelper {
     public CheckoutPage detectCurrentPage(FlowState state) {
         Browser browser = state.getBuyerPanel().getBrowserView().getBrowser();
 
-        for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
+        for (int i = 0; i <= 10; i++) {
             browser = state.getBuyerPanel().getBrowserView().getBrowser();
             CheckoutPage page = CheckoutPage.detectPage(browser);
             if (page != null) {
                 return page;
             }
-            WaitTime.Shortest.execute();
+            WaitTime.Short.execute();
 
         }
 
