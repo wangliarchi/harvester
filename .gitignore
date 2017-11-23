@@ -21,3 +21,8 @@ src/test/resources/data4test/pages/720US2017-11-17/.DS_Store
 src/test/resources/data4test/pages/720US2017-11-8/.DS_Store
 src/test/resources/data4test/pages/720US2017-11-9/.DS_Store
 tmp/
+hs_err_pid10697.log
+src/main/java/edu/olivet/harvester/.DS_Store
+src/main/java/edu/olivet/harvester/fulfill/.DS_Store
+src/main/java/edu/olivet/harvester/fulfill/model/.DS_Store
+src/main/java/edu/olivet/harvester/fulfill/model/page/.DS_Store
