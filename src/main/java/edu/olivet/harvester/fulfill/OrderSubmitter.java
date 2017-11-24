@@ -107,12 +107,12 @@ public class OrderSubmitter {
         //remove if not valid
         List<Order> validOrders = new ArrayList<>();
         for (Order order : orders) {
-            String error = orderValidator.isValid(order, FulfillmentEnum.Action.SubmitOrder);
-
-            if (StringUtils.isBlank(error) && (OrderCountryUtils.getFulfillementCountry(order) != Country.US)) {
+            String error;
+            if (OrderCountryUtils.getFulfillementCountry(order) != Country.US || OrderCountryUtils.getShipToCountry(order) != "US") {
                 error = "Harvester can only support US marketplace at this moment. Sorry for inconvenience.";
+            } else {
+                error = orderValidator.isValid(order, FulfillmentEnum.Action.SubmitOrder);
             }
-
 
             if (StringUtils.isNotBlank(error)) {
                 messageListener.addMsg(order, error, InformationLevel.Negative);
@@ -127,7 +127,7 @@ public class OrderSubmitter {
         }
 
 
-        if (OrderValidator.needCheck(null,OrderValidator.SkipValidation.ItemName)) {
+        if (OrderValidator.needCheck(null, OrderValidator.SkipValidation.ItemName)) {
             List<ItemCompareResult> results = PreValidator.compareItemNames4Orders(validOrders);
             ItemCheckResultDialog dialog = UITools.setDialogAttr(new ItemCheckResultDialog(null, true, results));
 

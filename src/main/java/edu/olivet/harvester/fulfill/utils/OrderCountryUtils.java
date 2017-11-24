@@ -1,6 +1,7 @@
 package edu.olivet.harvester.fulfill.utils;
 
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
@@ -11,6 +12,25 @@ import org.apache.commons.lang3.StringUtils;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/15/17 3:37 PM
  */
 public class OrderCountryUtils {
+
+    public static String getShipToCountry(Order order) {
+        if (Remark.purchaseBack(order.remark)) {
+            return Country.US.name();
+        } else if (Remark.ukFwd(order.remark)) {
+            return Country.UK.name();
+        } else {
+            // 产品目前默认都是US买回转运，Remark 没有标记
+            try {
+                if (order.type() == OrderEnums.OrderItemType.PRODUCT) {
+                    return Country.US.name();
+                }
+            } catch (Exception e) {
+                //ignore
+            }
+
+            return ApplicationContext.getBean(CountryStateUtils.class).getCountryCode(order.ship_country);
+        }
+    }
 
     public static Country getFulfillementCountry(Order order) {
         // 批注中直寄和买回同时存在的情况下，先考虑直寄，随后考虑买回, 如果非直寄 和 转运，默认和order order 的sales channel 相同
