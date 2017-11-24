@@ -108,7 +108,7 @@ public class OrderSubmitter {
         List<Order> validOrders = new ArrayList<>();
         for (Order order : orders) {
             String error;
-            if (OrderCountryUtils.getFulfillementCountry(order) != Country.US || OrderCountryUtils.getShipToCountry(order) != "US") {
+            if (OrderCountryUtils.getFulfillementCountry(order) != Country.US || !"US".equalsIgnoreCase(OrderCountryUtils.getShipToCountry(order))) {
                 error = "Harvester can only support US marketplace at this moment. Sorry for inconvenience.";
             } else {
                 error = orderValidator.isValid(order, FulfillmentEnum.Action.SubmitOrder);
