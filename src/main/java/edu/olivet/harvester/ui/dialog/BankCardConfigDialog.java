@@ -22,6 +22,7 @@ import java.awt.*;
 import java.io.File;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/3/17 11:51 AM
@@ -65,7 +66,16 @@ public class BankCardConfigDialog extends BaseDialog {
 
 
         vsequentialGroup.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE);
-        buyerAccountEmails.forEach(buyerEmail -> {
+        List<String> emails = creditCards.keySet().stream().collect(Collectors.toList());
+        for (String buyerEmail : buyerAccountEmails) {
+            if (!emails.contains(buyerEmail)) {
+                emails.add(buyerEmail);
+            }
+        }
+
+
+
+        emails.forEach(buyerEmail -> {
             BankCardPanel bankCardPanel = new BankCardPanel(buyerEmail);
             if (creditCards.containsKey(buyerEmail)) {
                 bankCardPanel.load(creditCards.get(buyerEmail));

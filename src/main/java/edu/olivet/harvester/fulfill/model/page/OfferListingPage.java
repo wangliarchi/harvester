@@ -54,7 +54,7 @@ public class OfferListingPage extends FulfillmentPage {
         //find seller
         Seller seller = findSeller(order);
 
-        if (OrderValidator.needCheck(OrderValidator.SkipValidation.SellerPrice)) {
+        if (OrderValidator.needCheck(order, OrderValidator.SkipValidation.SellerPrice)) {
             String result = OrderValidator.sellerPriceChangeNotExceedConfiguration(order, seller);
             if (StringUtils.isNotBlank(result)) {
                 throw new BusinessException(result);

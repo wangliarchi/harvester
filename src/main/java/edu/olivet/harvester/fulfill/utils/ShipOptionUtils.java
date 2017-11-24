@@ -91,7 +91,7 @@ public class ShipOptionUtils {
             if (Remark.fastShipping(order.remark) && !it.isExpedited()) {
                 return false;
             }
-            if (OrderValidator.skipCheck(SkipValidation.EDD) || Remark.isDN(order.remark)) {
+            if (OrderValidator.skipCheck(order, SkipValidation.EDD) || Remark.isDN(order.remark)) {
                 return true;
             }
 

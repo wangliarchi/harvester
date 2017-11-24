@@ -90,13 +90,16 @@ public class OrderValidator {
         }
     }
 
-    public static boolean skipCheck(SkipValidation skipValidation) {
+    public static boolean skipCheck(Order order, SkipValidation skipValidation) {
+        if (order != null && Remark.FORCE_FULFILL.isContainedBy(order.remark)) {
+            return true;
+        }
         RuntimeSettings settings = RuntimeSettings.load();
         return settings.getSkipValidation() == skipValidation || settings.getSkipValidation() == SkipValidation.All;
     }
 
-    public static boolean needCheck(SkipValidation skipValidation) {
-        return !skipCheck(skipValidation);
+    public static boolean needCheck(Order order, SkipValidation skipValidation) {
+        return !skipCheck(order, skipValidation);
     }
 
     public String isValid(Order order, FulfillmentEnum.Action scenario) {
@@ -490,7 +493,7 @@ public class OrderValidator {
     ForbiddenSeller forbiddenSeller;
 
     public String isNotForbiddenSeller(Order order) {
-        if (OrderValidator.skipCheck(SkipValidation.ForbiddenSupplier)) {
+        if (OrderValidator.skipCheck(order, SkipValidation.ForbiddenSupplier)) {
             return "";
         }
 

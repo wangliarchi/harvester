@@ -28,13 +28,13 @@ public class ReviewOrder extends Step {
     protected void process(FlowState state) {
         OrderReviewOnePage orderReviewOnePage = new OrderReviewOnePage(state.getBuyerPanel());
 
-        if (OrderValidator.needCheck(OrderValidator.SkipValidation.Address)) {
+        if (OrderValidator.needCheck(state.getOrder(),OrderValidator.SkipValidation.Address)) {
             reviewAddress(state);
         }
 
         reviewPayment(state);
 
-        if (OrderValidator.needCheck(OrderValidator.SkipValidation.Profit)) {
+        if (OrderValidator.needCheck(state.getOrder(),OrderValidator.SkipValidation.Profit)) {
             try {
                 orderReviewOnePage.checkTotalCost(state.getOrder());
                 LOGGER.info("Passed cost check.");

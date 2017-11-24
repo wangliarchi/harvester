@@ -16,7 +16,6 @@ import edu.olivet.harvester.fulfill.service.*;
 import edu.olivet.harvester.fulfill.utils.*;
 import edu.olivet.harvester.logger.StatisticLogger;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.model.OrderEnums.OrderColor;
 import edu.olivet.harvester.service.OrderService;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.BuyerPanel;
@@ -128,7 +127,7 @@ public class OrderSubmitter {
         }
 
 
-        if (OrderValidator.needCheck(OrderValidator.SkipValidation.ItemName)) {
+        if (OrderValidator.needCheck(null,OrderValidator.SkipValidation.ItemName)) {
             List<ItemCompareResult> results = PreValidator.compareItemNames4Orders(validOrders);
             ItemCheckResultDialog dialog = UITools.setDialogAttr(new ItemCheckResultDialog(null, true, results));
 

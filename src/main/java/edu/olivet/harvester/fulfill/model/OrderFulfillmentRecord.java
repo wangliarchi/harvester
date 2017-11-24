@@ -59,10 +59,8 @@ public class OrderFulfillmentRecord extends PrimaryKey implements ArrayConvertab
     private int quantityBought;
     @Column
     private Date fulfillDate;
-
     @Column
     private String shippingAddress;
-
     @Column
     private String fulfilledAddress;
     @Column
@@ -76,7 +74,7 @@ public class OrderFulfillmentRecord extends PrimaryKey implements ArrayConvertab
 
     @Override
     public Object[] toArray() {
-        return new Object[]{DateFormat.DATE_TIME.format(this.fulfillDate), orderId, sku, quantityPurchased, quantityBought, orderNumber, cost, buyerAccount, lastCode, purchaseDate, isbn, seller, character, condition, spreadsheetId, sheetName};
+        return new Object[]{DateFormat.DATE_TIME.format(this.fulfillDate), orderId, sku, quantityPurchased, quantityBought, orderNumber, cost, buyerAccount, lastCode, purchaseDate, isbn, seller, character, condition, spreadsheetId, sheetName,shippingAddress,fulfilledAddress,fulfilledASIN};
     }
 
 
