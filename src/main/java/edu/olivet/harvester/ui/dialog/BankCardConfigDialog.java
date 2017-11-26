@@ -66,7 +66,7 @@ public class BankCardConfigDialog extends BaseDialog {
 
 
         vsequentialGroup.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE);
-        List<String> emails = creditCards.keySet().stream().collect(Collectors.toList());
+        List<String> emails = new ArrayList<>(creditCards.keySet());
         for (String buyerEmail : buyerAccountEmails) {
             if (!emails.contains(buyerEmail)) {
                 emails.add(buyerEmail);
