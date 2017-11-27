@@ -409,10 +409,29 @@ public class JXBrowserHelper {
 
     }
 
+
+    public static  void loginGoogleAccount(Browser browser, String email, String password) {
+        //enter email address
+        DOMElement nextBtn = selectElementByCssSelector(browser, "#identifierNext");
+        if (nextBtn != null) {
+            fillValueForFormField(browser, "#identifierId", email);
+            WaitTime.Short.execute();
+            selectElementByCssSelectorWaitUtilLoaded(browser, "#identifierNext").click();
+            //JXBrowserHelper.waitUntilNewPageLoaded(browser);
+
+            //enter password
+            wait(browser, By.id("passwordNext"));
+            DOMElement passwordField = selectElementByName(browser, "password");
+            ((DOMFormControlElement) passwordField).setValue(password);
+            WaitTime.Short.execute();
+            selectElementByCssSelectorWaitUtilLoaded(browser, "#passwordNext").click();
+            waitUntilNewPageLoaded(browser);
+        }
+    }
+
     public static void main(String[] args) {
         String title = "https://www.amazon.com/MAIRICO-Premium-Kitchen-Purpose-Scissors/dp/B01HEPY216/ref=br_msw_pdt-2/131-7729985-1997618?_encoding=UTF8&smid=AXMKZ0APSAWJU&pf_rd_m=ATVPDKIKX0DER&pf_rd_s=&pf_rd_r=V563FE5ZVK4QCH3FVHQ0&pf_rd_t=36701&pf_rd_p=3c84e109-52be-4449-91bb-95cb9b9b2a9f&pf_rd_i=desktop";
         title = title.replaceAll(RegexUtils.Regex.NON_ALPHA_LETTER_DIGIT.val(), "");
-        System.out.println(title);
 
         Tools.switchLogMode(Configs.LogMode.Development);
         JFrame frame = new JFrame("Prototype of Harvester Web");
