@@ -39,7 +39,7 @@ import static com.teamdev.jxbrowser.chromium.BrowserKeyEvent.KeyEventType.*;
  */
 public class JXBrowserHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(JXBrowserHelper.class);
-    private static final int TIME_OUT_SECONDS = 60;
+    private static final int TIME_OUT_SECONDS = 20;
 
     static {
         try {
@@ -182,11 +182,7 @@ public class JXBrowserHelper {
 
     }
 
-
-    @InvokedExternally
-    //insert an element to page, and wait until it's gone
-    public static void waitUntilNewPageLoaded(Browser browser) {
-
+    public static void insertChecker(Browser browser) {
         //insert tracker
         DOMDocument document = browser.getDocument();
         DOMNode root = document.findElement(By.tagName("body"));
@@ -195,7 +191,11 @@ public class JXBrowserHelper {
         paragraph.setAttribute("id", "loading-checker");
         paragraph.appendChild(textNode);
         root.appendChild(paragraph);
+    }
 
+    @InvokedExternally
+    //insert an element to page, and wait until it's gone
+    public static void waitUntilNewPageLoaded(Browser browser) {
         //check tracker
         waitUntilNotFound(browser, "#loading-checker");
     }
@@ -205,6 +205,7 @@ public class JXBrowserHelper {
 
         int timeConsumed = 0;
         while (true) {
+
             DOMElement element = JXBrowserHelper.selectElementByCssSelector(browser, selector);
             if (element != null) {
                 if (!isVisible(browser, selector)) {
@@ -222,6 +223,7 @@ public class JXBrowserHelper {
                 continue;
             }
             break;
+
         }
 
     }
@@ -291,6 +293,7 @@ public class JXBrowserHelper {
         return browser.getDocument().findElement(By.name(name));
     }
 
+    @Repeat
     public static DOMElement selectElementByCssSelector(Browser browser, String selector) {
         return selectElementByCssSelector(browser.getDocument(), selector);
     }
