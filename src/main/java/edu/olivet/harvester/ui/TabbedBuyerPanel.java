@@ -46,7 +46,7 @@ public class TabbedBuyerPanel extends JTabbedPane {
 
     public void addFirstBuyerAccountTab() {
         Settings settings = Settings.load();
-        for(Configuration config : settings.getConfigs()){
+        for (Configuration config : settings.getConfigs()) {
             if (config.getPrimeBuyer() != null && StringUtils.isNotBlank(config.getPrimeBuyer().getEmail())) {
                 this.addTab(config.getCountry(), config.getPrimeBuyer());
                 return;
@@ -58,6 +58,7 @@ public class TabbedBuyerPanel extends JTabbedPane {
 
         }
     }
+
     public void addAllBuyerAccountTabs() {
         Settings settings = Settings.load();
         settings.getConfigs().forEach(config -> {
@@ -95,6 +96,27 @@ public class TabbedBuyerPanel extends JTabbedPane {
 
         return buyerPanel;
     }
+
+    public BuyerPanel addSheetTab(Country country, Account account) {
+        String tabKey = country.name() + " Spreadsheet";
+        if (buyerPanels.containsKey(tabKey)) {
+            LOGGER.info("Buyer account {} already initialized. ", tabKey);
+            return buyerPanels.get(tabKey);
+        }
+
+        final long start = System.currentTimeMillis();
+
+        BuyerPanel buyerPanel = new BuyerPanel(buyerPanels.size(), country, account, Math.max(-1, zoomLevel));
+
+        this.addTab(tabKey, UITools.getIcon("sheet.png"), buyerPanel);
+        buyerPanelIndexes.put(buyerPanels.size(), tabKey);
+        buyerPanels.put(tabKey, buyerPanel);
+
+        LOGGER.info("Finished init buyer {} account {} panel，took{}", country.name(), account.getKey(), Strings.formatElapsedTime(start));
+
+        return buyerPanel;
+    }
+
 
     public BuyerPanel getBuyerPanel(Country country, Account buyer) {
         String tabKey = getTabKey(country, buyer);

@@ -143,7 +143,7 @@ public class OrderValidator {
                 Validator.NotSelfOrder,
                 Validator.IsNotUKForward,
                 Validator.IsSupplierHunted,
-                Validator.StatusMarkedCorrectForSubmit,
+                //Validator.StatusMarkedCorrectForSubmit,
                 Validator.HasValidBuyerAccount,
                 Validator.HasValidCreditCard,
                 Validator.FulfillmentCountryIsValid,

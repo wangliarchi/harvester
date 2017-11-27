@@ -21,6 +21,7 @@ import edu.olivet.harvester.ui.dialog.ChooseSheetDialog;
 import edu.olivet.harvester.ui.dialog.SelectRangeDialog;
 import edu.olivet.harvester.ui.events.MarkStatusEvent;
 import edu.olivet.harvester.ui.events.SubmitOrdersEvent;
+import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -30,7 +31,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -85,6 +88,7 @@ public class RuntimeSettingsPanel extends JPanel {
         if (StringUtils.isNotBlank(settings.getSheetName())) {
             googleSheetTextField.setText(settings.getSheetName());
             googleSheetTextField.setToolTipText(settings.getSpreadsheetName() + " - " + settings.getSheetName());
+            loadSheetTabButton.setEnabled(true);
         }
 
 
@@ -222,21 +226,6 @@ public class RuntimeSettingsPanel extends JPanel {
             }
         });
 
-
-//        todayBudgetTextField.addActionListener(new ActionListener() {
-//            public void actionPerformed(ActionEvent e) {
-//                updateBudget();
-//            }
-//        });
-//
-//        todayBudgetTextField.addMouseListener(new MouseAdapter() {
-//            @Override
-//            public void mouseExited(MouseEvent e) {
-//                updateBudget();
-//            }
-//
-//        });
-
         markStatusButton.addActionListener(evt -> markStatus());
 
         submitButton.addActionListener(evt -> submitOrders());
@@ -257,6 +246,17 @@ public class RuntimeSettingsPanel extends JPanel {
             }
         });
 
+        loadSheetTabButton.addActionListener(evt -> {
+            if(StringUtils.isBlank(settings.getSpreadsheetId())) {
+                return;
+            }
+            loadSheetTabButton.setEnabled(false);
+            Country country = Country.fromCode(settings.getMarketplaceName());
+            Account sellerEmail = Settings.load().getConfigByCountry(country).getSellerEmail();
+            BuyerPanel panel = TabbedBuyerPanel.getInstance().addSheetTab(country, sellerEmail);
+            TabbedBuyerPanel.getInstance().setSelectedIndex(panel.getId());
+            JXBrowserHelper.loadSpreadsheet(panel.getBrowserView().getBrowser(), sellerEmail, settings.getSpreadsheetId());
+        });
 
         psEventListenerThread = new Thread(() -> {
             //noinspection InfiniteLoopStatement
@@ -270,7 +270,7 @@ public class RuntimeSettingsPanel extends JPanel {
                     case Ended:
                         hidePauseBtn();
                         break;
-                   case NotRuning:
+                    case NotRuning:
                         hidePauseBtn();
                         break;
                     default:
@@ -371,6 +371,7 @@ public class RuntimeSettingsPanel extends JPanel {
         noInvoiceTextField.setEnabled(false);
         finderCodeTextField.setEnabled(false);
         skipCheckComboBox.setEnabled(false);
+        loadSheetTabButton.setEnabled(false);
     }
 
     public void restAllBtns() {
@@ -386,6 +387,7 @@ public class RuntimeSettingsPanel extends JPanel {
         noInvoiceTextField.setEnabled(true);
         finderCodeTextField.setEnabled(true);
         skipCheckComboBox.setEnabled(true);
+        loadSheetTabButton.setEnabled(true);
     }
 
     public void selectGoogleSheet() {
@@ -424,6 +426,7 @@ public class RuntimeSettingsPanel extends JPanel {
             settings.save();
 
             setAccounts4Country();
+            loadSheetTabButton.setEnabled(true);
 
             loadBudget();
 
@@ -560,6 +563,8 @@ public class RuntimeSettingsPanel extends JPanel {
     private JTextField todayBudgetTextField;
     public JTextField todayUsedTextField;
 
+    private JButton loadSheetTabButton;
+
     private void initComponents() {
         setBorder(BorderFactory.createTitledBorder(BorderFactory.createTitledBorder("Runtime Settings")));
 
@@ -613,6 +618,9 @@ public class RuntimeSettingsPanel extends JPanel {
         stopButton.setVisible(false);
         stopButton.setEnabled(false);
 
+        loadSheetTabButton = new JButton();
+        loadSheetTabButton.setText("Load Sheet");
+        loadSheetTabButton.setEnabled(false);
 
         marketplaceLabel.setText("Marketplace");
         sellerLabel.setText("Seller");
@@ -625,6 +633,7 @@ public class RuntimeSettingsPanel extends JPanel {
         noInvoiceLabel.setText("No Invoice");
         codeFinderLabel.setText("Finder Code");
         maxEddLabel.setText("EDD Limit");
+
 
         skipCheckLabel = new JLabel();
         skipCheckLabel.setText("Skip Check");
@@ -694,7 +703,12 @@ public class RuntimeSettingsPanel extends JPanel {
                                                         .addComponent(sellerComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(buyerComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(primeBuyerComboBox, labelMinWidth, fieldWidth, fieldWidth)
-                                                        .addComponent(googleSheetTextField, labelMinWidth, fieldWidth, fieldWidth)
+                                                        .addGroup(layout.createSequentialGroup()
+                                                                .addComponent(googleSheetTextField)
+                                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(loadSheetTabButton)
+
+                                                        )
                                                         .addGroup(layout.createSequentialGroup()
                                                                 .addComponent(selectRangeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
@@ -769,7 +783,9 @@ public class RuntimeSettingsPanel extends JPanel {
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(googleSheetLabel)
-                                        .addComponent(googleSheetTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(googleSheetTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(loadSheetTabButton)
+                                )
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(selectRangeLabel)

@@ -21,7 +21,7 @@ public class MainPanel extends JPanel {
         runtimeSettingsPanel = RuntimeSettingsPanel.getInstance();
         mainWindowPanel = TabbedBuyerPanel.getInstance();
         progressLogsPanel = ProgressLogsPanel.getInstance();
-        progressLogsPanel.setMinimumSize(new Dimension(100,150));
+        progressLogsPanel.setMinimumSize(new Dimension(100, 150));
 
         jSplitPane1 = new JSplitPane();
         jSplitPane2 = new JSplitPane();
@@ -38,7 +38,6 @@ public class MainPanel extends JPanel {
         jSplitPane1.setBottomComponent(progressLogsPanel);
         jSplitPane2.setLeftComponent(mainWindowPanel);
         jSplitPane2.setRightComponent(runtimeSettingsPanel);
-
 
 
         javax.swing.GroupLayout layout = new GroupLayout(this);
@@ -58,7 +57,7 @@ public class MainPanel extends JPanel {
 
 
         mainWindowPanel.addFirstBuyerAccountTab();
-        //mainWindowPanel.getSelectedBuyerPanel().toHomePage();
+        mainWindowPanel.getSelectedBuyerPanel().toWelcomePage();
         //mainWindowPanel.resetZoomLevel();
     }
 
@@ -66,7 +65,7 @@ public class MainPanel extends JPanel {
         this.addComponentListener(new ComponentListener() {
             public void componentResized(ComponentEvent e) {
                 int height = Math.max(runtimeSettingsPanel.getPreferredSize().height + 50, getHeight() - 250);
-                height = Math.min(height,getHeight()-150);
+                height = Math.min(height, getHeight() - 100);
                 jSplitPane1.setDividerLocation(height);
                 jSplitPane2.setDividerLocation(getWidth() - runtimeSettingsPanel.getPreferredSize().width - 20);
                 mainWindowPanel.resetZoomLevel();

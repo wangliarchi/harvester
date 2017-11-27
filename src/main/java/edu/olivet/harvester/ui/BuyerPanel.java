@@ -1,14 +1,11 @@
 package edu.olivet.harvester.ui;
 
 import com.teamdev.jxbrowser.chromium.Browser;
-import com.teamdev.jxbrowser.chromium.Cookie;
-import com.teamdev.jxbrowser.chromium.CookieStorage;
-import com.teamdev.jxbrowser.chromium.dom.By;
-import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.UITools;
+import edu.olivet.foundations.utils.Configs;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.harvester.fulfill.utils.OrderBuyerUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
@@ -17,12 +14,9 @@ import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.FastDateFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import javax.swing.*;
 import java.awt.*;
 
@@ -62,9 +56,6 @@ public class BuyerPanel extends JPanel {
         this.buyer = buyer;
         this.browserView = JXBrowserHelper.init(this.profilePathName(), zoomLevel);
         this.add(browserView, BorderLayout.CENTER);
-
-        //to home page
-        //toHomePage();
     }
 
     public BuyerPanel(Order order) {
@@ -75,38 +66,17 @@ public class BuyerPanel extends JPanel {
         return this.buyer.key() + Constants.HYPHEN + this.id;
     }
 
-    public void setCookies(Country country, java.util.List<Cookie> cookies) {
-        Browser browser = browserView.getBrowser();
-
-        Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> it.loadURL(country.baseUrl()));
-        String url = browser.getURL();
-        for (Cookie cookie : cookies) {
-            browser.getCookieStorage().setCookie(
-                    url,
-                    cookie.getName(),
-                    cookie.getValue(),
-                    cookie.getDomain(),
-                    cookie.getPath(),
-                    cookie.getExpirationTime(),
-                    cookie.isSecure(),
-                    cookie.isHTTPOnly()
-            );
-        }
-    }
-
 
     public void toHomePage() {
         Browser browser = browserView.getBrowser();
         Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> it.loadURL(country.baseUrl()));
-
     }
 
-    private static final FastDateFormat DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss.SSS");
+    public void toWelcomePage() {
+        Browser browser = browserView.getBrowser();
+        String html = Configs.loadByFullPath("/welcome.html");
+        browser.loadHTML(html);
 
-
-    private String text(DOMElement ele, String selector) {
-        DOMElement child = ele.findElement(By.cssSelector(selector));
-        return child == null ? StringUtils.EMPTY : child.getTextContent().trim();
     }
 
     public static void main(String[] args) {

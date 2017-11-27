@@ -23,12 +23,11 @@ import javax.swing.GroupLayout.Alignment;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 9/20/2017 11:59 AM
  */
-public class UIHarvester extends AbstractApplicationUI  implements WindowListener {
+public class UIHarvester extends AbstractApplicationUI {
     private static final Logger LOGGER = LoggerFactory.getLogger(UIHarvester.class);
     @SuppressWarnings("FieldCanBeLocal")
     private JTextPane statusPane;
@@ -38,7 +37,6 @@ public class UIHarvester extends AbstractApplicationUI  implements WindowListene
     public UIHarvester() {
         this.initComponents();
         UIElements.getInstance().registerListener(new ActionController(this, UIElements.getInstance()));
-        addWindowListener(this);
     }
 
 
@@ -195,38 +193,4 @@ public class UIHarvester extends AbstractApplicationUI  implements WindowListene
         UITools.setDialogAttr(new UIHarvester(), true);
     }
 
-    @Override
-    public void windowOpened(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowClosing(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowClosed(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowIconified(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowDeiconified(WindowEvent e) {
-
-    }
-
-    @Override
-    public void windowActivated(WindowEvent e) {
-        TabbedBuyerPanel.getInstance().getSelectedBuyerPanel().toHomePage();
-    }
-
-    @Override
-    public void windowDeactivated(WindowEvent e) {
-
-    }
 }

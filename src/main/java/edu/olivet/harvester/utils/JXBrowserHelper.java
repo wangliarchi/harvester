@@ -6,6 +6,7 @@ import com.teamdev.jxbrowser.chromium.events.FinishLoadingEvent;
 import com.teamdev.jxbrowser.chromium.events.LoadAdapter;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import com.teamdev.jxbrowser.chromium.swing.internal.LightWeightWidget;
+import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.*;
@@ -413,6 +414,11 @@ public class JXBrowserHelper {
     }
 
 
+    public static void loadSpreadsheet(Browser browser, Account account, String spreadsheetId) {
+        String url = String.format("https://docs.google.com/spreadsheets/d/%s/edit#gid=1549829067",spreadsheetId);
+        loadPage(browser,url);
+        loginGoogleAccount(browser,account.getEmail(),account.getPassword());
+    }
     public static  void loginGoogleAccount(Browser browser, String email, String password) {
         //enter email address
         DOMElement nextBtn = selectElementByCssSelector(browser, "#identifierNext");
