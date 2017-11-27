@@ -15,7 +15,6 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -127,7 +126,7 @@ public class ItemCheckResultDialog extends javax.swing.JDialog {
         scrollPanel.setViewportView(resultTable);
 
         okBtn.setText(UIText.label("label.ok"));
-        okBtn.addActionListener(evt -> okBtnActionPerformed(evt));
+        okBtn.addActionListener(this::okBtnActionPerformed);
 
         cancelBtn.setText(UIText.label("label.cancel"));
         cancelBtn.addActionListener(evt -> {
@@ -245,7 +244,7 @@ public class ItemCheckResultDialog extends javax.swing.JDialog {
     }
 
     private void okBtnActionPerformed(ActionEvent evt) {
-        isbn2Sync = new ArrayList<ItemCompareResult>();
+        isbn2Sync = new ArrayList<>();
 
         Vector<?> vector = this.tableModel.getDataVector();
 

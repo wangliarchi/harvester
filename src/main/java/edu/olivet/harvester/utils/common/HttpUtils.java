@@ -133,9 +133,8 @@ public class HttpUtils {
 
         RequestConfig globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.DEFAULT)
                 .setConnectTimeout(TIME_OUT).build();
-        CloseableHttpClient client = HttpClients.custom().setConnectionManager(connectionManager).setDefaultRequestConfig(globalConfig).build();
 
-        return client;
+        return HttpClients.custom().setConnectionManager(connectionManager).setDefaultRequestConfig(globalConfig).build();
     }
 
     /**

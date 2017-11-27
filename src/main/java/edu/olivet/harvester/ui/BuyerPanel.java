@@ -94,12 +94,6 @@ public class BuyerPanel extends JPanel {
         }
     }
 
-    public @Nullable CookieStorage loginBuyerAccount() {
-        Browser browser = browserView.getBrowser();
-        Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> it.loadURL(country.baseUrl()));
-
-        return null;
-    }
 
     public void toHomePage() {
         Browser browser = browserView.getBrowser();

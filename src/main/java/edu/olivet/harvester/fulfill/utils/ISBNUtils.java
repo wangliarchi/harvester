@@ -30,7 +30,7 @@ public class ISBNUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(ISBNUtils.class);
     private static final String PRODUCT_PAGE_URL = "%s/dp/%s";
 
-    private static Map<String, String> cache = new ConcurrentHashMap<String, String>();
+    private static Map<String, String> cache = new ConcurrentHashMap<>();
     private static AtomicBoolean initFlag = new AtomicBoolean(false);
 
     /**
@@ -115,7 +115,7 @@ public class ISBNUtils {
     private static final String[] CONDITIONS = {ConditionUtils.Condition.New.name().toLowerCase(), ConditionUtils.Condition.Used.name().toLowerCase(), ConditionUtils.Condition.Collectible.name().toLowerCase()};
     private static final int[] INDEXES = {10, 20, 30};
 
-    public static String getTitleAtOfferListPage(String baseUrl, String isbn) throws IOException {
+    public static String getTitleAtOfferListPage(String baseUrl, String isbn) {
         int i = RandomUtils.nextInt(0, 3);
         String cond = CONDITIONS[i];
         int index = INDEXES[i];

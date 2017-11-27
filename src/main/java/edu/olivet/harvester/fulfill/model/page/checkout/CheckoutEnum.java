@@ -28,7 +28,8 @@ public class CheckoutEnum {
         OrderReview(".checkout.spc"),
         AmazonPrimeAd("#mom-no-thanks"),
         AmazonPrimeAdAfterPlaceOrderBtnClicked("#prime-piv-steps-container"),
-        OrderPlacedSuccessPage("#a-page .a-box.a-alert.a-alert-success");
+        OrderPlacedSuccessPage("#a-page .a-box.a-alert.a-alert-success"),
+        LoginPage("#ap_email");
 
         @Getter
         private String idSelector;

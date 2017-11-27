@@ -82,7 +82,6 @@ public class DailyBudgetHelper {
                             }
                         } catch (Exception e) {
                             LOGGER.error("", e);
-                            throw e;
                         }
                     }
                 }

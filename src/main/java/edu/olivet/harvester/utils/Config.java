@@ -8,7 +8,7 @@ public enum Config {
     CountryCode("country-codes", "国家代码"),
     CountryName("country-names", "国家"),
     USStates("us-states", "US States"),
-    AmazonAddressRule("addressrule.js", "亚马逊地址转换规则"),
+    AmazonAddressRule("addressrule", "亚马逊地址转换规则"),
     ConditionLevel("condition-level", "产品新旧等级设定"),
     ProfileList("profileList.properties", "性能监控列表"),
     Condition("conditions.properties", "Condition转换表"),

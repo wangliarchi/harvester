@@ -382,9 +382,7 @@ public class ConfirmShipments {
 
         LOGGER.info("Submitting order confirmation feeed to amzazon {}, using credential {}", country.name(), credential.toString());
 
-        String result = feedUploader.execute(feedFile, FeedGenerator.BatchFileType.ShippingConfirmation.feedType(), credential, 1);
-
-        return result;
+        return feedUploader.execute(feedFile, FeedGenerator.BatchFileType.ShippingConfirmation.feedType(), credential, 1);
     }
 
     /**
