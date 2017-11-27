@@ -180,3 +180,40 @@
 更新内容：
 1. Not using product api to check mws api status.
 2. Add more validation on order sheet settings
+
+======================================================================
+版本：1.0-2017-11-17.1-BETA,1.0-2017-11-23.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. first version of order submission - support orders from amazon.com to US addresses.
+======================================================================
+版本：1.0-2017-11-23.1-GA,1.0-2017-11-24.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. fixed qty not updated bug.
+
+======================================================================
+版本：1.0-2017-11-24.1-GA,1.0-2017-11-25.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. several bug fixes.
+
+======================================================================
+版本：1.0-2017-11-25.1-GA,1.0-2017-11-25.2-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. load one buyer panel on start up
+2. add more address validation methods
+3. several bug fixes.
