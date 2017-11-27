@@ -120,7 +120,7 @@ public class RuntimeSettingsPanel extends JPanel {
         }
 
 
-        skipCheckComboBox.setModel(new DefaultComboBoxModel<OrderValidator.SkipValidation>(OrderValidator.SkipValidation.values()));
+        skipCheckComboBox.setModel(new DefaultComboBoxModel<>(OrderValidator.SkipValidation.values()));
         if (settings.getSkipValidation() != null) {
             skipCheckComboBox.setSelectedItem(settings.getSkipValidation());
         }
@@ -134,10 +134,9 @@ public class RuntimeSettingsPanel extends JPanel {
             Map<String, Float> budgets = ApplicationContext.getBean(DailyBudgetHelper.class).getData(settings.getSpreadsheetId(), new Date());
             todayBudgetTextField.setText(budgets.get("budget").toString());
             todayUsedTextField.setText(budgets.get("cost").toString());
-            todayBudgetTextField.setEnabled(true);
-        } else {
-            todayBudgetTextField.setEnabled(false);
         }
+
+        todayBudgetTextField.setEnabled(false);
     }
 
     public void initEvents() {
@@ -182,18 +181,10 @@ public class RuntimeSettingsPanel extends JPanel {
             }
         });
 
-        finderCodeTextField.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                finderCodeTextFieldActionPerformed();
-            }
-        });
+        finderCodeTextField.addActionListener(e -> finderCodeTextFieldActionPerformed());
 
 
-        noInvoiceTextField.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                noInvoiceTextFieldActionPerformed();
-            }
-        });
+        noInvoiceTextField.addActionListener(e -> noInvoiceTextFieldActionPerformed());
 
 
         lostLimitComboBox.addItemListener(e -> {
@@ -232,19 +223,19 @@ public class RuntimeSettingsPanel extends JPanel {
         });
 
 
-        todayBudgetTextField.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                updateBudget();
-            }
-        });
-
-        todayBudgetTextField.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseExited(MouseEvent e) {
-                updateBudget();
-            }
-
-        });
+//        todayBudgetTextField.addActionListener(new ActionListener() {
+//            public void actionPerformed(ActionEvent e) {
+//                updateBudget();
+//            }
+//        });
+//
+//        todayBudgetTextField.addMouseListener(new MouseAdapter() {
+//            @Override
+//            public void mouseExited(MouseEvent e) {
+//                updateBudget();
+//            }
+//
+//        });
 
         markStatusButton.addActionListener(evt -> markStatus());
 
@@ -278,9 +269,8 @@ public class RuntimeSettingsPanel extends JPanel {
                     case Stopped:
                     case Ended:
                         hidePauseBtn();
-                        return;
-
-                    case NotRuning:
+                        break;
+                   case NotRuning:
                         hidePauseBtn();
                         break;
                     default:
@@ -448,7 +438,7 @@ public class RuntimeSettingsPanel extends JPanel {
         if (StringUtils.isBlank(settings.getSheetName())) {
             return;
         }
-        SelectRangeDialog dialog = UITools.setDialogAttr(new SelectRangeDialog(null, true, settings.getAdvancedSubmitSetting()), true);
+        SelectRangeDialog dialog = UITools.setDialogAttr(new SelectRangeDialog(null, true, settings.getAdvancedSubmitSetting()));
         settings = RuntimeSettings.load();
         selectedRangeLabel.setText(settings.getAdvancedSubmitSetting().toString());
 
@@ -492,7 +482,6 @@ public class RuntimeSettingsPanel extends JPanel {
 
         Account[] primeBuyers = primeBuyer == null ? new Account[0] : new Account[]{primeBuyer};
         primeBuyerComboBox.setModel(new DefaultComboBoxModel<>(primeBuyers));
-
 
     }
 

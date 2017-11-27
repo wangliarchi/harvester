@@ -1,6 +1,7 @@
 package edu.olivet.harvester.fulfill.model.page.checkout;
 
 import com.teamdev.jxbrowser.chromium.dom.By;
+import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
@@ -29,9 +30,10 @@ public class PaymentMethodMultiPage extends PaymentMethodAbstractPage {
 
         //continue;
         JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, CONTINUE_BTN_SELECTOR).click();
+        WaitTime.Shortest.execute();
         JXBrowserHelper.saveOrderScreenshot(order,buyerPanel,"1");
-
-        JXBrowserHelper.waitUntilNotFound(browser,"#new-payment-methods");
+        //JXBrowserHelper.waitUntilNewPageLoaded(browser);
+        //JXBrowserHelper.waitUntilNotFound(browser,"#new-payment-methods");
     }
 
 

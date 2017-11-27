@@ -52,7 +52,7 @@ public class SellerService {
             seller.setIndex(index);
             index++;
             // Seller未标价时不做处理
-            if (ZERO.equals(seller.getPrice().getAmount())) {
+            if (ZERO.equals(seller.getPrice().getAmount().floatValue())) {
                 continue;
             }
 

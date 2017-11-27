@@ -57,15 +57,17 @@ public class MainPanel extends JPanel {
         );
 
 
-        mainWindowPanel.addAllBuyerAccountTabs();
-        mainWindowPanel.getSelectedBuyerPanel().toHomePage();
-        mainWindowPanel.resetZoomLevel();
+        mainWindowPanel.addFirstBuyerAccountTab();
+        //mainWindowPanel.getSelectedBuyerPanel().toHomePage();
+        //mainWindowPanel.resetZoomLevel();
     }
 
     public void initEventListeners() {
         this.addComponentListener(new ComponentListener() {
             public void componentResized(ComponentEvent e) {
-                jSplitPane1.setDividerLocation(Math.max(runtimeSettingsPanel.getPreferredSize().height + 50, getHeight() - 250));
+                int height = Math.max(runtimeSettingsPanel.getPreferredSize().height + 50, getHeight() - 250);
+                height = Math.min(height,getHeight()-150);
+                jSplitPane1.setDividerLocation(height);
                 jSplitPane2.setDividerLocation(getWidth() - runtimeSettingsPanel.getPreferredSize().width - 20);
                 mainWindowPanel.resetZoomLevel();
             }

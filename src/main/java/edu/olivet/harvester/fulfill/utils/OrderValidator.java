@@ -95,7 +95,7 @@ public class OrderValidator {
             return true;
         }
         RuntimeSettings settings = RuntimeSettings.load();
-        return settings.getSkipValidation() == skipValidation || settings.getSkipValidation() == SkipValidation.All;
+        return settings != null && settings.getSkipValidation() != null && (settings.getSkipValidation() == skipValidation || settings.getSkipValidation() == SkipValidation.All);
     }
 
     public static boolean needCheck(Order order, SkipValidation skipValidation) {

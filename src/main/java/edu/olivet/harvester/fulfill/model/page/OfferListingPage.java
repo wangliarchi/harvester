@@ -1,7 +1,6 @@
 package edu.olivet.harvester.fulfill.model.page;
 
 import com.teamdev.jxbrowser.chromium.Browser;
-import com.teamdev.jxbrowser.chromium.dom.By;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
@@ -15,6 +14,7 @@ import edu.olivet.harvester.fulfill.utils.ConditionUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.fulfill.utils.OrderValidator;
 import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.model.Remark;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import org.apache.commons.lang3.StringUtils;
@@ -91,7 +91,7 @@ public class OfferListingPage extends FulfillmentPage {
             }
         }
 
-        throw new BusinessException(String.format("Seller %s with character %s is not found.", order.seller, order.character));
+        throw new BusinessException(String.format(Remark.SELLER_DISAPPEAR.text2Write(), order.seller, order.character));
     }
 
     @Repeat(expectedExceptions = BusinessException.class)
@@ -100,9 +100,11 @@ public class OfferListingPage extends FulfillmentPage {
         DOMElement sellerRow = rows.get(sellerIndex);
 
         DOMElement addToCartBtn = JXBrowserHelper.selectElementByCssSelector(sellerRow, ".olpBuyColumn .a-button-input");
+        JXBrowserHelper.insertChecker(browser);
         addToCartBtn.click();
+        JXBrowserHelper.waitUntilNewPageLoaded(browser);
         //wait until new page loaded
-        JXBrowserHelper.wait(browser, By.cssSelector("#hlb-ptc-btn-native"));
+        //JXBrowserHelper.wait(browser, By.cssSelector("#hlb-ptc-btn-native"));
     }
 
     public static void main(String[] args) {

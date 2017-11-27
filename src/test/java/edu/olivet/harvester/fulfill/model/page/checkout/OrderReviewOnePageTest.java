@@ -11,6 +11,7 @@ import edu.olivet.foundations.utils.Tools;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.fulfill.model.Address;
+import edu.olivet.harvester.fulfill.service.AddressValidatorService;
 import edu.olivet.harvester.fulfill.service.addressvalidator.USPSAddressValidator;
 import edu.olivet.harvester.model.Money;
 import edu.olivet.harvester.model.Order;
@@ -38,7 +39,7 @@ public class OrderReviewOnePageTest extends BaseTest {
     Browser browser;
 
     @Inject
-    USPSAddressValidator uspsAddressValidator;
+    AddressValidatorService addressValidatorService;
     @Inject
     SheetAPI sheetAPI;
     @Inject
@@ -90,7 +91,7 @@ public class OrderReviewOnePageTest extends BaseTest {
                     WaitTime.Short.execute();
                     Address address = orderReviewOnePage.parseEnteredAddress();
                     try {
-                        if (!uspsAddressValidator.verify(Address.loadFromOrder(order), address)) {
+                        if (!addressValidatorService.verify(Address.loadFromOrder(order), address)) {
                             LOGGER.error("Address failed verification. " + dir.getName() + "/" + file.getName() + " Entered " + address + ", original " + Address.loadFromOrder(order));
                         }
                     } catch (Exception e) {

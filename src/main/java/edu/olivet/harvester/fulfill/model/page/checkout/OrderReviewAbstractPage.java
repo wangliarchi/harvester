@@ -112,18 +112,22 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
             throw new BusinessException("Process stoped as requested.");
         }
 
-        DOMElement placeOrderBtn = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, "#submitOrderButtonId .a-button-input, .place-your-order-button");
-        placeOrderBtn.click();
 
+        DOMElement placeOrderBtn = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, "#submitOrderButtonId .a-button-input, .place-your-order-button");
+
+        JXBrowserHelper.insertChecker(browser);
+        placeOrderBtn.click();
         JXBrowserHelper.waitUntilNewPageLoaded(browser);
-        WaitTime.Short.execute();
+        WaitTime.Shorter.execute();
         DOMElement forceDuplicate = JXBrowserHelper.selectElementByName(browser, "forcePlaceOrder");
         if (forceDuplicate != null) {
             JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
+            JXBrowserHelper.insertChecker(browser);
             forceDuplicate.click();
             JXBrowserHelper.waitUntilNewPageLoaded(browser);
+            WaitTime.Shorter.execute();
         }
-        WaitTime.Short.execute();
+
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
 
     }

@@ -41,6 +41,7 @@ public class OrderPlacedSuccessPage extends FulfillmentPage {
             LOGGER.debug("Order placed succussfully, with order id {}. Now heading to {}", orderId, url);
             JXBrowserHelper.loadPage(browser, url);
         } else {
+            JXBrowserHelper.insertChecker(browser);
             viewLink.click();
             JXBrowserHelper.waitUntilNewPageLoaded(browser);
         }

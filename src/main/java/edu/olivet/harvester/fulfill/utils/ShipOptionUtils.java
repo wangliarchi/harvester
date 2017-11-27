@@ -91,11 +91,8 @@ public class ShipOptionUtils {
             if (Remark.fastShipping(order.remark) && !it.isExpedited()) {
                 return false;
             }
-            if (OrderValidator.skipCheck(order, SkipValidation.EDD) || Remark.isDN(order.remark)) {
-                return true;
-            }
+            return OrderValidator.skipCheck(order, SkipValidation.EDD) || Remark.isDN(order.remark) || latestDate.before(orderEdd) || daysExceedOrderEdd <= maxDays;
 
-            return latestDate.before(orderEdd) || daysExceedOrderEdd <= maxDays;
         }).collect(Collectors.toList());
 
 

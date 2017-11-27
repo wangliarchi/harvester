@@ -122,8 +122,7 @@ public class ShippingOption {
 
                 }
 
-                Date date = calendar.getTime();
-                return date;
+                return calendar.getTime();
             } catch (Exception e) {
                 //
             }

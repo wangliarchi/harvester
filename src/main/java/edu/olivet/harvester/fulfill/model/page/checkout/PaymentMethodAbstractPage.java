@@ -87,7 +87,7 @@ public abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract 
             WaitTime.Shortest.execute();
 
             List<DOMElement> creditCardErrors = JXBrowserHelper.selectElementsByCssSelector(browser, "#cc-errors .error-message");
-            creditCardErrors.removeIf(it -> JXBrowserHelper.isHidden(it));
+            creditCardErrors.removeIf(JXBrowserHelper::isHidden);
 
             if (CollectionUtils.isNotEmpty(creditCardErrors)) {
                 throw new BusinessException(creditCardErrors.get(0).getInnerText());

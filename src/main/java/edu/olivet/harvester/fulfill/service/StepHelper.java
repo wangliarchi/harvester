@@ -3,7 +3,6 @@ package edu.olivet.harvester.fulfill.service;
 import com.google.inject.Inject;
 import com.teamdev.jxbrowser.chromium.Browser;
 import edu.olivet.foundations.utils.BusinessException;
-import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.service.flowfactory.FlowState;
 import edu.olivet.harvester.fulfill.service.flowfactory.Step;
@@ -52,6 +51,8 @@ public class StepHelper {
     AmazonPrimeAd amazonPrimeAd;
     @Inject
     AfterOrderPlaced afterOrderPlaced;
+
+    @Inject Login login;
 
     public Step detectStep(FlowState state) {
 
@@ -116,6 +117,9 @@ public class StepHelper {
                 return amazonPrimeAd;
             case OrderPlacedSuccessPage:
                 return afterOrderPlaced;
+
+            case LoginPage:
+                return login;
             default:
                 return null;
 

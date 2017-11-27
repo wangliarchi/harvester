@@ -1,6 +1,9 @@
 package edu.olivet.harvester.fulfill.model.page.checkout;
 
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
+import com.teamdev.jxbrowser.chromium.dom.DOMInputElement;
+import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
@@ -23,14 +26,26 @@ public class ShippingAddressMultiPage extends ShippingAddressAbstract {
         fillNewAddressForm(order);
 
         DOMElement shipToBtn = JXBrowserHelper.selectElementByName(browser, "shipToThisAddress");
+        JXBrowserHelper.insertChecker(browser);
         shipToBtn.click();
-
-        JXBrowserHelper.waitUntilNotFound(browser, SELECTOR_FULL_NAME);
+        JXBrowserHelper.waitUntilNewPageLoaded(browser);
 
         DOMElement errorMsg = JXBrowserHelper.selectElementByCssSelector(browser, "#identity-add-new-address #addressIMB");
         if (errorMsg != null) {
-            LOGGER.error("Wrong addres " + errorMsg.getInnerText());
+            throw  new BusinessException("Wrong address " + errorMsg.getInnerText());
         }
 
+        if(JXBrowserHelper.selectElementByCssSelector(browser,"#AVS") != null) {
+            DOMInputElement selectOrigin = (DOMInputElement) JXBrowserHelper.selectElementByName(browser, "addr");
+            if (selectOrigin != null && JXBrowserHelper.isVisible(selectOrigin)) {
+                selectOrigin.setChecked(true);
+            }
+
+            JXBrowserHelper.insertChecker(browser);
+            JXBrowserHelper.selectElementByName(browser,"useSelectedAddress").click();
+
+            WaitTime.Shortest.execute();
+            JXBrowserHelper.waitUntilNewPageLoaded(browser);
+        }
     }
 }
