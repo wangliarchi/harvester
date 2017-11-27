@@ -28,7 +28,7 @@ public class DisplayContentDialog extends JDialog {
 
         this.setTitle(action.label());
         try {
-            String content = null;
+            String content;
 
             Language lang = Language.current();
             String postfix = lang == Language.ZH_CN ? StringUtils.EMPTY : ("_" + lang.locale().toString());
@@ -69,11 +69,7 @@ public class DisplayContentDialog extends JDialog {
         });
 
         okButton.setText(UIText.label("label.ok"));
-        okButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                doClose();
-            }
-        });
+        okButton.addActionListener(evt -> doClose());
 
         if (SystemUtils.IS_OS_WINDOWS) {
             textArea.setFont(new Font(okButton.getFont().getName(), Font.PLAIN, Constants.TEXT_FONT_SIZE));

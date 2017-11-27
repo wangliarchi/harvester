@@ -82,6 +82,7 @@ public class OrderSubmitter {
         if (!DUPLICATION_CHECK_CACHE.containsKey(settings.getSpreadsheetId())) {
             Spreadsheet spreadsheet = sheetService.getSpreadsheet(settings.getSpreadsheetId());
             List<Order> duplicatedOrders = orderService.findDuplicates(spreadsheet);
+            DUPLICATION_CHECK_CACHE.put(settings.getSpreadsheetId(),true);
             if (CollectionUtils.isNotEmpty(duplicatedOrders)) {
                 String msg = String.format("%s duplicated orders found in %s, %s", duplicatedOrders.size(), spreadsheet.getProperties().getTitle(),
                         StringUtils.join(duplicatedOrders.stream().map(it -> it.order_id + " @ " + it.sheetName).collect(Collectors.toSet()).toArray(new String[duplicatedOrders.size()]), ", "));
@@ -134,7 +135,7 @@ public class OrderSubmitter {
             if (dialog.isValidReturn()) {
                 List<ItemCompareResult> sync = dialog.getIsbn2Sync();
                 sync.forEach(it -> {
-                    if (it.isManualCheckPass() == false) {
+                    if (!it.isManualCheckPass()) {
                         messageListener.addMsg(it.getOrder(), "Failed item name check. " + it.getPreCheckReport(), InformationLevel.Negative);
                         validOrders.remove(it.getOrder());
                     }
@@ -200,12 +201,12 @@ public class OrderSubmitter {
             }
             //dailyBudgetHelper.getRemainingBudget(spreadsheetId, new Date());
 
-            messageListener.addMsg(order, String.format("start submitting. Buyer account %s, marketplace %s", buyerPanel.getBuyer().getEmail(), buyerPanel.getCountry().baseUrl()));
-
+            //messageListener.addMsg(order, String.format("start submitting. Buyer account %s, marketplace %s", buyerPanel.getBuyer().getEmail(), buyerPanel.getCountry().baseUrl()));
+            order.originalRemark = order.remark;
             orderFlowEngine.process(order, buyerPanel);
 
             if (StringUtils.isNotBlank(order.order_number)) {
-                messageListener.addMsg(order, "order fulfilled successfully. took " + Strings.formatElapsedTime(start));
+                messageListener.addMsg(order, "order fulfilled successfully. " + order.basicSuccessRecord() + ", took " + Strings.formatElapsedTime(start));
             }
 
 

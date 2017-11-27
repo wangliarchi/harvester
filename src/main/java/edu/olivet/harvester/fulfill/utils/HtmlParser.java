@@ -118,7 +118,7 @@ public class HtmlParser {
     }
 
     public static List<String> texts(Elements elements) {
-        List<String> results = new ArrayList<String>(elements.size());
+        List<String> results = new ArrayList<>(elements.size());
         for (Element element : elements) {
             results.add(element.text().trim());
         }

@@ -22,7 +22,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Address {
-    private String name;
+    private String name = "";
     private String address1;
     private String address2 = "";
     private String city;
@@ -60,16 +60,37 @@ public class Address {
         address.setAddress1(order.ship_address_1);
         address.setAddress2(order.ship_address_2);
         address.setZip(order.ship_zip);
-        address.setName(order.recipient_name);
-        address.setPhoneNumber(order.ship_phone_number);
+        address.setName(order.recipient_name.replaceAll("\"", "").replaceAll("&#34;",""));
+        if("unlisted".equalsIgnoreCase(order.ship_phone_number)) {
+            address.setPhoneNumber("321-123-456");
+        } else{
+            address.setPhoneNumber(order.ship_phone_number);
+        }
+
+        return address;
+    }
+
+    public  Address copy() {
+        Address address = new Address();
+        address.setName(name);
+        address.setAddress1(address1);
+        address.setAddress2(address2);
+        address.setCity(city);
+        address.setState(state);
+        address.setCountry(country);
+        address.setZip(getZip());
+        address.setPhoneNumber(phoneNumber);
+
         return address;
     }
 
     public static Address USFwdAddress() {
-        Address address = JSON.parseObject(Configs.read(Config.USForwardAddress.fileName()), Address.class);
-        return address;
+        return JSON.parseObject(Configs.read(Config.USForwardAddress.fileName()), Address.class);
     }
 
+    public boolean isUSAddress() {
+        return StringUtils.equalsAnyIgnoreCase(country,"US","United States");
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -128,11 +149,10 @@ public class Address {
     }
 
     public String getRecipient() {
-        String r = name.replace(RuntimeSettings.load().getNoInvoiceText(), "")
+
+        return name.replace(RuntimeSettings.load().getNoInvoiceText(), "")
                 .replaceAll(RegexUtils.Regex.PUNCTUATION.val(), "")
                 .replaceAll(" ", "");
-
-        return r;
     }
 
     public Set<String> addressSet() {

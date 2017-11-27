@@ -43,13 +43,13 @@ public class OrderAddressUtils {
 
 
     public static String recipientName(Order order) {
-        String fullName = order.recipient_name;
+        String fullName = order.recipient_name.replaceAll("\"","").replaceAll("&#34;","");
         // 如果拼接的姓名超过亚马逊允许上限，且当前价格差异大于20，可以不加上No Invoice，但需要补上Remark
         // 存在Seller为Prime但标识了a的情况，此时仍然需要当做Prime的情况处理Full Name
         if (!order.sellerIsPrime()) {
-            String s = order.recipient_name + RuntimeSettings.load().getNoInvoiceText();
+            String s = fullName + RuntimeSettings.load().getNoInvoiceText();
             int max = maxNameLength(OrderCountryUtils.getFulfillementCountry(order));
-            fullName = s.length() > max ? order.recipient_name : s;
+            fullName = s.length() > max ? fullName : s;
 
             if (s.length() > max && order.getPriceDiff() > 20.0f) {
                 order.remark = Remark.EMAIL_SELLER_NO_INVOICE.appendTo(order.remark);

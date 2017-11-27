@@ -8,6 +8,8 @@ import edu.olivet.foundations.utils.Configs;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.utils.Settings;
+import edu.olivet.harvester.utils.Settings.Configuration;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,16 +44,30 @@ public class TabbedBuyerPanel extends JTabbedPane {
         this.addTab(country, buyer);
     }
 
+    public void addFirstBuyerAccountTab() {
+        Settings settings = Settings.load();
+        for(Configuration config : settings.getConfigs()){
+            if (config.getPrimeBuyer() != null && StringUtils.isNotBlank(config.getPrimeBuyer().getEmail())) {
+                this.addTab(config.getCountry(), config.getPrimeBuyer());
+                return;
+            }
+            if (config.getBuyer() != null && StringUtils.isNotBlank(config.getBuyer().getEmail())) {
+                this.addTab(config.getCountry(), config.getBuyer());
+                return;
+            }
+
+        }
+    }
     public void addAllBuyerAccountTabs() {
         Settings settings = Settings.load();
         settings.getConfigs().forEach(config -> {
-
-            if (config.getBuyer() != null) {
-                this.addTab(config.getCountry(), config.getBuyer());
-            }
-            if (config.getPrimeBuyer() != null) {
+            if (config.getPrimeBuyer() != null && StringUtils.isNotBlank(config.getPrimeBuyer().getEmail())) {
                 this.addTab(config.getCountry(), config.getPrimeBuyer());
             }
+            if (config.getBuyer() != null && StringUtils.isNotBlank(config.getBuyer().getEmail())) {
+                this.addTab(config.getCountry(), config.getBuyer());
+            }
+
         });
     }
 
@@ -114,7 +130,7 @@ public class TabbedBuyerPanel extends JTabbedPane {
     }
 
     public void resetZoomLevel() {
-        zoomLevel = (getWidth() - 1000) > 0 ? 1 : (getWidth() / 1000 - 2.1);
+        //zoomLevel = (getWidth() - 1000) > 0 ? 1 : (getWidth() / 1000 - 2.1);
         zoomLevel = -1;
         buyerPanels.forEach((index, buyerPanel) -> buyerPanel.getBrowserView().getBrowser().setZoomLevel(zoomLevel));
     }

@@ -81,7 +81,7 @@ public class OrderFulfillmentRecord extends PrimaryKey implements ArrayConvertab
     public static final String[] COLUMNS = {"Fulfill Date", "OrderId", "sku", "quantityPurchased", "quantityBought", "orderNumber", "cost", "buyerAccount",
             "lastCode", "purchaseDate", "isbn", "seller", "character", "condition", "spreadsheetId", "sheetName","shippingAddress","fulfilledAddress","fulfilledASIN"};
 
-    public static final int[] WIDTHS = {100, 100, 50, 20, 20, 70, 50, 100, 30, 100, 60, 60, 10, 50, 100, 50,150,150,50};
+    public static final int[] WIDTHS = {100, 100, 50, 20, 20, 70, 50, 100, 30, 100, 60, 60, 10, 50, 100, 50,250,250,50};
 
 
 }

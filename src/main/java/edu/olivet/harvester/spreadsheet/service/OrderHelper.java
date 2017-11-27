@@ -159,10 +159,10 @@ public class OrderHelper {
         }
 
         int count = Integer.parseInt(actualQuant);
-        int quantLeft = Integer.parseInt(order.quantity_purchased) - count;
+        int qtyLeft = Integer.parseInt(order.quantity_purchased) - count;
 
         order.quantity_fulfilled = String.valueOf(count);
-        order.remark = Remark.appendPurchasedQuantityNotEnough(order.remark, count, quantLeft);
+        order.remark = Remark.appendPurchasedQuantityNotEnough(order.remark, count, qtyLeft);
     }
 
 

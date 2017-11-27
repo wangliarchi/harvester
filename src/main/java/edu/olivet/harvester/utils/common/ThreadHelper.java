@@ -25,7 +25,7 @@ public class ThreadHelper {
         for (int i = 0; i < threadCount; i++) {
             int from = i * step;
             if (from >= size) {
-                result.add(new ArrayList<T>(0));
+                result.add(new ArrayList<>(0));
                 continue;
             }
 

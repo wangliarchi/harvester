@@ -10,7 +10,6 @@ import edu.olivet.foundations.amazon.Account.AccountType;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Constants;
-import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.utils.JXBrowserHelper;
@@ -93,6 +92,8 @@ public class LoginVerificationService {
             DOMElement password = JXBrowserHelper.selectElementByName(browser, "password");
             ((DOMFormControlElement) password).setValue(buyer.getPassword());
             WaitTime.Short.execute();
+
+            JXBrowserHelper.insertChecker(browser);
             JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, "#passwordNext").click();
             JXBrowserHelper.waitUntilNewPageLoaded(browser);
         }

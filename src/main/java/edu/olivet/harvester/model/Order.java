@@ -4,11 +4,8 @@ import com.alibaba.fastjson.annotation.JSONField;
 import com.google.common.base.Objects;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.db.Keyable;
-import edu.olivet.foundations.utils.BusinessException;
-import edu.olivet.foundations.utils.Constants;
-import edu.olivet.foundations.utils.Dates;
+import edu.olivet.foundations.utils.*;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
-import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.model.OrderEnums.OrderColor;
 import edu.olivet.harvester.utils.Settings;
@@ -168,11 +165,18 @@ public class Order implements Keyable {
     private String fulfilledASIN;
 
     /**
+     * 做單過程中remark 可能變化
+     */
+    @JSONField(serialize = false)
+    public String originalRemark;
+
+    /**
      * Determine whether a order number is valid or not by detecting whether it matches Amazon, BetterWorld or Ingram Order Number Pattern
      */
-    private boolean orderNumberValid() {
+    public boolean orderNumberValid() {
         String orderNo = StringUtils.defaultString(this.order_number).trim();
-        return Regex.AMAZON_ORDER_NUMBER.isMatched(orderNo) ||
+
+        return StringUtils.isNotBlank(RegexUtils.getMatched(orderNo,Regex.AMAZON_ORDER_NUMBER)) ||
                 Regex.EBAY_ORDER_NUMBER.isMatched(orderNo) ||
                 Regex.BW_ORDER_NUMBER.isMatched(orderNo);
     }
@@ -192,6 +196,9 @@ public class Order implements Keyable {
     public boolean fulfilled() {
         return !this.colorIsGray() && !this.canceledBySeller() &&
                 (this.orderNumberValid() ||
+                        StringUtils.containsIgnoreCase(this.status,"fi") ||
+                        Strings.containsAnyIgnoreCase(this.remark, FORWARDED) ||
+                        Strings.containsAnyIgnoreCase(this.status, FORWARDED) ||
                         Strings.containsAnyIgnoreCase(this.cost, FORWARDED) ||
                         Strings.containsAnyIgnoreCase(this.order_number, FORWARDED) ||
                         Strings.containsAnyIgnoreCase(this.account, FORWARDED));
@@ -446,6 +453,13 @@ public class Order implements Keyable {
                 StringUtils.defaultString(Address.loadFromOrder(this).toString()) + Constants.TAB +
                 StringUtils.defaultString(this.fulfilledAddress.toString()) + Constants.TAB +
                 StringUtils.defaultString(this.fulfilledASIN) + Constants.TAB;
+    }
+
+    public String basicSuccessRecord() {
+        return StringUtils.defaultString(this.cost) + Constants.TAB +
+                StringUtils.defaultString(this.order_number) + Constants.TAB +
+                StringUtils.defaultString(this.account) + Constants.TAB +
+                StringUtils.defaultString(this.last_code);
     }
 
 

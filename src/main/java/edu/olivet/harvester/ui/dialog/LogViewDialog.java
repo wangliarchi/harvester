@@ -10,6 +10,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -189,7 +190,7 @@ public class LogViewDialog extends JDialog {
             private static final long serialVersionUID = -7996493405307614317L;
 
             @Override
-            public String getToolTipText(MouseEvent e) {
+            public String getToolTipText(@NotNull MouseEvent e) {
                 Point p = e.getPoint();
                 int rowIndex = rowAtPoint(p);
                 int colIndex = columnAtPoint(p);
@@ -261,7 +262,7 @@ public class LogViewDialog extends JDialog {
     }
 
     private Object[][] getStatLogData() {
-        java.util.List<String> logs = null;
+        java.util.List<String> logs;
         try {
             File file = ConfigEnums.Log.Statistic.file();
             if (!file.exists()) {
@@ -279,7 +280,7 @@ public class LogViewDialog extends JDialog {
 
         Collections.reverse(logs);
 
-        java.util.List<Object[]> list = new ArrayList<Object[]>(logs.size());
+        java.util.List<Object[]> list = new ArrayList<>(logs.size());
         for (String s : logs) {
             String[] arr = StringUtils.splitPreserveAllTokens(s, '\t');
             if (arr.length != STAT_COLUMN_NAMES.length - 1) {
@@ -339,7 +340,7 @@ public class LogViewDialog extends JDialog {
     private ContextPredicate contextPredicate = new ContextPredicate();
 
     private Object[][] getSuccessLogData() {
-        List<String> logs = null;
+        List<String> logs;
         try {
             File file = ConfigEnums.Log.Success.file();
             if (!file.exists()) {

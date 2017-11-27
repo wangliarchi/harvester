@@ -8,6 +8,7 @@ import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.utils.Settings.Configuration;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -193,12 +194,20 @@ public class ConfigurationPanel extends JPanel {
             mwsAccessKeyFld.getText().trim(), mwsSecretKeyFld.getText().trim(), country.marketPlaceId()));
 
         cfg.setBookDataSourceUrl(AppScript.getSpreadId(bookDataSourceUrlFld.getText().trim()));
-        cfg.setPrimeBuyer(new Account(primeBuyerFld.getText(), AccountType.PrimeBuyer));
-        cfg.setBuyer(new Account(buyerFld.getText(), AccountType.Buyer));
+        if(StringUtils.isNotBlank(primeBuyerFld.getText())) {
+            cfg.setPrimeBuyer(new Account(primeBuyerFld.getText(), AccountType.PrimeBuyer));
+        }
+        if(StringUtils.isNotBlank(buyerFld.getText())) {
+            cfg.setBuyer(new Account(buyerFld.getText(), AccountType.Buyer));
+        }
 
         cfg.setProductDataSourceUrl(AppScript.getSpreadId(productDataSourceUrlFld.getText().trim()));
-        cfg.setProdPrimeBuyer(new Account(prodPrimeBuyerFld.getText(), AccountType.PrimeBuyer));
-        cfg.setProdBuyer(new Account(prodBuyerFld.getText(), AccountType.Buyer));
+        if(StringUtils.isNotBlank(prodPrimeBuyerFld.getText())) {
+            cfg.setProdPrimeBuyer(new Account(prodPrimeBuyerFld.getText(), AccountType.PrimeBuyer));
+        }
+        if(StringUtils.isNotBlank(prodBuyerFld.getText())) {
+            cfg.setProdBuyer(new Account(prodBuyerFld.getText(), AccountType.Buyer));
+        }
         cfg.setEbatesBuyer(new Account(ebatesBuyerFld.getText(), AccountType.Buyer));
 
         cfg.setUserCode(userCodeFld.getText().trim());

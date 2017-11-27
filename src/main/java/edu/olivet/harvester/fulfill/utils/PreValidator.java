@@ -25,10 +25,10 @@ public class PreValidator {
 
     public static List<ItemCompareResult> compareItemNames4Orders(List<Order> orders) {
         long start = System.currentTimeMillis();
-        final List<ItemCompareResult> results = new ArrayList<ItemCompareResult>(orders.size());
+        final List<ItemCompareResult> results = new ArrayList<>(orders.size());
         List<List<Order>> list = ThreadHelper.assign(orders, COMPARE_JOB_NUMBER);
 
-        List<CompareItemNameWorker> jobs = new ArrayList<CompareItemNameWorker>(COMPARE_JOB_NUMBER);
+        List<CompareItemNameWorker> jobs = new ArrayList<>(COMPARE_JOB_NUMBER);
         for (List<Order> assignedOrders : list) {
             if (CollectionUtils.isEmpty(assignedOrders)) {
                 continue;

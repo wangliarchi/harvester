@@ -19,6 +19,7 @@ public class AmazonPrimeAdPage extends FulfillmentPage implements PageObject {
 
         DOMElement noLink = JXBrowserHelper.selectElementByCssSelector(browser, "#mom-no-thanks");
         if (noLink != null && JXBrowserHelper.isVisible(noLink)) {
+            JXBrowserHelper.insertChecker(browser);
             noLink.click();
             JXBrowserHelper.waitUntilNewPageLoaded(browser);
             return;
@@ -26,6 +27,7 @@ public class AmazonPrimeAdPage extends FulfillmentPage implements PageObject {
 
         noLink = JXBrowserHelper.selectElementByCssSelector(browser, ".prime-popover-actions button.primary");
         if (noLink != null && JXBrowserHelper.isVisible(noLink)) {
+            JXBrowserHelper.insertChecker(browser);
             noLink.click();
             JXBrowserHelper.waitUntilNewPageLoaded(browser);
         }

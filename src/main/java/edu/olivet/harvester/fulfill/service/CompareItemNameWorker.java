@@ -29,7 +29,7 @@ public class CompareItemNameWorker extends SwingWorker<List<ItemCompareResult>, 
     protected List<ItemCompareResult> doInBackground() throws Exception {
         Thread.currentThread().setName("CompareItemName");
 
-        List<ItemCompareResult> results = new ArrayList<ItemCompareResult>(orders.size());
+        List<ItemCompareResult> results = new ArrayList<>(orders.size());
         ItemValidator itemValidator = ApplicationContext.getBean(ItemValidator.class);
         for (Order order : orders) {
             String title = ISBNUtils.getTitle(OrderCountryUtils.getFulfillementCountry(order), order.isbn);

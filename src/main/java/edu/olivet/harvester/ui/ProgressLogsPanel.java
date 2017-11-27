@@ -11,13 +11,10 @@ import org.apache.commons.lang3.SystemUtils;
 import javax.swing.*;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultCaret;
 import javax.swing.text.Document;
 import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-
-import static javax.swing.text.DefaultCaret.ALWAYS_UPDATE;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/6/17 7:32 PM

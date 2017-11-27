@@ -132,7 +132,7 @@ public class ItemValidator {
     }
 
     public List<String> convert2Words(String[] arr) {
-        List<String> result = new ArrayList<String>(arr.length);
+        List<String> result = new ArrayList<>(arr.length);
         for (String t : arr) {
             // 去掉停词
             if (stopWords.get(t) == null) {

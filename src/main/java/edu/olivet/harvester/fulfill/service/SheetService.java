@@ -7,6 +7,7 @@ import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.harvester.fulfill.utils.OrderStatusUtils;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums.OrderColor;
+import edu.olivet.harvester.model.Remark;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import org.apache.commons.collections4.CollectionUtils;
@@ -54,10 +55,19 @@ public class SheetService extends SheetAPI {
             throw new BusinessException(e);
         }
 
-        appScript.markColor(spreadsheetId,order.sheetName,row, OrderColor.Finished);
+        updateFulfilledOrderBackgroundColor(spreadsheetId, order, row);
+
+
     }
 
 
+    public void updateFulfilledOrderBackgroundColor(String spreadsheetId, Order order, int row) {
+        if (Remark.quantityDiffered(order.remark)) {
+            appScript.markColor(spreadsheetId, order.sheetName, row, OrderColor.InvalidByCode);
+        } else {
+            appScript.markColor(spreadsheetId, order.sheetName, row, OrderColor.Finished);
+        }
+    }
 
     public void fillUnsuccessfulMsg(String spreadsheetId, Order order, String msg) {
         //need to relocate order row on google sheet, as it may be arranged during order fulfillment process.
@@ -76,7 +86,7 @@ public class SheetService extends SheetAPI {
             throw new BusinessException(e);
         }
 
-        appScript.markColor(spreadsheetId,order.sheetName,row, OrderColor.InvalidByCode);
+        appScript.markColor(spreadsheetId, order.sheetName, row, OrderColor.InvalidByCode);
     }
 
 
@@ -149,16 +159,21 @@ public class SheetService extends SheetAPI {
 
     public int locateOrder(Order order) {
         //id, sku, seller, price, remark
-        List<Order> orders = appScript.readOrders(order.spreadsheetId,order.sheetName);
-        for(Order o : orders) {
-            if(order.equalsLite(o)) {
+        List<Order> orders = appScript.readOrders(order.spreadsheetId, order.sheetName);
+        orders.removeIf(it->!it.equalsLite(order));
+        if(CollectionUtils.isEmpty(orders)) {
+            throw new BusinessException("Cant find order " + order + "on order sheet");
+        }
+
+        for(Order o: orders) {
+            if(StringUtils.equalsAnyIgnoreCase(o.remark,order.remark, order.originalRemark)) {
                 return o.row;
             }
         }
+
         throw new BusinessException("Cant find order " + order + "on order sheet");
+
     }
-
-
 
 
 }

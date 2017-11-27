@@ -3,6 +3,7 @@ package edu.olivet.harvester.fulfill.service.steps;
 import com.google.inject.Inject;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.harvester.fulfill.model.page.LoginPage;
+import edu.olivet.harvester.fulfill.service.StepHelper;
 import edu.olivet.harvester.fulfill.service.flowfactory.FlowState;
 import edu.olivet.harvester.fulfill.service.flowfactory.Step;
 import edu.olivet.harvester.utils.JXBrowserHelper;
@@ -28,13 +29,17 @@ public class Login extends Step {
     @Inject
     ProcessToCheckout processToCheckout;
 
+    @Inject StepHelper stepHelper;
+
     public Step createDynamicInstance(FlowState state) {
         state.setPrevStep(this);
 
         if (this.prevStep != null && this.prevStep.stepName.equals(ProcessToCheckout.class.getName())) {
             return processToCheckout;
         }
-
+        if (this.prevStep != null) {
+            return stepHelper.detectStep(state);
+        }
         //check if there are items in cart
         DOMElement navCartCountSpan = JXBrowserHelper.selectElementByCssSelector(state.getBuyerPanel().getBrowserView().getBrowser(), "#nav-cart-count");
         if (!"0".equals(navCartCountSpan.getInnerText())) {

@@ -8,7 +8,7 @@ import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.model.page.checkout.OrderReviewOnePage;
 import edu.olivet.harvester.fulfill.model.page.checkout.PaymentMethodOnePage;
 import edu.olivet.harvester.fulfill.model.page.checkout.ShippingAddressOnePage;
-import edu.olivet.harvester.fulfill.service.addressvalidator.USPSAddressValidator;
+import edu.olivet.harvester.fulfill.service.AddressValidatorService;
 import edu.olivet.harvester.fulfill.service.flowfactory.FlowState;
 import edu.olivet.harvester.fulfill.service.flowfactory.Step;
 import edu.olivet.harvester.fulfill.utils.OrderValidator;
@@ -22,7 +22,7 @@ public class ReviewOrder extends Step {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReviewOrder.class);
 
     @Inject
-    USPSAddressValidator uspsAddressValidator;
+    AddressValidatorService addressValidatorService;
 
     //dispatcher method
     protected void process(FlowState state) {
@@ -52,7 +52,7 @@ public class ReviewOrder extends Step {
         for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
             OrderReviewOnePage orderReviewOnePage = new OrderReviewOnePage(state.getBuyerPanel());
             try {
-                orderReviewOnePage.reviewShippingAddress(uspsAddressValidator);
+                orderReviewOnePage.reviewShippingAddress(addressValidatorService);
                 LOGGER.info("Address passed review");
                 return;
             } catch (Exception e) {

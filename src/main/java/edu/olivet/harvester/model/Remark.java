@@ -625,10 +625,7 @@ public enum Remark {
             return false;
         }
 
-        if(remark.contains("dn")) {
-            return true;
-        }
-        return false;
+        return remark.contains("dn");
     }
     public static void main(String[] args) {
         for (Country country : Country.values()) {

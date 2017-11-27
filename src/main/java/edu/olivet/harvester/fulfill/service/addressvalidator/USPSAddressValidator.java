@@ -60,9 +60,16 @@ public class USPSAddressValidator implements AddressValidator {
             boolean result = corrected.equals(entered);
 
             //log error if failed
-            if (result == false) {
+            if (!result) {
                 LOGGER.error("Address failed verification. Entered " + entered + ", original " + old + ", USPS returned " + corrected);
                 errorAlertService.sendMessage("Address failed verification", "Entered\n " + entered + "\n\n Original\n " + old + "\n\nUSPS returned\n" + corrected);
+
+                if(StringUtils.isNotBlank(old.getAddress2())) {
+                    Address copy = old.copy();
+                    copy.setAddress2("APT "+copy.getAddress2());
+                    corrected = getCorrectedAddress(copy);
+                    result = corrected.equals(entered);
+                }
             }
 
             return result;
@@ -79,11 +86,6 @@ public class USPSAddressValidator implements AddressValidator {
         String endpoint = USPS_ADDRESS_VRF_ENDPOINT + Strings.encode(xmlRequest);
         String response = get(endpoint);
         //LOGGER.info(response);
-        if (StringUtils.contains(response, "The address you entered was found but more information is needed")) {
-            address.setAddress2("APT " + address.getAddress2());
-            throw new BusinessException("The address you entered was found but more information is needed. " + response);
-        }
-
 
         Address correctedAddress = parseResponse(response);
         correctedAddress.setName(address.getName());
@@ -180,20 +182,21 @@ public class USPSAddressValidator implements AddressValidator {
         // Entered Address(address1=10248 PRINCE PL APT T1, address2=, city=UPPER MARLBORO, state=MD, zip=20774-1220, zip5=20774, zip4=1220, country=United States),
         //origin Address(address1=10248 Prince Place, address2=T1, city=Upper Marlboro, state=MD, zip=20774, zip5=20774, zip4=, country=United States)
         //3142 W George St C3, address2=, city=Chicago, state=IL, zip=60618, zip5=60618, zip4=, country=United States
+        //131 East 69th Street	3A	New York	10021
         Address address = new Address();
-        address.setAddress1("7852 WEST 600 NORTH");
-        address.setAddress2("");
-        address.setCity("PETERSBORO");
-        address.setState("UT");
-        address.setZip("84325");
+        address.setAddress1("131 East 69th Street");
+        address.setAddress2("3A");
+        address.setCity("New York");
+        address.setState("NY");
+        address.setZip("10021");
         address.setCountry("United States");
 
         Address enteredAddress = new Address();
-        enteredAddress.setAddress1("7852 W 600 N");
+        enteredAddress.setAddress1("131 E 69TH ST 3A");
         enteredAddress.setAddress2("");
-        enteredAddress.setCity("MENDON");
-        enteredAddress.setState("UT");
-        enteredAddress.setZip("84325-9706");
+        enteredAddress.setCity("NEW YORK");
+        enteredAddress.setState("NY");
+        enteredAddress.setZip("10021-5158");
         enteredAddress.setCountry("United States");
 
         System.out.println(validator.verify(address, enteredAddress));

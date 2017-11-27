@@ -58,6 +58,7 @@ public class ShoppingCartPage extends FulfillmentPage {
         }
         LOGGER.info("Current at {} - {}", browser.getTitle(), browser.getURL());
         DOMElement checkoutBtn = JXBrowserHelper.selectElementByName(browser, "proceedToCheckout");
+        JXBrowserHelper.insertChecker(browser);
         checkoutBtn.click();
         JXBrowserHelper.waitUntilNewPageLoaded(browser);
         LOGGER.info("Current at {} - {}", browser.getTitle(), browser.getURL());
