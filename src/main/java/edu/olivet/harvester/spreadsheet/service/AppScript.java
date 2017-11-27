@@ -80,9 +80,10 @@ public class AppScript {
 
     public Spreadsheet afterSpreadsheetLoaded(Spreadsheet spreadsheet) {
         try {
-            spreadsheet.setSpreadsheetCountry(Settings.load().getSpreadsheetCountry(spreadsheet.getSpreadsheetId()));
-            spreadsheet.setSpreadsheetType(Settings.load().getSpreadsheetType(spreadsheet.getSpreadsheetId()));
-        } catch (BusinessException e) {
+            Settings settings = Settings.load();
+            spreadsheet.setSpreadsheetCountry(settings.getSpreadsheetCountry(spreadsheet.getSpreadsheetId()));
+            spreadsheet.setSpreadsheetType(settings.getSpreadsheetType(spreadsheet.getSpreadsheetId()));
+        } catch (Exception e) {
             //ignore
         }
 
