@@ -31,7 +31,8 @@ public class ShippingMethodMultiPage extends ShippingAddressAbstract {
             throw new BusinessException(String.format("Continue button on select shipping option page not found. Current at %s- %s", browser.getTitle(), browser.getURL()));
         }
 
-
+        JXBrowserHelper.insertChecker(browser);
         continueBtn.click();
+        JXBrowserHelper.waitUntilNewPageLoaded(browser);
     }
 }

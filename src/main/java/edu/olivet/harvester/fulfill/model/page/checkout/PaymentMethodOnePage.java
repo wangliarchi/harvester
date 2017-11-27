@@ -38,11 +38,12 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
         selectCreditCard(order);
 
         //continue;
+        //JXBrowserHelper.insertChecker(browser);
         JXBrowserHelper.selectElementByCssSelector(browser, CONTINUE_BTN_SELECTOR).click();
 
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
-
-        JXBrowserHelper.wait(browser, By.cssSelector("#payment-information"));
+        //JXBrowserHelper.waitUntilNewPageLoaded(browser);
+        JXBrowserHelper.waitUntilNotFound(browser, CONTINUE_BTN_SELECTOR);
     }
 
 

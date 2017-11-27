@@ -49,6 +49,8 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
             throw new BusinessException("You don't have enough fund to process this order. Need $" + grandTotal.toUSDAmount() + ", only have $" + String.format("%.2f", remainingBudget));
         }
 
+        order.cost = grandTotal.toUSDAmount().toPlainString();
+
 
     }
 

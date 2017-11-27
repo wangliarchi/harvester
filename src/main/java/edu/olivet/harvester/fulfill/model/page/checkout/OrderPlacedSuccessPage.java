@@ -37,8 +37,9 @@ public class OrderPlacedSuccessPage extends FulfillmentPage {
 
         if (StringUtils.isNotBlank(orderId)) {
             order.order_number = orderId;
+            order.account = buyer.getEmail();
             String url = String.format("%s/gp/css/summary/edit.html/ref=typ_rev_edit?ie=UTF8&orderID=%s", buyerPanel.getCountry().baseUrl(), orderId);
-            LOGGER.debug("Order placed succussfully, with order id {}. Now heading to {}", orderId, url);
+            LOGGER.debug("Order placed successfully, with order id {}. Now heading to {}", orderId, url);
             JXBrowserHelper.loadPage(browser, url);
         } else {
             JXBrowserHelper.insertChecker(browser);

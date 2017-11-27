@@ -10,9 +10,12 @@ import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.model.OrderFulfillmentRecord;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
+import edu.olivet.harvester.fulfill.model.page.LoginPage;
+import edu.olivet.harvester.fulfill.model.page.checkout.CheckoutEnum.CheckoutPage;
 import edu.olivet.harvester.fulfill.model.page.checkout.OrderPlacedSuccessPage;
 import edu.olivet.harvester.fulfill.model.page.checkout.PlacedOrderDetailPage;
 import edu.olivet.harvester.fulfill.service.SheetService;
+import edu.olivet.harvester.fulfill.service.StepHelper;
 import edu.olivet.harvester.fulfill.service.flowfactory.FlowState;
 import edu.olivet.harvester.fulfill.service.flowfactory.Step;
 import edu.olivet.harvester.fulfill.utils.DailyBudgetHelper;
@@ -44,7 +47,7 @@ public class AfterOrderPlaced extends Step {
             readOrderInfo(state);
         } catch (Exception e) {
             LOGGER.error("Failed to read placed order info.", e);
-            return;
+            //return;
         }
 
         RuntimeSettings settings = RuntimeSettings.load();
@@ -73,11 +76,17 @@ public class AfterOrderPlaced extends Step {
         }
     }
 
+    @Inject StepHelper stepHelper;
     @Repeat(expectedExceptions = BusinessException.class)
     private void readOrderInfo(FlowState state) {
         //navigate to order detail page
         OrderPlacedSuccessPage orderPlacedSuccessPage = new OrderPlacedSuccessPage(state.getBuyerPanel());
         orderPlacedSuccessPage.execute(state.getOrder());
+
+        if(stepHelper.detectCurrentPage(state) == CheckoutPage.LoginPage) {
+            LoginPage loginPage = new LoginPage(state.getBuyerPanel());
+            loginPage.execute(state.getOrder());
+        }
 
         //read data from order detail page to order object
         PlacedOrderDetailPage placedOrderDetailPage = new PlacedOrderDetailPage(state.getBuyerPanel());

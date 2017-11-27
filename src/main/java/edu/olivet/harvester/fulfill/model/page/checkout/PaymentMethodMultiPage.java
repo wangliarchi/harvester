@@ -29,8 +29,10 @@ public class PaymentMethodMultiPage extends PaymentMethodAbstractPage {
         selectCreditCard(order);
 
         //continue;
+        JXBrowserHelper.insertChecker(browser);
         JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, CONTINUE_BTN_SELECTOR).click();
         WaitTime.Shortest.execute();
+        JXBrowserHelper.waitUntilNewPageLoaded(browser);
         JXBrowserHelper.saveOrderScreenshot(order,buyerPanel,"1");
         //JXBrowserHelper.waitUntilNewPageLoaded(browser);
         //JXBrowserHelper.waitUntilNotFound(browser,"#new-payment-methods");
