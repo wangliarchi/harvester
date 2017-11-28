@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.FeedUploader;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
+import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.MessagePanel;
@@ -258,23 +259,10 @@ public class ConfirmShipments {
 
         //submit feed to amazon via MWS Feed API
         String result;
+
         try {
             result = submitFeed(feedFile, country);
-
-            //write log to worksheet
-            writeLogToWorksheet(worksheet, result, resultSummary.toString());
-
-            result = resultDetail.toString() + "\n" + result;
-
-            insertToLocalDbLog(feedFile, country, result);
-
-            //send email
-            if (messagePanel instanceof VirtualMessagePanel) {
-                confirmShipmentEmailSender.sendSuccessEmail(result, feedFile, country);
-            }
-
         } catch (Exception e) {
-
             errorAlertService.sendMessage("Error when submitting order confirmation feed file via MWS.",
                     e.getMessage(), country, feedFile);
 
@@ -287,8 +275,30 @@ public class ConfirmShipments {
                 confirmShipmentEmailSender.sendErrorFoundEmail(subject,
                         "Error when submitting feed file. " + e.getMessage(), country);
             }
+            return;
+        }
+
+        try {
+            recordConfirmationLog(country, worksheet, resultSummary, resultDetail, result, feedFile);
+        } catch (Exception e) {
+            LOGGER.error("Fail to log confirmation ", e);
+        }
 
 
+    }
+
+    @Repeat
+    public void recordConfirmationLog(Country country, Worksheet worksheet, StringBuilder resultSummary, StringBuilder resultDetail, String result, File feedFile) {
+        //write log to worksheet
+        writeLogToWorksheet(worksheet, result, resultSummary.toString());
+
+        result = resultDetail.toString() + "\n" + result;
+
+        insertToLocalDbLog(feedFile, country, result);
+
+        //send email
+        if (messagePanel instanceof VirtualMessagePanel) {
+            confirmShipmentEmailSender.sendSuccessEmail(result, feedFile, country);
         }
 
 
@@ -359,10 +369,16 @@ public class ConfirmShipments {
 
         String result = "";
         if (country.europe()) {
-            for(Country c : Country.EURO) {
-                result = _submitFeed(feedFile, c);
-                if (!StringUtils.containsAny(result.toLowerCase(),"rejected","denied") ) {
-                    break;
+            for (Country c : Country.EURO) {
+                try {
+                    result = _submitFeed(feedFile, c);
+                    if (!StringUtils.containsAny(result.toLowerCase(), "rejected", "denied")) {
+                        break;
+                    }
+                } catch (Exception e) {
+                    if (!StringUtils.containsAny(e.getMessage().toLowerCase(), "rejected", "denied")) {
+                        break;
+                    }
                 }
             }
         } else {
