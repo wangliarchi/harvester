@@ -6,6 +6,7 @@ import edu.olivet.foundations.job.AbstractBackgroundJob;
 import edu.olivet.foundations.job.TaskScheduler;
 import edu.olivet.foundations.ui.*;
 import edu.olivet.foundations.utils.ApplicationContext;
+import edu.olivet.harvester.bugreport.service.ReportBugEvent;
 import edu.olivet.harvester.job.BackgroundJob;
 import edu.olivet.harvester.model.ConfigEnums;
 import edu.olivet.harvester.ui.dialog.BankCardConfigDialog;
@@ -43,11 +44,11 @@ public class UIHarvester extends AbstractApplicationUI {
     private void initComponents() {
 
         this.setResizable(true);
-        this.setMinimumSize(new Dimension(800,600));
+        this.setMinimumSize(new Dimension(800, 600));
         //maximized by default
         setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-        this.setTitle(String.format(APP_TITLE,Settings.load().getSid()));
+        this.setTitle(String.format(APP_TITLE, Settings.load().getSid()));
         UITools.setIcon(this, "harvester.png");
 
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -94,19 +95,6 @@ public class UIHarvester extends AbstractApplicationUI {
     }
 
 
-    @UIEvent
-    public void submitOrder() {
-
-    }
-
-
-
-    @UIEvent
-    public void findSupplier() {
-
-    }
-
-
     @Inject
     ConfirmShipmentEvent confirmShipmentEvent;
 
@@ -125,6 +113,7 @@ public class UIHarvester extends AbstractApplicationUI {
 
     @Inject
     OrderSubmissionLogEvent orderSubmissionLogEvent;
+
     @UIEvent
     public void orderSubmissionLog() {
         orderSubmissionLogEvent.excute();
@@ -132,6 +121,7 @@ public class UIHarvester extends AbstractApplicationUI {
 
     @Inject
     LogViewer logViewer;
+
     @UIEvent
     public void orderSuccessLog() {
         logViewer.displayLogs(ConfigEnums.Log.Success);
@@ -141,23 +131,31 @@ public class UIHarvester extends AbstractApplicationUI {
     public void orderStatisticLog() {
         logViewer.displayLogs(ConfigEnums.Log.Statistic);
     }
+
     @Inject
     SettingEvent settingEvent;
 
     @UIEvent
     public void settings() {
         settingEvent.excute();
-        this.setTitle(String.format(APP_TITLE,Settings.load().getSid()));
+        this.setTitle(String.format(APP_TITLE, Settings.load().getSid()));
     }
 
 
     @UIEvent
     public void configBankCard() {
         BankCardConfigDialog dialog = UITools.setDialogAttr(new BankCardConfigDialog());
-
         if (dialog.isOk()) {
             UITools.info("Credit card info has been saved successfully.");
         }
+    }
+
+    @Inject
+    ReportBugEvent reportBugEvent;
+
+    @UIEvent
+    public void reportBug() {
+        reportBugEvent.excute();
     }
 
     @Override
@@ -183,9 +181,9 @@ public class UIHarvester extends AbstractApplicationUI {
                 LOGGER.error("Cant initialize job {}", job.getClazz().getName(), e);
             }
         }
-
         taskScheduler.createOSTask();
     }
+
 
     public static void main(String[] args) {
         UIText.setLocale(Language.current());

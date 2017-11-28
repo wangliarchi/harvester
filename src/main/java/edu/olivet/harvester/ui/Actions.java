@@ -21,4 +21,6 @@ public class Actions {
     public static final Action OrderConfirmationHistory = new Action("OrderConfirmationHistory", "Order Confirmation History", null, "list.png");
 
     public static final Action ConfigBankCard = new Action("ConfigBankCard","Bank Card Configuration",null,"creditcards.png");
+
+    public static final Action ReportBug = new Action("ReportBug", "Report a Bug", null, "bug.png");
 }

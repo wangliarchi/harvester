@@ -39,14 +39,17 @@ public class UIElements extends AbstractUIContainer {
     public Map<Menu, Action[]> getMenuActions() {
         Map<Menu, Action[]> map = new HashMap<>();
         map.put(harvester, new Action[]{
-
-                Actions.FindSupplier
+                Action.CurrentVersion,
+                Action.UpgradeCheck,
+                Action.Separator,
+                Action.Restart
 
         });
 
         map.put(submitOrder, new Action[]{
                 //Actions.DuplicatedOrders,
                 Actions.OrderSubmissionLog,
+                Action.Separator,
                 Actions.OrderSuccessLog,
                 Actions.OrderStatisticLog
 
@@ -54,6 +57,7 @@ public class UIElements extends AbstractUIContainer {
 
         map.put(confirmShipment, new Action[]{
                 Actions.ConfirmShipment,
+                Action.Separator,
                 Actions.OrderConfirmationHistory
         });
         map.put(Menu.Settings, new Action[]{
@@ -62,13 +66,13 @@ public class UIElements extends AbstractUIContainer {
                 Action.Separator,
                 Action.CreateAutoStartTask,
                 Action.DeleteAutoStartTask,
-                Action.CreateShortCut,
-                Action.Separator,
-                Action.Restart
+                Action.CreateShortCut
+
         });
         map.put(Menu.Help, new Action[]{
-                Action.CurrentVersion,
-                Action.UpgradeCheck
+
+                Actions.ReportBug,
+                Action.Documentation
         });
         return map;
     }

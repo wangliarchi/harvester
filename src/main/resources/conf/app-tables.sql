@@ -68,4 +68,13 @@ CREATE TABLE IF NOT EXISTS order_fulfillment_logs(
 
 INSERT INTO order_fulfillment_logs (id,orderId,sku,sheetName,spreadsheetId,purchaseDate,isbn,seller,sellerId,
 sellerPrice,condition,character,remark,quantityPurchased,quantityBought,cost,orderNumber,buyerAccount,lastCode,fulfillDate)
-SELECT * FROM order_fulfillment_record
+SELECT * FROM order_fulfillment_record;
+
+/* bug */
+CREATE TABLE IF NOT EXISTS bug (
+	id 				  VARCHAR(25) 	PRIMARY KEY NOT NULL,
+	issue			  VARCHAR(25)		NOT NULL,
+	level			  VARCHAR(25) 	NOT NULL,
+	orderId			VARCHAR(25) 	NOT NULL,
+	title			  VARCHAR(500) 	NOT NULL,
+	reportTime	DATETIME		  NOT NULL);

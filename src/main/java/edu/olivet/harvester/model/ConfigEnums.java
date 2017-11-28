@@ -169,22 +169,14 @@ public class ConfigEnums {
      */
     public enum Log {
         Error("error.log"),
-        OrderMan("orderman.%s.log"),
+        Harvester("harvester.%s.log"),
         Success("success.log"),
-        FailReason("failreason.%s.log"),
         Profile("profile.%s.log"),
         Hunt("hunter.%s.log"),
-        Transfer("transfer.%s.csv"),
         ISBN("isbn.txt"),
-        ASINDeletion("asin.%s.log"),
-        ASINHistory("asinhistory.txt"),
-        InventoryLoader("inv.%s.log"),
         Statistic("statistic.log"),
         Service("service.%s.log"),
-        Deploy("deploy.log"),
-        MailMan("mailman.%s.log"),
-        ReturnRequestFollowUp("returnreq.%s.log"),
-        Infringements("infringements.txt");
+        Deploy("deploy.log");
 
         private String fileName;
 
