@@ -18,12 +18,27 @@ public class ProfitLostControl {
         return earning - cost;
     }
 
+    /**
+     * <pre>
+     * uk shipment的订单：亏钱不做单
+     * 跳过所有检查和跳过利润检查的情况下，亏损上限是20
+     * 标zuoba，做吧，Place The Order的情况下，亏损上限是 zuoba后面的值，但是仍然不能超过20，如果没有特别标明，就是20
+     * 没有设置跳过检查，也没有标zuoba的时候，亏损上限可以在orderman里面设置，有7和5两个选项。
+     * </pre>
+     */
     public static boolean canPlaceOrder(Order order, Float cost) {
-        if (StringUtils.containsIgnoreCase(order.remark, "zuoba")) {
-            return true;
+
+        float lostLimit;
+        if (order.fulfilledFromUK()) {
+            lostLimit = 0;
+        } else if (OrderValidator.skipCheck(order, OrderValidator.SkipValidation.Profit)) {
+            lostLimit = 20;
+        } else {
+            RuntimeSettings settings = RuntimeSettings.load();
+            lostLimit = Float.parseFloat(settings.getLostLimit());
         }
-        RuntimeSettings settings = RuntimeSettings.load();
-        float lostLimit = Float.parseFloat(settings.getLostLimit());
+
+
         float profit = profit(order, cost);
         return !(profit + lostLimit < 0);
     }

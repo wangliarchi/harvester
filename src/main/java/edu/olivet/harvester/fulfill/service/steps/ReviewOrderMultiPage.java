@@ -28,21 +28,20 @@ public class ReviewOrderMultiPage extends Step {
     protected void process(FlowState state) {
         OrderReviewMultiPage orderReviewMultiPage = new OrderReviewMultiPage(state.getBuyerPanel());
 
-        if (OrderValidator.needCheck(state.getOrder(),OrderValidator.SkipValidation.Address)) {
+        if (OrderValidator.needCheck(state.getOrder(), OrderValidator.SkipValidation.Address)) {
             reviewAddress(state);
         }
 
         reviewPayment(state);
 
-        if (OrderValidator.needCheck(state.getOrder(),OrderValidator.SkipValidation.Profit)) {
-            try {
-                orderReviewMultiPage.checkTotalCost(state.getOrder());
-                LOGGER.info("Passed cost check.");
-            } catch (Exception e) {
-                LOGGER.error("Failed cost check. ", e);
-                throw e;
-            }
+        try {
+            orderReviewMultiPage.checkTotalCost(state.getOrder());
+            LOGGER.info("Passed cost check.");
+        } catch (Exception e) {
+            LOGGER.error("Failed cost check. ", e);
+            throw e;
         }
+
 
     }
 

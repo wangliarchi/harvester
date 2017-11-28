@@ -252,7 +252,7 @@ public class Order implements Keyable {
     /**
      * Determine whether current order is fulfilled from UK directly via its remark
      */
-    private boolean fulfilledFromUK() {
+    public boolean fulfilledFromUK() {
         return Remark.FULFILL_FROM_UK.isContainedBy(this.remark);
     }
 
