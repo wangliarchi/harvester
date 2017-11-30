@@ -54,7 +54,7 @@ public class OrderValidator {
         NotDuplicatedOrder,
         IsNotForbiddenSeller,
         StatusNeedUpdate,
-        ISNotAddOn,
+        IsNotAddOn,
         AddressNotChanged
 
     }
@@ -146,7 +146,7 @@ public class OrderValidator {
                 Validator.IsSupplierHunted,
                 Validator.HasValidBuyerAccount,
                 Validator.HasValidCreditCard,
-                Validator.ISNotAddOn,
+                Validator.IsNotAddOn,
                 Validator.AddressNotChanged,
                 Validator.FulfillmentCountryIsValid,
                 Validator.IsNotForbiddenSeller,
