@@ -53,7 +53,9 @@ public class OrderValidator {
         HasEnoughBudgetToFulfill,
         NotDuplicatedOrder,
         IsNotForbiddenSeller,
-        StatusNeedUpdate
+        StatusNeedUpdate,
+        ISNotAddOn,
+        AddressNotChanged
 
     }
 
@@ -144,6 +146,8 @@ public class OrderValidator {
                 Validator.IsSupplierHunted,
                 Validator.HasValidBuyerAccount,
                 Validator.HasValidCreditCard,
+                Validator.ISNotAddOn,
+                Validator.AddressNotChanged,
                 Validator.FulfillmentCountryIsValid,
                 Validator.IsNotForbiddenSeller,
                 Validator.HasEnoughBudgetToFulfill
@@ -443,6 +447,23 @@ public class OrderValidator {
 
     }
 
+
+    public String isNotAddOn(Order order) {
+        if (order.isAddOn()) {
+            return UIText.message("message.submit.skip.addon", order.row);
+        }
+
+        return "";
+    }
+
+    public String addressNotChanged(Order order) {
+        if (order.addressChanged()) {
+            return UIText.message("message.submit.skip.addrchanged", order.row);
+        }
+
+        return "";
+    }
+
     @Inject
     DailyBudgetHelper dailyBudgetHelper;
 
@@ -485,6 +506,7 @@ public class OrderValidator {
 
         return "";
     }
+
 
     @Inject
     ForbiddenSeller forbiddenSeller;
