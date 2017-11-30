@@ -54,6 +54,9 @@ public class StepHelper {
 
     @Inject Login login;
 
+    @Inject ReadOrderDetails readOrderDetails;
+
+
     public Step detectStep(FlowState state) {
 
 
@@ -67,26 +70,21 @@ public class StepHelper {
                 if (Checkout.class.getName().equals(state.getPrevStep().stepName)) {
                     return reviewOrderChangeShippingAddress;
                 }
-
                 //if from shipping address page, then change payment method
                 if (EnterShippingAddress.class.getName().equals(state.getPrevStep().stepName)) {
                     return reviewOrderChangePaymentMethod;
                 }
-
                 //if from payment method page, then to select shipping method
                 if (SelectPaymentMethod.class.getName().equals(state.getPrevStep().stepName)) {
                     return reviewOrderChangeShippingMethod;
                 }
-
                 //if from shipping method method page, then to update qty
                 if (ReviewOrderChangeShippingMethod.class.getName().equals(state.getPrevStep().stepName)) {
                     return reviewOrderUpdateQty;
                 }
-
                 if (ReviewOrderUpdateQty.class.getName().equals(state.getPrevStep().stepName)) {
                     return reviewOrderMultiPage;
                 }
-
                 return null;
             case ShippingAddressOnePage:
             case ShippingAddress:
@@ -102,22 +100,19 @@ public class StepHelper {
                 if (Checkout.class.getName().equals(state.getPrevStep().stepName)) {
                     return enterShippingAddress;
                 }
-
                 if (SelectShippingMethod.class.getName().equals(state.getPrevStep().stepName)) {
                     return updateQty;
                 }
-
                 if (UpdateQty.class.getName().equals(state.getPrevStep().stepName)) {
                     return reviewOrder;
                 }
-
                 return selectShippingMethod;
-
             case AmazonPrimeAdAfterPlaceOrderBtnClicked:
                 return amazonPrimeAd;
             case OrderPlacedSuccessPage:
                 return afterOrderPlaced;
-
+            case OrderDetailPage:
+                return readOrderDetails;
             case LoginPage:
                 return login;
             default:
