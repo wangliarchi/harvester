@@ -173,7 +173,7 @@ public class OrderSubmitter {
                 Country country = OrderCountryUtils.getFulfillementCountry(order);
                 BuyerPanel buyerPanel = TabbedBuyerPanel.getInstance().getOrAddTab(country, buyer);
                 TabbedBuyerPanel.getInstance().highlight(buyerPanel);
-
+                order = sheetService.reloadOrder(order);
                 submit(order, buyerPanel);
 
 
