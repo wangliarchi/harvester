@@ -12,6 +12,7 @@ import org.nutz.dao.Cnd;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -35,9 +36,15 @@ public class ShipmentConfirmationJob extends AbstractBackgroundJob {
     }
 
     @Override
-    public void runIfMissed() {
-        DateTime dt = new DateTime();
-        if (dt.getHourOfDay() < 14) {
+    public void runIfMissed(Date nextTriggerTime) {
+        Date now = new Date();
+
+        //if current hour is less than next trigger time, cron job has not run yet, since its daily job
+        if (Dates.getField(now, Calendar.HOUR_OF_DAY) < Dates.getField(nextTriggerTime, Calendar.HOUR_OF_DAY)) {
+            return;
+        }
+
+        if (nextTriggerTime.getTime() - now.getTime() < 2 * 3600 * 1000) {
             return;
         }
 
@@ -56,8 +63,8 @@ public class ShipmentConfirmationJob extends AbstractBackgroundJob {
     }
 
     public static void main(String[] args) {
-        ShipmentConfirmationJob bean = new ShipmentConfirmationJob();
-        bean.runIfMissed();
+        //ShipmentConfirmationJob bean = new ShipmentConfirmationJob();
+        //bean.runIfMissed();
     }
 
 
