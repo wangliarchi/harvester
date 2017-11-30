@@ -39,7 +39,10 @@ public class ShipOptionUtils {
         List<ShippingOption> shippingOptions = listAllOptions(browser, buyerPanel.getCountry());
         List<ShippingOption> validShippingOptions = getValidateOptions(buyerPanel.getOrder(), shippingOptions);
 
+
         DOMElement option = options.get(validShippingOptions.get(0).getIndex());
+
+        LOGGER.debug("{} shipping options - {}, \n{} valid - {}\n,{} is chosen.",shippingOptions.size(),shippingOptions,validShippingOptions.size(),validShippingOptions,validShippingOptions.get(0));
         option.click();
 //        for (DOMElement option : options) {
 //            String eddText = JXBrowserHelper.selectElementByCssSelector(option, ".a-color-success").getInnerText().trim();
