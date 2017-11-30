@@ -39,20 +39,24 @@ public class ShipOptionUtils {
         List<ShippingOption> shippingOptions = listAllOptions(browser, buyerPanel.getCountry());
         List<ShippingOption> validShippingOptions = getValidateOptions(buyerPanel.getOrder(), shippingOptions);
 
-        for (DOMElement option : options) {
-            String eddText = JXBrowserHelper.selectElementByCssSelector(option, ".a-color-success").getInnerText().trim();
-            if (eddText.equals(validShippingOptions.get(0).getEstimatedDeliveryDate())) {
-                option.click();
-                break;
-            }
-        }
+        DOMElement option = options.get(validShippingOptions.get(0).getIndex());
+        option.click();
+//        for (DOMElement option : options) {
+//            String eddText = JXBrowserHelper.selectElementByCssSelector(option, ".a-color-success").getInnerText().trim();
+//            if (eddText.equals(validShippingOptions.get(0).getEstimatedDeliveryDate())) {
+//                option.click();
+//                return;
+//            }
+//        }
     }
 
     public static List<ShippingOption> listAllOptions(Browser browser, Country country) {
         List<DOMElement> options = JXBrowserHelper.selectElementsByCssSelector(browser, ".shipping-speed.ship-option");
 
         List<ShippingOption> shippingOptions = new ArrayList<>();
+        int index = 0;
         for (DOMElement option : options) {
+            index++;
             String eddText;
             String priceText;
             try {
@@ -70,7 +74,9 @@ public class ShipOptionUtils {
             }
 
             ShippingOption shippingOption = new ShippingOption(eddText, priceText, country);
+            shippingOption.setIndex(index - 1);
             shippingOptions.add(shippingOption);
+
         }
 
         return shippingOptions;

@@ -31,6 +31,7 @@ public class ShippingOption {
     String title;
     Money price;
     Date now;
+    int index = 0;
 
 
     public ShippingOption(String eddText, String priceText, Country country, Date today) {
