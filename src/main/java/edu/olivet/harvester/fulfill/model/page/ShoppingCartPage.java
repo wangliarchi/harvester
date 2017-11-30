@@ -48,11 +48,14 @@ public class ShoppingCartPage extends FulfillmentPage {
 
         DOMElement checkoutLink = JXBrowserHelper.selectElementByCssSelector(browser, "#hlb-ptc-btn-native");
         if (checkoutLink != null) {
-            String url = checkoutLink.getAttribute(PageUtils.HREF);
-            if (StringUtils.containsNone(url, "//")) {
-                url = country.baseUrl() + url;
-            }
-            JXBrowserHelper.loadPage(browser, url);
+            JXBrowserHelper.insertChecker(browser);
+            checkoutLink.click();
+            JXBrowserHelper.waitUntilNewPageLoaded(browser);
+            //String url = checkoutLink.getAttribute(PageUtils.HREF);
+            //if (StringUtils.containsNone(url, "//")) {
+            //    url = country.baseUrl() + url;
+            //}
+            //JXBrowserHelper.loadPage(browser, url);
             return;
         }
 

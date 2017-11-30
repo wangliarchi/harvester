@@ -27,10 +27,8 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.math.BigInteger;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 import static com.teamdev.jxbrowser.chromium.BrowserKeyEvent.KeyEventType.*;
 
@@ -111,7 +109,7 @@ public class JXBrowserHelper {
      * 初始化一个JXBrowser View
      *
      * @param profileDirName 该BrowserView对应Profile路径名称，需要注意：一个路径同一时间只能一个Browser使用
-     * @param zoomLevel      缩放级别，100%常规模式可设定为1，放大或缩小可以设置其他值
+     * @param zoomLevel 缩放级别，100%常规模式可设定为1，放大或缩小可以设置其他值
      * @return 初始化好的BrowserView实例
      */
     public static BrowserView init(String profileDirName, double zoomLevel) {
@@ -184,6 +182,10 @@ public class JXBrowserHelper {
     }
 
     public static void insertChecker(Browser browser) {
+        DOMElement checker = selectElementByCssSelector(browser, "#spinner-anchor");
+        if (checker != null && isVisible(checker)) {
+            return;
+        }
         //insert tracker
         DOMDocument document = browser.getDocument();
         DOMNode root = document.findElement(By.tagName("body"));
@@ -192,13 +194,19 @@ public class JXBrowserHelper {
         paragraph.setAttribute("id", "loading-checker");
         paragraph.appendChild(textNode);
         root.appendChild(paragraph);
+        //WaitTime.Shortest.execute();
     }
 
     @InvokedExternally
     //insert an element to page, and wait until it's gone
     public static void waitUntilNewPageLoaded(Browser browser) {
         //check tracker
-        waitUntilNotFound(browser, "#loading-checker");
+        DOMElement checker = selectElementByCssSelector(browser, "#spinner-anchor");
+        if (checker != null && isVisible(checker)) {
+            waitUntilNotFound(browser, "#spinner-anchor");
+        } else {
+            waitUntilNotFound(browser, "#loading-checker");
+        }
     }
 
     @InvokedExternally
@@ -209,7 +217,7 @@ public class JXBrowserHelper {
 
             DOMElement element = JXBrowserHelper.selectElementByCssSelector(browser, selector);
             if (element != null) {
-                if (!isVisible(browser, selector)) {
+                if (isHidden(element)) {
                     break;
                 }
 
@@ -289,28 +297,64 @@ public class JXBrowserHelper {
         Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> it.loadURL(url));
     }
 
-    @Repeat(expectedExceptions = BusinessException.class)
+
     public static DOMElement selectElementByName(Browser browser, String name) {
-        return browser.getDocument().findElement(By.name(name));
+        for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
+            try {
+                return browser.getDocument().findElement(By.name(name));
+            } catch (Exception e) {
+                LOGGER.error("",e);
+                WaitTime.Short.execute();
+            }
+        }
+
+        return null;
     }
 
-    @Repeat
     public static DOMElement selectElementByCssSelector(Browser browser, String selector) {
-        return selectElementByCssSelector(browser.getDocument(), selector);
+        for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
+            try {
+                return selectElementByCssSelector(browser.getDocument(), selector);
+            } catch (Exception e) {
+                LOGGER.error("",e);
+                WaitTime.Short.execute();
+            }
+        }
+
+        return null;
     }
 
-    @Repeat(expectedExceptions = BusinessException.class)
+
     public static DOMElement selectElementByCssSelector(DOMDocument document, String selector) {
-        return document.findElement(By.cssSelector(selector));
+        for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
+            try {
+                return document.findElement(By.cssSelector(selector));
+            } catch (Exception e) {
+                LOGGER.error("",e);
+                WaitTime.Short.execute();
+                //throw new BusinessException(e);
+            }
+        }
+
+        return null;
     }
 
     public static DOMElement selectElementByCssSelector(DOMElement element, String selector) {
         return element.findElement(By.cssSelector(selector));
     }
 
-    @Repeat(expectedExceptions = BusinessException.class)
     public static List<DOMElement> selectElementsByCssSelector(DOMDocument document, String selector) {
-        return document.findElements(By.cssSelector(selector));
+        for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
+            try {
+                return document.findElements(By.cssSelector(selector));
+            } catch (Exception e) {
+                //throw new BusinessException(e);
+                LOGGER.error("",e);
+                WaitTime.Short.execute();
+            }
+        }
+
+        return new ArrayList<>();
     }
 
     public static List<DOMElement> selectElementsByCssSelector(Browser browser, String selector) {
@@ -415,11 +459,12 @@ public class JXBrowserHelper {
 
 
     public static void loadSpreadsheet(Browser browser, Account account, String spreadsheetId) {
-        String url = String.format("https://docs.google.com/spreadsheets/d/%s/edit#gid=1549829067",spreadsheetId);
-        loadPage(browser,url);
-        loginGoogleAccount(browser,account.getEmail(),account.getPassword());
+        String url = String.format("https://docs.google.com/spreadsheets/d/%s/edit#gid=1549829067", spreadsheetId);
+        loadPage(browser, url);
+        loginGoogleAccount(browser, account.getEmail(), account.getPassword());
     }
-    public static  void loginGoogleAccount(Browser browser, String email, String password) {
+
+    public static void loginGoogleAccount(Browser browser, String email, String password) {
         //enter email address
         DOMElement nextBtn = selectElementByCssSelector(browser, "#identifierNext");
         if (nextBtn != null) {

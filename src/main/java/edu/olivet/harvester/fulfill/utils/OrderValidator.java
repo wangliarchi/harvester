@@ -143,7 +143,6 @@ public class OrderValidator {
                 Validator.NotSelfOrder,
                 Validator.IsNotUKForward,
                 Validator.IsSupplierHunted,
-                //Validator.StatusMarkedCorrectForSubmit,
                 Validator.HasValidBuyerAccount,
                 Validator.HasValidCreditCard,
                 Validator.FulfillmentCountryIsValid,
@@ -402,8 +401,9 @@ public class OrderValidator {
 
     public String hasValidBuyerAccount(Order order) {
         try {
-            Account buyer = OrderBuyerUtils.getBuyer(order);
+            OrderBuyerUtils.getBuyer(order);
         } catch (Exception e) {
+            LOGGER.error("",e);
             return "order buyer account not set properly.";
         }
         return "";

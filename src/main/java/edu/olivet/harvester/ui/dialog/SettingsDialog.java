@@ -250,7 +250,7 @@ public class SettingsDialog extends BaseDialog {
         //clear cache
 
         //update info on runtime settings panel
-        RuntimeSettingsPanel.getInstance().setAccounts4Country();
+        RuntimeSettingsPanel.getInstance().resetAfterSettingUpdated();
 
         //UITools.info(String.format("Congratulations! Harvester configuration successfully saved into%n%s", file.getAbsolutePath()));
         UITools.info("Configuration has been saved successfully.");

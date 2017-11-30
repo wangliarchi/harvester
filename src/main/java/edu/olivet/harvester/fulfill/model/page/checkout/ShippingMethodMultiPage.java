@@ -28,6 +28,7 @@ public class ShippingMethodMultiPage extends ShippingAddressAbstract {
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
 
         if (continueBtn == null) {
+            JXBrowserHelper.saveOrderScreenshot(order,buyerPanel,"1");
             throw new BusinessException(String.format("Continue button on select shipping option page not found. Current at %s- %s", browser.getTitle(), browser.getURL()));
         }
 

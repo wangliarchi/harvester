@@ -2,6 +2,7 @@ package edu.olivet.harvester.fulfill.utils;
 
 import com.mchange.lang.IntegerUtils;
 import edu.olivet.foundations.ui.UIText;
+import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Configs;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.harvester.utils.Config;
@@ -107,7 +108,7 @@ public class ConditionUtils {
         Map<String, String> conditionLvls = Configs.load(Config.ConditionLevel.fileName());
         String lvl = conditionLvls.get(str);
         if (lvl == null) {
-            throw new IllegalArgumentException(UIText.message("error.condition.invalid", cond));
+            throw new BusinessException(UIText.message("error.condition.invalid", cond));
         }
         return IntegerUtils.parseInt(lvl, 50);
     }

@@ -30,7 +30,6 @@ public class OrderPlacedSuccessPage extends FulfillmentPage {
         //parse orderId from url
         String orderId = RegexUtils.getMatched(browser.getURL(), RegexUtils.Regex.AMAZON_ORDER_NUMBER);
         if (StringUtils.isBlank(orderId)) {
-            //view order link
             orderId = RegexUtils.getMatched(viewLink.getAttribute("href"), RegexUtils.Regex.AMAZON_ORDER_NUMBER);
         }
 
@@ -38,6 +37,7 @@ public class OrderPlacedSuccessPage extends FulfillmentPage {
         if (StringUtils.isNotBlank(orderId)) {
             order.order_number = orderId;
             order.account = buyer.getEmail();
+
             String url = String.format("%s/gp/css/summary/edit.html/ref=typ_rev_edit?ie=UTF8&orderID=%s", buyerPanel.getCountry().baseUrl(), orderId);
             LOGGER.debug("Order placed successfully, with order id {}. Now heading to {}", orderId, url);
             JXBrowserHelper.loadPage(browser, url);

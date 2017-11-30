@@ -2,6 +2,8 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 
 import com.teamdev.jxbrowser.chromium.dom.By;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
+import edu.olivet.foundations.aop.Repeat;
+import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
@@ -30,6 +32,7 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
         if (changePaymentLink != null) {
             changePaymentLink.click();
             JXBrowserHelper.waitUntilNotFound(browser, CHANGE_PAYMENT_METHOD_BTN_SELECTOR);
+            WaitTime.Shortest.execute();
         }
 
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
@@ -37,6 +40,12 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
         //
         selectCreditCard(order);
 
+        click(order);
+
+    }
+
+    @Repeat
+    public void click(Order order) {
         //continue;
         //JXBrowserHelper.insertChecker(browser);
         JXBrowserHelper.selectElementByCssSelector(browser, CONTINUE_BTN_SELECTOR).click();

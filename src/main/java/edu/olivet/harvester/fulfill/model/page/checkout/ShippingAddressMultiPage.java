@@ -32,6 +32,7 @@ public class ShippingAddressMultiPage extends ShippingAddressAbstract {
 
         DOMElement errorMsg = JXBrowserHelper.selectElementByCssSelector(browser, "#identity-add-new-address #addressIMB");
         if (errorMsg != null) {
+            JXBrowserHelper.saveOrderScreenshot(order,buyerPanel, "1");
             throw  new BusinessException("Wrong address " + errorMsg.getInnerText());
         }
 

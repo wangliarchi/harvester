@@ -3,7 +3,11 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 import com.teamdev.jxbrowser.chromium.dom.By;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import com.teamdev.jxbrowser.chromium.dom.DOMInputElement;
+import edu.olivet.foundations.aop.Repeat;
+import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.WaitTime;
+import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
@@ -19,6 +23,7 @@ public class ShippingAddressOnePage extends ShippingAddressAbstract {
         super(buyerPanel);
     }
 
+    @Repeat
     public void execute(Order order) {
 
 
@@ -29,7 +34,7 @@ public class ShippingAddressOnePage extends ShippingAddressAbstract {
             JXBrowserHelper.waitUntilNotFound(browser, "#addressChangeLinkId");
         }
 
-        DOMElement newAddressLink = JXBrowserHelper.selectElementByCssSelector(browser, NEW_ADDRESS_SELECTOR);
+        DOMElement newAddressLink = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, NEW_ADDRESS_SELECTOR);
         newAddressLink.click();
 
         JXBrowserHelper.wait(browser, By.cssSelector("#enterAddressFullName"));
@@ -38,7 +43,9 @@ public class ShippingAddressOnePage extends ShippingAddressAbstract {
         WaitTime.Shortest.execute();
 
         //amazon may pop up address verification after clicking "use this address" btn, use user's original input by default.
-        while (true) {
+        int tried = 0;
+        while (true && tried <= Constants.MAX_REPEAT_TIMES) {
+            tried++;
             DOMElement useThisAddressBtn = JXBrowserHelper.selectVisibleElement(browser, ".a-popover-footer .a-button-primary .a-button-input");
 
             if (useThisAddressBtn == null) {
@@ -54,8 +61,10 @@ public class ShippingAddressOnePage extends ShippingAddressAbstract {
 
             WaitTime.Shortest.execute();
         }
-
-        //JXBrowserHelper.wait(browser, By.cssSelector("#addressChangeLinkId"));
+        if (JXBrowserHelper.selectVisibleElement(browser, ".a-popover-footer .a-button-primary .a-button-input") != null) {
+            JXBrowserHelper.saveOrderScreenshot(order,buyerPanel,"1");
+            throw new BusinessException("Error to enter shipping address " + Address.loadFromOrder(order));
+        }//JXBrowserHelper.wait(browser, By.cssSelector("#addressChangeLinkId"));
 
 
     }

@@ -101,12 +101,12 @@ public class RuntimeSettingsPanel extends JPanel {
         noInvoiceTextField.setText(settings.getNoInvoiceText());
 
 
-        lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"5", "7"}));
+        lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"5", "7"}));
         if (StringUtils.isNotBlank(settings.getLostLimit())) {
             lostLimitComboBox.setSelectedItem(settings.getLostLimit());
         }
 
-        priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"3", "5"}));
+        priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"3", "5"}));
         if (StringUtils.isNotBlank(settings.getPriceLimit())) {
             priceLimitComboBox.setSelectedItem(settings.getPriceLimit());
         }
@@ -118,7 +118,7 @@ public class RuntimeSettingsPanel extends JPanel {
         finderCodeTextField.setText(settings.getFinderCode());
 
 
-        maxDaysOverEddComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}));
+        maxDaysOverEddComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}));
         if (StringUtils.isNotBlank((settings.getEddLimit()))) {
             maxDaysOverEddComboBox.setSelectedItem(settings.getEddLimit());
         }
@@ -247,7 +247,7 @@ public class RuntimeSettingsPanel extends JPanel {
         });
 
         loadSheetTabButton.addActionListener(evt -> {
-            if(StringUtils.isBlank(settings.getSpreadsheetId())) {
+            if (StringUtils.isBlank(settings.getSpreadsheetId())) {
                 return;
             }
             loadSheetTabButton.setEnabled(false);
@@ -452,6 +452,22 @@ public class RuntimeSettingsPanel extends JPanel {
         }
     }
 
+    public void resetAfterSettingUpdated() {
+        if (!Settings.load().listAllSpreadsheets().contains(settings.getSpreadsheetId())) {
+            selectedWorksheet = null;
+            settings.setSpreadsheetId("");
+            settings.setSpreadsheetName("");
+            settings.setSheetName("");
+            settings.save();
+
+            googleSheetTextField.setText("");
+            googleSheetTextField.setToolTipText("");
+            loadSheetTabButton.setEnabled(false);
+            selectedRangeLabel.setText("");
+        }
+        setAccounts4Country();
+    }
+
     public void setAccounts4Country() {
         Country currentCountry = (Country) marketplaceComboBox.getSelectedItem();
         String spreadsheetId = settings.getSpreadsheetId();
@@ -459,7 +475,7 @@ public class RuntimeSettingsPanel extends JPanel {
         Settings.Configuration configuration = Settings.load().getConfigByCountry(currentCountry);
 
         Account seller = configuration.getSeller();
-        Account[] sellers = seller == null ? new Account[0] : new Account[]{seller};
+        Account[] sellers = seller == null ? new Account[0] : new Account[] {seller};
         sellerComboBox.setModel(new DefaultComboBoxModel<>(sellers));
 
         //default to book
@@ -467,7 +483,11 @@ public class RuntimeSettingsPanel extends JPanel {
         if (StringUtils.isBlank(spreadsheetId)) {
             type = OrderItemType.BOOK;
         } else {
-            type = Settings.load().getSpreadsheetType(spreadsheetId);
+            try {
+                type = Settings.load().getSpreadsheetType(spreadsheetId);
+            } catch (Exception e) {
+                type = OrderItemType.BOOK;
+            }
         }
 
 
@@ -480,10 +500,10 @@ public class RuntimeSettingsPanel extends JPanel {
             buyer = configuration.getProdBuyer();
             primeBuyer = configuration.getProdPrimeBuyer();
         }
-        Account[] buyers = buyer == null ? new Account[0] : new Account[]{buyer};
+        Account[] buyers = buyer == null ? new Account[0] : new Account[] {buyer};
         buyerComboBox.setModel(new DefaultComboBoxModel<>(buyers));
 
-        Account[] primeBuyers = primeBuyer == null ? new Account[0] : new Account[]{primeBuyer};
+        Account[] primeBuyers = primeBuyer == null ? new Account[0] : new Account[] {primeBuyer};
         primeBuyerComboBox.setModel(new DefaultComboBoxModel<>(primeBuyers));
 
     }

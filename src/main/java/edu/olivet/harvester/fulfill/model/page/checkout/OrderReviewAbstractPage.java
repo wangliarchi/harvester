@@ -4,6 +4,7 @@ import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.WaitTime;
+import edu.olivet.harvester.fulfill.exception.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.model.page.FulfillmentPage;
@@ -40,13 +41,13 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         Money grandTotal = parseTotal();
 
         if (!ProfitLostControl.canPlaceOrder(order, grandTotal.toUSDAmount().floatValue())) {
-            throw new BusinessException("Order cost exceed maximum limit.");
+            throw new OrderSubmissionException("Order cost exceed maximum limit.");
         }
 
         RuntimeSettings settings = RuntimeSettings.load();
         float remainingBudget = ApplicationContext.getBean(DailyBudgetHelper.class).getRemainingBudget(settings.getSpreadsheetId(), new Date());
         if (remainingBudget < grandTotal.toUSDAmount().floatValue()) {
-            throw new BusinessException("You don't have enough fund to process this order. Need $" + grandTotal.toUSDAmount() + ", only have $" + String.format("%.2f", remainingBudget));
+            throw new OrderSubmissionException("You don't have enough fund to process this order. Need $" + grandTotal.toUSDAmount() + ", only have $" + String.format("%.2f", remainingBudget));
         }
 
         order.cost = grandTotal.toUSDAmount().toPlainString();
@@ -102,7 +103,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         Address enteredAddress = parseEnteredAddress();
 
         if (!addressValidator.verify(OrderAddressUtils.orderShippingAddress(buyerPanel.getOrder()), enteredAddress)) {
-            throw new BusinessException(String.format("Address failed review. Entered %s, origin %s", enteredAddress, OrderAddressUtils.orderShippingAddress(buyerPanel.getOrder())));
+            throw new OrderSubmissionException(String.format("Address failed review. Entered %s, origin %s", enteredAddress, OrderAddressUtils.orderShippingAddress(buyerPanel.getOrder())));
         }
 
     }
@@ -111,7 +112,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
     public void placeOrder(Order order) {
         //checkTotalCost(order);
         if (PSEventListener.stopped()) {
-            throw new BusinessException("Process stoped as requested.");
+            throw new OrderSubmissionException("Process stopped as requested.");
         }
 
 

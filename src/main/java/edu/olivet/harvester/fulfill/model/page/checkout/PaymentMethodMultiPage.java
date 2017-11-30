@@ -1,6 +1,8 @@
 package edu.olivet.harvester.fulfill.model.page.checkout;
 
 import com.teamdev.jxbrowser.chromium.dom.By;
+import com.teamdev.jxbrowser.chromium.dom.DOMElement;
+import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.BuyerPanel;
@@ -13,7 +15,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PaymentMethodMultiPage extends PaymentMethodAbstractPage {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PaymentMethodMultiPage.class);
+    //private static final Logger LOGGER = LoggerFactory.getLogger(PaymentMethodMultiPage.class);
     private static final String CONTINUE_BTN_SELECTOR = "#order-summary-container #continue-top";
 
     public PaymentMethodMultiPage(BuyerPanel buyerPanel) {
@@ -28,14 +30,20 @@ public class PaymentMethodMultiPage extends PaymentMethodAbstractPage {
         //
         selectCreditCard(order);
 
+        click();
+
+    }
+
+    @Repeat
+    public void click() {
         //continue;
-        JXBrowserHelper.insertChecker(browser);
-        JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, CONTINUE_BTN_SELECTOR).click();
-        WaitTime.Shortest.execute();
-        JXBrowserHelper.waitUntilNewPageLoaded(browser);
-        JXBrowserHelper.saveOrderScreenshot(order,buyerPanel,"1");
-        //JXBrowserHelper.waitUntilNewPageLoaded(browser);
-        //JXBrowserHelper.waitUntilNotFound(browser,"#new-payment-methods");
+        DOMElement continueBtn = JXBrowserHelper.selectElementByCssSelector(browser, CONTINUE_BTN_SELECTOR);
+        if(continueBtn != null && JXBrowserHelper.isVisible(continueBtn)) {
+            //JXBrowserHelper.insertChecker(browser);
+            continueBtn.click();
+            WaitTime.Shortest.execute();
+            JXBrowserHelper.waitUntilNewPageLoaded(browser);
+        }
     }
 
 

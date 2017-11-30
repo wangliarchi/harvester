@@ -46,9 +46,11 @@ public abstract class ShippingAddressAbstract extends FulfillmentPage {
         } catch (Exception e) {
             LOGGER.info("can not fill ship address form", e);
             throw new BusinessException("can not fill ship address form, " + e.getMessage());
+        } finally {
+            JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
         }
 
-        JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
+
     }
 
 

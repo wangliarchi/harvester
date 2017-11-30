@@ -5,6 +5,7 @@ import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.WaitTime;
+import edu.olivet.harvester.fulfill.exception.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.model.page.checkout.OrderReviewOnePage;
 import edu.olivet.harvester.fulfill.model.page.checkout.PaymentMethodOnePage;
 import edu.olivet.harvester.fulfill.model.page.checkout.ShippingAddressOnePage;
@@ -34,13 +35,12 @@ public class ReviewOrder extends Step {
 
         reviewPayment(state);
 
-
         try {
             orderReviewOnePage.checkTotalCost(state.getOrder());
             LOGGER.info("Passed cost check.");
         } catch (Exception e) {
             LOGGER.error("Failed cost check. ", e);
-            throw e;
+            throw new OrderSubmissionException(e);
         }
 
 
@@ -80,7 +80,6 @@ public class ReviewOrder extends Step {
                 PaymentMethodOnePage paymentMethodOnePage = new PaymentMethodOnePage(state.getBuyerPanel());
                 paymentMethodOnePage.execute(state.getOrder());
                 WaitTime.Shortest.execute();
-
             }
         }
 

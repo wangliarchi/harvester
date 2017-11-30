@@ -5,6 +5,7 @@ import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.foundations.utils.WaitTime;
+import edu.olivet.harvester.fulfill.exception.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.utils.OrderBuyerUtils;
 import edu.olivet.harvester.model.CreditCard;
 import edu.olivet.harvester.model.Order;
@@ -35,13 +36,14 @@ public abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract 
         creditCard = OrderBuyerUtils.getCreditCard(order);
 
         if (creditCard == null) {
-            throw new BusinessException("Credit card for buyer account " + buyer.getEmail() + " not found.");
+            throw new OrderSubmissionException("Credit card for buyer account " + buyer.getEmail() + " not found.");
         }
-
+        JXBrowserHelper.waitUntilVisible(browser,".payment-row");
         List<DOMElement> cards = JXBrowserHelper.selectElementsByCssSelector(browser, ".payment-row");
 
         if (CollectionUtils.isEmpty(cards)) {
-            throw new BusinessException("No credit card info fdound for buyer account " + buyer.getEmail());
+            JXBrowserHelper.saveOrderScreenshot(order,buyerPanel,"1");
+            throw new BusinessException("No credit card info found for buyer account " + buyer.getEmail());
         }
 
         for (DOMElement paymentRow : cards) {
@@ -59,7 +61,7 @@ public abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract 
 
 
         //credit card not found
-
+        JXBrowserHelper.saveOrderScreenshot(order,buyerPanel,"1");
         throw new BusinessException(String.format("Credit card with no %s not found.", creditCard.getCardNo()));
 
 
@@ -90,6 +92,7 @@ public abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract 
             creditCardErrors.removeIf(JXBrowserHelper::isHidden);
 
             if (CollectionUtils.isNotEmpty(creditCardErrors)) {
+                JXBrowserHelper.saveOrderScreenshot(buyerPanel.getOrder(),buyerPanel,"1");
                 throw new BusinessException(creditCardErrors.get(0).getInnerText());
             }
         }

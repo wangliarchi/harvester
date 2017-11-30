@@ -42,7 +42,6 @@ public class SellerService {
     }
 
     public List<Seller> parseSellers(Browser browser, Country country) {
-        String offerListingSelector = "div.a-row.a-spacing-mini.olpOffer";
         List<Seller> sellers = new ArrayList<>();
         List<DOMElement> sellerRows = JXBrowserHelper.selectElementsByCssSelector(browser, "div.a-row.a-spacing-mini.olpOffer");
 

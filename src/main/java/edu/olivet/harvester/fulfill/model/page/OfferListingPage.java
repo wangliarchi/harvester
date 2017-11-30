@@ -7,6 +7,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
+import edu.olivet.harvester.fulfill.exception.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.model.Seller;
 import edu.olivet.harvester.fulfill.model.SellerEnums;
 import edu.olivet.harvester.fulfill.service.SellerService;
@@ -54,10 +55,11 @@ public class OfferListingPage extends FulfillmentPage {
         //find seller
         Seller seller = findSeller(order);
 
+        //check if seller price lifted over maximum limit
         if (OrderValidator.needCheck(order, OrderValidator.SkipValidation.SellerPrice)) {
             String result = OrderValidator.sellerPriceChangeNotExceedConfiguration(order, seller);
             if (StringUtils.isNotBlank(result)) {
-                throw new BusinessException(result);
+                throw new OrderSubmissionException(result);
             }
 
         }
@@ -91,7 +93,8 @@ public class OfferListingPage extends FulfillmentPage {
             }
         }
 
-        throw new BusinessException(String.format(Remark.SELLER_DISAPPEAR.text2Write(), order.seller, order.character));
+        JXBrowserHelper.saveOrderScreenshot(order,buyerPanel,"1");
+        throw new OrderSubmissionException(String.format(Remark.SELLER_DISAPPEAR.text2Write(), order.seller, order.character));
     }
 
     @Repeat(expectedExceptions = BusinessException.class)

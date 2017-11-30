@@ -8,6 +8,7 @@ import com.mchange.lang.FloatUtils;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Dates;
+import edu.olivet.harvester.fulfill.exception.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.service.SheetService;
 import edu.olivet.harvester.ui.RuntimeSettingsPanel;
 import org.apache.commons.collections4.CollectionUtils;
@@ -42,11 +43,11 @@ public class DailyBudgetHelper {
         Float remaining = budgetData.get("budget") - budgetData.get("cost");
 
         if (budgetData.get("budget") <= 0) {
-            throw new BusinessException("Today's budget has not been entered yet. Please fill in 'Daily Cost' sheet.");
+            throw new OrderSubmissionException("Today's budget has not been entered yet. Please fill in 'Daily Cost' sheet.");
         }
 
         if (remaining <= 0) {
-            throw new BusinessException("You have exceed today's budget limit. ");
+            throw new OrderSubmissionException("You have exceed today's budget limit. ");
         }
 
         return remaining;

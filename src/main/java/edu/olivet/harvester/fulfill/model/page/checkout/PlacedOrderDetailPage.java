@@ -59,6 +59,7 @@ public class PlacedOrderDetailPage extends FulfillmentPage {
         } catch (Exception e) {
             LOGGER.error("Error parse data on order detail page", e);
             //reload page
+            JXBrowserHelper.saveOrderScreenshot(order,buyerPanel,"1");
             JXBrowserHelper.loadPage(browser, String.format("%s/gp/css/summary/edit.html/ref=typ_rev_edit?ie=UTF8&orderID=%s", buyerPanel.getCountry().baseUrl(), order.order_number));
             throw new BusinessException(e);
         }

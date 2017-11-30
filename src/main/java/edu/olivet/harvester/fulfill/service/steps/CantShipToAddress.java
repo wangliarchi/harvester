@@ -1,6 +1,7 @@
 package edu.olivet.harvester.fulfill.service.steps;
 
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.harvester.fulfill.exception.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.service.flowfactory.FlowState;
 import edu.olivet.harvester.fulfill.service.flowfactory.Step;
 
@@ -15,6 +16,6 @@ public class CantShipToAddress extends Step {
 
     @Override
     protected void process(FlowState state) {
-        throw new BusinessException("Sorry, this item can't be shipped to selected address.  ");
+        throw new OrderSubmissionException("Sorry, this item can't be shipped to selected address.  ");
     }
 }

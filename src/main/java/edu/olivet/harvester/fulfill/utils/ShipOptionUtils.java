@@ -6,6 +6,7 @@ import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Dates;
+import edu.olivet.harvester.fulfill.exception.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.model.ShippingOption;
 import edu.olivet.harvester.fulfill.utils.OrderValidator.SkipValidation;
@@ -99,7 +100,7 @@ public class ShipOptionUtils {
         if (CollectionUtils.isEmpty(validShippingOptions)) {
             Date latestDate = shippingOptions.get(0).getLatestDeliveryDate();
             int days = Math.abs(Dates.daysBetween(latestDate, orderEdd));
-            throw new BusinessException("No shipping option available. Earliest EDD is " + Dates.format(latestDate, DateFormat.US_FEEDBACK_DATE.pattern()) + ", order EDD is " + Dates.format(order.latestEdd(), DateFormat.US_FEEDBACK_DATE.pattern()) + ", exceed order EDD " + days + " days");
+            throw new OrderSubmissionException("No shipping option available. Earliest EDD is " + Dates.format(latestDate, DateFormat.US_FEEDBACK_DATE.pattern()) + ", order EDD is " + Dates.format(order.latestEdd(), DateFormat.US_FEEDBACK_DATE.pattern()) + ", exceed order EDD " + days + " days");
         }
 
         validShippingOptions.sort(Comparator.comparing(ShippingOption::getPriceAmount));

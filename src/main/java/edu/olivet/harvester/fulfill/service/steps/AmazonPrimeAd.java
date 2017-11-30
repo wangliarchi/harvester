@@ -25,6 +25,7 @@ public class AmazonPrimeAd extends Step {
 
     @Override
     public Step createDynamicInstance(FlowState state) {
+        state.setPrevStep(this);
         Step nextStep = stepHelper.detectStep(state);
         LOGGER.info("Next step is " + nextStep.stepName);
         return nextStep;

@@ -108,11 +108,10 @@ public class OrderSubmitter {
         //remove if not valid
         List<Order> validOrders = new ArrayList<>();
         for (Order order : orders) {
-            String error;
-            if (OrderCountryUtils.getFulfillementCountry(order) != Country.US || !"US".equalsIgnoreCase(OrderCountryUtils.getShipToCountry(order))) {
+            String error = orderValidator.isValid(order, FulfillmentEnum.Action.SubmitOrder);
+
+            if (StringUtils.isBlank(error) && OrderCountryUtils.getFulfillementCountry(order) != Country.US || !"US".equalsIgnoreCase(OrderCountryUtils.getShipToCountry(order))) {
                 error = "Harvester can only support US marketplace at this moment. Sorry for inconvenience.";
-            } else {
-                error = orderValidator.isValid(order, FulfillmentEnum.Action.SubmitOrder);
             }
 
             if (StringUtils.isNotBlank(error)) {

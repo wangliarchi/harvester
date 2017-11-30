@@ -3,6 +3,7 @@ package edu.olivet.harvester.fulfill.model.page;
 import com.teamdev.jxbrowser.chromium.Browser;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import com.teamdev.jxbrowser.chromium.dom.DOMFormControlElement;
+import com.teamdev.jxbrowser.chromium.dom.DOMInputElement;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.aop.Repeat;
@@ -84,13 +85,21 @@ public class LoginPage extends FulfillmentPage implements PageObject {
         ((DOMFormControlElement) pawssword).setValue(buyer.getPassword());
         WaitTime.Shortest.execute();
 
+
+        DOMElement rememberMe = JXBrowserHelper.selectElementByName(browser, "rememberMe");
+        if (rememberMe != null) {
+            DOMInputElement element = (DOMInputElement) rememberMe;
+            element.setChecked(true);
+        }
+
         JXBrowserHelper.insertChecker(browser);
         Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> ((DOMFormControlElement) pawssword).getForm().submit());
         JXBrowserHelper.waitUntilNewPageLoaded(browser);
 
-        if (StringUtils.containsIgnoreCase(browser.getURL(), AmazonPage.Login.urlMark())) {
-            throw new IllegalStateException("Error while logging in");
-        }
+//        if (StringUtils.containsIgnoreCase(browser.getURL(), AmazonPage.Login.urlMark())) {
+//            JXBrowserHelper.saveOrderScreenshot(order,buyerPanel,"1");
+//            throw new BusinessException("Error while logging in");
+//        }
 
         //check if verification code is requested
         DOMElement codeRequested = JXBrowserHelper.selectElementByName(browser, "claimspicker");
@@ -98,7 +107,8 @@ public class LoginPage extends FulfillmentPage implements PageObject {
             JXBrowserHelper.selectElementByCssSelector(browser, "#continue").click();
             WaitTime.Shortest.execute();
             enterVerificationCode();
-       }
+            WaitTime.Shortest.execute();
+        }
 
 
         LOGGER.info("{} logged in successfully, now at {} -> {}, took {}", country.name(), browser.getTitle(), browser.getURL(), Strings.formatElapsedTime(start));
@@ -117,7 +127,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
             JXBrowserHelper.fillValueForFormField(browser, ".cvf-widget-input.cvf-widget-input-code", verificationCode);
             WaitTime.Short.execute();
         } catch (Exception e) {
-            LOGGER.error("Failed to fetch verification code.",e);
+            LOGGER.error("Failed to fetch verification code.", e);
             UITools.info("Please enter login verification code.");
             WaitTime.Short.execute();
             while (true) {
@@ -130,7 +140,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
 
         Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> ((DOMFormControlElement) codeField).getForm().submit());
 
-        if(JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, ".cvf-widget-input.cvf-widget-input-code") != null) {
+        if (JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, ".cvf-widget-input.cvf-widget-input-code") != null) {
             throw new BusinessException("Invalid code. Please check your code and try again.");
         }
     }

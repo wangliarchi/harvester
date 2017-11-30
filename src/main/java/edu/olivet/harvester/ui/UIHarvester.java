@@ -24,6 +24,7 @@ import javax.swing.GroupLayout.Alignment;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Date;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 9/20/2017 11:59 AM
@@ -173,10 +174,10 @@ public class UIHarvester extends AbstractApplicationUI {
 
     void startBackgroundJobs() {
         for (BackgroundJob job : BackgroundJob.values()) {
-            taskScheduler.startJob(job.getCron(), job.getClazz());
+            Date nextTriggerTime = taskScheduler.startJob(job.getCron(), job.getClazz());
             try {
                 AbstractBackgroundJob bg = ApplicationContext.getBean(job.getClazz());
-                bg.runIfMissed();
+                bg.runIfMissed(nextTriggerTime);
             } catch (Exception e) {
                 LOGGER.error("Cant initialize job {}", job.getClazz().getName(), e);
             }

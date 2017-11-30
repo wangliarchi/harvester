@@ -24,6 +24,7 @@ public class Checkout extends Step {
     StepHelper stepHelper;
 
     public Step createDynamicInstance(FlowState state) {
+        state.setPrevStep(this);
         Step nextStep = stepHelper.detectStep(state);
         LOGGER.info("Next step is " + nextStep.stepName);
         return nextStep;

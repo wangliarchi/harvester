@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Tools;
+import edu.olivet.harvester.fulfill.exception.OrderSubmissionException;
 import edu.olivet.harvester.model.CreditCard;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
@@ -44,7 +45,7 @@ public class OrderBuyerUtils {
         if (creditCards.containsKey(buyer.getEmail().toLowerCase())) {
             return creditCards.get(buyer.getEmail().toLowerCase());
         }
-        throw new BusinessException("No credit card configed for buyer account " + buyer.getEmail());
+        throw new OrderSubmissionException("No credit card configed for buyer account " + buyer.getEmail());
     }
 
     public static CreditCard getCreditCard(Order order) {

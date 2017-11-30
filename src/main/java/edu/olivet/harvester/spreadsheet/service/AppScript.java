@@ -216,6 +216,7 @@ public class AppScript {
         final long start = System.currentTimeMillis();
         String json = this.processResult(this.get(params));
 
+        //LOGGER.info("request {}, response{}",params,json);
         List<Order> orders = this.parse(json);
         orders.forEach(it -> {
             it.setSheetName(sheetName);

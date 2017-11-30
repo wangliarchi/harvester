@@ -3,6 +3,7 @@ package edu.olivet.harvester.fulfill.service;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
+import com.sun.org.apache.xpath.internal.operations.Or;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.harvester.fulfill.utils.OrderStatusUtils;
 import edu.olivet.harvester.model.Order;
@@ -159,6 +160,13 @@ public class SheetService extends SheetAPI {
 
     public int locateOrder(Order order) {
         //id, sku, seller, price, remark
+        Order o = reloadOrder(order);
+        return o.row;
+
+    }
+
+    public Order reloadOrder(Order order) {
+        //id, sku, seller, price, remark
         List<Order> orders = appScript.readOrders(order.spreadsheetId, order.sheetName);
         orders.removeIf(it->!it.equalsLite(order));
         if(CollectionUtils.isEmpty(orders)) {
@@ -167,7 +175,7 @@ public class SheetService extends SheetAPI {
 
         for(Order o: orders) {
             if(StringUtils.equalsAnyIgnoreCase(o.remark,order.remark, order.originalRemark)) {
-                return o.row;
+                return o;
             }
         }
 

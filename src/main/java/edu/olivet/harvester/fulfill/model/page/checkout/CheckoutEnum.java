@@ -1,7 +1,9 @@
 package edu.olivet.harvester.fulfill.model.page.checkout;
 
 import com.teamdev.jxbrowser.chromium.Browser;
+import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import lombok.Getter;
 
@@ -20,7 +22,7 @@ public class CheckoutEnum {
     public enum CheckoutPage {
         ShippingAddress(".checkout.checkout-as"),
         ShippingAddressOnePage(".a-container.page-container #shipaddress #add-new-address-popover-link"),
-        CantShipToAddressPage("#changeQuantityFormId"),
+        CantShipToAddressPage("#changeQuantityFormId .lineitem-address .lineitem-error-message"),
         PaymentMethod(".checkout.pay"),
         PaymentMethodOnePage(".a-container.page-container #payment #cc-popover-link"),
         ShippingMethod("#shippingOptionFormId"),
@@ -29,6 +31,7 @@ public class CheckoutEnum {
         AmazonPrimeAd("#mom-no-thanks"),
         AmazonPrimeAdAfterPlaceOrderBtnClicked("#prime-piv-steps-container"),
         OrderPlacedSuccessPage("#a-page .a-box.a-alert.a-alert-success"),
+        OrderDetailPage("#orderDetails"),
         LoginPage("#ap_email");
 
         @Getter
@@ -39,13 +42,17 @@ public class CheckoutEnum {
         }
 
         public static CheckoutPage detectPage(Browser browser) {
-            //loading-spinner-blocker-doc
+            JXBrowserHelper.waitUntilNotFound(browser, ".section-overwrap");
+            JXBrowserHelper.waitUntilNotFound(browser, "#spinner-anchor");
+            JXBrowserHelper.waitUntilNotFound(browser, ".loading-img-text");
+
             for (CheckoutPage page : CheckoutPage.values()) {
-                if (JXBrowserHelper.selectElementByCssSelector(browser, page.getIdSelector()) != null) {
+                DOMElement element = JXBrowserHelper.selectElementByCssSelector(browser, page.getIdSelector());
+                if (element != null && JXBrowserHelper.isVisible(element)) {
                     return page;
                 }
             }
-            throw new BusinessException("Cant detect current page " + browser.getTitle() + " - " + browser.getURL());
+            return null;
 
         }
     }
