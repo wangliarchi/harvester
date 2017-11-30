@@ -235,3 +235,23 @@
 
 更新内容：
 1. fix a bug on order confirmation for EU marketplaces.
+
+======================================================================
+版本：1.0-2017-11-28.1-GA,1.0-2017-11-28.2-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. report bug function.
+2. several bug fixes and improvements.
+
+======================================================================
+版本：1.0-2017-11-28.2-GA,1.0-2017-11-29.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. fixed 2 bugs on order confirmation.
+2. several bug fixes and improvements on order submission.
