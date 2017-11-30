@@ -3,9 +3,11 @@ package edu.olivet.harvester.fulfill.utils;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Strings;
+import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.model.Remark;
+import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -49,7 +51,16 @@ public class OrderCountryUtils {
             } catch (Exception e) {
                 //ignore
             }
-            return Country.fromSalesChanel(order.getSales_chanel());
+            try {
+                return Country.fromSalesChanel(order.getSales_chanel());
+            } catch (Exception e) {
+                //sale channel is missing, current country;
+                if (StringUtils.isNotBlank(order.spreadsheetId)) {
+                    return Settings.load().getSpreadsheetCountry(order.spreadsheetId);
+                }
+
+                return Country.valueOf(RuntimeSettings.load().getMarketplaceName());
+            }
         }
     }
 

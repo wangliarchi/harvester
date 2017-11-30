@@ -7,7 +7,6 @@ import com.teamdev.jxbrowser.chromium.events.LoadAdapter;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import com.teamdev.jxbrowser.chromium.swing.internal.LightWeightWidget;
 import edu.olivet.foundations.amazon.Account;
-import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.*;
 import edu.olivet.harvester.model.Order;
@@ -109,7 +108,7 @@ public class JXBrowserHelper {
      * 初始化一个JXBrowser View
      *
      * @param profileDirName 该BrowserView对应Profile路径名称，需要注意：一个路径同一时间只能一个Browser使用
-     * @param zoomLevel 缩放级别，100%常规模式可设定为1，放大或缩小可以设置其他值
+     * @param zoomLevel      缩放级别，100%常规模式可设定为1，放大或缩小可以设置其他值
      * @return 初始化好的BrowserView实例
      */
     public static BrowserView init(String profileDirName, double zoomLevel) {
@@ -303,7 +302,7 @@ public class JXBrowserHelper {
             try {
                 return browser.getDocument().findElement(By.name(name));
             } catch (Exception e) {
-                LOGGER.error("",e);
+                LOGGER.error("", e);
                 WaitTime.Short.execute();
             }
         }
@@ -316,7 +315,7 @@ public class JXBrowserHelper {
             try {
                 return selectElementByCssSelector(browser.getDocument(), selector);
             } catch (Exception e) {
-                LOGGER.error("",e);
+                LOGGER.error("", e);
                 WaitTime.Short.execute();
             }
         }
@@ -330,7 +329,7 @@ public class JXBrowserHelper {
             try {
                 return document.findElement(By.cssSelector(selector));
             } catch (Exception e) {
-                LOGGER.error("",e);
+                LOGGER.error("", e);
                 WaitTime.Short.execute();
                 //throw new BusinessException(e);
             }
@@ -349,7 +348,7 @@ public class JXBrowserHelper {
                 return document.findElements(By.cssSelector(selector));
             } catch (Exception e) {
                 //throw new BusinessException(e);
-                LOGGER.error("",e);
+                LOGGER.error("", e);
                 WaitTime.Short.execute();
             }
         }
@@ -436,7 +435,7 @@ public class JXBrowserHelper {
         for (DOMElement optionElm : options) {
             try {
                 DOMOptionElement option = (DOMOptionElement) optionElm;
-                if (value.equalsIgnoreCase(option.getAttribute("value")) || value.equalsIgnoreCase(option.getInnerText())) {
+                if (value.equalsIgnoreCase(option.getAttribute("value"))) {
                     option.setSelected(true);
                     break;
                 }

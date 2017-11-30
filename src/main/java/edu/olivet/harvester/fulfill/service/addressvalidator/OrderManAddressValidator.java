@@ -5,7 +5,10 @@ import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.aop.Profile;
 import edu.olivet.foundations.ui.UIText;
-import edu.olivet.foundations.utils.*;
+import edu.olivet.foundations.utils.ApplicationContext;
+import edu.olivet.foundations.utils.Configs;
+import edu.olivet.foundations.utils.Constants;
+import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
@@ -24,19 +27,29 @@ import java.util.*;
  */
 public class OrderManAddressValidator implements AddressValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderManAddressValidator.class);
-    /** 对数字类型文本做容错处理时，需补上缺少的字符内容:{@value} */
+    /**
+     * 对数字类型文本做容错处理时，需补上缺少的字符内容:{@value}
+     */
     public static final char DIGIT_ZERO = '0';
-    /** 一屏式模式下，地址信息的连接字符 */
+    /**
+     * 一屏式模式下，地址信息的连接字符
+     */
     private static final String SINGLE_PAGE_ADDR_SEPERATOR = ", ";
-    /** 比较地址属性时，在二者不相等的前提下，能接受的相似度最低值 */
+    /**
+     * 比较地址属性时，在二者不相等的前提下，能接受的相似度最低值
+     */
     private static final float MIN_SIMILARITY = 0.9f;
-    /** Rating value indicate two addresses are exactly same */
+    /**
+     * Rating value indicate two addresses are exactly same
+     */
     private static final float SAME = 1.0f;
 
     private Map<String, String> addressRules;
 
-    @Inject CountryStateUtils countryStateUtils;
-    @Inject ErrorAlertService errorAlertService;
+
+    @Inject
+    ErrorAlertService errorAlertService;
+
     /**
      * 合并普通缩写规则和UPS官方缩写规则，然后将亚马逊的规则写入覆盖
      */
@@ -54,25 +67,25 @@ public class OrderManAddressValidator implements AddressValidator {
     @Profile
     public boolean verify(Address old, Address entered) {
         try {
-                if(_verify(old,entered)) {
-                    return true;
-                }
-                String finalOrAddr = applyRule2Addr(old.toString());
-                String finalAddr = applyRule2Addr(entered.toString());
-
-                if (!finalOrAddr.equals(finalAddr)) {
-                    double similarity = StringUtils.getJaroWinklerDistance(finalOrAddr, finalAddr);
-                    if (similarity < MIN_SIMILARITY) {
-                        String msg = "Address failed verification. Entered " + entered + ", original " + old + ", Addresses after rules applied " + finalOrAddr + ", "+finalAddr;
-                        LOGGER.error(msg);
-                        errorAlertService.sendMessage("Address failed verification", msg);
-                        return false;
-                    }
-                }
-
+            if (_verify(old, entered)) {
                 return true;
+            }
+            String finalOrAddr = applyRule2Addr(old.toString());
+            String finalAddr = applyRule2Addr(entered.toString());
 
-        }catch(Exception e){
+            if (!finalOrAddr.equals(finalAddr)) {
+                double similarity = StringUtils.getJaroWinklerDistance(finalOrAddr, finalAddr);
+                if (similarity < MIN_SIMILARITY) {
+                    String msg = "OrderMan Address failed verification. Entered " + entered + ", original " + old + ", Addresses after rules applied " + finalOrAddr + ", " + finalAddr;
+                    LOGGER.error(msg);
+                    errorAlertService.sendMessage("Address failed verification", msg);
+                    return false;
+                }
+            }
+
+            return true;
+
+        } catch (Exception e) {
             LOGGER.error("${message}", e);
             return false;
         }
@@ -100,29 +113,30 @@ public class OrderManAddressValidator implements AddressValidator {
         List<String> list = this.compareStateZip(old, entered);
         results.addAll(list);
 
-        result = this.compareCountry(old.getCountry(), entered.getCountry());
-        if (StringUtils.isNotBlank(result)) {
-            results.add(result);
+        if (StringUtils.isNotBlank(entered.getCountry())) {
+            result = this.compareCountry(old.getCountry(), entered.getCountry());
+            if (StringUtils.isNotBlank(result)) {
+                results.add(result);
+            }
         }
 
-        if(CollectionUtils.isNotEmpty(results)) {
-            String msg = "Address failed verification. Entered " + entered + ", original " + old + ". " + StringUtils.join(results,"; ");
+        if (CollectionUtils.isNotEmpty(results)) {
+            String msg = "OrderMan Address failed verification. Entered " + entered + ", original " + old + ". " + StringUtils.join(results, "; ");
             LOGGER.error(msg);
             errorAlertService.sendMessage("Address failed verification", msg);
             return false;
         }
-         return true;
+        return true;
 
 
     }
 
 
-
-
     /**
      * 将地址去掉标点符号、全部转换为小写之后，按照亚马逊地址替换规则进行转换
-     * @param addr	输入的地址信息
-     * @return		转换后的地址信息
+     *
+     * @param addr 输入的地址信息
+     * @return 转换后的地址信息
      */
     public String applyRule2Addr(String addr) {
         if (StringUtils.isBlank(addr)) {
@@ -150,9 +164,10 @@ public class OrderManAddressValidator implements AddressValidator {
 
     /**
      * 检查地址
-     * @param address01		OrderReview页面的address1+address2
-     * @param address02		Order本身的ship_address1+ship_address2
-     * @return	校验结果
+     *
+     * @param address01 OrderReview页面的address1+address2
+     * @param address02 Order本身的ship_address1+ship_address2
+     * @return 校验结果
      */
     public String compareAddress(String address01, String address02) {
         if (this.sameInWords(address01, address02)) {
@@ -192,14 +207,15 @@ public class OrderManAddressValidator implements AddressValidator {
     /**
      * 比较地址中的国家，一般只需根据名称比较。但也存在国家名称不同，却指向相同国家代码的情况
      * eg: South Korea -> Korea, Republic of
-     * @param country1	OrderReview页面的country名称
-     * @param country2	Order本身的ship_country列
-     * @return	校验结果
+     *
+     * @param country1 OrderReview页面的country名称
+     * @param country2 Order本身的ship_country列
+     * @return 校验结果
      */
     public String compareCountry(String country1, String country2) {
         if (!country1.equals(country2)) {
-            String code1 = countryStateUtils.getCountryCode(country1);
-            String code2 = countryStateUtils.getCountryCode(country2);
+            String code1 = CountryStateUtils.getInstance().getCountryCode(country1);
+            String code2 = CountryStateUtils.getInstance().getCountryCode(country2);
             if (!code1.equals(code2)) {
                 return UIText.message("error.addr.country", country1, code1, country2, code2);
             }
@@ -210,9 +226,10 @@ public class OrderManAddressValidator implements AddressValidator {
     /**
      * 比较邮政编码，存在比如两个美国邮政编码应当一致，但经过Amazon自动转换之后后四位不同的情况
      * eg: 44224-2297 -> 44224-2209
-     * @param zip1	OrderReview页面的zipcode，可能为空白，但不能为null
-     * @param zip2	Order本身ship_zipcode列，可能为空白，但不能为null
-     * @return	校验结果
+     *
+     * @param zip1 OrderReview页面的zipcode，可能为空白，但不能为null
+     * @param zip2 Order本身ship_zipcode列，可能为空白，但不能为null
+     * @return 校验结果
      */
     public String compareZipCode(String zip1, String zip2) {
         if (!zip1.replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY).equals(zip2.replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY)) &&
@@ -227,7 +244,6 @@ public class OrderManAddressValidator implements AddressValidator {
         }
         return null;
     }
-
 
 
     /**
@@ -293,7 +309,8 @@ public class OrderManAddressValidator implements AddressValidator {
 
     /**
      * 目前订单中会出现部分邮政编码文字变为数字，导致首位数字0被自动取消的情况，尝试自动补齐
-     * @param zipCode	当前邮政编码
+     *
+     * @param zipCode 当前邮政编码
      */
     public String correctUSZipCode(String zipCode) {
         if (StringUtils.isBlank(zipCode)) {
@@ -307,17 +324,18 @@ public class OrderManAddressValidator implements AddressValidator {
 
     /**
      * 目前订单中会出现部分邮政编码文字变为数字，导致首位数字0被自动取消的情况，尝试自动补齐
-     * @param zipCode	当前邮政编码
+     *
+     * @param zipCode 当前邮政编码
      */
     public String correctDEZipCode(String zipCode) {
         return StringUtils.leftPad(zipCode, 5, DIGIT_ZERO);
     }
 
 
-
     /**
      * 对美国州名进行容错处理，比如Ks.，Pa.等等
-     * @param shipState		原始订单数据中的州名
+     *
+     * @param shipState 原始订单数据中的州名
      */
     public static String correctUSState(String shipState) {
         if (!shipState.contains(".")) {
@@ -355,6 +373,7 @@ public class OrderManAddressValidator implements AddressValidator {
         assert result != null;
         return result.replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY);
     }
+
     /**
      * <pre>
      * Calculate similarity between two addresses
@@ -402,7 +421,7 @@ public class OrderManAddressValidator implements AddressValidator {
         for (State state : State.values()) {
             _addr = _addr.replace(state.desc(), state.name()).replace(state.desc().toUpperCase(), state.name());
         }
-        return 	_addr.replace("USA", StringUtils.EMPTY).replace("US", StringUtils.EMPTY)
+        return _addr.replace("USA", StringUtils.EMPTY).replace("US", StringUtils.EMPTY)
                 .replaceAll(Regex.DIGITS_MINUS.val(), StringUtils.EMPTY)
                 .replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY);
     }
@@ -424,7 +443,7 @@ public class OrderManAddressValidator implements AddressValidator {
 
         List<String> list = Lists.newArrayList(array);
         Collections.reverse(list);
-        for (Iterator<String> iterator = list.iterator(); iterator.hasNext();) {
+        for (Iterator<String> iterator = list.iterator(); iterator.hasNext(); ) {
             String string = iterator.next();
             if (StringUtils.startsWith(string, "Phone:")) {
                 iterator.remove();
@@ -432,7 +451,7 @@ public class OrderManAddressValidator implements AddressValidator {
             }
 
             try {
-                countryStateUtils.getCountryCode(string);
+                CountryStateUtils.getInstance().getCountryCode(string);
                 iterator.remove();
             } catch (IllegalArgumentException e) {
                 // -> Ignore
@@ -452,11 +471,6 @@ public class OrderManAddressValidator implements AddressValidator {
 
     public static void main(String[] args) {
         OrderManAddressValidator validator = ApplicationContext.getBean(OrderManAddressValidator.class);
-
-        // Entered Address(address1=10248 PRINCE PL APT T1, address2=, city=UPPER MARLBORO, state=MD, zip=20774-1220, zip5=20774, zip4=1220, country=United States),
-        //origin Address(address1=10248 Prince Place, address2=T1, city=Upper Marlboro, state=MD, zip=20774, zip5=20774, zip4=, country=United States)
-        //3142 W George St C3, address2=, city=Chicago, state=IL, zip=60618, zip5=60618, zip4=, country=United States
-        //131 East 69th Street	3A	New York	10021
         Address address = new Address();
         address.setAddress1("131 East 69th Street");
         address.setAddress2("3A");

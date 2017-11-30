@@ -1,6 +1,5 @@
 package edu.olivet.harvester.fulfill.utils;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.UIText;
@@ -17,9 +16,13 @@ import java.util.Map;
 public class CountryStateUtils {
     private Map<String, String> countryCodes;
     private Map<String, String> usStates;
+    private final static CountryStateUtils instance = new CountryStateUtils();
 
-    @Inject
-    public void init() {
+    public static CountryStateUtils getInstance() {
+        return instance;
+    }
+
+    private CountryStateUtils() {
         countryCodes = Configs.load(Config.CountryCode.fileName());
         usStates = Configs.load(Config.USStates.fileName(), Configs.KeyCase.UpperCase);
     }

@@ -41,7 +41,7 @@ public abstract class ShippingAddressAbstract extends FulfillmentPage {
             JXBrowserHelper.fillValueForFormField(browser, SELECTOR_CITY, address.getCity());
             JXBrowserHelper.fillValueForFormField(browser, SELECTOR_STATE, address.getState());
             JXBrowserHelper.fillValueForFormField(browser, SELECTOR_ZIP, address.getZip());
-            JXBrowserHelper.setValueForFormSelect(browser, SELECTOR_COUNTRY, address.getCountry());
+            JXBrowserHelper.setValueForFormSelect(browser, SELECTOR_COUNTRY, address.getCountryCode());
             JXBrowserHelper.fillValueForFormField(browser, SELECTOR_PHONE, address.getPhoneNumber());
         } catch (Exception e) {
             LOGGER.info("can not fill ship address form", e);

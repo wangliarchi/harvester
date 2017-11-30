@@ -3,7 +3,6 @@ package edu.olivet.harvester.fulfill.service;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-import com.sun.org.apache.xpath.internal.operations.Or;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.harvester.fulfill.utils.OrderStatusUtils;
 import edu.olivet.harvester.model.Order;
@@ -91,8 +90,6 @@ public class SheetService extends SheetAPI {
     }
 
 
-    @Inject
-    OrderStatusUtils orderStatusUtils;
 
     public Map<String, List<String>> updateStatus(String spreadsheetId, List<Order> orders) {
         if (CollectionUtils.isEmpty(orders)) {
@@ -105,7 +102,7 @@ public class SheetService extends SheetAPI {
         Map<Integer, String> statusToUpdate = new HashMap<>();
         for (Order order : orders) {
             //update status cell
-            String status = orderStatusUtils.determineStatus(order);
+            String status = OrderStatusUtils.determineStatus(order);
             statusToUpdate.put(order.row, status);
             ValueRange rowData = new ValueRange().setValues(Collections.singletonList(Collections.singletonList(status)))
                     .setRange(order.getSheetName() + "!A" + order.row);

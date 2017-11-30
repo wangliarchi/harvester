@@ -75,6 +75,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
             String addressLine1 = JXBrowserHelper.text(browser, ".displayAddressUL .displayAddressAddressLine1");
             String addressLine2 = JXBrowserHelper.text(browser, ".displayAddressUL .displayAddressAddressLine2");
             String cityStateZip = JXBrowserHelper.text(browser, ".displayAddressUL .displayAddressCityStateOrRegionPostalCode");
+            String country = JXBrowserHelper.text(browser, ".displayAddressUL .displayAddressCountryName");
             String[] parts = StringUtils.split(cityStateZip, ",");
             String city = parts[0].trim();
             String[] regionZip = StringUtils.split(parts[1].trim(), " ");
@@ -88,6 +89,11 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
             enteredAddress.setCity(city);
             enteredAddress.setState(state);
             enteredAddress.setZip(zip);
+
+            if (StringUtils.isNotBlank(country)) {
+                enteredAddress.setCountry(country);
+            }
+
 
             return enteredAddress;
 

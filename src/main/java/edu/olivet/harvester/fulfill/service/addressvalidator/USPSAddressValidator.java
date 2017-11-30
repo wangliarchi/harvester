@@ -34,14 +34,11 @@ public class USPSAddressValidator implements AddressValidator {
     private static final String USERNAME = "566OLIVE0646";
 
     @Inject
-    CountryStateUtils countryStateUtils;
-
-    @Inject
     ErrorAlertService errorAlertService;
 
     public boolean verify(Address old, Address entered) {
 
-        if (!StringUtils.equalsAnyIgnoreCase(old.getCountry().toLowerCase(), "us", "united states")) {
+        if (!old.isUSAddress()) {
             throw new BusinessException("USPS address validation can only work for US addresses");
         }
 
@@ -64,9 +61,9 @@ public class USPSAddressValidator implements AddressValidator {
                 LOGGER.error("Address failed verification. Entered " + entered + ", original " + old + ", USPS returned " + corrected);
                 errorAlertService.sendMessage("Address failed verification", "Entered\n " + entered + "\n\n Original\n " + old + "\n\nUSPS returned\n" + corrected);
 
-                if(StringUtils.isNotBlank(old.getAddress2())) {
+                if (StringUtils.isNotBlank(old.getAddress2())) {
                     Address copy = old.copy();
-                    copy.setAddress2("APT "+copy.getAddress2());
+                    copy.setAddress2("APT " + copy.getAddress2());
                     corrected = getCorrectedAddress(copy);
                     result = corrected.equals(entered);
                 }
@@ -74,7 +71,7 @@ public class USPSAddressValidator implements AddressValidator {
 
             return result;
         } catch (Exception e) {
-            LOGGER.error("{}",old, e);
+            LOGGER.error("{}", old, e);
         }
         return false;
 
@@ -173,12 +170,11 @@ public class USPSAddressValidator implements AddressValidator {
         return String.format(request,
                 USERNAME,
                 address.getAddress2(), address.getAddress1(), address.getCity(),
-                countryStateUtils.getUSStateAbbr(address.getState()), address.getZip5(), address.getZip4());
+                CountryStateUtils.getInstance().getUSStateAbbr(address.getState()), address.getZip5(), address.getZip4());
     }
 
     public static void main(String[] args) {
         USPSAddressValidator validator = ApplicationContext.getBean(USPSAddressValidator.class);
-
         // Entered Address(address1=10248 PRINCE PL APT T1, address2=, city=UPPER MARLBORO, state=MD, zip=20774-1220, zip5=20774, zip4=1220, country=United States),
         //origin Address(address1=10248 Prince Place, address2=T1, city=Upper Marlboro, state=MD, zip=20774, zip5=20774, zip4=, country=United States)
         //3142 W George St C3, address2=, city=Chicago, state=IL, zip=60618, zip5=60618, zip4=, country=United States

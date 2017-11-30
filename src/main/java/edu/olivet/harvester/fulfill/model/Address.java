@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.base.Objects;
 import edu.olivet.foundations.utils.Configs;
 import edu.olivet.foundations.utils.RegexUtils;
+import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.utils.Config;
 import lombok.AllArgsConstructor;
@@ -28,7 +29,7 @@ public class Address {
     private String city;
     private String state;
     private String zip = "";
-    private String country;
+    private String country = "";
     private String zip5 = "";
     private String zip4 = "";
     private String phoneNumber = "";
@@ -60,17 +61,17 @@ public class Address {
         address.setAddress1(order.ship_address_1);
         address.setAddress2(order.ship_address_2);
         address.setZip(order.ship_zip);
-        address.setName(order.recipient_name.replaceAll("\"", "").replaceAll("&#34;",""));
-        if("unlisted".equalsIgnoreCase(order.ship_phone_number)) {
+        address.setName(order.recipient_name.replaceAll("\"", "").replaceAll("&#34;", ""));
+        if ("unlisted".equalsIgnoreCase(order.ship_phone_number)) {
             address.setPhoneNumber("321-123-456");
-        } else{
+        } else {
             address.setPhoneNumber(order.ship_phone_number);
         }
 
         return address;
     }
 
-    public  Address copy() {
+    public Address copy() {
         Address address = new Address();
         address.setName(name);
         address.setAddress1(address1);
@@ -88,8 +89,15 @@ public class Address {
         return JSON.parseObject(Configs.read(Config.USForwardAddress.fileName()), Address.class);
     }
 
+    public String getCountryCode() {
+        if (StringUtils.isBlank(country)) {
+            return "";
+        }
+        return CountryStateUtils.getInstance().getCountryCode(country);
+    }
+
     public boolean isUSAddress() {
-        return StringUtils.equalsAnyIgnoreCase(country,"US","United States");
+        return "US".equalsIgnoreCase(getCountryCode());
     }
 
     @Override
@@ -132,11 +140,17 @@ public class Address {
 
         }
 
+        boolean sameCountry = true;
+        if (StringUtils.isNotBlank(country) && StringUtils.isNotBlank(address.getCountry())) {
+            if (!getCountryCode().equalsIgnoreCase(address.getCountryCode())) {
+                sameCountry = false;
+            }
+        }
         //todo State full and abbr
         return sameAddressLines &&
-                //StringUtils.equalsIgnoreCase(city, address.getCity()) &&
+                StringUtils.equalsIgnoreCase(city, address.getCity()) &&
                 StringUtils.equalsIgnoreCase(state, address.getState()) &&
-                StringUtils.equalsIgnoreCase(country, address.getCountry()) &&
+                sameCountry &&
                 StringUtils.equalsIgnoreCase(getZip5(), address.getZip5());
     }
 
@@ -176,6 +190,10 @@ public class Address {
     @Override
     public String toString() {
         return name + (StringUtils.isNotBlank(address1) ? ", " + address1 : "") + (StringUtils.isNotBlank(address2) ? ", " + address2 : "") + ", " + city + ", " + state + " " + getZip() + ", " + country;
+    }
+
+    public String withouName() {
+        return (StringUtils.isNotBlank(address1) ? ", " + address1 : "") + (StringUtils.isNotBlank(address2) ? ", " + address2 : "") + ", " + city + ", " + state + " " + getZip() + ", " + country;
     }
 
 }

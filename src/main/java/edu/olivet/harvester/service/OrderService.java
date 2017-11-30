@@ -154,6 +154,7 @@ public class OrderService {
                     continue;
                 }
 
+                order.setSpreadsheetId(spreadsheetId);
                 order.setSheetName(sheetName);
                 ordersForSheet.add(order);
             }

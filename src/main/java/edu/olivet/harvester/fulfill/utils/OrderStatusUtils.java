@@ -1,6 +1,5 @@
 package edu.olivet.harvester.fulfill.utils;
 
-import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
@@ -9,13 +8,12 @@ import edu.olivet.harvester.model.OrderEnums;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/15/17 3:39 PM
  */
 public class OrderStatusUtils {
-    @Inject
-    CountryStateUtils countryStateUtils;
+
 
     /**
      * 根据当前订单数据决定需要标识的状态，注意：分支判断的顺序<strong>不能颠倒!</strong>
      */
-    public String determineStatus(Order order) {
+    public static String determineStatus(Order order) {
         if (OrderEnums.Status.Finish.value().equalsIgnoreCase(order.status) || OrderEnums.Status.Skip.value().equalsIgnoreCase(order.status) || order.toBeChecked()) {
             return null;
         }
@@ -40,7 +38,7 @@ public class OrderStatusUtils {
             return OrderEnums.Status.SellerIsHalf.value();
         } else if (order.seller.toLowerCase().startsWith("in-") || order.seller.toLowerCase().equals("in")) {
             return OrderEnums.Status.SellerIsIngram.value();
-        } else if (!finalAmazonCountry.code().equals(countryStateUtils.getCountryCode(order.ship_country))) {
+        } else if (!finalAmazonCountry.code().equals(CountryStateUtils.getInstance().getCountryCode(order.ship_country))) {
             return OrderEnums.Status.International.value();
         } else if (order.sellerIsPrime()) {
             return OrderEnums.Status.PrimeSeller.value();

@@ -2,7 +2,6 @@ package edu.olivet.harvester.fulfill.utils;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.UIText;
@@ -194,7 +193,7 @@ public class OrderValidator {
 
 
     public String statusMarkedCorrectForSubmit(Order order) {
-        String status = orderStatusUtils.determineStatus(order);
+        String status = OrderStatusUtils.determineStatus(order);
         if (order.status.equals(status)) {
             return "";
         }
@@ -211,12 +210,10 @@ public class OrderValidator {
 
     }
 
-    @Inject
-    OrderStatusUtils orderStatusUtils;
 
     public String statusNeedUpdate(Order order) {
-        String s = orderStatusUtils.determineStatus(order);
-        if (StringUtils.equals(orderStatusUtils.determineStatus(order), order.status)) {
+        String s = OrderStatusUtils.determineStatus(order);
+        if (StringUtils.equals(s, order.status)) {
             return "Order status has already been updated.";
         }
 
@@ -403,7 +400,7 @@ public class OrderValidator {
         try {
             OrderBuyerUtils.getBuyer(order);
         } catch (Exception e) {
-            LOGGER.error("",e);
+            LOGGER.error("", e);
             return "order buyer account not set properly.";
         }
         return "";

@@ -9,7 +9,10 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
+import edu.olivet.foundations.utils.ApplicationContext;
+import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Strings;
+import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.model.ItemCompareResult;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.*;
@@ -82,7 +85,7 @@ public class OrderSubmitter {
         if (!DUPLICATION_CHECK_CACHE.containsKey(settings.getSpreadsheetId())) {
             Spreadsheet spreadsheet = sheetService.getSpreadsheet(settings.getSpreadsheetId());
             List<Order> duplicatedOrders = orderService.findDuplicates(spreadsheet);
-            DUPLICATION_CHECK_CACHE.put(settings.getSpreadsheetId(),true);
+            DUPLICATION_CHECK_CACHE.put(settings.getSpreadsheetId(), true);
             if (CollectionUtils.isNotEmpty(duplicatedOrders)) {
                 String msg = String.format("%s duplicated orders found in %s, %s", duplicatedOrders.size(), spreadsheet.getProperties().getTitle(),
                         StringUtils.join(duplicatedOrders.stream().map(it -> it.order_id + " @ " + it.sheetName).collect(Collectors.toSet()).toArray(new String[duplicatedOrders.size()]), ", "));
@@ -110,7 +113,7 @@ public class OrderSubmitter {
         for (Order order : orders) {
             String error = orderValidator.isValid(order, FulfillmentEnum.Action.SubmitOrder);
 
-            if (StringUtils.isBlank(error) && OrderCountryUtils.getFulfillementCountry(order) != Country.US || !"US".equalsIgnoreCase(OrderCountryUtils.getShipToCountry(order))) {
+            if (StringUtils.isBlank(error) && OrderCountryUtils.getFulfillementCountry(order) != Country.US) {
                 error = "Harvester can only support US marketplace at this moment. Sorry for inconvenience.";
             }
 
@@ -236,4 +239,26 @@ public class OrderSubmitter {
     }
 
 
+    public static void main(String[] args) {
+        OrderSubmitter orderSubmitter = ApplicationContext.getBean(OrderSubmitter.class);
+        String spreadsheetId = "1t1iEDNrokcqjE7cTEuYW07Egm6By2CNsMuog9TK1LhI";
+        Spreadsheet spreadsheet = orderSubmitter.sheetService.getSpreadsheet(spreadsheetId);
+        List<Order> orders = orderSubmitter.orderService.getOrders(spreadsheet, Dates.parseDate("10/01/2017"));
+        orders.removeIf(it -> it.ship_country.equalsIgnoreCase("united states"));
+
+
+        orders.forEach(it -> {
+            try {
+
+                //Address address = OrderAddressUtils.orderShippingAddress(it);
+                Address address = Address.loadFromOrder(it);
+                System.out.println(String.format("%s\t2017-11-23T06:19:12+00:00\thttp://www.amazon.com/product/dp/B01A0CPHNC\tJiuUSBk2016-0718-C61316\t9.75\t1\t24.95\t%s", address.getName(), address.getState()));
+                System.out.println(String.format("%s\t%s\t%s\t%s\t%s\t\t\t\t\t%s", address.getAddress1(), address.getAddress2(), address.getCity(), address.getZip(), address.getPhoneNumber(), address.getCountry()));
+//                System.out.println(CountryStateUtils.getInstance().getCountryCode(address.getCountry()));
+            } catch (Exception e) {
+                System.out.println(it);
+                throw e;
+            }
+        });
+    }
 }

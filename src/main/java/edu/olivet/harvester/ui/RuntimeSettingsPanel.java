@@ -101,12 +101,12 @@ public class RuntimeSettingsPanel extends JPanel {
         noInvoiceTextField.setText(settings.getNoInvoiceText());
 
 
-        lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"5", "7"}));
+        lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"5", "7"}));
         if (StringUtils.isNotBlank(settings.getLostLimit())) {
             lostLimitComboBox.setSelectedItem(settings.getLostLimit());
         }
 
-        priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"3", "5"}));
+        priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"3", "5"}));
         if (StringUtils.isNotBlank(settings.getPriceLimit())) {
             priceLimitComboBox.setSelectedItem(settings.getPriceLimit());
         }
@@ -118,7 +118,7 @@ public class RuntimeSettingsPanel extends JPanel {
         finderCodeTextField.setText(settings.getFinderCode());
 
 
-        maxDaysOverEddComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}));
+        maxDaysOverEddComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}));
         if (StringUtils.isNotBlank((settings.getEddLimit()))) {
             maxDaysOverEddComboBox.setSelectedItem(settings.getEddLimit());
         }
@@ -312,7 +312,11 @@ public class RuntimeSettingsPanel extends JPanel {
             }
         }).start();
 
-        psEventListenerThread.start();
+        try {
+            psEventListenerThread.start();
+        } catch (Exception e) {
+            //ignore
+        }
     }
 
     public void updateBudget() {
@@ -470,12 +474,21 @@ public class RuntimeSettingsPanel extends JPanel {
 
     public void setAccounts4Country() {
         Country currentCountry = (Country) marketplaceComboBox.getSelectedItem();
+        Settings.Configuration configuration;
+        try {
+            configuration = Settings.load().getConfigByCountry(currentCountry);
+        } catch (Exception e) {
+            settings = new RuntimeSettings();
+            settings.save();
+            marketplaceComboBox.setSelectedIndex(0);
+            return;
+        }
+
         String spreadsheetId = settings.getSpreadsheetId();
 
-        Settings.Configuration configuration = Settings.load().getConfigByCountry(currentCountry);
 
         Account seller = configuration.getSeller();
-        Account[] sellers = seller == null ? new Account[0] : new Account[] {seller};
+        Account[] sellers = seller == null ? new Account[0] : new Account[]{seller};
         sellerComboBox.setModel(new DefaultComboBoxModel<>(sellers));
 
         //default to book
@@ -500,10 +513,10 @@ public class RuntimeSettingsPanel extends JPanel {
             buyer = configuration.getProdBuyer();
             primeBuyer = configuration.getProdPrimeBuyer();
         }
-        Account[] buyers = buyer == null ? new Account[0] : new Account[] {buyer};
+        Account[] buyers = buyer == null ? new Account[0] : new Account[]{buyer};
         buyerComboBox.setModel(new DefaultComboBoxModel<>(buyers));
 
-        Account[] primeBuyers = primeBuyer == null ? new Account[0] : new Account[] {primeBuyer};
+        Account[] primeBuyers = primeBuyer == null ? new Account[0] : new Account[]{primeBuyer};
         primeBuyerComboBox.setModel(new DefaultComboBoxModel<>(primeBuyers));
 
     }
