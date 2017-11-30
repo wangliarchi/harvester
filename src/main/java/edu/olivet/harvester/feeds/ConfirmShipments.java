@@ -372,10 +372,12 @@ public class ConfirmShipments {
             for (Country c : Country.EURO) {
                 try {
                     result = _submitFeed(feedFile, c);
+                    LOGGER.debug("order confirmation result {}",result);
                     if (!StringUtils.containsAny(result.toLowerCase(), "rejected", "denied")) {
                         break;
                     }
                 } catch (Exception e) {
+                    LOGGER.error("Order confirmation submission error {}",e.getMessage());
                     if (!StringUtils.containsAny(e.getMessage().toLowerCase(), "rejected", "denied")) {
                         break;
                     }
@@ -394,9 +396,16 @@ public class ConfirmShipments {
     }
 
     public String _submitFeed(File feedFile, Country country) {
-        MarketWebServiceIdentity credential = Settings.load().getConfigByCountry(country).getMwsCredential();
+        MarketWebServiceIdentity credential;
+        if(country.europe()) {
+            credential = Settings.load().getConfigByCountry(Country.UK).getMwsCredential();
+            credential.setMarketPlaceId(country.marketPlaceId());
+        } else {
+            credential = Settings.load().getConfigByCountry(country).getMwsCredential();
+        }
 
-        LOGGER.info("Submitting order confirmation feeed to amzazon {}, using credential {}", country.name(), credential.toString());
+
+        LOGGER.info("Submitting order confirmation feed to amazon {}, using credential {}", country.name(), credential.toString());
 
         return feedUploader.execute(feedFile, FeedGenerator.BatchFileType.ShippingConfirmation.feedType(), credential, 1);
     }
