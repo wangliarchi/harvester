@@ -26,12 +26,12 @@ public class ShippingAddressOnePage extends ShippingAddressAbstract {
     @Repeat
     public void execute(Order order) {
 
-
         DOMElement changeAddressLink = JXBrowserHelper.selectElementByCssSelector(browser, "#addressChangeLinkId");
         if (changeAddressLink != null) {
-            changeAddressLink.click();
-            WaitTime.Shortest.execute();
-            JXBrowserHelper.waitUntilNotFound(browser, "#addressChangeLinkId");
+            JXBrowserHelper.click(changeAddressLink);
+//            changeAddressLink.click();
+//            WaitTime.Shortest.execute();
+//            JXBrowserHelper.waitUntilNotFound(browser, "#addressChangeLinkId");
         }
 
         DOMElement newAddressLink = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, NEW_ADDRESS_SELECTOR);

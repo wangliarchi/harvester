@@ -172,6 +172,7 @@ public class SheetService extends SheetAPI {
 
         for(Order o: orders) {
             if(StringUtils.equalsAnyIgnoreCase(o.remark,order.remark, order.originalRemark)) {
+                o.setContext(order.getContext());
                 return o;
             }
         }
