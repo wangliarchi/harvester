@@ -7,6 +7,7 @@ import com.teamdev.jxbrowser.chromium.events.LoadAdapter;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import com.teamdev.jxbrowser.chromium.swing.internal.LightWeightWidget;
 import edu.olivet.foundations.amazon.Account;
+import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.*;
 import edu.olivet.harvester.model.Order;
@@ -108,7 +109,7 @@ public class JXBrowserHelper {
      * 初始化一个JXBrowser View
      *
      * @param profileDirName 该BrowserView对应Profile路径名称，需要注意：一个路径同一时间只能一个Browser使用
-     * @param zoomLevel      缩放级别，100%常规模式可设定为1，放大或缩小可以设置其他值
+     * @param zoomLevel 缩放级别，100%常规模式可设定为1，放大或缩小可以设置其他值
      * @return 初始化好的BrowserView实例
      */
     public static BrowserView init(String profileDirName, double zoomLevel) {
@@ -236,6 +237,27 @@ public class JXBrowserHelper {
 
     }
 
+
+    @InvokedExternally
+    public static void waitUntilNotFound(DOMElement element) {
+
+        int timeConsumed = 0;
+        while (true) {
+            if (isHidden(element)) {
+                break;
+            }
+
+            WaitTime.Shortest.execute();
+            timeConsumed += WaitTime.Shortest.val();
+
+            if (timeConsumed > TIME_OUT_SECONDS) {
+
+                throw new BusinessException(String.format("等待%d秒之后，期待的Dom元素%s还在",
+                        timeConsumed, element));
+            }
+        }
+
+    }
 
     /**
      * <pre>
@@ -456,6 +478,12 @@ public class JXBrowserHelper {
 
     }
 
+    @Repeat
+    public static void click(DOMElement element) {
+        element.click();
+        WaitTime.Shortest.execute();
+        waitUntilNotFound(element);
+    }
 
     public static void loadSpreadsheet(Browser browser, Account account, String spreadsheetId) {
         String url = String.format("https://docs.google.com/spreadsheets/d/%s/edit#gid=1549829067", spreadsheetId);
