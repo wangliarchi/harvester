@@ -28,7 +28,7 @@ public class DailyBudgetHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(DailyBudgetHelper.class);
 
     @Inject
-    SheetService sheetService;
+    private SheetService sheetService;
 
 
     public Float getRemainingBudget(String spreadsheetId, String dateString) {
@@ -63,6 +63,9 @@ public class DailyBudgetHelper {
         budgetData.put("budget", 0f);
         budgetData.put("cost", 0f);
         for (ValueRange valueRange : valueRanges) {
+            if (valueRange.getValues() == null) {
+                continue;
+            }
             List<List<Object>> data = com.google.common.collect.Lists.reverse(valueRange.getValues());
             rowNo = data.size();
             for (List<Object> rowData : data) {
