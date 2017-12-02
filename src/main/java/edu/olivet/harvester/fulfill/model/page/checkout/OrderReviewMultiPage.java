@@ -3,9 +3,10 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 import com.teamdev.jxbrowser.chromium.dom.By;
 import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.harvester.fulfill.model.page.AmazonPage;
+import edu.olivet.harvester.fulfill.utils.pagehelper.GiftOptionHelper;
 import edu.olivet.harvester.fulfill.utils.OrderBuyerUtils;
-import edu.olivet.harvester.fulfill.utils.QtyUtils;
-import edu.olivet.harvester.fulfill.utils.ShipOptionUtils;
+import edu.olivet.harvester.fulfill.utils.pagehelper.QtyUtils;
+import edu.olivet.harvester.fulfill.utils.pagehelper.ShipOptionUtils;
 import edu.olivet.harvester.model.CreditCard;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.BuyerPanel;
@@ -52,6 +53,8 @@ public class OrderReviewMultiPage extends OrderReviewAbstractPage {
 
     public void updateQty(Order order) {
         QtyUtils.updateQty(buyerPanel,order);
+
+        GiftOptionHelper.giftOption(buyerPanel.getBrowserView().getBrowser(),order);
     }
 
 

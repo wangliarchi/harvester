@@ -1,4 +1,4 @@
-package edu.olivet.harvester.fulfill.utils;
+package edu.olivet.harvester.fulfill.utils.pagehelper;
 
 import com.teamdev.jxbrowser.chromium.Browser;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;

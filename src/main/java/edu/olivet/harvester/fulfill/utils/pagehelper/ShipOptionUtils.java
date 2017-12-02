@@ -1,14 +1,14 @@
-package edu.olivet.harvester.fulfill.utils;
+package edu.olivet.harvester.fulfill.utils.pagehelper;
 
 import com.mchange.lang.IntegerUtils;
 import com.teamdev.jxbrowser.chromium.Browser;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.amazon.Country;
-import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.harvester.fulfill.exception.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.model.ShippingOption;
+import edu.olivet.harvester.fulfill.utils.OrderValidator;
 import edu.olivet.harvester.fulfill.utils.OrderValidator.SkipValidation;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.Remark;

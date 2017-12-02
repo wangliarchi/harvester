@@ -13,6 +13,7 @@ import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.model.Address;
+import edu.olivet.harvester.fulfill.model.FulfillmentEnum;
 import edu.olivet.harvester.fulfill.model.ItemCompareResult;
 import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.*;

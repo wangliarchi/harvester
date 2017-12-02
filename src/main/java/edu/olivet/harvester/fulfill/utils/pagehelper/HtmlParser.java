@@ -1,4 +1,4 @@
-package edu.olivet.harvester.fulfill.utils;
+package edu.olivet.harvester.fulfill.utils.pagehelper;
 
 import com.google.inject.Singleton;
 import com.mchange.lang.IntegerUtils;

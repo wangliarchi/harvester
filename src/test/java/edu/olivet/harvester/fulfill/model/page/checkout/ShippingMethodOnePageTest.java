@@ -11,7 +11,7 @@ import edu.olivet.foundations.utils.Tools;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.fulfill.model.ShippingOption;
-import edu.olivet.harvester.fulfill.utils.ShipOptionUtils;
+import edu.olivet.harvester.fulfill.utils.pagehelper.ShipOptionUtils;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.service.OrderService;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;

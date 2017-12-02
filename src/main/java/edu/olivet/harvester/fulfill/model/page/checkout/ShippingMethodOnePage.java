@@ -1,7 +1,8 @@
 package edu.olivet.harvester.fulfill.model.page.checkout;
 
-import edu.olivet.harvester.fulfill.utils.QtyUtils;
-import edu.olivet.harvester.fulfill.utils.ShipOptionUtils;
+import edu.olivet.harvester.fulfill.utils.pagehelper.GiftOptionHelper;
+import edu.olivet.harvester.fulfill.utils.pagehelper.QtyUtils;
+import edu.olivet.harvester.fulfill.utils.pagehelper.ShipOptionUtils;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
@@ -31,8 +32,12 @@ public class ShippingMethodOnePage extends ShippingAddressAbstract {
     }
 
     public void updateQty(Order order) {
-        QtyUtils.updateQty(buyerPanel,order);
+        QtyUtils.updateQty(buyerPanel, order);
+
+        //set gift option
+        GiftOptionHelper.giftOption(buyerPanel.getBrowserView().getBrowser(),order);
     }
+
 
 
 }
