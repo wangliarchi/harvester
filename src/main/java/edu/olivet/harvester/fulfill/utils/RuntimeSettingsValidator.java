@@ -2,6 +2,7 @@ package edu.olivet.harvester.fulfill.utils;
 
 import com.google.inject.Singleton;
 import edu.olivet.foundations.ui.UIText;
+import edu.olivet.harvester.fulfill.model.FulfillmentEnum;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;

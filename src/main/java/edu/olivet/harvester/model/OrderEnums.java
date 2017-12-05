@@ -1,6 +1,6 @@
 package edu.olivet.harvester.model;
 
-import edu.olivet.harvester.fulfill.utils.FulfillmentEnum;
+import edu.olivet.harvester.fulfill.model.FulfillmentEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 

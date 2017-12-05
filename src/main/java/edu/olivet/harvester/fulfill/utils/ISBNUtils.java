@@ -4,6 +4,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.Configs;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.RegexUtils;
+import edu.olivet.harvester.fulfill.utils.pagehelper.HtmlParser;
 import edu.olivet.harvester.logger.ISBNLogger;
 import edu.olivet.harvester.model.ConfigEnums;
 import edu.olivet.harvester.utils.common.HttpUtils;
