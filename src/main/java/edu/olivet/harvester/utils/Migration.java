@@ -8,9 +8,9 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.utils.Directory;
 import edu.olivet.foundations.utils.Tools;
+import edu.olivet.harvester.fulfill.utils.CreditCardUtils;
 import edu.olivet.harvester.model.CreditCard;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
-import edu.olivet.harvester.ui.Harvester;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -190,7 +190,7 @@ public class Migration {
     }
 
     public static void migrateCreditCardSetttings() {
-        File file = new File(Harvester.CC_CONFIG_FILE_PATH);
+        File file = new File(CreditCardUtils.CC_CONFIG_FILE_PATH);
         if (file.exists()) {
             return;
         }
@@ -222,10 +222,8 @@ public class Migration {
             }
         });
 
+        CreditCardUtils.saveToFile(creditCards);
 
-        Tools.writeStringToFile(file, JSON.toJSONString(creditCards, true));
-
-        System.out.println(creditcards);
     }
 
     public static void main(String[] args) {

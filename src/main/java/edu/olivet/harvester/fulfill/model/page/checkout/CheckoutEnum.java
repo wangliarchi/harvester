@@ -21,7 +21,7 @@ public class CheckoutEnum {
     public enum CheckoutPage {
         ShippingAddress(".checkout.checkout-as"),
         ShippingAddressOnePage(".a-container.page-container #shipaddress #add-new-address-popover-link"),
-        CantShipToAddressPage("#changeQuantityFormId .alertMessage"),
+        CantShipToAddressPage("#changeQuantityFormId .alertMessage,#changeQuantityFormId .lineitem-error-message"),
         PaymentMethod(".checkout.pay"),
         PaymentMethodOnePage(".a-container.page-container #payment #cc-popover-link"),
         ShippingMethod("#shippingOptionFormId"),

@@ -9,7 +9,6 @@ import edu.olivet.harvester.fulfill.model.ShippingOption;
 import edu.olivet.harvester.model.Order;
 import org.apache.commons.collections4.CollectionUtils;
 
-import java.text.DecimalFormat;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,17 +27,15 @@ import java.util.stream.Collectors;
  * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Nov 21, 2014 5:32:32 PM
  */
 @Singleton
-public class CAHandler extends DefaultHandler implements ShippingHandler {
+public class UKHandler extends DefaultHandler implements ShippingHandler {
 
-    public static final DecimalFormat DOUBLE_FORMAT = new DecimalFormat("0.00");
+    private static final UKHandler instance = new UKHandler();
 
-    private static final CAHandler instance = new CAHandler();
-
-    private CAHandler() {
+    private UKHandler() {
     }
 
 
-    public static CAHandler getInstance() {
+    public static UKHandler getInstance() {
         return instance;
     }
 
@@ -47,10 +44,6 @@ public class CAHandler extends DefaultHandler implements ShippingHandler {
     public ShippingOption determineShipOption(Order order, List<ShippingOption> shippingOptions) {
         List<ShippingOption> validOptions = getValidateOptions(order, shippingOptions);
 
-        //国际直寄都选择快递
-        if (order.isIntl()) {
-            validOptions.removeIf(it -> !it.isExpedited());
-        }
 
         List<ShippingOption> freeShippings = validOptions.stream().filter(it -> it.isFree()).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(freeShippings)) {
@@ -73,10 +66,6 @@ public class CAHandler extends DefaultHandler implements ShippingHandler {
 
     @Override
     public ShippingSpeed determineFinalSpeed(Order order) {
-        //国际直寄都选择快递
-        if (order.isIntl()) {
-            return ShippingSpeed.Expedited;
-        }
 
         if (order.expeditedShipping()) {
             return ShippingSpeed.Expedited;
@@ -84,8 +73,6 @@ public class CAHandler extends DefaultHandler implements ShippingHandler {
 
         return ShippingSpeed.Standard;
     }
-
-
 
 
 }

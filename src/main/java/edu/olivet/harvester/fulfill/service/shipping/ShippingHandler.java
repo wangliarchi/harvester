@@ -1,7 +1,6 @@
 package edu.olivet.harvester.fulfill.service.shipping;
 
 
-import edu.olivet.harvester.fulfill.exception.Exceptions;
 import edu.olivet.harvester.fulfill.model.ShippingEnums.ShippingSpeed;
 import edu.olivet.harvester.fulfill.model.ShippingOption;
 import edu.olivet.harvester.model.Order;
@@ -27,12 +26,4 @@ public interface ShippingHandler {
     ShippingSpeed determineFinalSpeed(Order order);
 
 
-    /**
-     * 对订单的运费进行校验，不能超过设定的上限
-     *
-     * @param shippingFee 下单时的实际每件物品运费
-     * @param order       当前订单
-     * @throws Exceptions.ShippingFeeTooHighException
-     */
-    void checkFee(float shippingFee, Order order) throws Exceptions.ShippingFeeTooHighException;
 }

@@ -1,14 +1,12 @@
 package edu.olivet.harvester.ui.dialog;
 
-import com.alibaba.fastjson.JSON;
 import edu.olivet.deploy.Language;
 import edu.olivet.foundations.ui.BaseDialog;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
-import edu.olivet.foundations.utils.Tools;
+import edu.olivet.harvester.fulfill.utils.CreditCardUtils;
 import edu.olivet.harvester.model.CreditCard;
 import edu.olivet.harvester.ui.BankCardPanel;
-import edu.olivet.harvester.ui.Harvester;
 import edu.olivet.harvester.utils.Migration;
 import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.collections4.CollectionUtils;
@@ -19,10 +17,8 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.io.File;
 import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/3/17 11:51 AM
@@ -72,7 +68,6 @@ public class BankCardConfigDialog extends BaseDialog {
                 emails.add(buyerEmail);
             }
         }
-
 
 
         emails.forEach(buyerEmail -> {
@@ -127,11 +122,7 @@ public class BankCardConfigDialog extends BaseDialog {
     }
 
     public void loadCreditCards() {
-        File file = new File(Harvester.CC_CONFIG_FILE_PATH);
-        if (file.exists() && file.isFile()) {
-            JSON.parseArray(Tools.readFileToString(file), CreditCard.class).forEach(creditCard -> creditCards.put(creditCard.getAccountEmail(), creditCard));
-        }
-
+        creditCards = CreditCardUtils.loadCreditCards();
     }
 
     public Set<String> loadBuyerAccountEmails() {
@@ -192,8 +183,7 @@ public class BankCardConfigDialog extends BaseDialog {
         }
         creditCards.forEach(creditCard -> this.creditCards.put(creditCard.getAccountEmail(), creditCard));
 
-        File file = new File(Harvester.CC_CONFIG_FILE_PATH);
-        Tools.writeStringToFile(file, JSON.toJSONString(creditCards, true));
+        CreditCardUtils.saveToFile(creditCards);
 
         ok = true;
         doClose();

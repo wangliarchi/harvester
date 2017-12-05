@@ -2,6 +2,7 @@ package edu.olivet.harvester.fulfill.model.page;
 
 import com.google.common.collect.Lists;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
+import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
@@ -27,6 +28,7 @@ public class AmazonPrimeAdPage extends FulfillmentPage implements PageObject {
             DOMElement noLink = JXBrowserHelper.selectElementByCssSelector(browser, selector);
             if (noLink != null && JXBrowserHelper.isVisible(noLink)) {
                 JXBrowserHelper.click(noLink);
+                WaitTime.Shortest.execute();
                 return;
             }
         }

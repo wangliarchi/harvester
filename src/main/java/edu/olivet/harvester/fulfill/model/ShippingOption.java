@@ -111,15 +111,21 @@ public class ShippingOption {
         ArrayUtils.reverse(eddParts);
         for (String part : eddParts) {
             String[] parts = StringUtils.split(part, "-");
+
             String dateString = parts[parts.length - 1].trim();
+
             if (dateString.length() <= 2) {
                 dateString = parts[parts.length - 2].trim();
                 String[] dateStringParts = dateString.split(" ");
-                dateString = StringUtils.join(Arrays.copyOf(dateStringParts, dateStringParts.length - 1), " ") + parts[parts.length - 1].trim();
+                dateString = StringUtils.join(Arrays.copyOf(dateStringParts, dateStringParts.length - 1), " ") + " " + parts[parts.length - 1].trim();
             }
-            dateString = dateString.replace("get it on", "").replace("get it", "");
+
             dateString = dateString.replaceAll("[^A-Za-z0-9 ]", "").trim();
 
+            String[] dateStringParts = dateString.split(" ");
+            List<String> list = Lists.newArrayList(dateStringParts);
+            list.removeIf(it -> StringUtils.isBlank(it));
+            dateString = list.get(list.size() - 2) + " " + list.get(list.size() - 1);
 
             for (String pattern : formatPatterns) {
                 SimpleDateFormat dateFormat = new SimpleDateFormat(pattern, country.locale());
@@ -141,9 +147,12 @@ public class ShippingOption {
                 }
             }
 
-            if (Strings.containsAnyIgnoreCase(dateString.toLowerCase(), "days", "Werktage", "lavorativi", "ouvrés", "días")) {
+            if (Strings.containsAnyIgnoreCase(part.toLowerCase(), "days", "Werktage", "lavorativi", "ouvrés", "días")) {
                 try {
-                    String daysString = dateString.replaceAll(RegexUtils.Regex.NON_DIGITS.val(), "");
+                    String[] dayParts = StringUtils.split(part, "-");
+                    String daysString = dayParts[dayParts.length - 1].trim();
+
+                    daysString = daysString.replaceAll(RegexUtils.Regex.NON_DIGITS.val(), "");
                     int days = IntegerUtils.parseInt(daysString, 1);
 
                     Calendar calendar = Calendar.getInstance();

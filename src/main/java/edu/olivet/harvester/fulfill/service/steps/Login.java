@@ -29,12 +29,17 @@ public class Login extends Step {
     @Inject
     ProcessToCheckout processToCheckout;
 
-    @Inject StepHelper stepHelper;
+    @Inject
+    StepHelper stepHelper;
 
     public Step createDynamicInstance(FlowState state) {
         state.setPrevStep(this);
 
         if (this.prevStep != null && this.prevStep.stepName.equals(ProcessToCheckout.class.getName())) {
+            return processToCheckout;
+        }
+
+        if (this.prevStep != null && this.prevStep.stepName.equals(Checkout.class.getName())) {
             return processToCheckout;
         }
         if (this.prevStep != null) {

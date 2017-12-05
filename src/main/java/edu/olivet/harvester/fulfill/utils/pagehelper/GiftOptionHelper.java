@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class GiftOptionHelper {
     private static final String continueBtnSelector = ".save-gift-button-box .a-button-primary .a-button-text,.save-gift-button-box .a-button-primary .a-button-input,  .popover-gift-bottom .a-button-primary .a-button-text,.popover-gift-bottom  .a-button-primary .a-button-input";
-    private static final String CHECKBOX_SELECTOR = "#giftForm .includeReceiptCheckbox input,.include-gift-receipt-checkbox input,.include-gift-receipt input";
+    private static final String CHECKBOX_SELECTOR = "#giftForm .includeReceiptCheckbox input,.include-gift-receipt-checkbox input,.include-gift-receipt input,input.hide-prices-checkbox";
     public static void giftOption(Browser browser, Order order) {
         //a-button a-button-small gift-popover-link
         DOMElement giftOptionBtn = JXBrowserHelper.selectElementByCssSelector(browser, ".shipping-group .gift-popover-link");

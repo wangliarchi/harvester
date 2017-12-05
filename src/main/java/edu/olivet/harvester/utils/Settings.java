@@ -7,6 +7,7 @@ import edu.olivet.foundations.amazon.MWSUtils;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Constants;
+import edu.olivet.foundations.utils.Directory;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
@@ -34,11 +35,21 @@ import java.util.stream.Collectors;
 public class Settings {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Settings.class);
-
+    public static final String CONFIG_FILE_PATH = Directory.Customize.path() + "/harvester-config.json";
+    public static final String TEST_CONFIG_FILE_PATH = "src/test/resources/conf/harvester-test.json";
+    private static Settings instance;
 
     public static Settings load() {
-        File file = new File(Harvester.CONFIG_FILE_PATH);
-        return Settings.load(file);
+        if (instance == null) {
+            reload();
+        }
+        return instance;
+    }
+
+    public static Settings reload() {
+        File file = new File(getConfigPath());
+        instance = Settings.load(file);
+        return instance;
     }
 
     public static Settings load(String filePath) {
@@ -54,6 +65,20 @@ public class Settings {
         }
     }
 
+    public static String getConfigPath() {
+
+        if (Harvester.debugFlag) {
+            return TEST_CONFIG_FILE_PATH;
+        } else {
+            return CONFIG_FILE_PATH;
+        }
+    }
+
+    public void saveToFile() {
+        File file = new File(getConfigPath());
+        Tools.writeStringToFile(file, JSON.toJSONString(this, true));
+        reload();
+    }
 
     private String sid;
 
@@ -227,8 +252,8 @@ public class Settings {
 
             if (StringUtils.isBlank(userCode)) {
                 list.add("User code not provided");
-            } else if (FinderCodeUtils.validate(userCode)) {
-                list.add("User code not not valid.");
+            } else if (!FinderCodeUtils.validate(userCode)) {
+                list.add("User code not valid.");
             }
 
             if ((ebatesBuyer == null || !ebatesBuyer.valid())) {

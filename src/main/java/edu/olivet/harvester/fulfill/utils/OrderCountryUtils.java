@@ -4,7 +4,6 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.model.Remark;
 import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.lang3.StringUtils;
@@ -15,20 +14,11 @@ import org.apache.commons.lang3.StringUtils;
 public class OrderCountryUtils {
 
     public static String getShipToCountry(Order order) {
-        if (Remark.purchaseBack(order.remark)) {
+        if (order.purchaseBack()) {
             return Country.US.name();
-        } else if (Remark.ukFwd(order.remark)) {
+        } else if (order.isUKForward()) {
             return Country.UK.name();
         } else {
-            // 产品目前默认都是US买回转运，Remark 没有标记
-            try {
-                if (order.type() == OrderEnums.OrderItemType.PRODUCT) {
-                    return Country.US.name();
-                }
-            } catch (Exception e) {
-                //ignore
-            }
-
             return CountryStateUtils.getInstance().getCountryCode(order.ship_country);
         }
     }
@@ -80,7 +70,7 @@ public class OrderCountryUtils {
             result += "&seller=" + order.seller_id;
         }
 
-        return getFulfillmentCountry(order).baseUrl() + "/" + result;
+        return getFulfillmentCountry(order).baseUrl() + result;
 
     }
 

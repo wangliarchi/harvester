@@ -558,8 +558,14 @@ public class RuntimeSettingsPanel extends JPanel {
 
     private void finderCodeTextFieldActionPerformed() {
         if (!FinderCodeUtils.validate(finderCodeTextField.getText())) {
-            finderCodeTextField.setText(FinderCodeUtils.generate());
-            UITools.error("Finder code is invalid. System generated one for you.");
+            String defaultCode = Settings.load().getConfigByCountry((Country) marketplaceComboBox.getSelectedItem()).getUserCode();
+            if (FinderCodeUtils.validate(defaultCode)) {
+                finderCodeTextField.setText(defaultCode);
+                UITools.error("Finder code is invalid. User code in setting is used.");
+            } else {
+                finderCodeTextField.setText(FinderCodeUtils.generate());
+                UITools.error("Finder code is invalid. System generated one for you.");
+            }
         }
         settings.setFinderCode(finderCodeTextField.getText());
         settings.save();

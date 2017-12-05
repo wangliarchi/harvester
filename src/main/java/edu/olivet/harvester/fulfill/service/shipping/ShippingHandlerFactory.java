@@ -13,6 +13,12 @@ public class ShippingHandlerFactory {
         switch (fulfillmentCountry) {
             case CA:
                 return CAHandler.getInstance();
+            case UK:
+            case DE:
+            case FR:
+            case ES:
+            case IT:
+                return UKHandler.getInstance();
             default:
                 return DefaultHandler.getInstance();
         }

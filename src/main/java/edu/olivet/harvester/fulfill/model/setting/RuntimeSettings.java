@@ -2,8 +2,12 @@ package edu.olivet.harvester.fulfill.model.setting;
 
 import com.alibaba.fastjson.JSON;
 import com.google.inject.Singleton;
+import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.utils.Directory;
+import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
+import edu.olivet.harvester.model.OrderEnums.OrderItemType;
 import edu.olivet.harvester.ui.Harvester;
 import lombok.Data;
 
@@ -28,8 +32,11 @@ public class RuntimeSettings {
     private String finderCode = "";
     private OrderValidator.SkipValidation skipValidation = OrderValidator.SkipValidation.None;
 
+    public static final String RUNTIME_SETTINGS_FILE_PATH = Directory.Customize.path() + "/runtime-settings.json";
+    public static final String TEST_RUNTIME_SETTINGS_FILE_PATH = "src/test/resources/conf/runtime-settings.json";
+
     public void save() {
-        File file = new File(Harvester.RUNTIME_SETTINGS_FILE_PATH);
+        File file = new File(getConfigPath());
         Tools.writeStringToFile(file, JSON.toJSONString(this, true));
 
         //clear cache
@@ -40,7 +47,7 @@ public class RuntimeSettings {
 
     public static RuntimeSettings load() {
         if (instance == null) {
-            File file = new File(Harvester.RUNTIME_SETTINGS_FILE_PATH);
+            File file = new File(getConfigPath());
             if (file.exists() && file.isFile()) {
                 instance = JSON.parseObject(Tools.readFileToString(file), RuntimeSettings.class);
             } else {
@@ -51,8 +58,24 @@ public class RuntimeSettings {
         return instance;
     }
 
+    public static String getConfigPath() {
+        if (Harvester.debugFlag) {
+            return TEST_RUNTIME_SETTINGS_FILE_PATH;
+        }
+
+        return RUNTIME_SETTINGS_FILE_PATH;
+    }
+
     public String context() {
         return this.sid + marketplaceName;
+    }
+
+    public Country getCurrentCountry() {
+        return Country.valueOf(marketplaceName);
+    }
+
+    public OrderItemType getCurrentType() {
+        return Strings.containsAnyIgnoreCase(spreadsheetName, "product", "prod") ? OrderItemType.PRODUCT : OrderItemType.BOOK;
     }
 
     public String toString() {

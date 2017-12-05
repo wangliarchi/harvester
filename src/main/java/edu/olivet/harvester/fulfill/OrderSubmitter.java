@@ -74,7 +74,7 @@ public class OrderSubmitter {
 
     private static final Map<String, Boolean> DUPLICATION_CHECK_CACHE = new HashMap<>();
 
-    private static final List<Country> SUPPORTED_MARKETPLACES = Lists.newArrayList(Country.US, Country.CA);
+    private static final List<Country> SUPPORTED_MARKETPLACES = Lists.newArrayList(Country.US, Country.CA, Country.UK);
 
     public void execute(RuntimeSettings settings) {
         messageListener.empty();

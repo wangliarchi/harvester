@@ -26,6 +26,7 @@ public class OrderStatusUtils {
         }
 
         // 客户改变地址、灰条等情况目前略过
+
         if (order.needBuyAndTransfer()) {
             if (order.sellerIsPrime()) {
                 return OrderEnums.Status.PrimeBuyAndTransfer.value();

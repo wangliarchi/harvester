@@ -2,6 +2,7 @@ package edu.olivet.harvester.fulfill.utils;
 
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.utils.common.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -14,7 +15,8 @@ public class ProfitLostControl {
      */
     public static float earning(Order order) {
         String qty = StringUtils.isNotBlank(order.quantity_fulfilled) ? order.quantity_fulfilled : order.quantity_purchased;
-        return (order.getOrderTotalPrice().toUSDAmount().floatValue() * 0.85f - 1.8f) * Float.parseFloat(qty);
+        Float value = (order.getOrderTotalPrice().toUSDAmount().floatValue() * 0.85f - 1.8f) * Float.parseFloat(qty);
+        return NumberUtils.round(value, 2);
     }
 
     /**
@@ -22,7 +24,7 @@ public class ProfitLostControl {
      */
     public static float profit(Order order, Float cost) {
         float earning = earning(order);
-        return earning - cost;
+        return NumberUtils.round(earning - cost, 2);
     }
 
     /**

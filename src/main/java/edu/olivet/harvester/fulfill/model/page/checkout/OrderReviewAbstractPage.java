@@ -78,7 +78,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         List<DOMElement> trs = JXBrowserHelper.selectElementsByCssSelector(browser, "#subtotals-marketplace-table tr");
         Money shippingCost = null;
         for (DOMElement tr : trs) {
-            if (Strings.containsAnyIgnoreCase(tr.getInnerText(), "Shipping")) {
+            if (Strings.containsAnyIgnoreCase(tr.getInnerText(), "Shipping", "packing")) {
                 try {
                     String shippingCostString = JXBrowserHelper.text(tr, ".a-text-right");
                     shippingCost = Money.fromText(shippingCostString, buyerPanel.getCountry());

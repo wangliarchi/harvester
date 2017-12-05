@@ -14,6 +14,7 @@ import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.spreadsheet.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
+import edu.olivet.harvester.ui.Harvester;
 import edu.olivet.harvester.utils.Settings;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Guice;
@@ -71,7 +72,7 @@ public class BaseTest {
         @Override
         public List<Order> readOrders(String spreadId, String sheetName) {
             String localJSONFilePath = BaseTest.TEST_DATA_ROOT + File.separator +
-                "spreadsheet-data-" + spreadId + "-" + sheetName.replaceAll("/", "") + ".json";
+                    "spreadsheet-data-" + spreadId + "-" + sheetName.replaceAll("/", "") + ".json";
             File localJsonFile = new File(localJSONFilePath);
 
             if (!localJsonFile.exists()) {
@@ -99,6 +100,7 @@ public class BaseTest {
 
     @BeforeClass
     public void setUp() throws IOException, BusinessException {
+        Harvester.debugFlag = true;
 
         UIText.setLocale(Language.EN_US);
         basePath = new File(BaseTest.class.getResource("/").getFile()).getAbsolutePath() + File.separator;

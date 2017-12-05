@@ -5,7 +5,6 @@ import edu.olivet.foundations.job.AutoUpgradeJob;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
-import edu.olivet.foundations.utils.Directory;
 import edu.olivet.harvester.job.ContextUploadJob;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
@@ -13,6 +12,7 @@ import edu.olivet.harvester.ui.dialog.SettingsDialog;
 import edu.olivet.harvester.utils.MessageListener;
 import edu.olivet.harvester.utils.Migration;
 import edu.olivet.harvester.utils.SettingValidator;
+import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.lang3.SystemUtils;
 
 import java.io.File;
@@ -23,11 +23,8 @@ import java.io.File;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 9/20/2017 11:58 AM
  */
 public class Harvester {
-
-    public static final String CONFIG_FILE_PATH = Directory.Customize.path() + "/harvester-config.json";
-    public static final String CC_CONFIG_FILE_PATH = Directory.Customize.path() + "/creditcard-config.json";
-    public static final String RUNTIME_SETTINGS_FILE_PATH = Directory.Customize.path() + "/runtime-settings.json";
     public static final String APP_NAME = "Harvester";
+    public static boolean debugFlag = false;
 
     private static final Application APP = new Application(APP_NAME);
 
@@ -38,7 +35,7 @@ public class Harvester {
             new AutoUpgradeJob().execute();
         }
 
-        if (!new File(CONFIG_FILE_PATH).exists()) {
+        if (!new File(Settings.CONFIG_FILE_PATH).exists()) {
 
             if (Migration.hasMigrationFile() && UITools.confirmed("OrderMan configuration is found. Do you want to migrate it to Harvester?")) {
                 Migration.setUseMigration(true);

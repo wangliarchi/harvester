@@ -5,7 +5,6 @@ import com.google.inject.Singleton;
 import com.mchange.lang.IntegerUtils;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Strings;
-import edu.olivet.harvester.fulfill.exception.Exceptions.ShippingFeeTooHighException;
 import edu.olivet.harvester.fulfill.exception.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.model.ShippingEnums.ShippingSpeed;
 import edu.olivet.harvester.fulfill.model.ShippingOption;
@@ -59,10 +58,6 @@ public class DefaultHandler implements ShippingHandler {
         return null;
     }
 
-    @Override
-    public void checkFee(float shippingFee, Order order) throws ShippingFeeTooHighException {
-        return;
-    }
 
     @Override
     public List<ShippingOption> getValidateOptions(Order order, List<ShippingOption> shippingOptions) {

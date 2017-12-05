@@ -14,10 +14,7 @@ import edu.olivet.harvester.fulfill.model.Seller;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.DailyBudgetHelper;
 import edu.olivet.harvester.fulfill.service.ForbiddenSeller;
-import edu.olivet.harvester.fulfill.utils.ConditionUtils;
-import edu.olivet.harvester.fulfill.utils.OrderBuyerUtils;
-import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
-import edu.olivet.harvester.fulfill.utils.OrderStatusUtils;
+import edu.olivet.harvester.fulfill.utils.*;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.model.Remark;
@@ -66,7 +63,6 @@ public class OrderValidator {
         IsNotAddOn,
         AddressNotChanged,
         ProductTransferUrlIsValid
-
     }
 
 
@@ -82,11 +78,8 @@ public class OrderValidator {
         SellerPrice("label.skip.price"),
         GiftOption("label.skip.giftoption"),
         Profit("label.skip.profit"),
-        //ShippingFee("label.skip.shippingfee"),
+        ShippingFee("label.skip.shippingfee"),
         Address("label.skip.address"),
-        ShippingFee("Skip Shipping Fee Check"),
-        //RefundMultiCheck("label.skip.multirefund"),
-        //OperationSuccessCheck("label.skip.opersuccess"),
         EDD("Skip EDD Check"),
         All("label.skip.all");
 
@@ -438,7 +431,7 @@ public class OrderValidator {
 
     public String hasValidCreditCard(Order order) {
         try {
-            OrderBuyerUtils.getCreditCard(order);
+            CreditCardUtils.getCreditCard(order);
             return "";
         } catch (Exception e) {
             return "No valid credit card found.";

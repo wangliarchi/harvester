@@ -1,6 +1,6 @@
 package edu.olivet.harvester.fulfill.model.page.checkout;
 
-import edu.olivet.harvester.fulfill.utils.OrderBuyerUtils;
+import edu.olivet.harvester.fulfill.utils.CreditCardUtils;
 import edu.olivet.harvester.model.CreditCard;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.BuyerPanel;
@@ -23,7 +23,7 @@ public class OrderReviewOnePage extends OrderReviewAbstractPage {
 
     public boolean reviewPaymentMethod() {
         String lastDigits = JXBrowserHelper.text(browser,"#payment-information .a-color-secondary span");
-        CreditCard creditCard = OrderBuyerUtils.getCreditCard(buyerPanel.getOrder());
+        CreditCard creditCard = CreditCardUtils.getCreditCard(buyerPanel.getOrder());
         return creditCard.getCardNo().endsWith(lastDigits);
     }
 

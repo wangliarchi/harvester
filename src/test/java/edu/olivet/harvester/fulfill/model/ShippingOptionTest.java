@@ -26,19 +26,35 @@ public class ShippingOptionTest {
 
         //
         ShippingOption shippingOption = new ShippingOption("Two-Day Shipping — get it Wednesday, Nov 22", "— get it Wednesday, Nov 22", "", Country.CA, now.get());
-        assertEquals(shippingOption.getPrice().toString(), "CAD0.00");
+        assertEquals(shippingOption.getPrice(), null);
         assertEquals(Dates.format(shippingOption.getLatestDeliveryDate(), DateFormat.FULL_MONTH_DAY.pattern()), "11/22");
+        assertTrue(shippingOption.isExpedited());
+
+
+        shippingOption = new ShippingOption("Standard Delivery : delivered by Dec. 20-22", "delivered by Dec. 20-22", "", Country.UK, now.get());
+        assertEquals(shippingOption.getPrice(), null);
+        assertEquals(Dates.format(shippingOption.getLatestDeliveryDate(), DateFormat.FULL_MONTH_DAY.pattern()), "12/22");
+        assertFalse(shippingOption.isExpedited());
+
+        shippingOption = new ShippingOption("AmazonGlobal Expedited Shipping : delivered by Dec. 12-21", "delivered by Dec. 12-21", "", Country.UK, now.get());
+        assertEquals(shippingOption.getPrice(), null);
+        assertEquals(Dates.format(shippingOption.getLatestDeliveryDate(), DateFormat.FULL_MONTH_DAY.pattern()), "12/21");
+        assertTrue(shippingOption.isExpedited());
+
+        shippingOption = new ShippingOption("AmazonGlobal Priority : delivered by Monday, Dec. 11", "delivered by Monday, Dec. 11", "", Country.UK, now.get());
+        assertEquals(shippingOption.getPrice(), null);
+        assertEquals(Dates.format(shippingOption.getLatestDeliveryDate(), DateFormat.FULL_MONTH_DAY.pattern()), "12/11");
         assertTrue(shippingOption.isExpedited());
 
         //get it Tomorrow, Dec 2, by 9pm
         shippingOption = new ShippingOption("One-Day Delivery — get it Tomorrow, Nov 19, by 9pm", "— get it Tomorrow, Nov 19, by 9pm", "", Country.CA, now.get());
-        assertEquals(shippingOption.getPrice().toString(), "CAD0.00");
+        assertEquals(shippingOption.getPrice(), null);
         assertEquals(Dates.format(shippingOption.getLatestDeliveryDate(), DateFormat.FULL_MONTH_DAY.pattern()), "11/19");
         assertTrue(shippingOption.isExpedited());
 
 
         shippingOption = new ShippingOption("Two-Day Shipping --get it Nov 22 - 23", "--get it Wednesday, Nov  22 - 23", "", Country.CA, now.get());
-        assertEquals(shippingOption.getPrice().toString(), "CAD0.00");
+        assertEquals(shippingOption.getPrice(), null);
         assertEquals(Dates.format(shippingOption.getLatestDeliveryDate(), DateFormat.FULL_MONTH_DAY.pattern()), "11/23");
         assertTrue(shippingOption.isExpedited());
 

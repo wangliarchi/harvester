@@ -1,6 +1,5 @@
 package edu.olivet.harvester.ui.dialog;
 
-import com.alibaba.fastjson.JSON;
 import edu.olivet.deploy.Language;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.BaseDialog;
@@ -8,11 +7,9 @@ import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
-import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.ui.ConfigurationPanel;
-import edu.olivet.harvester.ui.Harvester;
 import edu.olivet.harvester.ui.RuntimeSettingsPanel;
 import edu.olivet.harvester.utils.Migration;
 import edu.olivet.harvester.utils.SettingValidator;
@@ -29,7 +26,6 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.GroupLayout.Group;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import java.awt.*;
-import java.io.File;
 import java.util.*;
 import java.util.List;
 
@@ -245,8 +241,7 @@ public class SettingsDialog extends BaseDialog {
 
 
         this.settings = new Settings(sid, configs);
-        File file = new File(Harvester.CONFIG_FILE_PATH);
-        Tools.writeStringToFile(file, JSON.toJSONString(this.settings, true));
+        settings.saveToFile();
         //clear cache
 
         //update info on runtime settings panel

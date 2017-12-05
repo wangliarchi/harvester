@@ -9,6 +9,7 @@ import edu.olivet.foundations.utils.*;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.model.ShippingEnums;
+import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.model.OrderEnums.OrderColor;
@@ -244,8 +245,8 @@ public class Order implements Keyable {
             return true;
         }
 
-        // 产品目前默认都是US买回转运，Remark 没有标记
-        return type() == OrderEnums.OrderItemType.PRODUCT;
+        // 产品目前默认都是US买回转运，Remark 没有标记。产品单如果不是直寄或UK FWD，都是US FWD
+        return (type() == OrderEnums.OrderItemType.PRODUCT && !isDirectShip() && !isUKForward());
 
     }
 
@@ -297,7 +298,10 @@ public class Order implements Keyable {
      * </pre>
      */
     public boolean needBuyAndTransfer() {
-        return this.statusIndicatePurchaseBack() || Remark.purchaseBack(this.remark) || Remark.ukFwd(this.remark) || type() == OrderEnums.OrderItemType.PRODUCT;
+        return this.statusIndicatePurchaseBack() ||
+                Remark.purchaseBack(this.remark) ||
+                Remark.ukFwd(this.remark) ||
+                (type() == OrderEnums.OrderItemType.PRODUCT && !isDirectShip());
     }
 
 
@@ -450,7 +454,7 @@ public class Order implements Keyable {
         return OrderEnums.SellerType.AP.name().equalsIgnoreCase(this.seller) || OrderEnums.SellerType.AP.abbrev().equalsIgnoreCase(this.character);
     }
 
-    OrderEnums.OrderItemType type = null;
+    public OrderEnums.OrderItemType type = null;
 
     public OrderEnums.OrderItemType type() {
         if (type == null) {
@@ -459,6 +463,10 @@ public class Order implements Keyable {
             } catch (Exception e) {
                 //
             }
+        }
+
+        if (type == null) {
+            type = RuntimeSettings.load().getCurrentType();
         }
 
         return type;
@@ -534,16 +542,16 @@ public class Order implements Keyable {
     private Money orderTotalPrice;
 
     public Money getOrderTotalPrice() {
-        if (orderTotalPrice == null) {
-            float priceFloat = 0;
-            if (StringUtils.isNotBlank(price)) {
-                priceFloat = FloatUtils.parseFloat(price, 0);
-            }
-            if (StringUtils.isNotBlank(shipping_fee)) {
-                priceFloat += FloatUtils.parseFloat(shipping_fee, 0);
-            }
-            orderTotalPrice = new Money(priceFloat, OrderCountryUtils.getMarketplaceCountry(this));
+        //if (orderTotalPrice == null) {
+        float priceFloat = 0;
+        if (StringUtils.isNotBlank(price)) {
+            priceFloat = FloatUtils.parseFloat(price, 0);
         }
+        if (StringUtils.isNotBlank(shipping_fee)) {
+            priceFloat += FloatUtils.parseFloat(shipping_fee, 0);
+        }
+        orderTotalPrice = new Money(priceFloat, OrderCountryUtils.getMarketplaceCountry(this));
+        //}
 
         return orderTotalPrice;
 

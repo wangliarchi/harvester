@@ -8,14 +8,12 @@ import edu.olivet.harvester.fulfill.model.setting.AdvancedSubmitSetting;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.model.ConfigEnums;
 import edu.olivet.harvester.model.OrderEnums;
-import edu.olivet.harvester.ui.Harvester;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -339,8 +337,8 @@ public class SelectRangeDialog extends BaseDialog {
                         .addGroup(layout.createSequentialGroup()
                                 .addContainerGap()
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-                                        .addComponent(scopePanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(typePanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(scopePanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(typePanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         //.addComponent(loopPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 )
                                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -659,8 +657,6 @@ public class SelectRangeDialog extends BaseDialog {
 
         UIText.setLocale(Language.current());
         UITools.setTheme();
-
-        File file = new File(Harvester.RUNTIME_SETTINGS_FILE_PATH);
         RuntimeSettings settings = RuntimeSettings.load();
         AdvancedSubmitSetting advancedSubmitSetting = settings.getAdvancedSubmitSetting();
         UITools.setDialogAttr(new SelectRangeDialog(null, true, advancedSubmitSetting), true);
