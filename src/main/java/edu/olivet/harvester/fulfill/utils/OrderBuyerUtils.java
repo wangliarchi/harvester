@@ -2,7 +2,6 @@ package edu.olivet.harvester.fulfill.utils;
 
 import com.alibaba.fastjson.JSON;
 import edu.olivet.foundations.amazon.Account;
-import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.fulfill.exception.OrderSubmissionException;
 import edu.olivet.harvester.model.CreditCard;
@@ -21,7 +20,7 @@ import java.util.Map;
 public class OrderBuyerUtils {
     public static Account getBuyer(Order order) {
         Settings settings = Settings.load();
-        Settings.Configuration config = settings.getConfigByCountry(OrderCountryUtils.getFulfillementCountry(order));
+        Settings.Configuration config = settings.getConfigByCountry(OrderCountryUtils.getFulfillmentCountry(order));
         OrderEnums.OrderItemType type = settings.getSpreadsheetType(order.getSpreadsheetId());
 
         //Direct shipment uses non prime account

@@ -10,8 +10,9 @@ import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
-import edu.olivet.harvester.fulfill.model.AdvancedSubmitSetting;
-import edu.olivet.harvester.fulfill.model.RuntimeSettings;
+import edu.olivet.harvester.fulfill.model.setting.AdvancedSubmitSetting;
+import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
+import edu.olivet.harvester.fulfill.utils.FwdAddressUtils;
 import edu.olivet.harvester.fulfill.utils.OrderFilter;
 import edu.olivet.harvester.model.ConfigEnums;
 import edu.olivet.harvester.model.Order;
@@ -70,9 +71,12 @@ public class AppScript {
         params.put(PARAM_SPREAD_ID, spreadId);
         params.put(PARAM_METHOD, "GETSPREADMETADATA");
         String json = this.processResult(this.get(params));
-
-        Spreadsheet spreadsheet = JSON.parseObject(json, Spreadsheet.class);
-
+        Spreadsheet spreadsheet;
+        try {
+            spreadsheet = JSON.parseObject(json, Spreadsheet.class);
+        } catch (Exception e) {
+            throw new BusinessException(json);
+        }
         SPREADSHEET_CLIENT_CACHE.put(spreadId, spreadsheet);
         return spreadsheet;
 
@@ -185,6 +189,7 @@ public class AppScript {
     public List<Order> readOrders(RuntimeSettings settings) {
         try {
             List<Order> orders = readOrders(settings.getSpreadsheetId(), settings.getSheetName());
+
             orders = OrderFilter.filterOrders(orders, settings.getAdvancedSubmitSetting());
             orders.forEach(it -> it.setContext(settings.context()));
 
@@ -222,6 +227,12 @@ public class AppScript {
             it.setSheetName(sheetName);
             it.setSpreadsheetId(spreadId);
         });
+
+        try {
+            FwdAddressUtils.getLastFWDIndex(spreadId, sheetName, orders);
+        } catch (Exception e) {
+            LOGGER.error("", e);
+        }
 
         LOGGER.info("Read {} orders from sheet {} via in {}", orders.size(), sheetName, Strings.formatElapsedTime(start));
         return orders;

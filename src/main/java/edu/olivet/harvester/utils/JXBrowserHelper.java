@@ -109,7 +109,7 @@ public class JXBrowserHelper {
      * 初始化一个JXBrowser View
      *
      * @param profileDirName 该BrowserView对应Profile路径名称，需要注意：一个路径同一时间只能一个Browser使用
-     * @param zoomLevel 缩放级别，100%常规模式可设定为1，放大或缩小可以设置其他值
+     * @param zoomLevel      缩放级别，100%常规模式可设定为1，放大或缩小可以设置其他值
      * @return 初始化好的BrowserView实例
      */
     public static BrowserView init(String profileDirName, double zoomLevel) {
@@ -440,24 +440,62 @@ public class JXBrowserHelper {
         return StringUtils.EMPTY;
     }
 
+    public static boolean isSelectElement(Browser browser, String selector) {
+        try {
+            DOMSelectElement select = (DOMSelectElement) JXBrowserHelper.selectElementByCssSelector(browser, selector);
+            return select != null;
+        } catch (ClassCastException e) {
+            return false;
+        }
+
+    }
+
     public static void fillValueForFormField(Browser browser, String selector, String value) {
-        DOMElement element = JXBrowserHelper.selectElementByCssSelector(browser, selector);
-        ((DOMFormControlElement) element).setValue(value);
+        try {
+            DOMElement element = JXBrowserHelper.selectElementByCssSelector(browser, selector);
+            ((DOMFormControlElement) element).setValue(value);
+        } catch (Exception e) {
+            LOGGER.error("Error fill data {} for {}", value, selector);
+        }
     }
 
     public static void fillValueForFormField(DOMElement parentElement, String selector, String value) {
-        DOMElement element = JXBrowserHelper.selectElementByCssSelector(parentElement, selector);
-        ((DOMFormControlElement) element).setValue(value);
+        try {
+            DOMElement element = JXBrowserHelper.selectElementByCssSelector(parentElement, selector);
+            ((DOMFormControlElement) element).setValue(value);
+        } catch (Exception e) {
+            LOGGER.error("Error fill data {} for {}", value, selector);
+        }
     }
 
     public static void setValueForFormSelect(Browser browser, String selector, String value) {
-        DOMSelectElement select = (DOMSelectElement) JXBrowserHelper.selectElementByCssSelector(browser, selector);
+        DOMSelectElement select;
+        try {
+            select = (DOMSelectElement) JXBrowserHelper.selectElementByCssSelector(browser, selector);
+        } catch (ClassCastException e) {
+            fillValueForFormField(browser, selector, value);
+            return;
+        } catch (Exception e) {
+            LOGGER.error("error fill value for {}", selector, e);
+            return;
+        }
+
+        if (select == null) {
+            LOGGER.error("no elelment {} found", selector);
+            return;
+        }
+
         List<DOMOptionElement> options = select.getOptions();
 
         for (DOMElement optionElm : options) {
             try {
                 DOMOptionElement option = (DOMOptionElement) optionElm;
                 if (value.equalsIgnoreCase(option.getAttribute("value"))) {
+                    option.setSelected(true);
+                    break;
+                }
+
+                if (value.equalsIgnoreCase(option.getInnerText())) {
                     option.setSelected(true);
                     break;
                 }

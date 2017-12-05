@@ -1,4 +1,4 @@
-package edu.olivet.harvester.fulfill.model;
+package edu.olivet.harvester.fulfill.model.setting;
 
 import com.alibaba.fastjson.JSON;
 import com.google.inject.Singleton;

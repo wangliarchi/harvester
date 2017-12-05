@@ -21,7 +21,7 @@ public abstract class Step {
     @Setter
     protected Step prevStep;
 
-    public String stepName;
+    public String stepName = this.getClass().getName();
 
 
     public abstract Step createDynamicInstance(FlowState state);

@@ -7,9 +7,7 @@ import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.exception.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.model.page.checkout.OrderReviewMultiPage;
-import edu.olivet.harvester.fulfill.model.page.checkout.PaymentMethodOnePage;
-import edu.olivet.harvester.fulfill.model.page.checkout.ShippingAddressMultiPage;
-import edu.olivet.harvester.fulfill.service.addressvalidator.USPSAddressValidator;
+import edu.olivet.harvester.fulfill.service.AddressValidatorService;
 import edu.olivet.harvester.fulfill.service.flowfactory.FlowState;
 import edu.olivet.harvester.fulfill.service.flowfactory.Step;
 import edu.olivet.harvester.fulfill.utils.OrderValidator;
@@ -23,7 +21,7 @@ public class ReviewOrderMultiPage extends Step {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReviewOrderMultiPage.class);
 
     @Inject
-    USPSAddressValidator uspsAddressValidator;
+    AddressValidatorService addressValidator;
 
     //dispatcher method
     protected void process(FlowState state) {
@@ -36,12 +34,22 @@ public class ReviewOrderMultiPage extends Step {
         reviewPayment(state);
 
         try {
+            orderReviewMultiPage.checkShippingCost(state.getOrder());
+            LOGGER.info("Passed shipping cost check.");
+        } catch (Exception e) {
+            LOGGER.error("Failed shipping cost check. ", e);
+            throw new OrderSubmissionException(e);
+        }
+
+        try {
             orderReviewMultiPage.checkTotalCost(state.getOrder());
             LOGGER.info("Passed cost check.");
         } catch (Exception e) {
             LOGGER.error("Failed cost check. ", e);
             throw new OrderSubmissionException(e);
         }
+
+
 
 
     }
@@ -53,14 +61,13 @@ public class ReviewOrderMultiPage extends Step {
         for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
             OrderReviewMultiPage orderReviewMultiPage = new OrderReviewMultiPage(state.getBuyerPanel());
             try {
-                orderReviewMultiPage.reviewShippingAddress(uspsAddressValidator);
+                orderReviewMultiPage.reviewShippingAddress(addressValidator);
                 LOGGER.info("Address passed review");
                 return;
             } catch (Exception e) {
                 errorMsg = e.getMessage();
                 LOGGER.warn("", e.getMessage());
-                ShippingAddressMultiPage shippingAddressMultiPage = new ShippingAddressMultiPage(state.getBuyerPanel());
-                shippingAddressMultiPage.execute(state.getOrder());
+                orderReviewMultiPage.changeShippingAddress();
                 WaitTime.Shortest.execute();
             }
 
@@ -80,10 +87,8 @@ public class ReviewOrderMultiPage extends Step {
                 return;
             } else {
                 LOGGER.info("Payment did not pass review");
-                PaymentMethodOnePage paymentMethodOnePage = new PaymentMethodOnePage(state.getBuyerPanel());
-                paymentMethodOnePage.execute(state.getOrder());
+                orderReviewMultiPage.changePaymentMethod();
                 WaitTime.Shortest.execute();
-
             }
         }
 

@@ -36,6 +36,14 @@ public class ReviewOrder extends Step {
         reviewPayment(state);
 
         try {
+            orderReviewOnePage.checkShippingCost(state.getOrder());
+            LOGGER.info("Passed shipping cost check.");
+        } catch (Exception e) {
+            LOGGER.error("Failed shipping cost check. ", e);
+            throw new OrderSubmissionException(e);
+        }
+
+        try {
             orderReviewOnePage.checkTotalCost(state.getOrder());
             LOGGER.info("Passed cost check.");
         } catch (Exception e) {

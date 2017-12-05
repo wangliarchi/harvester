@@ -32,7 +32,7 @@ public class CompareItemNameWorker extends SwingWorker<List<ItemCompareResult>, 
         List<ItemCompareResult> results = new ArrayList<>(orders.size());
         ItemValidator itemValidator = ApplicationContext.getBean(ItemValidator.class);
         for (Order order : orders) {
-            String title = ISBNUtils.getTitle(OrderCountryUtils.getFulfillementCountry(order), order.isbn);
+            String title = ISBNUtils.getTitle(OrderCountryUtils.getFulfillmentCountry(order), order.isbn);
             if (StringUtils.isBlank(title)) {
                 continue;
             }

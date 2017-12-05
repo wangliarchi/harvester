@@ -2,11 +2,15 @@ package edu.olivet.harvester.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.google.common.base.Objects;
+import com.mchange.lang.FloatUtils;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.db.Keyable;
 import edu.olivet.foundations.utils.*;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.harvester.fulfill.model.Address;
+import edu.olivet.harvester.fulfill.model.ShippingEnums;
+import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
+import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.model.OrderEnums.OrderColor;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Data;
@@ -165,6 +169,16 @@ public class Order implements Keyable {
     private String fulfilledASIN;
 
     /**
+     * 实际做单Shipping Cost
+     */
+    @JSONField(serialize = false)
+    public Money shippingCost;
+
+
+    @JSONField(serialize = false)
+    public ShippingEnums.ShippingSpeed shippingSpeed;
+
+    /**
      * 做單過程中remark 可能變化
      */
     @JSONField(serialize = false)
@@ -176,7 +190,7 @@ public class Order implements Keyable {
     public boolean orderNumberValid() {
         String orderNo = StringUtils.defaultString(this.order_number).trim();
 
-        return StringUtils.isNotBlank(RegexUtils.getMatched(orderNo,Regex.AMAZON_ORDER_NUMBER)) ||
+        return StringUtils.isNotBlank(RegexUtils.getMatched(orderNo, Regex.AMAZON_ORDER_NUMBER)) ||
                 Regex.EBAY_ORDER_NUMBER.isMatched(orderNo) ||
                 Regex.BW_ORDER_NUMBER.isMatched(orderNo);
     }
@@ -196,7 +210,7 @@ public class Order implements Keyable {
     public boolean fulfilled() {
         return !this.colorIsGray() && !this.canceledBySeller() &&
                 (this.orderNumberValid() ||
-                        StringUtils.containsIgnoreCase(this.status,"fi") ||
+                        StringUtils.containsIgnoreCase(this.status, "fi") ||
                         Strings.containsAnyIgnoreCase(this.remark, FORWARDED) ||
                         Strings.containsAnyIgnoreCase(this.status, FORWARDED) ||
                         Strings.containsAnyIgnoreCase(this.cost, FORWARDED) ||
@@ -225,7 +239,14 @@ public class Order implements Keyable {
      * Currently used in Customer Service Email Generation <strong>ONLY!</strong>
      */
     public boolean purchaseBack() {
-        return Remark.purchaseBack(this.remark);
+
+        if (Remark.purchaseBack(this.remark)) {
+            return true;
+        }
+
+        // 产品目前默认都是US买回转运，Remark 没有标记
+        return type() == OrderEnums.OrderItemType.PRODUCT;
+
     }
 
     /**
@@ -240,6 +261,13 @@ public class Order implements Keyable {
      */
     public boolean switchCountry() {
         return isDirectShip();
+    }
+
+
+    public boolean isIntl() {
+        String fulfillmentCountry = OrderCountryUtils.getFulfillmentCountry(this).name();
+        String marketplaceCountry = CountryStateUtils.getInstance().getCountryCode(OrderCountryUtils.getShipToCountry(this));
+        return !fulfillmentCountry.equalsIgnoreCase(marketplaceCountry);
     }
 
     /**
@@ -264,11 +292,12 @@ public class Order implements Keyable {
     /**
      * <pre>
      * 判定当前订单是否需要买回转运，根据其状态和Remark，用于<strong>做单</strong>场景
+     * <strong>产品单默认为 买回转运</strong>
      * <strong>如果批注中包含了直寄，则先不视为买回转运</strong>
      * </pre>
      */
     public boolean needBuyAndTransfer() {
-        return this.statusIndicatePurchaseBack() || Remark.purchaseBack(this.remark) || Remark.ukFwd(this.remark);
+        return this.statusIndicatePurchaseBack() || Remark.purchaseBack(this.remark) || Remark.ukFwd(this.remark) || type() == OrderEnums.OrderItemType.PRODUCT;
     }
 
 
@@ -403,7 +432,8 @@ public class Order implements Keyable {
      */
     @JSONField(serialize = false)
     public float getPriceDiff() {
-        return Float.parseFloat(this.price) - Float.parseFloat(this.seller_price);
+        //return Float.parseFloat(this.price) - Float.parseFloat(this.seller_price);
+        return getOrderPrice().toUSDAmount().floatValue() - getSellerPrice().toUSDAmount().floatValue();
     }
 
     /**
@@ -420,11 +450,15 @@ public class Order implements Keyable {
         return OrderEnums.SellerType.AP.name().equalsIgnoreCase(this.seller) || OrderEnums.SellerType.AP.abbrev().equalsIgnoreCase(this.character);
     }
 
-    OrderEnums.OrderItemType type;
+    OrderEnums.OrderItemType type = null;
 
     public OrderEnums.OrderItemType type() {
         if (type == null) {
-            type = Settings.load().getSpreadsheetType(spreadsheetId);
+            try {
+                type = Settings.load().getSpreadsheetType(spreadsheetId);
+            } catch (Exception e) {
+                //
+            }
         }
 
         return type;
@@ -460,6 +494,67 @@ public class Order implements Keyable {
                 StringUtils.defaultString(this.order_number) + Constants.TAB +
                 StringUtils.defaultString(this.account) + Constants.TAB +
                 StringUtils.defaultString(this.last_code);
+    }
+
+    @JSONField(serialize = false)
+    private Money sellerPrice;
+
+    public Money getSellerPrice() {
+        if (sellerPrice == null) {
+            float price = 0;
+            if (StringUtils.isNotBlank(seller_price)) {
+                price = FloatUtils.parseFloat(seller_price, 0);
+            }
+
+            sellerPrice = new Money(price, OrderCountryUtils.getFulfillmentCountry(this));
+        }
+
+        return sellerPrice;
+
+    }
+
+    @JSONField(serialize = false)
+    private Money orderPrice;
+
+    public Money getOrderPrice() {
+        if (orderPrice == null) {
+            float priceFloat = 0;
+            if (StringUtils.isNotBlank(price)) {
+                priceFloat = FloatUtils.parseFloat(price, 0);
+            }
+            orderPrice = new Money(priceFloat, OrderCountryUtils.getMarketplaceCountry(this));
+        }
+
+        return orderPrice;
+
+    }
+
+
+    @JSONField(serialize = false)
+    private Money orderTotalPrice;
+
+    public Money getOrderTotalPrice() {
+        if (orderTotalPrice == null) {
+            float priceFloat = 0;
+            if (StringUtils.isNotBlank(price)) {
+                priceFloat = FloatUtils.parseFloat(price, 0);
+            }
+            if (StringUtils.isNotBlank(shipping_fee)) {
+                priceFloat += FloatUtils.parseFloat(shipping_fee, 0);
+            }
+            orderTotalPrice = new Money(priceFloat, OrderCountryUtils.getMarketplaceCountry(this));
+        }
+
+        return orderTotalPrice;
+
+    }
+
+    @JSONField(serialize = false)
+    public Money orderTotalCost;
+
+
+    public boolean expeditedShipping() {
+        return Remark.fastShipping(remark);
     }
 
 

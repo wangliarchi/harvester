@@ -59,7 +59,7 @@ public class BuyerPanel extends JPanel {
     }
 
     public BuyerPanel(Order order) {
-        this(0, OrderCountryUtils.getFulfillementCountry(order), OrderBuyerUtils.getBuyer(order), 1);
+        this(0, OrderCountryUtils.getFulfillmentCountry(order), OrderBuyerUtils.getBuyer(order), 1);
     }
 
     private String profilePathName() {

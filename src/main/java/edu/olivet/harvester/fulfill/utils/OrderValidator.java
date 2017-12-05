@@ -2,17 +2,20 @@ package edu.olivet.harvester.fulfill.utils;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
+import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.UIText;
+import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.model.OrderFulfillmentRecord;
-import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.model.Seller;
+import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.ForbiddenSeller;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.model.Remark;
+import edu.olivet.harvester.utils.Settings;
 import edu.olivet.harvester.utils.common.DateFormat;
 import org.apache.commons.lang3.StringUtils;
 import org.nutz.dao.Cnd;
@@ -55,7 +58,8 @@ public class OrderValidator {
         IsNotForbiddenSeller,
         StatusNeedUpdate,
         IsNotAddOn,
-        AddressNotChanged
+        AddressNotChanged,
+        ProductTransferUrlIsValid
 
     }
 
@@ -74,6 +78,7 @@ public class OrderValidator {
         Profit("label.skip.profit"),
         //ShippingFee("label.skip.shippingfee"),
         Address("label.skip.address"),
+        ShippingFee("Skip Shipping Fee Check"),
         //RefundMultiCheck("label.skip.multirefund"),
         //OperationSuccessCheck("label.skip.opersuccess"),
         EDD("Skip EDD Check"),
@@ -148,9 +153,11 @@ public class OrderValidator {
                 Validator.HasValidCreditCard,
                 Validator.IsNotAddOn,
                 Validator.AddressNotChanged,
+                Validator.StatusMarkedCorrectForSubmit,
                 Validator.FulfillmentCountryIsValid,
                 Validator.IsNotForbiddenSeller,
-                Validator.HasEnoughBudgetToFulfill
+                Validator.HasEnoughBudgetToFulfill,
+                Validator.ProductTransferUrlIsValid
 
         );
 
@@ -202,7 +209,7 @@ public class OrderValidator {
             return "";
         }
 
-        return "Order status is not marked for submission.";
+        return "Order status is not marked correctly for submission. It should be " + status;
     }
 
     public String statusIsInitial(Order order) {
@@ -402,17 +409,20 @@ public class OrderValidator {
 
     public String hasValidBuyerAccount(Order order) {
         try {
-            OrderBuyerUtils.getBuyer(order);
+            Account buyer = OrderBuyerUtils.getBuyer(order);
+            if (!buyer.valid()) {
+                throw new BusinessException("Buyer account " + buyer + "is not valid.");
+            }
         } catch (Exception e) {
             LOGGER.error("", e);
-            return "order buyer account not set properly.";
+            return String.format("order buyer account not set properly. %s - ", OrderCountryUtils.getFulfillmentCountry(order), Settings.load().getSpreadsheetType(order.getSpreadsheetId()));
         }
         return "";
     }
 
     public String fulfillmentCountryIsValid(Order order) {
         try {
-            Country country = OrderCountryUtils.getFulfillementCountry(order);
+            Country country = OrderCountryUtils.getFulfillmentCountry(order);
         } catch (Exception e) {
             return "order fulfillment country is not valid.";
         }
@@ -423,10 +433,11 @@ public class OrderValidator {
     public String hasValidCreditCard(Order order) {
         try {
             OrderBuyerUtils.getCreditCard(order);
+            return "";
         } catch (Exception e) {
-            return e.getMessage();
+            return "No valid credit card found.";
         }
-        return "";
+
     }
 
     /**
@@ -518,7 +529,7 @@ public class OrderValidator {
 
         Seller seller = new Seller();
         seller.setUuid(order.seller_id);
-        seller.setOfferListingCountry(OrderCountryUtils.getFulfillementCountry(order));
+        seller.setOfferListingCountry(OrderCountryUtils.getFulfillmentCountry(order));
         seller.setName(order.seller);
         if (forbiddenSeller.isForbidden(seller)) {
             return String.format("Seller %s (%s) is forbidden.", seller.getName(), seller.getUuid());
@@ -530,9 +541,34 @@ public class OrderValidator {
     public static String sellerPriceChangeNotExceedConfiguration(Order order, Seller seller) {
         RuntimeSettings settings = RuntimeSettings.load();
         float maxAllowed = Float.parseFloat(settings.getPriceLimit());
-        float priceRaised = seller.getPrice().toUSDAmount().floatValue() - Float.parseFloat(order.seller_price);
+        float priceRaised = seller.getPrice().toUSDAmount().floatValue() - order.getSellerPrice().toUSDAmount().floatValue();
         if (maxAllowed < priceRaised) {
             return "Seller price raised " + String.format("%.2f", priceRaised) + " to " + seller.getPrice().usdText();
+        }
+
+        return "";
+    }
+
+    public static String productTransferUrlIsValid(Order order) {
+        if (skipCheck(order, SkipValidation.UrlNotMatch)) {
+            return "";
+        }
+
+        if (order.type() != OrderEnums.OrderItemType.PRODUCT) {
+            return "";
+        }
+
+        if (!order.purchaseBack()) {
+            return "";
+        }
+
+        //program will generate url
+        if (StringUtils.isBlank(order.url) || order.url.length() <= 3) {
+            return "";
+        }
+        String prefix = String.format("%s/%s/%s", RuntimeSettings.load().getFinderCode(), order.sheetName, order.getContext());
+        if (!order.url.startsWith(prefix)) {
+            return "Order url is invalid. current is '" + order.url + "', should be '" + prefix + "xxx'";
         }
 
         return "";

@@ -21,10 +21,28 @@ public class ShippingOptionTest {
 
     @Test
     public void testShippingOption() throws Exception {
-        now.set(Dates.parseDate("11/16/2017"));
+        now.set(Dates.parseDate("11/18/2017"));
 
 
-        ShippingOption shippingOption = new ShippingOption("Friday, Nov. 24 - Tuesday, Nov. 28", "$2.99 - Expedited Shipping", Country.US, now.get());
+        //
+        ShippingOption shippingOption = new ShippingOption("Two-Day Shipping — get it Wednesday, Nov 22", "— get it Wednesday, Nov 22", "", Country.CA, now.get());
+        assertEquals(shippingOption.getPrice().toString(), "CAD0.00");
+        assertEquals(Dates.format(shippingOption.getLatestDeliveryDate(), DateFormat.FULL_MONTH_DAY.pattern()), "11/22");
+        assertTrue(shippingOption.isExpedited());
+
+        //get it Tomorrow, Dec 2, by 9pm
+        shippingOption = new ShippingOption("One-Day Delivery — get it Tomorrow, Nov 19, by 9pm", "— get it Tomorrow, Nov 19, by 9pm", "", Country.CA, now.get());
+        assertEquals(shippingOption.getPrice().toString(), "CAD0.00");
+        assertEquals(Dates.format(shippingOption.getLatestDeliveryDate(), DateFormat.FULL_MONTH_DAY.pattern()), "11/19");
+        assertTrue(shippingOption.isExpedited());
+
+
+        shippingOption = new ShippingOption("Two-Day Shipping --get it Nov 22 - 23", "--get it Wednesday, Nov  22 - 23", "", Country.CA, now.get());
+        assertEquals(shippingOption.getPrice().toString(), "CAD0.00");
+        assertEquals(Dates.format(shippingOption.getLatestDeliveryDate(), DateFormat.FULL_MONTH_DAY.pattern()), "11/23");
+        assertTrue(shippingOption.isExpedited());
+
+        shippingOption = new ShippingOption("Friday, Nov. 24 - Tuesday, Nov. 28", "$2.99 - Expedited Shipping", Country.US, now.get());
         assertEquals(shippingOption.getPrice().toString(), "$2.99");
         assertEquals(Dates.format(shippingOption.getLatestDeliveryDate(), DateFormat.FULL_MONTH_DAY.pattern()), "11/28");
         assertTrue(shippingOption.isExpedited());

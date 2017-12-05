@@ -5,6 +5,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.utils.Configs;
 import edu.olivet.harvester.utils.Config;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
@@ -16,6 +17,7 @@ import java.util.Map;
 public class CountryStateUtils {
     private Map<String, String> countryCodes;
     private Map<String, String> usStates;
+    private Map<String, String> caStates;
     private final static CountryStateUtils instance = new CountryStateUtils();
 
     public static CountryStateUtils getInstance() {
@@ -25,6 +27,7 @@ public class CountryStateUtils {
     private CountryStateUtils() {
         countryCodes = Configs.load(Config.CountryCode.fileName());
         usStates = Configs.load(Config.USStates.fileName(), Configs.KeyCase.UpperCase);
+        caStates = Configs.load(Config.CAProvinces.fileName(), Configs.KeyCase.UpperCase);
     }
 
 
@@ -56,5 +59,30 @@ public class CountryStateUtils {
         }
 
         return usStates.get(stateName.toUpperCase()).toUpperCase();
+    }
+
+
+    public String getUSStateName(String stateAbbr) {
+        if (StringUtils.length(stateAbbr) > 2) {
+            return stateAbbr;
+        }
+
+        return MapUtils.invertMap(usStates).get(stateAbbr.toUpperCase());
+    }
+
+    public String getCAStateAbbr(String stateName) {
+        if (StringUtils.length(stateName) == 2) {
+            return stateName.toUpperCase();
+        }
+
+        return caStates.get(stateName.toUpperCase()).toUpperCase();
+    }
+
+    public String getCAStateName(String stateAbbr) {
+        if (StringUtils.length(stateAbbr) > 2) {
+            return stateAbbr;
+        }
+
+        return MapUtils.invertMap(caStates).get(stateAbbr.toUpperCase());
     }
 }

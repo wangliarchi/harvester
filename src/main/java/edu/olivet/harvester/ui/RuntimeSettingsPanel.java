@@ -7,8 +7,8 @@ import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.WaitTime;
-import edu.olivet.harvester.fulfill.model.AdvancedSubmitSetting;
-import edu.olivet.harvester.fulfill.model.RuntimeSettings;
+import edu.olivet.harvester.fulfill.model.setting.AdvancedSubmitSetting;
+import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.service.ProgressUpdator;
 import edu.olivet.harvester.fulfill.utils.DailyBudgetHelper;
@@ -21,6 +21,7 @@ import edu.olivet.harvester.ui.dialog.ChooseSheetDialog;
 import edu.olivet.harvester.ui.dialog.SelectRangeDialog;
 import edu.olivet.harvester.ui.events.MarkStatusEvent;
 import edu.olivet.harvester.ui.events.SubmitOrdersEvent;
+import edu.olivet.harvester.utils.FinderCodeUtils;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.collections4.CollectionUtils;
@@ -457,7 +458,13 @@ public class RuntimeSettingsPanel extends JPanel {
     }
 
     public void resetAfterSettingUpdated() {
-        if (!Settings.load().listAllSpreadsheets().contains(settings.getSpreadsheetId())) {
+        Settings systemSettings = Settings.load();
+        List<Country> countries = systemSettings.listAllCountries();
+        settings.setSid(systemSettings.getSid());
+
+        marketplaceComboBox.setModel(new DefaultComboBoxModel<>(countries.toArray(new Country[countries.size()])));
+
+        if (!systemSettings.listAllSpreadsheets().contains(settings.getSpreadsheetId())) {
             selectedWorksheet = null;
             settings.setSpreadsheetId("");
             settings.setSpreadsheetName("");
@@ -524,8 +531,11 @@ public class RuntimeSettingsPanel extends JPanel {
     public void setOrderFinder() {
         Country currentCountry = (Country) marketplaceComboBox.getSelectedItem();
         Settings.Configuration configuration = Settings.load().getConfigByCountry(currentCountry);
-
-        finderCodeTextField.setText(configuration.getUserCode());
+        if (FinderCodeUtils.validate(configuration.getUserCode())) {
+            finderCodeTextField.setText(configuration.getUserCode());
+        } else {
+            finderCodeTextField.setText(FinderCodeUtils.generate());
+        }
     }
 
     private void clearGoogleSheet() {
@@ -547,6 +557,10 @@ public class RuntimeSettingsPanel extends JPanel {
     }
 
     private void finderCodeTextFieldActionPerformed() {
+        if (!FinderCodeUtils.validate(finderCodeTextField.getText())) {
+            finderCodeTextField.setText(FinderCodeUtils.generate());
+            UITools.error("Finder code is invalid. System generated one for you.");
+        }
         settings.setFinderCode(finderCodeTextField.getText());
         settings.save();
     }

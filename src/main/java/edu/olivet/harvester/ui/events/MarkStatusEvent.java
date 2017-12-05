@@ -3,7 +3,7 @@ package edu.olivet.harvester.ui.events;
 import com.google.inject.Inject;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
-import edu.olivet.harvester.fulfill.model.RuntimeSettings;
+import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.MarkStatusService;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.utils.FulfillmentEnum;

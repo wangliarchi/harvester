@@ -1,7 +1,7 @@
 package edu.olivet.harvester.fulfill.model.page.checkout;
 
+import edu.olivet.harvester.fulfill.service.shipping.ShipOptionUtils;
 import edu.olivet.harvester.fulfill.utils.QtyUtils;
-import edu.olivet.harvester.fulfill.utils.ShipOptionUtils;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;

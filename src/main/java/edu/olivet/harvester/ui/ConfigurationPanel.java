@@ -6,6 +6,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
+import edu.olivet.harvester.utils.FinderCodeUtils;
 import edu.olivet.harvester.utils.Settings.Configuration;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +22,8 @@ import javax.swing.GroupLayout.Alignment;
  */
 public class ConfigurationPanel extends JPanel {
 
-    @Getter private final Country country;
+    @Getter
+    private final Country country;
 
     public ConfigurationPanel(Country country) {
         this.country = country;
@@ -70,96 +72,96 @@ public class ConfigurationPanel extends JPanel {
 
         final int width = 480;
         layout.setHorizontalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup()
-                    .addGap(20)
-                    .addGroup(layout.createParallelGroup(Alignment.TRAILING)
-                        .addComponent(sellerLbl)
-                        .addComponent(sellerEmailLbl)
-                        .addComponent(storeNameLbl)
-                        .addComponent(signatureLbl)
-                        .addComponent(sellerIdLbl)
-                        .addComponent(mwsAccessKeyLbl)
-                        .addComponent(mwsSecretKeyLbl)
-                        .addComponent(bookDataSourceUrlLbl)
-                        .addComponent(productDataSourceUrlLbl)
-                        .addComponent(userCodeLbl)
-                        .addComponent(primeBuyerLbl)
-                        .addComponent(buyerLbl)
-                        .addComponent(prodPrimeBuyerLbl)
-                        .addComponent(prodBuyerLbl)
-                        .addComponent(ebatesBuyerLbl))
-                    .addGap(20)
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup().addComponent(sellerFld, width, width, width))
-                        .addGroup(layout.createSequentialGroup().addComponent(sellerEmailFld, width, width, width))
-                        .addGroup(layout.createSequentialGroup().addComponent(storeNameFld, width, width, width))
-                        .addGroup(layout.createSequentialGroup().addComponent(signatureFld, width, width, width))
-                        .addGroup(layout.createSequentialGroup().addComponent(sellerIdFld, width, width, width))
-                        .addGroup(layout.createSequentialGroup().addComponent(mwsAccessKeyFld, width, width, width))
-                        .addGroup(layout.createSequentialGroup().addComponent(mwsSecretKeyFld, width, width, width))
-                        .addGroup(layout.createSequentialGroup().addComponent(bookDataSourceUrlFld, width, width, width))
-                        .addGroup(layout.createSequentialGroup().addComponent(productDataSourceUrlFld, width, width, width))
-                        .addGroup(layout.createSequentialGroup().addComponent(userCodeFld, width, width, width))
-                        .addGroup(layout.createSequentialGroup().addComponent(primeBuyerFld, width, width, width))
-                        .addGroup(layout.createSequentialGroup().addComponent(buyerFld, width, width, width))
-                        .addGroup(layout.createSequentialGroup().addComponent(prodPrimeBuyerFld, width, width, width))
-                        .addGroup(layout.createSequentialGroup().addComponent(prodBuyerFld, width, width, width))
-                        .addGroup(layout.createSequentialGroup().addComponent(ebatesBuyerFld, width, width, width))
-                    .addGap(20)
-                    )));
+                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addGap(20)
+                                .addGroup(layout.createParallelGroup(Alignment.TRAILING)
+                                        .addComponent(sellerLbl)
+                                        .addComponent(sellerEmailLbl)
+                                        .addComponent(storeNameLbl)
+                                        .addComponent(signatureLbl)
+                                        .addComponent(sellerIdLbl)
+                                        .addComponent(mwsAccessKeyLbl)
+                                        .addComponent(mwsSecretKeyLbl)
+                                        .addComponent(bookDataSourceUrlLbl)
+                                        .addComponent(productDataSourceUrlLbl)
+                                        .addComponent(userCodeLbl)
+                                        .addComponent(primeBuyerLbl)
+                                        .addComponent(buyerLbl)
+                                        .addComponent(prodPrimeBuyerLbl)
+                                        .addComponent(prodBuyerLbl)
+                                        .addComponent(ebatesBuyerLbl))
+                                .addGap(20)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addGroup(layout.createSequentialGroup().addComponent(sellerFld, width, width, width))
+                                        .addGroup(layout.createSequentialGroup().addComponent(sellerEmailFld, width, width, width))
+                                        .addGroup(layout.createSequentialGroup().addComponent(storeNameFld, width, width, width))
+                                        .addGroup(layout.createSequentialGroup().addComponent(signatureFld, width, width, width))
+                                        .addGroup(layout.createSequentialGroup().addComponent(sellerIdFld, width, width, width))
+                                        .addGroup(layout.createSequentialGroup().addComponent(mwsAccessKeyFld, width, width, width))
+                                        .addGroup(layout.createSequentialGroup().addComponent(mwsSecretKeyFld, width, width, width))
+                                        .addGroup(layout.createSequentialGroup().addComponent(bookDataSourceUrlFld, width, width, width))
+                                        .addGroup(layout.createSequentialGroup().addComponent(productDataSourceUrlFld, width, width, width))
+                                        .addGroup(layout.createSequentialGroup().addComponent(userCodeFld, width, width, width))
+                                        .addGroup(layout.createSequentialGroup().addComponent(primeBuyerFld, width, width, width))
+                                        .addGroup(layout.createSequentialGroup().addComponent(buyerFld, width, width, width))
+                                        .addGroup(layout.createSequentialGroup().addComponent(prodPrimeBuyerFld, width, width, width))
+                                        .addGroup(layout.createSequentialGroup().addComponent(prodBuyerFld, width, width, width))
+                                        .addGroup(layout.createSequentialGroup().addComponent(ebatesBuyerFld, width, width, width))
+                                        .addGap(20)
+                                )));
 
         int vGap = 5, height = 30;
         layout.setVerticalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup()
-                    .addGap(10)
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(sellerLbl).addComponent(sellerFld, height, height, height))
-                    .addGap(vGap)
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(sellerEmailLbl).addComponent(sellerEmailFld, height, height, height))
-                    .addGap(vGap)
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(storeNameLbl).addComponent(storeNameFld, height, height, height))
-                    .addGap(vGap)
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(signatureLbl).addComponent(signatureFld, height, height, height))
-                    .addGap(vGap)
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(sellerIdLbl).addComponent(sellerIdFld, height, height, height))
-                    .addGap(vGap)
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(mwsAccessKeyLbl).addComponent(mwsAccessKeyFld, height, height, height))
-                    .addGap(vGap)
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(mwsSecretKeyLbl).addComponent(mwsSecretKeyFld, height, height, height))
-                    .addGap(vGap)
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(bookDataSourceUrlLbl).addComponent(bookDataSourceUrlFld, height, height, height))
-                    .addGap(vGap)
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(primeBuyerLbl).addComponent(primeBuyerFld, height, height, height))
-                    .addGap(vGap)
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(buyerLbl).addComponent(buyerFld, height, height, height))
-                    .addGap(vGap)
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(productDataSourceUrlLbl).addComponent(productDataSourceUrlFld, height, height, height))
-                    .addGap(vGap)
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(prodPrimeBuyerLbl).addComponent(prodPrimeBuyerFld, height, height, height))
-                    .addGap(vGap)
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(prodBuyerLbl).addComponent(prodBuyerFld, height, height, height))
-                    .addGap(vGap)
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(ebatesBuyerLbl).addComponent(ebatesBuyerFld, height, height, height))
-                    .addGap(vGap)
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(userCodeLbl).addComponent(userCodeFld, height, height, height))
-                    .addGap(vGap)
-                ));
+                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addGap(10)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(sellerLbl).addComponent(sellerFld, height, height, height))
+                                .addGap(vGap)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(sellerEmailLbl).addComponent(sellerEmailFld, height, height, height))
+                                .addGap(vGap)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(storeNameLbl).addComponent(storeNameFld, height, height, height))
+                                .addGap(vGap)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(signatureLbl).addComponent(signatureFld, height, height, height))
+                                .addGap(vGap)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(sellerIdLbl).addComponent(sellerIdFld, height, height, height))
+                                .addGap(vGap)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(mwsAccessKeyLbl).addComponent(mwsAccessKeyFld, height, height, height))
+                                .addGap(vGap)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(mwsSecretKeyLbl).addComponent(mwsSecretKeyFld, height, height, height))
+                                .addGap(vGap)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(bookDataSourceUrlLbl).addComponent(bookDataSourceUrlFld, height, height, height))
+                                .addGap(vGap)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(primeBuyerLbl).addComponent(primeBuyerFld, height, height, height))
+                                .addGap(vGap)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(buyerLbl).addComponent(buyerFld, height, height, height))
+                                .addGap(vGap)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(productDataSourceUrlLbl).addComponent(productDataSourceUrlFld, height, height, height))
+                                .addGap(vGap)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(prodPrimeBuyerLbl).addComponent(prodPrimeBuyerFld, height, height, height))
+                                .addGap(vGap)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(prodBuyerLbl).addComponent(prodBuyerFld, height, height, height))
+                                .addGap(vGap)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(ebatesBuyerLbl).addComponent(ebatesBuyerFld, height, height, height))
+                                .addGap(vGap)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(userCodeLbl).addComponent(userCodeFld, height, height, height))
+                                .addGap(vGap)
+                        ));
         UITools.addListener2Textfields(this);
     }
 
@@ -191,21 +193,21 @@ public class ConfigurationPanel extends JPanel {
         cfg.setSignature(signatureFld.getText().trim());
 
         cfg.setMwsCredential(new MarketWebServiceIdentity(sellerIdFld.getText().trim(),
-            mwsAccessKeyFld.getText().trim(), mwsSecretKeyFld.getText().trim(), country.marketPlaceId()));
+                mwsAccessKeyFld.getText().trim(), mwsSecretKeyFld.getText().trim(), country.marketPlaceId()));
 
         cfg.setBookDataSourceUrl(AppScript.getSpreadId(bookDataSourceUrlFld.getText().trim()));
-        if(StringUtils.isNotBlank(primeBuyerFld.getText())) {
+        if (StringUtils.isNotBlank(primeBuyerFld.getText())) {
             cfg.setPrimeBuyer(new Account(primeBuyerFld.getText(), AccountType.PrimeBuyer));
         }
-        if(StringUtils.isNotBlank(buyerFld.getText())) {
+        if (StringUtils.isNotBlank(buyerFld.getText())) {
             cfg.setBuyer(new Account(buyerFld.getText(), AccountType.Buyer));
         }
 
         cfg.setProductDataSourceUrl(AppScript.getSpreadId(productDataSourceUrlFld.getText().trim()));
-        if(StringUtils.isNotBlank(prodPrimeBuyerFld.getText())) {
+        if (StringUtils.isNotBlank(prodPrimeBuyerFld.getText())) {
             cfg.setProdPrimeBuyer(new Account(prodPrimeBuyerFld.getText(), AccountType.PrimeBuyer));
         }
-        if(StringUtils.isNotBlank(prodBuyerFld.getText())) {
+        if (StringUtils.isNotBlank(prodBuyerFld.getText())) {
             cfg.setProdBuyer(new Account(prodBuyerFld.getText(), AccountType.Buyer));
         }
         cfg.setEbatesBuyer(new Account(ebatesBuyerFld.getText(), AccountType.Buyer));
@@ -216,6 +218,7 @@ public class ConfigurationPanel extends JPanel {
 
     public void load(@Nullable Configuration cfg) {
         if (cfg == null) {
+            userCodeFld.setText(FinderCodeUtils.generate());
             return;
         }
 
@@ -243,7 +246,7 @@ public class ConfigurationPanel extends JPanel {
         ebatesBuyerFld.setText(this.abbrevAccount(cfg.getEbatesBuyer()));
         userCodeFld.setText(cfg.getUserCode());
     }
-    
+
     private String abbrevAccount(Account account) {
         return account == null ? null : account.abbrev();
     }

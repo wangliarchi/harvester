@@ -38,7 +38,7 @@ public class PlacedOrderDetailPage extends FulfillmentPage {
             JXBrowserHelper.wait(browser, By.cssSelector("#orderDetails"));
             JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
             order.order_number = parseOrderId();
-            order.cost = parseTotalCost();
+            order.orderTotalCost = parseTotalCost();
             order.last_code = parseLastCode();
             order.account = buyer.getEmail();
 
@@ -59,12 +59,10 @@ public class PlacedOrderDetailPage extends FulfillmentPage {
         } catch (Exception e) {
             LOGGER.error("Error parse data on order detail page", e);
             //reload page
-            JXBrowserHelper.saveOrderScreenshot(order,buyerPanel,"1");
+            JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
             JXBrowserHelper.loadPage(browser, String.format("%s/gp/css/summary/edit.html/ref=typ_rev_edit?ie=UTF8&orderID=%s", buyerPanel.getCountry().baseUrl(), order.order_number));
             throw new BusinessException(e);
         }
-
-
 
 
     }
@@ -107,15 +105,21 @@ public class PlacedOrderDetailPage extends FulfillmentPage {
         return items;
     }
 
-    public String parseTotalCost() {
+    /**
+     * <pre>Jin Janice, [Dec 1, 2017, 4:15:11 PM]:
+     * ca 的书一律贴加元，其余的单在哪个国家做单就贴哪个国家的货币单位”
+     * 这个时现状，之后可以统一 在哪个卖场做单就贴相应卖场的币种
+     * </pre>
+     */
+    public Money parseTotalCost() {
         String total = JXBrowserHelper.text(browser, "#od-subtotals .a-text-right.a-span-last .a-color-base.a-text-bold");
         try {
             Money money = Money.fromText(total, country);
-            return money.toUSDAmount().toPlainString();
+            return money;
         } catch (Exception e) {
             //ignore
         }
-        return "";
+        return null;
     }
 
     public String parseLastCode() {

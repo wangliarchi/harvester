@@ -9,10 +9,10 @@ import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.model.OrderFulfillmentRecord;
-import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.model.page.LoginPage;
 import edu.olivet.harvester.fulfill.model.page.checkout.CheckoutEnum.CheckoutPage;
 import edu.olivet.harvester.fulfill.model.page.checkout.PlacedOrderDetailPage;
+import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.SheetService;
 import edu.olivet.harvester.fulfill.service.StepHelper;
 import edu.olivet.harvester.fulfill.service.flowfactory.FlowState;
@@ -75,7 +75,8 @@ public class ReadOrderDetails extends Step {
         }
     }
 
-    @Inject StepHelper stepHelper;
+    @Inject
+    StepHelper stepHelper;
 
     @Repeat(expectedExceptions = BusinessException.class)
     private void readOrderInfo(FlowState state) {
@@ -91,7 +92,7 @@ public class ReadOrderDetails extends Step {
 
     @Repeat(expectedExceptions = BusinessException.class)
     private void updateInfoToOrderSheet(String spreadsheetId, Order order) {
-       sheetService.fillFulfillmentOrderInfo(spreadsheetId, order);
+        sheetService.fillFulfillmentOrderInfo(spreadsheetId, order);
     }
 
     @Repeat(expectedExceptions = BusinessException.class)
@@ -110,7 +111,11 @@ public class ReadOrderDetails extends Step {
         record.setSellerPrice(order.seller_price);
         record.setCondition(order.condition);
         record.setCharacter(order.character);
-        record.setCost(order.cost);
+        if (order.orderTotalCost != null) {
+            record.setCost(order.orderTotalCost.getAmount().toPlainString());
+        } else {
+            record.setCost(order.cost);
+        }
         record.setOrderNumber(order.order_number);
         record.setBuyerAccount(order.account);
         record.setLastCode(order.last_code);

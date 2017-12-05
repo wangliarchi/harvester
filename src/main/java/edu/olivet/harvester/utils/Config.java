@@ -8,13 +8,16 @@ public enum Config {
     CountryCode("country-codes", "国家代码"),
     CountryName("country-names", "国家"),
     USStates("us-states", "US States"),
+    CAProvinces("ca-provinces", "CA Provinces"),
     AmazonAddressRule("addressrule", "亚马逊地址转换规则"),
     ConditionLevel("condition-level", "产品新旧等级设定"),
     ProfileList("profileList.properties", "性能监控列表"),
     Condition("conditions.properties", "Condition转换表"),
     ForbiddenSellers("forbidden_sellers.json", "Forbidden Sellers"),
     StopWords("stopwords.json", "Stopwords"),
-    USForwardAddress("usBookTransAddr.json", "US FWD Address");
+    USForwardAddress("usBookTransAddr.json", "US FWD Address"),
+    ShippingFeeLimit("shipping-limit.json", "Shipping Fee Limit"),
+    Names("names", "Common used name list");
 
     private String fileName;
     private String desc;

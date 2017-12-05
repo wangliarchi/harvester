@@ -11,7 +11,8 @@ import edu.olivet.foundations.utils.Tools;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.fulfill.model.ShippingOption;
-import edu.olivet.harvester.fulfill.utils.ShipOptionUtils;
+import edu.olivet.harvester.fulfill.service.shipping.ShipOptionUtils;
+import edu.olivet.harvester.fulfill.service.shipping.ShippingHandlerFactory;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.service.OrderService;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
@@ -85,9 +86,9 @@ public class ShippingMethodOnePageTest extends BaseTest {
                         WaitTime.Short.execute();
 
                         List<ShippingOption> options = ShipOptionUtils.listAllOptions(browser, Country.US);
-                        List<ShippingOption> validOptions = ShipOptionUtils.getValidateOptions(order, options);
+                        List<ShippingOption> validOptions = ShippingHandlerFactory.getHandler(order).getValidateOptions(order, options);
 
-                        //System.out.println(validOptions);
+                        System.out.println(validOptions);
                     } catch (Exception e) {
                         LOGGER.error("{} ", dir.getName() + "/" + file.getName(), e);
                         WaitTime.Shortest.execute();

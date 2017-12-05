@@ -373,12 +373,12 @@ public class ConfirmShipments {
                 try {
                     result = _submitFeed(feedFile, c);
                     LOGGER.debug("order confirmation result {}",result);
-                    if (!StringUtils.containsAny(result.toLowerCase(), "rejected", "denied")) {
+                    if (!Strings.containsAnyIgnoreCase(result.toLowerCase(), "rejected", "denied")) {
                         break;
                     }
                 } catch (Exception e) {
                     LOGGER.error("Order confirmation submission error {}",e.getMessage());
-                    if (!StringUtils.containsAny(e.getMessage().toLowerCase(), "rejected", "denied")) {
+                    if (!Strings.containsAnyIgnoreCase(e.getMessage().toLowerCase(), "rejected", "denied")) {
                         break;
                     }
                 }

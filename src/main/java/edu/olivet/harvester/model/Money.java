@@ -1,10 +1,10 @@
 package edu.olivet.harvester.model;
 
-import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.CurrencyRateCalculator;
 import edu.olivet.foundations.utils.RegexUtils;
+import edu.olivet.harvester.utils.CurrencyConvertor;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
@@ -23,8 +23,7 @@ public class Money {
     private Currency currency;
     private BigDecimal amount;
 
-    @Inject
-    CurrencyRateCalculator currencyRateCalculator;
+    CurrencyRateCalculator currencyRateCalculator = CurrencyConvertor.getInstance();
 
     public Money(BigDecimal amount, Country country) {
         this.amount = amount;

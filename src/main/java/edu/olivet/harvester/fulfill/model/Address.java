@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.base.Objects;
 import edu.olivet.foundations.utils.Configs;
 import edu.olivet.foundations.utils.RegexUtils;
+import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.utils.Config;
@@ -96,8 +97,33 @@ public class Address {
         return CountryStateUtils.getInstance().getCountryCode(country);
     }
 
+    public String getFullStateName() {
+        if (StringUtils.isBlank(state)) {
+            return state;
+        }
+
+        if (StringUtils.length(state) > 2) {
+            return state;
+        }
+
+        if (isUSAddress()) {
+            return CountryStateUtils.getInstance().getUSStateName(state);
+        }
+
+        if (isCAAddress()) {
+            return CountryStateUtils.getInstance().getCAStateName(state);
+        }
+
+        return state;
+
+    }
+
     public boolean isUSAddress() {
         return "US".equalsIgnoreCase(getCountryCode());
+    }
+
+    public boolean isCAAddress() {
+        return "CA".equalsIgnoreCase(getCountryCode());
     }
 
     @Override
@@ -193,7 +219,7 @@ public class Address {
     }
 
     public String withouName() {
-        return (StringUtils.isNotBlank(address1) ? ", " + address1 : "") + (StringUtils.isNotBlank(address2) ? ", " + address2 : "") + ", " + city + ", " + state + " " + getZip() + ", " + country;
+        return (StringUtils.isNotBlank(address1) ? ", " + address1 : "") + (StringUtils.isNotBlank(address2) ? ", " + address2 : "") + ", " + city + ", " + getFullStateName() + " " + getZip() + ", " + country;
     }
 
 }

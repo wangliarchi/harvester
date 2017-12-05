@@ -3,6 +3,7 @@ package edu.olivet.harvester.fulfill.utils;
 import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.model.OrderEnums;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -18,6 +19,9 @@ public class OrderAddressUtilsTest extends BaseTest {
         order.setContext("700US");
         order.order_id = "002-1578027-1397838";
         order.remark = "";
+        order.setSpreadsheetId("testid");
+        order.setSheetName("11/20");
+        order.setType(OrderEnums.OrderItemType.BOOK);
 
         assertEquals(OrderAddressUtils.orderShippingAddress(order), Address.loadFromOrder(order));
 
@@ -25,7 +29,7 @@ public class OrderAddressUtilsTest extends BaseTest {
 
         Address address = Address.USFwdAddress();
         address.setName("zhuanyun/700/1397838");
-        assertEquals(OrderAddressUtils.orderShippingAddress(order),address);
+        assertEquals(OrderAddressUtils.orderShippingAddress(order), address);
 
     }
 
@@ -34,7 +38,10 @@ public class OrderAddressUtilsTest extends BaseTest {
         Order order = prepareOrder();
         order.setContext("700US");
         order.order_id = "002-1578027-1397838";
-        assertEquals(OrderAddressUtils.usFwdBookRecipient(order), "zhuanyun/700/1397838");
+        order.setSpreadsheetId("testid");
+        order.setSheetName("11/20");
+        order.setType(OrderEnums.OrderItemType.BOOK);
+        assertEquals(FwdAddressUtils.getFwdRecipient(order), "zhuanyun/700/1397838");
     }
 
 }

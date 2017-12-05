@@ -39,6 +39,11 @@ public class SheetService extends SheetAPI {
 
         //fulfilled order info
         String range = String.format("%s!AC%d:AF%d", order.sheetName, row, row);
+
+        //paste usd for all
+        if (order.orderTotalCost != null) {
+            order.cost = order.orderTotalCost.toUSDAmount().toPlainString();
+        }
         ValueRange rowData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(order.cost, order.order_number, order.account, order.last_code)))
                 .setRange(range);
         dateToUpdate.add(rowData);
@@ -47,6 +52,11 @@ public class SheetService extends SheetAPI {
         ValueRange remarkData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(order.remark)))
                 .setRange(String.format("%s!S%d", order.sheetName, row));
         dateToUpdate.add(remarkData);
+
+        //url
+        ValueRange urlData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(order.url)))
+                .setRange(String.format("%s!P%d", order.sheetName, row));
+        dateToUpdate.add(urlData);
 
         try {
             this.batchUpdateValues(spreadsheetId, dateToUpdate);
@@ -88,7 +98,6 @@ public class SheetService extends SheetAPI {
 
         appScript.markColor(spreadsheetId, order.sheetName, row, OrderColor.InvalidByCode);
     }
-
 
 
     public Map<String, List<String>> updateStatus(String spreadsheetId, List<Order> orders) {
@@ -165,13 +174,13 @@ public class SheetService extends SheetAPI {
     public Order reloadOrder(Order order) {
         //id, sku, seller, price, remark
         List<Order> orders = appScript.readOrders(order.spreadsheetId, order.sheetName);
-        orders.removeIf(it->!it.equalsLite(order));
-        if(CollectionUtils.isEmpty(orders)) {
+        orders.removeIf(it -> !it.equalsLite(order));
+        if (CollectionUtils.isEmpty(orders)) {
             throw new BusinessException("Cant find order " + order + "on order sheet");
         }
 
-        for(Order o: orders) {
-            if(StringUtils.equalsAnyIgnoreCase(o.remark,order.remark, order.originalRemark)) {
+        for (Order o : orders) {
+            if (StringUtils.equalsAnyIgnoreCase(o.remark, order.remark, order.originalRemark)) {
                 o.setContext(order.getContext());
                 return o;
             }

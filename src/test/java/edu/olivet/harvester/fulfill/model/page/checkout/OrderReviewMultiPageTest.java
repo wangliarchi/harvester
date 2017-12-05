@@ -6,6 +6,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.BaseTest;
+import edu.olivet.harvester.fulfill.model.ShippingEnums;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.BuyerPanel;
 import org.testng.annotations.Test;
@@ -66,6 +67,21 @@ public class OrderReviewMultiPageTest extends BaseTest {
         WaitTime.Short.execute();
 
         orderReviewMultiPage.checkTotalCost(order);
+    }
+
+    @Test
+    public void testCheckShippingCost() {
+        prepareBrowser();
+        Order order = prepareOrder();
+        order.estimated_delivery_date = "2017-11-13 2017-11-21";
+        order.ship_country = "United States";
+        order.ship_state = "FL";
+        order.shippingSpeed = ShippingEnums.ShippingSpeed.Standard;
+        orderReviewMultiPage.getBuyerPanel().setOrder(order);
+        browser.loadHTML(Tools.readFileToString(new File(TEST_DATA_ROOT + File.separator + "pages" + File.separator + "9.1-PlaceYourOrder-Amazon.comCheckout.html")));
+        WaitTime.Short.execute();
+
+        orderReviewMultiPage.checkShippingCost(order);
     }
 
     @Test

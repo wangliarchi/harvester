@@ -299,7 +299,7 @@ public class SheetAPI {
 
         String[] toRemoveKeywords = toRemoveKeywordList.toArray(new String[toRemoveKeywordList.size()]);
 
-        sheets.removeIf(it -> StringUtils.containsAny(it.getName().toLowerCase(), toRemoveKeywords));
+        sheets.removeIf(it -> Strings.containsAnyIgnoreCase(it.getName().toLowerCase(), toRemoveKeywords));
 
         return sheets;
     }

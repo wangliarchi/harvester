@@ -268,8 +268,8 @@ public class OrderManAddressValidator implements AddressValidator {
     public List<String> compareStateZip(Address old, Address entered) {
         List<String> results = new ArrayList<>();
 
-        String orStateZip = (old.getState() + old.getZip()).replace(StringUtils.SPACE, StringUtils.EMPTY).toLowerCase();
-        String stateZip = (entered.getState() + entered.getZip()).replace(StringUtils.SPACE, StringUtils.EMPTY).toLowerCase();
+        String orStateZip = (old.getFullStateName() + old.getZip()).replace(StringUtils.SPACE, StringUtils.EMPTY).toLowerCase();
+        String stateZip = (entered.getFullStateName() + entered.getZip()).replace(StringUtils.SPACE, StringUtils.EMPTY).toLowerCase();
         // 如果州名和邮政编码连接一起的结果不等同，或互不包含(存在一些情况州名会亚马逊自动去掉了)，再分解检查
         if (!orStateZip.equals(stateZip) && !orStateZip.contains(stateZip) && !stateZip.contains(orStateZip)) {
             String result = this.compareZipCode(old.getZip(), entered.getZip());

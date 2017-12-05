@@ -1,4 +1,4 @@
-package edu.olivet.harvester.fulfill.model;
+package edu.olivet.harvester.fulfill.model.setting;
 
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.utils.Constants;

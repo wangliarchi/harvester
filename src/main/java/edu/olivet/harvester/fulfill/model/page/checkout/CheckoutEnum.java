@@ -27,11 +27,11 @@ public class CheckoutEnum {
         ShippingMethod("#shippingOptionFormId"),
         ShippingMethodOnePage(".a-container.page-container #spc-orders"),
         OrderReview(".checkout.spc"),
-        AmazonPrimeAd("#mom-no-thanks,#checkout-student-signup-form"),
+        AmazonPrimeAd("#mom-no-thanks,#checkout-student-signup-form，.prime-nothanks-button"),
         AmazonPrimeAdAfterPlaceOrderBtnClicked("#prime-piv-steps-container"),
         OrderPlacedSuccessPage("#a-page .a-box.a-alert.a-alert-success"),
         OrderDetailPage("#orderDetails"),
-        LoginPage("#ap_email");
+        LoginPage("#ap_email,#ap_password");
 
         @Getter
         private String idSelector;

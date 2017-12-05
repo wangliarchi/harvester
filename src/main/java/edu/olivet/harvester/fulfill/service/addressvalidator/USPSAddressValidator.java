@@ -175,10 +175,6 @@ public class USPSAddressValidator implements AddressValidator {
 
     public static void main(String[] args) {
         USPSAddressValidator validator = ApplicationContext.getBean(USPSAddressValidator.class);
-        // Entered Address(address1=10248 PRINCE PL APT T1, address2=, city=UPPER MARLBORO, state=MD, zip=20774-1220, zip5=20774, zip4=1220, country=United States),
-        //origin Address(address1=10248 Prince Place, address2=T1, city=Upper Marlboro, state=MD, zip=20774, zip5=20774, zip4=, country=United States)
-        //3142 W George St C3, address2=, city=Chicago, state=IL, zip=60618, zip5=60618, zip4=, country=United States
-        //131 East 69th Street	3A	New York	10021
         Address address = new Address();
         address.setAddress1("131 East 69th Street");
         address.setAddress2("3A");

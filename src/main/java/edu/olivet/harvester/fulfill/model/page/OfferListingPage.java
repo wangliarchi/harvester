@@ -76,7 +76,7 @@ public class OfferListingPage extends FulfillmentPage {
 
         LOGGER.info("Finding seller for order {}", order.order_id);
 
-        Country currentCountry = OrderCountryUtils.getFulfillementCountry(order);
+        Country currentCountry = OrderCountryUtils.getFulfillmentCountry(order);
         List<Seller> sellers = sellerService.parseSellers(browser, currentCountry);
 
         //List<Seller> results = new ArrayList<>();

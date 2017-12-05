@@ -3,13 +3,15 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.exception.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.model.Address;
-import edu.olivet.harvester.fulfill.model.RuntimeSettings;
 import edu.olivet.harvester.fulfill.model.page.FulfillmentPage;
+import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.service.addressvalidator.AddressValidator;
+import edu.olivet.harvester.fulfill.service.shipping.FeeLimitChecker;
 import edu.olivet.harvester.fulfill.utils.DailyBudgetHelper;
 import edu.olivet.harvester.fulfill.utils.OrderAddressUtils;
 import edu.olivet.harvester.fulfill.utils.ProfitLostControl;
@@ -23,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/13/17 1:53 PM
@@ -50,11 +53,45 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
             throw new OrderSubmissionException("You don't have enough fund to process this order. Need $" + grandTotal.toUSDAmount() + ", only have $" + String.format("%.2f", remainingBudget));
         }
 
-        order.cost = grandTotal.toUSDAmount().toPlainString();
+        order.orderTotalCost = grandTotal;
+        order.cost = grandTotal.getAmount().toPlainString();
 
 
     }
 
+
+    public void checkShippingCost(Order order) {
+
+        Money shippingCost = parseShippingFee();
+
+        if (!FeeLimitChecker.getInstance().notExceed(order, shippingCost.getAmount().floatValue())) {
+            throw new OrderSubmissionException("Order shipping cost exceed maximum limit.");
+        }
+
+
+        order.shippingCost = shippingCost;
+
+    }
+
+
+    public Money parseShippingFee() {
+        List<DOMElement> trs = JXBrowserHelper.selectElementsByCssSelector(browser, "#subtotals-marketplace-table tr");
+        Money shippingCost = null;
+        for (DOMElement tr : trs) {
+            if (Strings.containsAnyIgnoreCase(tr.getInnerText(), "Shipping")) {
+                try {
+                    String shippingCostString = JXBrowserHelper.text(tr, ".a-text-right");
+                    shippingCost = Money.fromText(shippingCostString, buyerPanel.getCountry());
+                    break;
+                } catch (Exception e) {
+                    LOGGER.error("Error reading shipping cost. ", e);
+                    throw new BusinessException("Cant read shipping cost - " + e.getMessage());
+                }
+            }
+        }
+
+        return shippingCost;
+    }
 
     public Money parseTotal() {
         String grandTotalText = JXBrowserHelper.text(browser, "#subtotals-marketplace-table .grand-total-price");
@@ -63,7 +100,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
             grandTotal = Money.fromText(grandTotalText, buyerPanel.getCountry());
         } catch (Exception e) {
             LOGGER.error("Error reading grand total. ", e);
-            throw new BusinessException("Can read grand total - " + e.getMessage());
+            throw new BusinessException("Cannt read grand total - " + e.getMessage());
         }
 
         return grandTotal;

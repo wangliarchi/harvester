@@ -2,6 +2,7 @@ package edu.olivet.harvester.fulfill.utils;
 
 import com.google.inject.Singleton;
 import com.mchange.lang.IntegerUtils;
+import edu.olivet.foundations.utils.Strings;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -55,7 +56,7 @@ public class HtmlParser {
 
         String[] lowqualities = new String[]{"water,damage,heavy,loose"};
 
-        return !StringUtils.containsAny(rowHtml, lowqualities);
+        return !Strings.containsAnyIgnoreCase(rowHtml, lowqualities);
     }
 
     private static final Float ZERO = 0.0f;

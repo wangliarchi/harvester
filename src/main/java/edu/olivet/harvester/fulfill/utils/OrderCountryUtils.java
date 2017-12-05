@@ -1,9 +1,8 @@
 package edu.olivet.harvester.fulfill.utils;
 
 import edu.olivet.foundations.amazon.Country;
-import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Strings;
-import edu.olivet.harvester.fulfill.model.RuntimeSettings;
+import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.model.Remark;
@@ -30,37 +29,33 @@ public class OrderCountryUtils {
                 //ignore
             }
 
-            return ApplicationContext.getBean(CountryStateUtils.class).getCountryCode(order.ship_country);
+            return CountryStateUtils.getInstance().getCountryCode(order.ship_country);
         }
     }
 
-    public static Country getFulfillementCountry(Order order) {
+    public static Country getMarketplaceCountry(Order order) {
+        try {
+            return Country.fromSalesChanel(order.getSales_chanel());
+        } catch (Exception e) {
+            //sale channel is missing, current country;
+            if (StringUtils.isNotBlank(order.spreadsheetId)) {
+                return Settings.load().getSpreadsheetCountry(order.spreadsheetId);
+            }
+
+            return Country.fromCode(RuntimeSettings.load().getMarketplaceName());
+        }
+    }
+
+    public static Country getFulfillmentCountry(Order order) {
         // 批注中直寄和买回同时存在的情况下，先考虑直寄，随后考虑买回, 如果非直寄 和 转运，默认和order order 的sales channel 相同
         if (order.isDirectShip()) {
             return Remark.getDirectShipFromCountry(order.remark);
-        } else if (Remark.purchaseBack(order.remark)) {
+        } else if (order.purchaseBack()) {
             return Country.US;
         } else if (Remark.ukFwd(order.remark)) {
             return Country.UK;
         } else {
-            // 产品目前默认都是US买回转运，Remark 没有标记
-            try {
-                if (order.type() == OrderEnums.OrderItemType.PRODUCT) {
-                    return Country.US;
-                }
-            } catch (Exception e) {
-                //ignore
-            }
-            try {
-                return Country.fromSalesChanel(order.getSales_chanel());
-            } catch (Exception e) {
-                //sale channel is missing, current country;
-                if (StringUtils.isNotBlank(order.spreadsheetId)) {
-                    return Settings.load().getSpreadsheetCountry(order.spreadsheetId);
-                }
-
-                return Country.valueOf(RuntimeSettings.load().getMarketplaceName());
-            }
+            return getMarketplaceCountry(order);
         }
     }
 
@@ -85,8 +80,9 @@ public class OrderCountryUtils {
             result += "&seller=" + order.seller_id;
         }
 
-        return getFulfillementCountry(order).baseUrl() + "/" + result;
+        return getFulfillmentCountry(order).baseUrl() + "/" + result;
 
     }
+
 
 }

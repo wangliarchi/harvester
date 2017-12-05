@@ -39,7 +39,13 @@ public abstract class ShippingAddressAbstract extends FulfillmentPage {
             JXBrowserHelper.fillValueForFormField(browser, SELECTOR_ADDR1, address.getAddress1());
             JXBrowserHelper.fillValueForFormField(browser, SELECTOR_ADDR2, address.getAddress2());
             JXBrowserHelper.fillValueForFormField(browser, SELECTOR_CITY, address.getCity());
-            JXBrowserHelper.fillValueForFormField(browser, SELECTOR_STATE, address.getState());
+
+            if (JXBrowserHelper.isSelectElement(browser, SELECTOR_STATE)) {
+                JXBrowserHelper.setValueForFormSelect(browser, SELECTOR_STATE, address.getFullStateName());
+            } else {
+                JXBrowserHelper.fillValueForFormField(browser, SELECTOR_STATE, address.getState());
+            }
+
             JXBrowserHelper.fillValueForFormField(browser, SELECTOR_ZIP, address.getZip());
             JXBrowserHelper.setValueForFormSelect(browser, SELECTOR_COUNTRY, address.getCountryCode());
             JXBrowserHelper.fillValueForFormField(browser, SELECTOR_PHONE, address.getPhoneNumber());

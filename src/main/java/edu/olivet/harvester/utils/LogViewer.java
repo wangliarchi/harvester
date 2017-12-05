@@ -2,7 +2,7 @@ package edu.olivet.harvester.utils;
 
 import edu.olivet.foundations.ui.Action;
 import edu.olivet.foundations.ui.UITools;
-import edu.olivet.harvester.fulfill.model.RuntimeSettings;
+import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.model.ConfigEnums.Log;
 import edu.olivet.harvester.ui.dialog.DisplayContentDialog;
 import edu.olivet.harvester.ui.dialog.LogViewDialog;

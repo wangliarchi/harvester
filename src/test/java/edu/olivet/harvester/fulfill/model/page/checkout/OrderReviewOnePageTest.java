@@ -12,7 +12,6 @@ import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.service.AddressValidatorService;
-import edu.olivet.harvester.fulfill.service.addressvalidator.USPSAddressValidator;
 import edu.olivet.harvester.model.Money;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.service.OrderService;

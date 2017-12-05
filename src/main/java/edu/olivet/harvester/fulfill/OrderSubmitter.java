@@ -2,6 +2,7 @@ package edu.olivet.harvester.fulfill;
 
 
 import com.google.api.services.sheets.v4.model.Spreadsheet;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import edu.olivet.foundations.amazon.Account;
@@ -14,7 +15,7 @@ import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.model.ItemCompareResult;
-import edu.olivet.harvester.fulfill.model.RuntimeSettings;
+import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.*;
 import edu.olivet.harvester.fulfill.utils.*;
 import edu.olivet.harvester.logger.StatisticLogger;
@@ -68,8 +69,14 @@ public class OrderSubmitter {
 
     private static final Map<String, Boolean> DUPLICATION_CHECK_CACHE = new HashMap<>();
 
+    private static final List<Country> SUPPORTED_MARKETPLACES = Lists.newArrayList(Country.US, Country.CA);
+
     public void execute(RuntimeSettings settings) {
         messageListener.empty();
+
+        if (!SUPPORTED_MARKETPLACES.contains(Country.valueOf(settings.getMarketplaceName()))) {
+            messageListener.addMsg(String.format("Harvester can only support %s marketplaces at this moment. Sorry for inconvenience.", SUPPORTED_MARKETPLACES), InformationLevel.Negative);
+        }
 
         //check daily budget
         try {
@@ -111,11 +118,13 @@ public class OrderSubmitter {
         //remove if not valid
         List<Order> validOrders = new ArrayList<>();
         for (Order order : orders) {
-            String error = orderValidator.isValid(order, FulfillmentEnum.Action.SubmitOrder);
-
-            if (StringUtils.isBlank(error) && OrderCountryUtils.getFulfillementCountry(order) != Country.US) {
-                error = "Harvester can only support US marketplace at this moment. Sorry for inconvenience.";
+            String error;
+            if (!SUPPORTED_MARKETPLACES.contains(OrderCountryUtils.getFulfillmentCountry(order))) {
+                error = String.format("Harvester can only support %s marketplaces at this moment. Sorry for inconvenience.", SUPPORTED_MARKETPLACES);
+            } else {
+                error = orderValidator.isValid(order, FulfillmentEnum.Action.SubmitOrder);
             }
+
 
             if (StringUtils.isNotBlank(error)) {
                 messageListener.addMsg(order, error, InformationLevel.Negative);
@@ -170,7 +179,7 @@ public class OrderSubmitter {
 
             try {
                 Account buyer = OrderBuyerUtils.getBuyer(order);
-                Country country = OrderCountryUtils.getFulfillementCountry(order);
+                Country country = OrderCountryUtils.getFulfillmentCountry(order);
                 BuyerPanel buyerPanel = TabbedBuyerPanel.getInstance().getOrAddTab(country, buyer);
                 TabbedBuyerPanel.getInstance().highlight(buyerPanel);
                 //order = sheetService.reloadOrder(order);

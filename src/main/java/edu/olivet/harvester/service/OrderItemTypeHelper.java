@@ -6,12 +6,12 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.aop.Profile;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils;
+import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.service.mws.ProductAttributesHelper;
 import edu.olivet.harvester.service.mws.ProductClient;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,8 +40,8 @@ public class OrderItemTypeHelper {
             type = this.getItemTypeBySku(order);
 
             //LOGGER.info("Order item type for {} found as {} from SKU pattern. ASIN {}, SKU {}",
-                    //order.order_id,
-                    //type.name(), order.isbn, order.sku);
+            //order.order_id,
+            //type.name(), order.isbn, order.sku);
 
             return type;
 
@@ -51,21 +51,21 @@ public class OrderItemTypeHelper {
 
         /**
          Disable now. API quote has been used up by repricing programs.
-        try {
+         try {
 
-            type = this.getItemTypeByMWSAPI(order);
-            LOGGER.info("Order item type for {} found as {} from MWS product API. ASIN {}, SKU {}",
-                    order.order_id,
-                    type.name(), order.isbn, order.sku);
+         type = this.getItemTypeByMWSAPI(order);
+         LOGGER.info("Order item type for {} found as {} from MWS product API. ASIN {}, SKU {}",
+         order.order_id,
+         type.name(), order.isbn, order.sku);
 
-            return type;
+         return type;
 
-        } catch (Exception e) {
-            LOGGER.warn(
-                    "No product group info found by product api for {}, ASIN {}, SKU {} - {}, will set default to BOOK", order.order_id, order.isbn, order.sku, e
-            );
-        }
-        */
+         } catch (Exception e) {
+         LOGGER.warn(
+         "No product group info found by product api for {}, ASIN {}, SKU {} - {}, will set default to BOOK", order.order_id, order.isbn, order.sku, e
+         );
+         }
+         */
 
         //TODO: defaut to BOOK?
 
@@ -83,11 +83,8 @@ public class OrderItemTypeHelper {
 
         String[] productKeywords = {"ART", "AUTO", "pro", "jewel", "shoe", "cloth", "watch", "BABY", "BEAU", "ELEC", "FOOD", "HARDWARE", "HEAL", "HOME", "MEASURE", "OFFICE", "PET", "SAFETY", "SPOR", "TOOL", "TOY", "access", "guowai", "bady", "kit", "out", "uban"};
 
-
-        for (String keyword : productKeywords) {
-            if (StringUtils.containsIgnoreCase(sku,keyword)) {
-                return OrderEnums.OrderItemType.PRODUCT;
-            }
+        if (Strings.containsAnyIgnoreCase(sku, productKeywords)) {
+            return OrderEnums.OrderItemType.PRODUCT;
         }
 
 

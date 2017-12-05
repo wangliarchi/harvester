@@ -52,9 +52,11 @@ public class StepHelper {
     @Inject
     AfterOrderPlaced afterOrderPlaced;
 
-    @Inject Login login;
+    @Inject
+    Login login;
 
-    @Inject ReadOrderDetails readOrderDetails;
+    @Inject
+    ReadOrderDetails readOrderDetails;
 
 
     public Step detectStep(FlowState state) {
@@ -74,15 +76,15 @@ public class StepHelper {
                 if (EnterShippingAddress.class.getName().equals(state.getPrevStep().stepName)) {
                     return reviewOrderChangePaymentMethod;
                 }
-                //if from payment method page, then to select shipping method
+                //if from payment method page, then to update qty
                 if (SelectPaymentMethod.class.getName().equals(state.getPrevStep().stepName)) {
-                    return reviewOrderChangeShippingMethod;
-                }
-                //if from shipping method method page, then to update qty
-                if (ReviewOrderChangeShippingMethod.class.getName().equals(state.getPrevStep().stepName)) {
                     return reviewOrderUpdateQty;
                 }
+                //if from update qty page, then to select shipping method
                 if (ReviewOrderUpdateQty.class.getName().equals(state.getPrevStep().stepName)) {
+                    return reviewOrderChangeShippingMethod;
+                }
+                if (ReviewOrderChangeShippingMethod.class.getName().equals(state.getPrevStep().stepName)) {
                     return reviewOrderMultiPage;
                 }
                 return null;
@@ -95,7 +97,6 @@ public class StepHelper {
             case PaymentMethod:
                 return selectPaymentMethod;
             case ShippingMethod:
-            case ShippingMethodOnePage:
                 //jumped here directly after checkout btn clicked, go back to enter shipping method...
                 if (Checkout.class.getName().equals(state.getPrevStep().stepName)) {
                     return enterShippingAddress;
@@ -107,6 +108,18 @@ public class StepHelper {
                     return reviewOrder;
                 }
                 return selectShippingMethod;
+            case ShippingMethodOnePage:
+                //jumped here directly after checkout btn clicked, go back to enter shipping method...
+                if (Checkout.class.getName().equals(state.getPrevStep().stepName)) {
+                    return enterShippingAddress;
+                }
+                if (UpdateQty.class.getName().equals(state.getPrevStep().stepName)) {
+                    return selectShippingMethod;
+                }
+                if (SelectShippingMethod.class.getName().equals(state.getPrevStep().stepName)) {
+                    return reviewOrder;
+                }
+                return updateQty;
             case AmazonPrimeAdAfterPlaceOrderBtnClicked:
                 return amazonPrimeAd;
             case OrderPlacedSuccessPage:

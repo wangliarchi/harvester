@@ -5,7 +5,7 @@ import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.Strings;
-import edu.olivet.harvester.fulfill.model.RuntimeSettings;
+import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.utils.FulfillmentEnum;
 import edu.olivet.harvester.fulfill.utils.OrderValidator;
 import edu.olivet.harvester.fulfill.utils.RuntimeSettingsValidator;

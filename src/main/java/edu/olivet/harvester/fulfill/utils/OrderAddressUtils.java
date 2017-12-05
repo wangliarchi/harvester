@@ -2,7 +2,7 @@ package edu.olivet.harvester.fulfill.utils;
 
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.harvester.fulfill.model.Address;
-import edu.olivet.harvester.fulfill.model.RuntimeSettings;
+import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.Remark;
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ public class OrderAddressUtils {
 
         if (order.purchaseBack()) {
             Address address = Address.USFwdAddress();
-            address.setName(usFwdBookRecipient(order));
+            address.setName(FwdAddressUtils.getFwdRecipient(order));
             return address;
         }
 
@@ -31,24 +31,14 @@ public class OrderAddressUtils {
 
     }
 
-    public static String usFwdBookRecipient(Order order) {
-
-        if (OrderCountryUtils.getFulfillementCountry(order) == Country.US) {
-            return String.format("zhuanyun/%s/%s", order.getContext().substring(0, order.getContext().length() - 2), order.order_id.substring(order.order_id.lastIndexOf('-') + 1));
-        } else {
-            return order.url;
-        }
-
-    }
-
 
     public static String recipientName(Order order) {
-        String fullName = order.recipient_name.replaceAll("\"","").replaceAll("&#34;","");
+        String fullName = order.recipient_name.replaceAll("\"", "").replaceAll("&#34;", "");
         // 如果拼接的姓名超过亚马逊允许上限，且当前价格差异大于20，可以不加上No Invoice，但需要补上Remark
         // 存在Seller为Prime但标识了a的情况，此时仍然需要当做Prime的情况处理Full Name
         if (!order.sellerIsPrime()) {
             String s = fullName + RuntimeSettings.load().getNoInvoiceText();
-            int max = maxNameLength(OrderCountryUtils.getFulfillementCountry(order));
+            int max = maxNameLength(OrderCountryUtils.getFulfillmentCountry(order));
             fullName = s.length() > max ? fullName : s;
 
             if (s.length() > max && order.getPriceDiff() > 20.0f) {
