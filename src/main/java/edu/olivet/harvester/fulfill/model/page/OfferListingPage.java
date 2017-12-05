@@ -13,7 +13,7 @@ import edu.olivet.harvester.fulfill.model.SellerEnums;
 import edu.olivet.harvester.fulfill.service.SellerService;
 import edu.olivet.harvester.fulfill.utils.ConditionUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
-import edu.olivet.harvester.fulfill.utils.OrderValidator;
+import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.Remark;
 import edu.olivet.harvester.ui.BuyerPanel;

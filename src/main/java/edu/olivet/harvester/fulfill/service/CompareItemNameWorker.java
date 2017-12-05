@@ -4,6 +4,7 @@ import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.harvester.fulfill.model.ItemCompareResult;
 import edu.olivet.harvester.fulfill.utils.ISBNUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
+import edu.olivet.harvester.fulfill.utils.validation.ItemValidator;
 import edu.olivet.harvester.model.Order;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -38,7 +39,7 @@ public class CompareItemNameWorker extends SwingWorker<List<ItemCompareResult>, 
             }
 
             String itemName = order.item_name.trim();
-            edu.olivet.harvester.fulfill.service.ItemValidator.ValidateReport report = itemValidator.validateItemName(title, itemName);
+            ItemValidator.ValidateReport report = itemValidator.validateItemName(title, itemName);
             results.add(new ItemCompareResult(order, title, report.pass, false, report.toString()));
         }
 

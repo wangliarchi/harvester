@@ -1,4 +1,4 @@
-package edu.olivet.harvester.fulfill.service.flowfactory;
+package edu.olivet.harvester.fulfill.service.flowcontrol;
 
 import com.google.inject.Inject;
 import edu.olivet.harvester.utils.MessageListener;

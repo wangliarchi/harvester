@@ -10,9 +10,9 @@ import edu.olivet.harvester.fulfill.model.page.checkout.OrderReviewOnePage;
 import edu.olivet.harvester.fulfill.model.page.checkout.PaymentMethodOnePage;
 import edu.olivet.harvester.fulfill.model.page.checkout.ShippingAddressOnePage;
 import edu.olivet.harvester.fulfill.service.AddressValidatorService;
-import edu.olivet.harvester.fulfill.service.flowfactory.FlowState;
-import edu.olivet.harvester.fulfill.service.flowfactory.Step;
-import edu.olivet.harvester.fulfill.utils.OrderValidator;
+import edu.olivet.harvester.fulfill.service.flowcontrol.FlowState;
+import edu.olivet.harvester.fulfill.service.flowcontrol.Step;
+import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,4 +1,4 @@
-package edu.olivet.harvester.fulfill.utils;
+package edu.olivet.harvester.fulfill.utils.validation;
 
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.utils.Constants;
@@ -89,7 +89,7 @@ public class Predicates {
      *
      * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Jan 6, 2015 9:11:52 AM
      */
-    static class CategoryPredicate implements Predicate {
+    public static class CategoryPredicate implements Predicate {
         public CategoryPredicate(OrderEnums.Status status) {
             this.status = status;
         }
@@ -108,7 +108,7 @@ public class Predicates {
      *
      * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Jan 6, 2015 9:12:04 AM
      */
-    static class MultiRowPredicate implements Predicate {
+    public static class MultiRowPredicate implements Predicate {
         private Map<Integer, Boolean> rowMap = new HashMap<>();
 
         public MultiRowPredicate(String multiRows) {
@@ -130,7 +130,7 @@ public class Predicates {
      *
      * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Jan 6, 2015 9:12:17 AM
      */
-    static class ScopePredicate implements Predicate {
+    public static class ScopePredicate implements Predicate {
         private final int startRowNo;
         private final int endRowNo;
 
@@ -151,7 +151,7 @@ public class Predicates {
      *
      * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Jan 6, 2015 9:12:04 AM
      */
-    static class SingleRowPredicate implements Predicate {
+    public static class SingleRowPredicate implements Predicate {
         public SingleRowPredicate(int rowNo) {
             this.rowNo = rowNo;
         }

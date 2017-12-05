@@ -1,5 +1,6 @@
 package edu.olivet.harvester.fulfill.utils;
 
+import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.model.Order;
 import org.apache.commons.lang3.StringUtils;
 

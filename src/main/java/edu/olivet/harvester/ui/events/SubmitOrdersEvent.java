@@ -7,7 +7,7 @@ import edu.olivet.harvester.fulfill.OrderSubmitter;
 import edu.olivet.harvester.fulfill.model.FulfillmentEnum;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
-import edu.olivet.harvester.fulfill.utils.RuntimeSettingsValidator;
+import edu.olivet.harvester.fulfill.utils.validation.RuntimeSettingsValidator;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

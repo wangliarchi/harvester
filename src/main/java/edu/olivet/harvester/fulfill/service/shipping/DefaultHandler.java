@@ -10,7 +10,7 @@ import edu.olivet.harvester.fulfill.exception.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.model.ShippingEnums.ShippingSpeed;
 import edu.olivet.harvester.fulfill.model.ShippingOption;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
-import edu.olivet.harvester.fulfill.utils.OrderValidator;
+import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.Remark;
 import edu.olivet.harvester.utils.common.DateFormat;

@@ -1,4 +1,4 @@
-package edu.olivet.harvester.fulfill.utils;
+package edu.olivet.harvester.fulfill.utils.validation;
 
 import com.google.inject.Singleton;
 import edu.olivet.foundations.ui.UIText;

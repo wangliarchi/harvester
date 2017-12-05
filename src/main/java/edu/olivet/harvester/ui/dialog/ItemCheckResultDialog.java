@@ -2,7 +2,7 @@ package edu.olivet.harvester.ui.dialog;
 
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.harvester.fulfill.model.ItemCompareResult;
-import edu.olivet.harvester.fulfill.service.ItemValidator;
+import edu.olivet.harvester.fulfill.utils.validation.ItemValidator;
 import org.apache.commons.collections.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;

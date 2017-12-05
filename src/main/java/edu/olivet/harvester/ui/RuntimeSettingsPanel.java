@@ -12,7 +12,7 @@ import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.DailyBudgetHelper;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.service.ProgressUpdator;
-import edu.olivet.harvester.fulfill.utils.OrderValidator;
+import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.model.OrderEnums.OrderItemType;
 import edu.olivet.harvester.spreadsheet.Worksheet;
