@@ -53,9 +53,8 @@ public class ProfitLostControl {
                 lostLimit = cost * 0.05f;
             }
         }
-
-
         float profit = profit(order, cost);
+
         return profit - lostLimit >= 0;
     }
 

@@ -281,9 +281,14 @@ public class RuntimeSettingsPanel extends JPanel {
                 WaitTime.Shortest.execute();
             }
         }, "PSEventListener");
-
+        psEventListenerThread.start();
     }
 
+    public void resetSkipSetting() {
+        skipCheckComboBox.setSelectedIndex(0);
+        settings.setSkipValidation(OrderValidator.SkipValidation.None);
+        settings.save();
+    }
 
     public void markStatus() {
         new Thread(() -> {
@@ -313,11 +318,7 @@ public class RuntimeSettingsPanel extends JPanel {
             }
         }).start();
 
-        try {
-            psEventListenerThread.start();
-        } catch (Exception e) {
-            //ignore
-        }
+
     }
 
     public void updateBudget() {

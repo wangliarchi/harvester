@@ -27,7 +27,7 @@ public class CheckoutEnum {
         ShippingMethod("#shippingOptionFormId"),
         ShippingMethodOnePage(".a-container.page-container #spc-orders"),
         OrderReview(".checkout.spc"),
-        AmazonPrimeAd("#mom-no-thanks,#checkout-student-signup-form，.prime-nothanks-button"),
+        AmazonPrimeAd("#mom-no-thanks,#checkout-student-signup-form,.prime-nothanks-button,#prime-no-thanks"),
         AmazonPrimeAdAfterPlaceOrderBtnClicked("#prime-piv-steps-container"),
         OrderPlacedSuccessPage("#a-page .a-box.a-alert.a-alert-success"),
         OrderDetailPage("#orderDetails"),

@@ -99,7 +99,7 @@ public class ConditionUtils {
     }
 
     public static boolean goodToGo(String sellerCondition, String actualCondition) {
-        return getConditionLevel(actualCondition) - getConditionLevel(sellerCondition) >= -10;
+        return getConditionLevel(translateCondition(actualCondition)) - getConditionLevel(translateCondition(sellerCondition)) >= -10;
 
     }
 

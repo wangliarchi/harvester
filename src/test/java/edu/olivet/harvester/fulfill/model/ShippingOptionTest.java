@@ -30,6 +30,44 @@ public class ShippingOptionTest {
         assertEquals(Dates.format(shippingOption.getLatestDeliveryDate(), DateFormat.FULL_MONTH_DAY.pattern()), "11/22");
         assertTrue(shippingOption.isExpedited());
 
+        //
+        shippingOption = new ShippingOption("Standardversand (durchschnittlich 7 bis 21 Werktage) : Lieferung zwischen 22. Dezember-23. Januar", "Lieferung zwischen 22. Dezember-23. Januar", "", Country.DE, now.get());
+        assertEquals(shippingOption.getPrice(), null);
+        assertEquals(Dates.format(shippingOption.getLatestDeliveryDate(), DateFormat.FULL_MONTH_DAY.pattern()), "01/23");
+        assertFalse(shippingOption.isExpedited());
+
+        //
+        shippingOption = new ShippingOption("Standard-Versand (8-12 Werktage) : Lieferung 15.-20. Dezember", "Lieferung 15.-20. Dezember", "", Country.DE, now.get());
+        assertEquals(shippingOption.getPrice(), null);
+        assertEquals(Dates.format(shippingOption.getLatestDeliveryDate(), DateFormat.FULL_MONTH_DAY.pattern()), "12/20");
+        assertFalse(shippingOption.isExpedited());
+
+
+        //
+        shippingOption = new ShippingOption("AmazonGlobal Prioritaire - Recevez-le mardi 12 décembre", "- Recevez-le mardi 12 décembre", "", Country.FR, now.get());
+        assertEquals(shippingOption.getPrice(), null);
+        assertEquals(Dates.format(shippingOption.getLatestDeliveryDate(), DateFormat.FULL_MONTH_DAY.pattern()), "12/12");
+        assertTrue(shippingOption.isExpedited());
+
+
+        //
+        shippingOption = new ShippingOption("Expédition standard AmazonGlobal - Recevez-le entre le 16 et le 20 décembre", "- Recevez-le entre le 16 et le 20 décembre", "", Country.FR, now.get());
+        assertEquals(shippingOption.getPrice(), null);
+        assertEquals(Dates.format(shippingOption.getLatestDeliveryDate(), DateFormat.FULL_MONTH_DAY.pattern()), "12/20");
+        assertFalse(shippingOption.isExpedited());
+
+
+        //
+        shippingOption = new ShippingOption("Envío estándar de Amazon Global — recíbelo entre el 21 y el 28 de dic", "— recíbelo entre el 21 y el 28 de dic", "", Country.ES, now.get());
+        assertEquals(shippingOption.getPrice(), null);
+        assertEquals(Dates.format(shippingOption.getLatestDeliveryDate(), DateFormat.FULL_MONTH_DAY.pattern()), "12/28");
+        assertFalse(shippingOption.isExpedited());
+
+        //
+        shippingOption = new ShippingOption("Entrega estándar — recíbelo entre el 3 y el 18 de ene", "— recíbelo entre el 3 y el 18 de ene", "", Country.ES, now.get());
+        assertEquals(shippingOption.getPrice(), null);
+        assertEquals(Dates.format(shippingOption.getLatestDeliveryDate(), DateFormat.FULL_MONTH_DAY.pattern()), "01/18");
+        assertFalse(shippingOption.isExpedited());
 
         shippingOption = new ShippingOption("Standard Delivery : delivered by Dec. 20-22", "delivered by Dec. 20-22", "", Country.UK, now.get());
         assertEquals(shippingOption.getPrice(), null);

@@ -45,7 +45,11 @@ public class ShippingOption {
         this.fullText = fullText;
         estimatedDeliveryDate = eddText;
         title = priceText;
-        latestDeliveryDate = parseEDD(eddText, country);
+        try {
+            latestDeliveryDate = parseEDD(eddText, country);
+        } catch (Exception e) {
+            latestDeliveryDate = parseEDD(fullText, country);
+        }
         price = parsePrice(priceText, country);
         shippingSpeed = ShippingSpeed.get(fullText);
 
@@ -86,7 +90,7 @@ public class ShippingOption {
     //FREE Two-Day Shipping
     //$3.99 - Standard Shipping
     public Money parsePrice(String priceText, Country country) {
-        if (Strings.containsAnyIgnoreCase(fullText, "free")) {
+        if (Strings.containsAnyIgnoreCase(fullText, "free ", "GRATUIT", "frei ", "gratis ", "gratuito ")) {
             return new Money(0f, country);
         }
         if (StringUtils.isBlank(priceText)) {
@@ -105,7 +109,7 @@ public class ShippingOption {
     //Friday, Nov. 17 - Monday, Nov. 27
     //Monday, Nov. 13, Standard-Shipping --get it Dec 4 - 5
     public Date parseEDD(String eddText, Country country) {
-        List<String> formatPatterns = Lists.newArrayList("EEEE MMM dd", "MMM dd");
+        List<String> formatPatterns = Lists.newArrayList("MMM dd", "dd MMM");
 
         String[] eddParts = StringUtils.split(eddText, ",");
         ArrayUtils.reverse(eddParts);
@@ -120,12 +124,20 @@ public class ShippingOption {
                 dateString = StringUtils.join(Arrays.copyOf(dateStringParts, dateStringParts.length - 1), " ") + " " + parts[parts.length - 1].trim();
             }
 
-            dateString = dateString.replaceAll("[^A-Za-z0-9 ]", "").trim();
+            dateString = dateString.replaceAll("[^\\p{L}\\p{Nd} ]+", "").trim();
+            dateString = dateString.replace(" de ", " ");
 
             String[] dateStringParts = dateString.split(" ");
             List<String> list = Lists.newArrayList(dateStringParts);
             list.removeIf(it -> StringUtils.isBlank(it));
+
             dateString = list.get(list.size() - 2) + " " + list.get(list.size() - 1);
+            index = 3;
+            while (!RegexUtils.match(dateString, ".*\\d+.*") && list.size() >= index) {
+                dateString = list.get(list.size() - index) + " " + dateString;
+                index++;
+            }
+
 
             for (String pattern : formatPatterns) {
                 SimpleDateFormat dateFormat = new SimpleDateFormat(pattern, country.locale());
@@ -142,12 +154,13 @@ public class ShippingOption {
                     date = c.getTime();
                     return date;
                 } catch (ParseException e) {
+                    //LOGGER.error("", e);
                     //ingore
                     //throw new BusinessException(e);
                 }
             }
 
-            if (Strings.containsAnyIgnoreCase(part.toLowerCase(), "days", "Werktage", "lavorativi", "ouvrés", "días")) {
+            if (Strings.containsAnyIgnoreCase(part.toLowerCase(), "days", "Werktage", "lavorativi", "ouvrés", "días", "jours", "Tage", "dias", "giorni")) {
                 try {
                     String[] dayParts = StringUtils.split(part, "-");
                     String daysString = dayParts[dayParts.length - 1].trim();

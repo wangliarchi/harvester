@@ -140,12 +140,16 @@ public class StepHelper {
         Browser browser = state.getBuyerPanel().getBrowserView().getBrowser();
 
         for (int i = 0; i <= 10; i++) {
-            browser = state.getBuyerPanel().getBrowserView().getBrowser();
-            CheckoutPage page = CheckoutPage.detectPage(browser);
-            if (page != null) {
-                return page;
+            try {
+                browser = state.getBuyerPanel().getBrowserView().getBrowser();
+                CheckoutPage page = CheckoutPage.detectPage(browser);
+                if (page != null) {
+                    return page;
+                }
+                WaitTime.Short.execute();
+            } catch (Exception e) {
+                //
             }
-            WaitTime.Short.execute();
 
         }
 

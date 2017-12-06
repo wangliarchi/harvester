@@ -182,7 +182,7 @@ public class OrderManAddressValidator implements AddressValidator {
             Arrays.sort(arr1);
             Arrays.sort(arr2);
             // 顺序打乱，但所有字符排序后拼接起来完全一致，也视为相同
-            if (new String(arr1).equals(new String(arr2))) {
+            if (new String(arr1).equalsIgnoreCase(new String(arr2))) {
                 return null;
             }
 
@@ -213,10 +213,10 @@ public class OrderManAddressValidator implements AddressValidator {
      * @return 校验结果
      */
     public String compareCountry(String country1, String country2) {
-        if (!country1.equals(country2)) {
+        if (!country1.equalsIgnoreCase(country2)) {
             String code1 = CountryStateUtils.getInstance().getCountryCode(country1);
             String code2 = CountryStateUtils.getInstance().getCountryCode(country2);
-            if (!code1.equals(code2)) {
+            if (!code1.equalsIgnoreCase(code2)) {
                 return UIText.message("error.addr.country", country1, code1, country2, code2);
             }
         }
@@ -238,7 +238,7 @@ public class OrderManAddressValidator implements AddressValidator {
             String[] arr2 = StringUtils.splitPreserveAllTokens(zip2, Constants.HYPHEN);
             String _zip1 = arr1.length > 0 ? arr1[0] : StringUtils.EMPTY;
             String _zip2 = arr2.length > 0 ? arr2[0] : StringUtils.EMPTY;
-            if (!_zip1.equals(_zip2)) {
+            if (!_zip1.equalsIgnoreCase(_zip2)) {
                 return UIText.message("error.addr.zip", zip1, zip2);
             }
         }
@@ -271,7 +271,7 @@ public class OrderManAddressValidator implements AddressValidator {
         String orStateZip = (old.getFullStateName() + old.getZip()).replace(StringUtils.SPACE, StringUtils.EMPTY).toLowerCase();
         String stateZip = (entered.getFullStateName() + entered.getZip()).replace(StringUtils.SPACE, StringUtils.EMPTY).toLowerCase();
         // 如果州名和邮政编码连接一起的结果不等同，或互不包含(存在一些情况州名会亚马逊自动去掉了)，再分解检查
-        if (!orStateZip.equals(stateZip) && !orStateZip.contains(stateZip) && !stateZip.contains(orStateZip)) {
+        if (!orStateZip.equalsIgnoreCase(stateZip) && !orStateZip.contains(stateZip) && !stateZip.contains(orStateZip)) {
             String result = this.compareZipCode(old.getZip(), entered.getZip());
             if (StringUtils.isNotBlank(result)) {
                 results.add(result);

@@ -565,8 +565,8 @@ public class OrderValidator {
         if (StringUtils.isBlank(order.url) || order.url.length() <= 3) {
             return "";
         }
-        String prefix = String.format("%s/%s/%s", RuntimeSettings.load().getFinderCode(), order.sheetName, order.getContext());
-        if (!order.url.startsWith(prefix)) {
+        String prefix = String.format("%s/%s", order.sheetName, RuntimeSettings.load().getSid());
+        if (!order.url.contains(prefix)) {
             return "Order url is invalid. current is '" + order.url + "', should be '" + prefix + "xxx'";
         }
 

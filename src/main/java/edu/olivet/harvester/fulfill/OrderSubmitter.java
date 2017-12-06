@@ -28,6 +28,7 @@ import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.service.OrderService;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.BuyerPanel;
+import edu.olivet.harvester.ui.RuntimeSettingsPanel;
 import edu.olivet.harvester.ui.TabbedBuyerPanel;
 import edu.olivet.harvester.ui.dialog.ItemCheckResultDialog;
 import edu.olivet.harvester.utils.MessageListener;
@@ -74,7 +75,7 @@ public class OrderSubmitter {
 
     private static final Map<String, Boolean> DUPLICATION_CHECK_CACHE = new HashMap<>();
 
-    private static final List<Country> SUPPORTED_MARKETPLACES = Lists.newArrayList(Country.US, Country.CA, Country.UK);
+    private static final List<Country> SUPPORTED_MARKETPLACES = Lists.newArrayList(Country.US, Country.CA, Country.UK, Country.DE, Country.FR, Country.ES, Country.IT);
 
     public void execute(RuntimeSettings settings) {
         messageListener.empty();
@@ -196,6 +197,8 @@ public class OrderSubmitter {
                 messageListener.addMsg(order, e.getMessage(), InformationLevel.Negative);
             }
         }
+
+        RuntimeSettingsPanel.getInstance().resetSkipSetting();
 
         StatisticLogger.log(String.format("%s\t%s", ProgressUpdator.toTable(), Strings.formatElapsedTime(start)));
 

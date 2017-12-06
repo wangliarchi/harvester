@@ -68,7 +68,7 @@ public class DefaultHandler implements ShippingHandler {
         DateTime start = new DateTime(orderEdd.getTime());
 
         List<ShippingOption> validShippingOptions = shippingOptions.stream().filter(it -> {
-            if (Strings.containsAnyIgnoreCase(it.getFullText().toLowerCase(), "trial")) {
+            if (Strings.containsAnyIgnoreCase(it.getFullText().toLowerCase(), "trial", "prueba", "Kostenlose Testphase", "l'essai")) {
                 return false;
             }
 
@@ -87,7 +87,10 @@ public class DefaultHandler implements ShippingHandler {
         if (CollectionUtils.isEmpty(validShippingOptions)) {
             Date latestDate = shippingOptions.get(0).getLatestDeliveryDate();
             int days = Math.abs(Dates.daysBetween(latestDate, orderEdd));
-            throw new OrderSubmissionException("No shipping option available. Earliest EDD is " + Dates.format(latestDate, DateFormat.US_FEEDBACK_DATE.pattern()) + ", order EDD is " + Dates.format(order.latestEdd(), DateFormat.US_FEEDBACK_DATE.pattern()) + ", exceed order EDD " + days + " days");
+            throw new OrderSubmissionException("No shipping option available. Earliest EDD is " +
+                    Dates.format(latestDate, DateFormat.US_FEEDBACK_DATE.pattern()) + ", order EDD is " +
+                    Dates.format(order.latestEdd(), DateFormat.US_FEEDBACK_DATE.pattern()) +
+                    ", exceed order EDD " + days + " days");
         }
 
         return validShippingOptions;

@@ -54,11 +54,14 @@ public class ShipOptionUtils {
             index++;
             String eddText;
             String priceText;
+            String fullTxt = option.getInnerText().trim();
+
             try {
                 eddText = JXBrowserHelper.selectElementByCssSelector(option, ".a-color-success").getInnerText().trim();
             } catch (Exception e) {
-                LOGGER.error("Error fetch shipping option edd {}", option.getInnerHTML());
-                continue;
+//                LOGGER.error("Error fetch shipping option edd {}", option.getInnerHTML());
+//                continue;
+                eddText = fullTxt;
             }
             try {
                 priceText = JXBrowserHelper.selectElementByCssSelector(option, ".a-color-secondary").getInnerText().trim();
@@ -69,7 +72,6 @@ public class ShipOptionUtils {
                 //continue;
             }
 
-            String fullTxt = option.getInnerText().trim();
 
             try {
                 ShippingOption shippingOption = new ShippingOption(fullTxt, eddText, priceText, country);

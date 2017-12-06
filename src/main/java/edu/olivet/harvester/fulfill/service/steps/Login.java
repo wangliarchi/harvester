@@ -33,16 +33,19 @@ public class Login extends Step {
     StepHelper stepHelper;
 
     public Step createDynamicInstance(FlowState state) {
+        Step prevStep = state.getPrevStep();
         state.setPrevStep(this);
 
-        if (this.prevStep != null && this.prevStep.stepName.equals(ProcessToCheckout.class.getName())) {
-            return processToCheckout;
-        }
+        if (prevStep != null && !prevStep.stepName.equalsIgnoreCase(stepName)) {
 
-        if (this.prevStep != null && this.prevStep.stepName.equals(Checkout.class.getName())) {
-            return processToCheckout;
-        }
-        if (this.prevStep != null) {
+            if (prevStep.stepName.equals(ProcessToCheckout.class.getName())) {
+                return processToCheckout;
+            }
+
+            if (prevStep.stepName.equals(Checkout.class.getName())) {
+                return processToCheckout;
+            }
+
             return stepHelper.detectStep(state);
         }
         //check if there are items in cart

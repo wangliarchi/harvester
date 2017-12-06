@@ -19,7 +19,7 @@ public class AmazonPrimeAdPage extends FulfillmentPage implements PageObject {
     }
 
     private final List<String> linkSelectors = Lists.newArrayList(".prime-nothanks-button", "#mom-no-thanks",
-            ".prime-popover-actions button.primary");
+            ".prime-popover-actions button.primary","#prime-no-thanks");
 
     @Override
     public void execute(Order order) {

@@ -174,8 +174,8 @@ public class Address {
         }
         //todo State full and abbr
         return sameAddressLines &&
-                StringUtils.equalsIgnoreCase(city, address.getCity()) &&
-                StringUtils.equalsIgnoreCase(state, address.getState()) &&
+                //StringUtils.equalsIgnoreCase(city, address.getCity()) &&
+                StringUtils.equalsIgnoreCase(getState(), address.getState()) &&
                 sameCountry &&
                 StringUtils.equalsIgnoreCase(getZip5(), address.getZip5());
     }
@@ -215,7 +215,7 @@ public class Address {
 
     @Override
     public String toString() {
-        return name + (StringUtils.isNotBlank(address1) ? ", " + address1 : "") + (StringUtils.isNotBlank(address2) ? ", " + address2 : "") + ", " + city + ", " + state + " " + getZip() + ", " + country;
+        return getRecipient() + (StringUtils.isNotBlank(address1) ? ", " + address1 : "") + (StringUtils.isNotBlank(address2) ? ", " + address2 : "") + ", " + city + ", " + state + " " + getZip() + ", " + country;
     }
 
     public String withouName() {

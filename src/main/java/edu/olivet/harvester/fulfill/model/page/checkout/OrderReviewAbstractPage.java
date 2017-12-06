@@ -1,5 +1,6 @@
 package edu.olivet.harvester.fulfill.model.page.checkout;
 
+import com.google.common.collect.Lists;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
@@ -33,6 +34,7 @@ import java.util.List;
 public abstract class OrderReviewAbstractPage extends FulfillmentPage {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderReviewAbstractPage.class);
+    private static final List<String> SHIPPING_KEYWORDS = Lists.newArrayList("Shipping", "packing", "Verpackung", "Livraison", "Envío", "spedizione");
 
     OrderReviewAbstractPage(BuyerPanel buyerPanel) {
         super(buyerPanel);
@@ -44,7 +46,9 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         Money grandTotal = parseTotal();
 
         if (!ProfitLostControl.canPlaceOrder(order, grandTotal.toUSDAmount().floatValue())) {
-            throw new OrderSubmissionException("Order cost exceed maximum limit.");
+            throw new OrderSubmissionException("Order cost exceed maximum limit. Seller price" + order.getSellerPrice() +
+                    ", shipping " + order.shippingCost + ", total " + order.getOrderTotalCost() + ", " +
+                    order.getOrderTotalCost().toUSDAmount().toPlainString() + "USD");
         }
 
         RuntimeSettings settings = RuntimeSettings.load();
@@ -78,7 +82,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         List<DOMElement> trs = JXBrowserHelper.selectElementsByCssSelector(browser, "#subtotals-marketplace-table tr");
         Money shippingCost = null;
         for (DOMElement tr : trs) {
-            if (Strings.containsAnyIgnoreCase(tr.getInnerText(), "Shipping", "packing")) {
+            if (Strings.containsAnyIgnoreCase(tr.getInnerText(), SHIPPING_KEYWORDS.toArray(new String[SHIPPING_KEYWORDS.size()]))) {
                 try {
                     String shippingCostString = JXBrowserHelper.text(tr, ".a-text-right");
                     shippingCost = Money.fromText(shippingCostString, buyerPanel.getCountry());

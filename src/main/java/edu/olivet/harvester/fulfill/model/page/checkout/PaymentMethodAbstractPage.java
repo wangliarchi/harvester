@@ -84,6 +84,12 @@ public abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract 
 
             WaitTime.Shortest.execute();
 
+            DOMElement cvvField = JXBrowserHelper.selectElementByCssSelector(paymentRow, "#addCreditCardVerificationNumber");
+            if (cvvField != null) {
+                JXBrowserHelper.fillValueForFormField(paymentRow, "#addCreditCardVerificationNumber", creditCard.getCvv());
+                WaitTime.Shortest.execute();
+            }
+
             confirmCardBtn.click();
 
             WaitTime.Shortest.execute();
