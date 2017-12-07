@@ -262,6 +262,9 @@ public class ConfirmShipments {
 
         try {
             result = submitFeed(feedFile, country);
+            if(StringUtils.isBlank(result)) {
+                throw new BusinessException("No result returned.");
+            }
         } catch (Exception e) {
             errorAlertService.sendMessage("Error when submitting order confirmation feed file via MWS.",
                     e.getMessage(), country, feedFile);
@@ -368,16 +371,18 @@ public class ConfirmShipments {
         messagePanel.displayMsg("Feed submitted to Amazon... It may take few minutes for Amazon to process.");
 
         String result = "";
+        String error = "";
         if (country.europe()) {
             for (Country c : Country.EURO) {
                 try {
                     result = _submitFeed(feedFile, c);
-                    LOGGER.debug("order confirmation result {}",result);
+                    LOGGER.debug("order confirmation result {}", result);
                     if (!Strings.containsAnyIgnoreCase(result.toLowerCase(), "rejected", "denied")) {
                         break;
                     }
                 } catch (Exception e) {
-                    LOGGER.error("Order confirmation submission error {}",e.getMessage());
+                    error = "Order confirmation submission error " + e.getMessage();
+                    LOGGER.error("Order confirmation submission error {}", e);
                     if (!Strings.containsAnyIgnoreCase(e.getMessage().toLowerCase(), "rejected", "denied")) {
                         break;
                     }
@@ -387,17 +392,21 @@ public class ConfirmShipments {
             result = _submitFeed(feedFile, country);
         }
 
-
-        messagePanel.wrapLineMsg("Feed has been submitted successfully. " + result, LOGGER, InformationLevel.Important);
+        if (StringUtils.isNotBlank(error)) {
+            messagePanel.wrapLineMsg(error, LOGGER, InformationLevel.Negative);
+        } else {
+            messagePanel.wrapLineMsg("Feed has been submitted successfully. " + result, LOGGER, InformationLevel.Important);
+        }
 
         return result;
 
 
     }
 
+    @Repeat(expectedExceptions = BusinessException.class)
     public String _submitFeed(File feedFile, Country country) {
         MarketWebServiceIdentity credential;
-        if(country.europe()) {
+        if (country.europe()) {
             credential = Settings.load().getConfigByCountry(Country.UK).getMwsCredential();
             credential.setMarketPlaceId(country.marketPlaceId());
         } else {
@@ -606,7 +615,7 @@ public class ConfirmShipments {
             }
         }
 
-        //wait for 2 mininues, then check unshipped orders.
+        //wait for 2 minutes, then check unshipped orders.
         Tools.sleep(2, TimeUnit.MINUTES);
         notConfirmedOrderNotification();
 
