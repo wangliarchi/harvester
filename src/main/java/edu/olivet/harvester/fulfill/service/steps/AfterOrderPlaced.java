@@ -1,10 +1,15 @@
 package edu.olivet.harvester.fulfill.service.steps;
 
 import com.google.inject.Inject;
+import edu.olivet.foundations.aop.Repeat;
+import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.harvester.fulfill.model.page.checkout.OrderPlacedSuccessPage;
+import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
+import edu.olivet.harvester.fulfill.service.SheetService;
 import edu.olivet.harvester.fulfill.service.StepHelper;
 import edu.olivet.harvester.fulfill.service.flowcontrol.FlowState;
 import edu.olivet.harvester.fulfill.service.flowcontrol.Step;
+import edu.olivet.harvester.model.Order;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +29,15 @@ public class AfterOrderPlaced extends Step {
             LOGGER.error("",e);
         }
 
+        //fill data back to google sheet
+        new Thread(() -> {
+            try {
+                updateInfoToOrderSheet(RuntimeSettings.load().getSpreadsheetId(), state.getOrder());
+            } catch (Exception e) {
+                LOGGER.error("Failed to update order fulfillment info to order update sheet", e);
+            }
+        }).start();
+
     }
 
     @Inject StepHelper stepHelper;
@@ -33,5 +47,10 @@ public class AfterOrderPlaced extends Step {
         return stepHelper.detectStep(state);
     }
 
+    @Inject SheetService sheetService;
+    @Repeat(expectedExceptions = BusinessException.class)
+    private void updateInfoToOrderSheet(String spreadsheetId, Order order) {
+        sheetService.fillFulfillmentOrderInfo(spreadsheetId, order);
+    }
 
 }

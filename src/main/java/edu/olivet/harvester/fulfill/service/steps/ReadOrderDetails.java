@@ -49,30 +49,29 @@ public class ReadOrderDetails extends Step {
             //return;
         }
 
-        RuntimeSettings settings = RuntimeSettings.load();
-        //fill data back to google sheet
-        try {
-            updateInfoToOrderSheet(settings.getSpreadsheetId(), order);
-        } catch (Exception e) {
-            LOGGER.error("Failed to update order fulfillment info to order update sheet", e);
-        }
-        try {
-            saveToDB(order);
-        } catch (Exception e) {
-            LOGGER.error("Failed to save order fulfillment info into database.", e);
-        }
+        new Thread(() -> {
+            try {
+                saveToDB(order);
+            } catch (Exception e) {
+                LOGGER.error("Failed to save order fulfillment info into database.", e);
+            }
+        }).start();
 
-        try {
-            updateSpending(settings.getSpreadsheetId(), order);
-        } catch (Exception e) {
-            LOGGER.error("Failed to update spending.", e);
-        }
+        new Thread(() -> {
+            try {
+                updateSpending(RuntimeSettings.load().getSpreadsheetId(), order);
+            } catch (Exception e) {
+                LOGGER.error("Failed to update spending.", e);
+            }
+        }).start();
 
-        try {
-            SuccessLogger.log(order);
-        } catch (Exception e) {
-            //ignore
-        }
+        new Thread(() -> {
+            try {
+                SuccessLogger.log(order);
+            } catch (Exception e) {
+                //ignore
+            }
+        }).start();
     }
 
     @Inject
@@ -90,10 +89,7 @@ public class ReadOrderDetails extends Step {
         placedOrderDetailPage.execute(state.getOrder());
     }
 
-    @Repeat(expectedExceptions = BusinessException.class)
-    private void updateInfoToOrderSheet(String spreadsheetId, Order order) {
-        sheetService.fillFulfillmentOrderInfo(spreadsheetId, order);
-    }
+
 
     @Repeat(expectedExceptions = BusinessException.class)
     private void saveToDB(Order order) {
