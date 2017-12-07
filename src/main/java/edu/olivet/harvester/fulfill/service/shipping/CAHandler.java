@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 /**
  * <pre>
  * 加拿大运输方式选择处理:
- * CA目前都只有普递，加拿大直寄或者国际的 都选择普递，如果有free shiping选择free shiping
+ * CA目前都只有普递，加拿大直寄或者国际的 都选择普递，如果有free shipping选择free shipping
  * 运费上限国内单10加元，国际单20加元
  *
  * CA产品转运 - ca直寄
@@ -29,8 +29,6 @@ import java.util.stream.Collectors;
  */
 @Singleton
 public class CAHandler extends DefaultHandler implements ShippingHandler {
-
-    public static final DecimalFormat DOUBLE_FORMAT = new DecimalFormat("0.00");
 
     private static final CAHandler instance = new CAHandler();
 
@@ -52,10 +50,10 @@ public class CAHandler extends DefaultHandler implements ShippingHandler {
             validOptions.removeIf(it -> !it.isExpedited());
         }
 
-        List<ShippingOption> freeShippings = validOptions.stream().filter(it -> it.isFree()).collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(freeShippings)) {
-            freeShippings.sort(Comparator.comparing(ShippingOption::getLatestDeliveryDate));
-            return freeShippings.get(0);
+        List<ShippingOption> freeShippingOptions = validOptions.stream().filter(ShippingOption::isFree).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(freeShippingOptions)) {
+            freeShippingOptions.sort(Comparator.comparing(ShippingOption::getLatestDeliveryDate));
+            return freeShippingOptions.get(0);
         }
 
         ShippingSpeed shippingSpeed = determineFinalSpeed(order);

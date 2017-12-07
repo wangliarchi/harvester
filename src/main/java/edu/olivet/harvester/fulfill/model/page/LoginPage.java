@@ -70,8 +70,11 @@ public class LoginPage extends FulfillmentPage implements PageObject {
         }
 
         DOMElement email = JXBrowserHelper.selectElementByCssSelector(browser, EMAIL_SELECTOR);
-        ((DOMFormControlElement) email).setValue(buyer.getEmail());
-        WaitTime.Shortest.execute();
+        if (email != null) {
+            //noinspection ConstantConditions
+            ((DOMFormControlElement) email).setValue(buyer.getEmail());
+            WaitTime.Shortest.execute();
+        }
 
         //amazon sometimes split login process into 2 pages, one page to enter email and next page to enter pw.
         DOMElement continueBtn = JXBrowserHelper.selectElementByCssSelector(browser, CONTINUE_BTN_SELECTOR);
@@ -81,8 +84,8 @@ public class LoginPage extends FulfillmentPage implements PageObject {
             JXBrowserHelper.waitUntilNewPageLoaded(browser);
         }
 
-        DOMElement pawssword = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, PASSWORD_SELECTOR);
-        ((DOMFormControlElement) pawssword).setValue(buyer.getPassword());
+        DOMElement password = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, PASSWORD_SELECTOR);
+        ((DOMFormControlElement) password).setValue(buyer.getPassword());
         WaitTime.Shortest.execute();
 
 
@@ -93,26 +96,20 @@ public class LoginPage extends FulfillmentPage implements PageObject {
         }
 
         JXBrowserHelper.insertChecker(browser);
-        Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> ((DOMFormControlElement) pawssword).getForm().submit());
+        Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> ((DOMFormControlElement) password).getForm().submit());
         JXBrowserHelper.waitUntilNewPageLoaded(browser);
-
-//        if (StringUtils.containsIgnoreCase(browser.getURL(), AmazonPage.Login.urlMark())) {
-//            JXBrowserHelper.saveOrderScreenshot(order,buyerPanel,"1");
-//            throw new BusinessException("Error while logging in");
-//        }
 
         //check if verification code is requested
         DOMElement codeRequested = JXBrowserHelper.selectElementByName(browser, "claimspicker");
-        if (codeRequested != null) {
-            JXBrowserHelper.selectElementByCssSelector(browser, "#continue").click();
+        DOMElement continueButton = JXBrowserHelper.selectElementByCssSelector(browser, "#continue");
+        if (codeRequested != null && continueButton != null) {
+            continueBtn.click();
             WaitTime.Shortest.execute();
             enterVerificationCode();
             WaitTime.Shortest.execute();
         }
 
-
         LOGGER.info("{} logged in successfully, now at {} -> {}, took {}", country.name(), browser.getTitle(), browser.getURL(), Strings.formatElapsedTime(start));
-
     }
 
     @Repeat

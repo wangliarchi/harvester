@@ -43,7 +43,7 @@ public class ForbiddenSeller extends AppScript {
     }
 
     public List<String> load(Country country) {
-        List<String> forbiddens = new ArrayList<>();
+        List<String> forbiddenSellers = new ArrayList<>();
         File localFile = new File(Directory.Customize.path() + File.separator + Config.ForbiddenSellers.fileName());
         String json;
         if (!localFile.exists()) {
@@ -58,13 +58,13 @@ public class ForbiddenSeller extends AppScript {
         for (JSONObject object : regions) {
             String countryCode = object.get("country").toString();
             if (country.name().equalsIgnoreCase(countryCode) || (country.europe() && "eu".equalsIgnoreCase(countryCode))) {
-                forbiddens.addAll(object.getJSONArray("ids").stream().filter(it -> StringUtils.isNotBlank(it.toString())).map(it -> it.toString().toLowerCase()).collect(Collectors.toList()));
-                forbiddens.addAll(object.getJSONArray("names").stream().filter(it -> StringUtils.isNotBlank(it.toString())).map(it -> it.toString().toLowerCase()).collect(Collectors.toList()));
+                forbiddenSellers.addAll(object.getJSONArray("ids").stream().filter(it -> StringUtils.isNotBlank(it.toString())).map(it -> it.toString().toLowerCase()).collect(Collectors.toList()));
+                forbiddenSellers.addAll(object.getJSONArray("names").stream().filter(it -> StringUtils.isNotBlank(it.toString())).map(it -> it.toString().toLowerCase()).collect(Collectors.toList()));
                 break;
             }
         }
 
-        return forbiddens;
+        return forbiddenSellers;
     }
 
     public String get() {

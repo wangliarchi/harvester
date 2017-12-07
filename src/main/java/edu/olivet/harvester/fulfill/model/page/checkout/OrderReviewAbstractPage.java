@@ -116,7 +116,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
             return Money.fromText(grandTotalText, buyerPanel.getCountry());
         } catch (Exception e) {
             LOGGER.error("Error reading grand total. ", e);
-            throw new BusinessException("Cannt read grand total - " + e.getMessage());
+            throw new BusinessException("Can not read grand total - " + e.getMessage());
         }
 
     }

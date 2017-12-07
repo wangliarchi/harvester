@@ -32,7 +32,7 @@ public class ConfirmShipmentEvent implements HarvesterUIEvent {
     @Inject
     private AppScript appScript;
 
-    public void excute() {
+    public void execute() {
         long start = System.currentTimeMillis();
 
         LOGGER.info("Confirm shipment button clicked");

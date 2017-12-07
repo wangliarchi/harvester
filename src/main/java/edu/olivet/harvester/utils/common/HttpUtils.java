@@ -158,8 +158,8 @@ public class HttpUtils {
     /**
      * 准备一个{@link HttpGet}实例
      */
-    public static HttpGet prepareHttpGet(String url) {
-        HttpGet get = new HttpGet(url);
+    public static HttpGet prepareHttpGet(String urlString) {
+        HttpGet get = new HttpGet(urlString);
         get.addHeader("Connection", "keep-alive");
         get.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
         get.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36");
@@ -167,10 +167,10 @@ public class HttpUtils {
         get.addHeader("Accept-Language", "en-US,en;q=0.8");
         get.addHeader("Cache-Control", "max-age=0");
         try {
-            URL _url = new URL(url);
-            get.addHeader("Host", _url.getHost());
+            URL url = new URL(urlString);
+            get.addHeader("Host", url.getHost());
         } catch (MalformedURLException ex) {
-            logger.error("访问url获取对应HTML代码时出错。原因：非法url:{}", url);
+            logger.error("访问url获取对应HTML代码时出错。原因：非法url:{}", urlString);
             throw Lang.wrapThrow(ex);
         }
         return get;

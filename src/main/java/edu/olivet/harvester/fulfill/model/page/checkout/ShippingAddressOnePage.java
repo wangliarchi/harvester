@@ -29,9 +29,6 @@ public class ShippingAddressOnePage extends ShippingAddressAbstract {
         DOMElement changeAddressLink = JXBrowserHelper.selectElementByCssSelector(browser, "#addressChangeLinkId");
         if (changeAddressLink != null) {
             JXBrowserHelper.click(changeAddressLink);
-//            changeAddressLink.click();
-//            WaitTime.Shortest.execute();
-//            JXBrowserHelper.waitUntilNotFound(browser, "#addressChangeLinkId");
         }
 
         DOMElement newAddressLink = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, NEW_ADDRESS_SELECTOR);
@@ -44,7 +41,7 @@ public class ShippingAddressOnePage extends ShippingAddressAbstract {
 
         //amazon may pop up address verification after clicking "use this address" btn, use user's original input by default.
         int tried = 0;
-        while (true && tried <= Constants.MAX_REPEAT_TIMES) {
+        while (tried <= Constants.MAX_REPEAT_TIMES) {
             tried++;
             DOMElement useThisAddressBtn = JXBrowserHelper.selectVisibleElement(browser, ".a-popover-footer .a-button-primary .a-button-input");
 
@@ -62,9 +59,9 @@ public class ShippingAddressOnePage extends ShippingAddressAbstract {
             WaitTime.Shortest.execute();
         }
         if (JXBrowserHelper.selectVisibleElement(browser, ".a-popover-footer .a-button-primary .a-button-input") != null) {
-            JXBrowserHelper.saveOrderScreenshot(order,buyerPanel,"1");
+            JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
             throw new BusinessException("Error to enter shipping address " + Address.loadFromOrder(order));
-        }//JXBrowserHelper.wait(browser, By.cssSelector("#addressChangeLinkId"));
+        }
 
 
     }

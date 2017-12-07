@@ -19,7 +19,7 @@ public class OrderSubmissionLogEvent implements HarvesterUIEvent {
     private DBManager dbManager;
 
     @Override
-    public void excute() {
+    public void execute() {
         List<OrderFulfillmentRecord> list = dbManager.query(OrderFulfillmentRecord.class,
                 Cnd.where("orderId", "!=", "").desc("fulfillDate"));
         ListModel<OrderFulfillmentRecord> dialog = new ListModel<>(Actions.OrderSubmissionLog.label(), list, OrderFulfillmentRecord.COLUMNS, null, OrderFulfillmentRecord.WIDTHS);

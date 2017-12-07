@@ -24,6 +24,7 @@ public class ReviewOrderMultiPage extends Step {
     AddressValidatorService addressValidator;
 
     //dispatcher method
+    @SuppressWarnings("Duplicates")
     protected void process(FlowState state) {
         OrderReviewMultiPage orderReviewMultiPage = new OrderReviewMultiPage(state.getBuyerPanel());
 

@@ -39,16 +39,16 @@ public class MarkStatusService {
     @Inject
     MessageListener messageListener;
 
-    public void excute() {
+    public void execute() {
         RuntimeSettings settings = RuntimeSettings.load();
-        excute(settings);
+        execute(settings);
     }
 
-    public void excute(RuntimeSettings settings) {
-        excute(settings, true);
+    public void execute(RuntimeSettings settings) {
+        execute(settings, true);
     }
 
-    public void excute(RuntimeSettings settings, boolean showErrorMsg) {
+    public void execute(RuntimeSettings settings, boolean showErrorMsg) {
 
         long start = System.currentTimeMillis();
         List<Order> orders = appScript.readOrders(settings);

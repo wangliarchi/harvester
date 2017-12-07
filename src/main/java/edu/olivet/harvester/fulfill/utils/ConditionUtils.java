@@ -19,8 +19,6 @@ import java.util.Map;
 public class ConditionUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConditionUtils.class);
 
-    private static Map<String, String> conditionI18N;
-
 
     public enum Condition {
         New("New"),
@@ -45,8 +43,6 @@ public class ConditionUtils {
 
         /**
          * 根据baseCondition判定是否为Used
-         *
-         * @param baseCondition
          */
         public static boolean used(String baseCondition) {
             return Condition.Used.name().equalsIgnoreCase(baseCondition) ||
@@ -56,7 +52,7 @@ public class ConditionUtils {
     }
 
     public static String translateCondition(String str) {
-        conditionI18N = Configs.load("conditions.properties", Configs.KeyCase.LowerCase);
+        Map<String, String> conditionI18N = Configs.load("conditions.properties", Configs.KeyCase.LowerCase);
 
         String translated = conditionI18N.get(str.toLowerCase());
         if (translated == null) {
@@ -81,7 +77,7 @@ public class ConditionUtils {
      *
      * @param condition 订单产品的condition字符串
      */
-    public static String getMasterCondtion(String condition) {
+    public static String getMasterCondition(String condition) {
 
         if (StringUtils.isBlank(condition)) {
             throw new IllegalArgumentException(UIText.message("error.condition.missing"));
@@ -105,8 +101,8 @@ public class ConditionUtils {
 
     public static int getConditionLevel(String cond) {
         String str = cond.replace("-", StringUtils.EMPTY).replace(StringUtils.SPACE, StringUtils.EMPTY).toLowerCase();
-        Map<String, String> conditionLvls = Configs.load(Config.ConditionLevel.fileName());
-        String lvl = conditionLvls.get(str);
+        Map<String, String> conditionLevels = Configs.load(Config.ConditionLevel.fileName());
+        String lvl = conditionLevels.get(str);
         if (lvl == null) {
             throw new BusinessException(UIText.message("error.condition.invalid", cond));
         }

@@ -74,6 +74,7 @@ public class OrderManAddressValidator implements AddressValidator {
             String finalAddr = applyRule2Addr(entered.toString());
 
             if (!finalOrAddr.equals(finalAddr)) {
+                //noinspection deprecation
                 double similarity = StringUtils.getJaroWinklerDistance(finalOrAddr, finalAddr);
                 if (similarity < MIN_SIMILARITY) {
                     String msg = "OrderMan Address failed verification. Entered " + entered + ", original " + old + ", Addresses after rules applied " + finalOrAddr + ", " + finalAddr;
@@ -257,7 +258,7 @@ public class OrderManAddressValidator implements AddressValidator {
         String _city1 = city1.replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY).toLowerCase();
         String _city2 = city2.replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY).toLowerCase();
         if (!_city1.equals(_city2)) {
-            double similarity = StringUtils.getJaroWinklerDistance(_city1, _city2);
+            @SuppressWarnings("deprecation") double similarity = StringUtils.getJaroWinklerDistance(_city1, _city2);
             if (similarity < MIN_SIMILARITY) {
                 return UIText.text("error.addr.city", city1, city2);
             }
@@ -404,6 +405,7 @@ public class OrderManAddressValidator implements AddressValidator {
             return SAME;
         }
 
+        //noinspection deprecation
         return StringUtils.getJaroWinklerDistance(s1, s2);
     }
 

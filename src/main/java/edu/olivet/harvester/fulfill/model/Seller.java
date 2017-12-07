@@ -15,12 +15,7 @@ public class Seller {
 
     public static final DecimalFormat DOUBLE_FORMAT = new DecimalFormat("0.00");
 
-    /**寻找Seller过程中所得分数*/
-    /**
-     * Seller 有两个国家属性，
-     * 第一个是seller所在offerlisting国家，country_OfferListing
-     * 第二个是seller描述里面的实际发货国家。country_ShippingFrom
-     */
+    /*寻找Seller过程中所得分数*/
     private Integer score = 0;
 
 
@@ -41,7 +36,7 @@ public class Seller {
         return StringUtils.isNotBlank(this.uuid) ? String.format("%s(ID:%s)", sellerName, this.uuid) : sellerName;
     }
 
-    /** Seller所属亚马逊国家，比如是英国Seller还是美国Seller */
+    /* Seller所属亚马逊国家，比如是英国Seller还是美国Seller */
     /**
      * Seller 有两个国家属性，第一个是seller所在offerlisting国家，第二个是seller描述里面的实际发货国家。
      * 这个country是offerlisting所在国家。
@@ -220,13 +215,13 @@ public class Seller {
     }
 
 
-    public void setInstock(String delivery_str) {
+    public void setInstock(String deliveryStr) {
         if (!this.instock) {
             return;
         }
 
         // 德语， Currently not on stock
-        if (delivery_str.contains("Derzeit nicht auf Lager.")) {
+        if (deliveryStr.contains("Derzeit nicht auf Lager.")) {
             this.instock = false;
         }
     }

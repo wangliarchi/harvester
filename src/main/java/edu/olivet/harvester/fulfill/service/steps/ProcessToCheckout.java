@@ -14,14 +14,14 @@ public class ProcessToCheckout extends Step {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessToCheckout.class);
 
 
-
     protected void process(FlowState state) {
         ShoppingCartPage shoppingCartPage = new ShoppingCartPage(state.getBuyerPanel());
         shoppingCartPage.processToCheckout();
     }
 
     @Inject Checkout checkout;
+
     public Step createDynamicInstance(FlowState state) {
-       return checkout;
+        return checkout;
     }
 }

@@ -71,8 +71,8 @@ public abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract 
     public void reenterCCNumber(DOMElement paymentRow) {
         //reenter credit card number
 
-        DOMElement addrChalllenage = JXBrowserHelper.selectElementByCssSelector(paymentRow, ".addr-challenge");
-        if (addrChalllenage == null || JXBrowserHelper.isHidden(addrChalllenage)) {
+        DOMElement addrChallenge = JXBrowserHelper.selectElementByCssSelector(paymentRow, ".addr-challenge");
+        if (addrChallenge == null || JXBrowserHelper.isHidden(addrChallenge)) {
             return;
         }
 

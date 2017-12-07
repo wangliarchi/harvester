@@ -59,37 +59,46 @@ public class ItemCompareResult implements Comparable<ItemCompareResult> {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ItemCompareResult other = (ItemCompareResult) obj;
         if (isbn == null) {
             if (other.isbn != null)
                 return false;
-        } else if (!isbn.equals(other.isbn))
+        } else if (!isbn.equals(other.isbn)) {
             return false;
+        }
         if (isbnName == null) {
             if (other.isbnName != null)
                 return false;
-        } else if (!isbnName.equals(other.isbnName))
+        } else if (!isbnName.equals(other.isbnName)) {
             return false;
+        }
         if (itemName == null) {
             if (other.itemName != null)
                 return false;
-        } else if (!itemName.equals(other.itemName))
+        } else if (!itemName.equals(other.itemName)) {
             return false;
-        if (manualCheckPass != other.manualCheckPass)
+        }
+        if (manualCheckPass != other.manualCheckPass) {
             return false;
-        if (preCheckPass != other.preCheckPass)
+        }
+        if (preCheckPass != other.preCheckPass) {
             return false;
+        }
         if (preCheckReport == null) {
             if (other.preCheckReport != null)
                 return false;
-        } else if (!preCheckReport.equals(other.preCheckReport))
+        } else if (!preCheckReport.equals(other.preCheckReport)) {
             return false;
+        }
         return row == other.row;
     }
 

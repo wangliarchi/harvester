@@ -49,11 +49,13 @@ public class GiftOptionHelper {
                 }
 
                 DOMTextAreaElement giftMessageTextArea = (DOMTextAreaElement) JXBrowserHelper.selectElementByName(browser, "gift-message-text");
+                assert giftMessageTextArea != null;
                 giftMessageTextArea.setValue("");
                 WaitTime.Shortest.execute();
             }
 
             DOMElement continueBtn = JXBrowserHelper.selectVisibleElement(browser, continueBtnSelector);
+            assert continueBtn != null;
             continueBtn.click();
             WaitTime.Shortest.execute();
             JXBrowserHelper.waitUntilNotFound(continueBtn);

@@ -33,6 +33,7 @@ import java.util.List;
 public class LogViewDialog extends JDialog {
     /**
      * 成功日志各列枚举定义
+     *
      * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Jan 5, 2015 8:26:18 AM
      */
     enum SuccessLogColumn {
@@ -53,17 +54,21 @@ public class LogViewDialog extends JDialog {
         private String label;
         private Class<?> type;
         private int sortNo;
+
         SuccessLogColumn(String label, Class<?> type, int sortNo) {
             this.label = label;
             this.type = type;
             this.sortNo = sortNo;
         }
+
         public String getLabel() {
             return label;
         }
+
         public Class<?> getType() {
             return type;
         }
+
         public int getSortNo() {
             return sortNo;
         }
@@ -86,8 +91,10 @@ public class LogViewDialog extends JDialog {
             return result;
         }
     }
+
     /**
      * 统计日志各列枚举定义
+     *
      * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Jan 5, 2015 8:26:28 AM
      */
     enum StatisticLogColumn {
@@ -102,17 +109,21 @@ public class LogViewDialog extends JDialog {
         private String label;
         private Class<?> type;
         private int sortNo;
+
         StatisticLogColumn(String label, Class<?> type, int sortNo) {
             this.label = label;
             this.type = type;
             this.sortNo = sortNo;
         }
+
         public String getLabel() {
             return label;
         }
+
         public Class<?> getType() {
             return type;
         }
+
         public int getSortNo() {
             return sortNo;
         }
@@ -139,15 +150,13 @@ public class LogViewDialog extends JDialog {
     private static final long serialVersionUID = 8527571063009083949L;
     private static String[] SUCCESS_COLUMN_NAMES;
     private static String[] STAT_COLUMN_NAMES;
-    private DefaultTableModel successLogTableModel;
-    private DefaultTableModel statLogTableModel;
     private final String context;
     private DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
 
     public LogViewDialog(Frame parent, boolean modal, String context) {
         super(parent, modal);
         this.context = context;
-        centerRenderer.setHorizontalAlignment( JLabel.CENTER );
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
         initComponents();
     }
 
@@ -174,8 +183,8 @@ public class LogViewDialog extends JDialog {
         SUCCESS_COLUMN_NAMES = SuccessLogColumn.columnNames();
         Object[][] data = getSuccessLogData();
         int rowCount = data.length;
-        int colColunt = SUCCESS_COLUMN_NAMES.length;
-        successLogTableModel = new DefaultTableModel(rowCount, colColunt) {
+        int colCount = SUCCESS_COLUMN_NAMES.length;
+        DefaultTableModel successLogTableModel = new DefaultTableModel(rowCount, colCount) {
             private static final long serialVersionUID = 3728339236601985972L;
 
             Class<?>[] types = SuccessLogColumn.columnTypes();
@@ -186,7 +195,7 @@ public class LogViewDialog extends JDialog {
         };
 
         successLogTableModel.setDataVector(data, SUCCESS_COLUMN_NAMES);
-        successLogTable =  new JTable(successLogTableModel) {
+        successLogTable = new JTable(successLogTableModel) {
             private static final long serialVersionUID = -7996493405307614317L;
 
             @Override
@@ -217,11 +226,12 @@ public class LogViewDialog extends JDialog {
     private void renderStatLogs() {
         STAT_COLUMN_NAMES = StatisticLogColumn.columnNames();
         Object[][] statData = getStatLogData();
-        statLogTableModel = new DefaultTableModel(statData.length, STAT_COLUMN_NAMES.length) {
+        DefaultTableModel statLogTableModel = new DefaultTableModel(statData.length, STAT_COLUMN_NAMES.length) {
             private static final long serialVersionUID = 3688940866473584300L;
             Class<?>[] types = StatisticLogColumn.columnTypes();
+
             public Class<?> getColumnClass(int columnIndex) {
-                return types [columnIndex];
+                return types[columnIndex];
             }
         };
         statLogTableModel.setDataVector(statData, STAT_COLUMN_NAMES);
@@ -319,12 +329,13 @@ public class LogViewDialog extends JDialog {
 
     /**
      * 按照context筛选过滤日志记录，只显示当前环境下的成功日志记录
+     *
      * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Dec 18, 2014 5:21:31 PM
      */
     class ContextPredicate implements Predicate {
         @Override
         public boolean evaluate(Object object) {
-            String line = (String)object;
+            String line = (String) object;
             String[] arr = StringUtils.splitPreserveAllTokens(line, '\t');
             if (arr.length >= 14) {
                 // 对过往的日志记录作兼容处理
@@ -337,6 +348,7 @@ public class LogViewDialog extends JDialog {
             return true;
         }
     }
+
     private ContextPredicate contextPredicate = new ContextPredicate();
 
     private Object[][] getSuccessLogData() {
@@ -392,11 +404,11 @@ public class LogViewDialog extends JDialog {
     }
 
     private void initComponents() {
-        logPane = new JTabbedPane();
-        successLogPanel = new JPanel();
-        successScroll = new JScrollPane();
-        statDataPanel = new JPanel();
-        statScroll = new JScrollPane();
+        JTabbedPane logPane = new JTabbedPane();
+        JPanel successLogPanel = new JPanel();
+        JScrollPane successScroll = new JScrollPane();
+        JPanel statDataPanel = new JPanel();
+        JScrollPane statScroll = new JScrollPane();
 
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent evt) {
@@ -468,11 +480,6 @@ public class LogViewDialog extends JDialog {
         dialog.setVisible(true);
     }
 
-    private JTabbedPane logPane;
-    private JPanel successLogPanel;
-    private JPanel statDataPanel;
-    private JScrollPane successScroll;
-    private JScrollPane statScroll;
     private JTable successLogTable;
     private JTable statisticLogTable;
 }

@@ -83,9 +83,6 @@ public class QtyUtils {
 
             JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
 
-
-            //browser.executeJavaScript(String.format("$('select.a-native-dropdown.quantity-dropdown-select').val(%s).change()", order.quantity_purchased));
-            //JXBrowserHelper.setValueForFormSelect(browser, "select.a-native-dropdown.quantity-dropdown-select", order.quantity_purchased);
             JXBrowserHelper.selectElementByCssSelector(browser, ".quantity-dropdown .a-button-text").click();
             JXBrowserHelper.waitUntilVisible(browser, "div.a-popover-wrapper ul.a-list-link");
 

@@ -59,8 +59,6 @@ public class ShipOptionUtils {
             try {
                 eddText = JXBrowserHelper.selectElementByCssSelector(option, ".a-color-success").getInnerText().trim();
             } catch (Exception e) {
-//                LOGGER.error("Error fetch shipping option edd {}", option.getInnerHTML());
-//                continue;
                 eddText = fullTxt;
             }
             try {

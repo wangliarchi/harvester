@@ -8,7 +8,6 @@ import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
-import edu.olivet.harvester.utils.order.PageUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -68,6 +67,7 @@ public class ShoppingCartPage extends FulfillmentPage {
         LOGGER.info("Current at {} - {}", browser.getTitle(), browser.getURL());
         DOMElement checkoutBtn = JXBrowserHelper.selectElementByName(browser, "proceedToCheckout");
         JXBrowserHelper.insertChecker(browser);
+        assert checkoutBtn != null;
         checkoutBtn.click();
         JXBrowserHelper.waitUntilNewPageLoaded(browser);
         LOGGER.info("Current at {} - {}", browser.getTitle(), browser.getURL());
@@ -79,6 +79,7 @@ public class ShoppingCartPage extends FulfillmentPage {
 
         try {
             DOMElement cartForm = JXBrowserHelper.selectElementByCssSelector(browser, "#activeCartViewForm");
+            assert cartForm != null;
             if (StringUtils.contains(cartForm.getInnerHTML(), "sc-empty-cart")) {
                 LOGGER.info("Shopping cart is empty.");
                 return;

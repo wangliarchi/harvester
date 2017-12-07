@@ -28,7 +28,7 @@ public class SubmitOrdersEvent extends Observable implements HarvesterUIEvent {
     @Inject
     OrderSubmitter orderSubmitter;
 
-    public void excute() {
+    public void execute() {
         PSEventListener.reset();
         RuntimeSettings settings = RuntimeSettings.load();
         RuntimeSettingsValidator.CheckResult result = validator.validate(settings, FulfillmentEnum.Action.UpdateStatus);

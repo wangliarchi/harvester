@@ -188,9 +188,6 @@ public class AdvancedSubmitSetting {
         } else if (!multiRows.equals(other.multiRows)) {
             return false;
         }
-        if (singleRowNo != other.singleRowNo) {
-            return false;
-        }
-        return startRowNo == other.startRowNo && statusFilterValue == other.statusFilterValue && submitRange == other.submitRange;
+        return singleRowNo == other.singleRowNo && startRowNo == other.startRowNo && statusFilterValue == other.statusFilterValue && submitRange == other.submitRange;
     }
 }

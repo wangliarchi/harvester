@@ -48,9 +48,8 @@ public class DefaultHandler implements ShippingHandler {
             throw new OrderSubmissionException("No shipping option available.");
         }
         validOptions.sort(Comparator.comparing(ShippingOption::getPriceAmount));
-        ShippingOption shippingOption = validOptions.get(0);
 
-        return shippingOption;
+        return validOptions.get(0);
     }
 
     @Override
@@ -77,10 +76,7 @@ public class DefaultHandler implements ShippingHandler {
             int daysExceedOrderEdd = Days.daysBetween(start, end).getDays();
 
             //Expedited Shipping requested
-            if (order.expeditedShipping() && !it.isExpedited()) {
-                return false;
-            }
-            return OrderValidator.skipCheck(order, OrderValidator.SkipValidation.EDD) || Remark.isDN(order.remark) || latestDate.before(orderEdd) || daysExceedOrderEdd <= maxDays;
+            return (!order.expeditedShipping() || it.isExpedited()) && (OrderValidator.skipCheck(order, OrderValidator.SkipValidation.EDD) || Remark.isDN(order.remark) || latestDate.before(orderEdd) || daysExceedOrderEdd <= maxDays);
         }).collect(Collectors.toList());
 
 

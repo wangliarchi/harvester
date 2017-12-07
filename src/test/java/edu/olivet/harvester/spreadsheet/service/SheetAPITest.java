@@ -28,7 +28,7 @@ public class SheetAPITest {
     }
 
     @Test
-    public void testBactchGetSpreadsheetValues() throws Exception {
+    public void testBatchGetSpreadsheetValues() throws Exception {
     }
 
     @Test

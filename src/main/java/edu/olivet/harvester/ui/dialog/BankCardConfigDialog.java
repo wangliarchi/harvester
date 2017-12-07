@@ -58,10 +58,10 @@ public class BankCardConfigDialog extends BaseDialog {
 
         GroupLayout.ParallelGroup hParallelGroup = innerLayout.createParallelGroup(GroupLayout.Alignment.LEADING);
         GroupLayout.ParallelGroup vParallelGroup = innerLayout.createParallelGroup(GroupLayout.Alignment.LEADING);
-        GroupLayout.SequentialGroup vsequentialGroup = innerLayout.createSequentialGroup();
+        GroupLayout.SequentialGroup vSequentialGroup = innerLayout.createSequentialGroup();
 
 
-        vsequentialGroup.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE);
+        vSequentialGroup.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE);
         List<String> emails = new ArrayList<>(creditCards.keySet());
         for (String buyerEmail : buyerAccountEmails) {
             if (!emails.contains(buyerEmail)) {
@@ -78,14 +78,14 @@ public class BankCardConfigDialog extends BaseDialog {
             bankCardPanels.add(bankCardPanel);
             hParallelGroup.addGroup(GroupLayout.Alignment.TRAILING, innerLayout.createSequentialGroup().addComponent(bankCardPanel));
 
-            vsequentialGroup.addGroup(innerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+            vSequentialGroup.addGroup(innerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(bankCardPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
                     .addGap(5);
 
 
         });
         innerLayout.setHorizontalGroup(hParallelGroup);
-        innerLayout.setVerticalGroup(vParallelGroup.addGroup(vsequentialGroup));
+        innerLayout.setVerticalGroup(vParallelGroup.addGroup(vSequentialGroup));
 
 
         GroupLayout layout = new GroupLayout(getContentPane());

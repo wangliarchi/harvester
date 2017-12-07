@@ -49,7 +49,7 @@ public class OrderItemTypeHelper {
             //LOGGER.warn("No product group info found by sku pattern for {}, ASIN {}, SKU {} - {}", order.order_id, order.isbn, order.sku, e);
         }
 
-        /**
+        /*
          Disable now. API quote has been used up by repricing programs.
          try {
 
@@ -67,7 +67,7 @@ public class OrderItemTypeHelper {
          }
          */
 
-        //TODO: defaut to BOOK?
+        //TODO: default to BOOK?
 
         return OrderEnums.OrderItemType.BOOK;
 

@@ -239,7 +239,7 @@ public class Rating {
         this.count = count;
     }
 
-    //	@Override
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -253,7 +253,7 @@ public class Rating {
         return result;
     }
 
-    //	@Override
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -274,13 +274,10 @@ public class Rating {
         if (negativeCount != other.negativeCount) {
             return false;
         }
-        if (neutral != other.neutral) {
-            return false;
-        }
-        return neutralCount == other.neutralCount && positive == other.positive && positiveCount == other.positiveCount;
+        return neutral == other.neutral && neutralCount == other.neutralCount && positive == other.positive && positiveCount == other.positiveCount;
     }
 
-    //	@Override
+    @Override
     public String toString() {
         return UIText.text("supplier.rating.summary", this.positive, this.positiveCount, this.neutral, this.neutralCount,
                 this.negative, this.negativeCount, this.count);

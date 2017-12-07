@@ -62,10 +62,5 @@ public class ShipmentConfirmationJob extends AbstractBackgroundJob {
 
     }
 
-    public static void main(String[] args) {
-        //ShipmentConfirmationJob bean = new ShipmentConfirmationJob();
-        //bean.runIfMissed();
-    }
-
 
 }

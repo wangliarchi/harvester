@@ -44,6 +44,7 @@ public class LogUploader extends AbstractBackgroundJob {
     public void executeWithoutWait() throws IOException, DbxException {
         File log = new File(Directory.Log.path(), "harvester." + Dates.today() + ".log");
         if (log.exists() && log.length() > ZERO_BYTES) {
+            //noinspection CheckStyle
             DropboxAssistant DBX_CLIENT = new DropboxAssistant(Harvester.APP_NAME);
             // Relatively big log file will wait extra time to upload
             if (log.length() > FileUtils.ONE_MB) {

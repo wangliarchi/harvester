@@ -218,7 +218,7 @@ public class Address {
         return getRecipient() + (StringUtils.isNotBlank(address1) ? ", " + address1 : "") + (StringUtils.isNotBlank(address2) ? ", " + address2 : "") + ", " + city + ", " + state + " " + getZip() + ", " + country;
     }
 
-    public String withouName() {
+    public String withoutName() {
         return (StringUtils.isNotBlank(address1) ? ", " + address1 : "") + (StringUtils.isNotBlank(address2) ? ", " + address2 : "") + ", " + city + ", " + getFullStateName() + " " + getZip() + ", " + country;
     }
 

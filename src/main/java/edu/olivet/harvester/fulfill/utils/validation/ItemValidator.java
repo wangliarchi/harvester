@@ -27,15 +27,12 @@ public class ItemValidator {
     private static final int PASS_DIFF_COUNT = 2;
     private static final int PASS_SAME_RATE = 80;
     private static final int PASS_SAME_COUNT = 5;
-    private static final int MAX_MINUS_PROFIT = 20;
     private Map<String, String> stopWords;
-    private Map<String, String> conditionLvls;
 
 
     @Inject
     public void init() throws IOException {
         stopWords = Configs.load(Config.StopWords.fileName());
-        conditionLvls = Configs.load(Config.ConditionLevel.fileName());
     }
 
 

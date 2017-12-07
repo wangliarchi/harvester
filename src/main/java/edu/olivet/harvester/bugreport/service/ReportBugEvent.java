@@ -48,7 +48,7 @@ public class ReportBugEvent implements HarvesterUIEvent {
 
     @Override
     @Repeat
-    public void excute() {
+    public void execute() {
 
 
         Bug bug = new Bug();

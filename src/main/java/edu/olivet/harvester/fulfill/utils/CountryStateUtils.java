@@ -18,7 +18,7 @@ public class CountryStateUtils {
     private Map<String, String> countryCodes;
     private Map<String, String> usStates;
     private Map<String, String> caStates;
-    private final static CountryStateUtils instance = new CountryStateUtils();
+    private static final CountryStateUtils instance = new CountryStateUtils();
 
     public static CountryStateUtils getInstance() {
         return instance;

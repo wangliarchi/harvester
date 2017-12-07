@@ -50,7 +50,7 @@ public class OrderService {
 
         List<ValueRange> valueRanges;
         try {
-            valueRanges = spreadsheetService.bactchGetSpreadsheetValues(spreadsheetId, ranges);
+            valueRanges = spreadsheetService.batchGetSpreadsheetValues(spreadsheetId, ranges);
         } catch (BusinessException e) {
             LOGGER.error("error get batch sheet values for {} ranges {}. {}", spreadsheetId, ranges, e);
             throw e;

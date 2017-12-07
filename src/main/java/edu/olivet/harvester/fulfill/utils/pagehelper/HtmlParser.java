@@ -52,11 +52,11 @@ public class HtmlParser {
         return null;
     }
 
-    private boolean ifWavorLowQuailityWords(String rowHtml) {
+    private boolean ifWavorLowQualityWords(String rowHtml) {
 
-        String[] lowqualities = new String[]{"water,damage,heavy,loose"};
+        String[] lowQualities = new String[]{"water,damage,heavy,loose"};
 
-        return !Strings.containsAnyIgnoreCase(rowHtml, lowqualities);
+        return !Strings.containsAnyIgnoreCase(rowHtml, lowQualities);
     }
 
     private static final Float ZERO = 0.0f;

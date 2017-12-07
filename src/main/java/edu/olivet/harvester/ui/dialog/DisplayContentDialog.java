@@ -11,8 +11,6 @@ import org.apache.commons.lang3.SystemUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -48,16 +46,11 @@ public class DisplayContentDialog extends JDialog {
     public void displayMsg(String msg) {
         this.textArea.append(msg + Constants.NEW_LINE);
     }
-    /*
-    public void addMsgSeparator() {
-    	this.displayMsg(MailMan.SPLIT_LINE);
-    }
-    */
 
     private void initComponents() {
         this.setResizable(false);
-        okButton = new JButton();
-        scrollPane = new JScrollPane();
+        JButton okButton = new JButton();
+        JScrollPane scrollPane = new JScrollPane();
         textArea = new JTextArea();
         textArea.setEditable(false);
         textArea.setLineWrap(true);
@@ -108,7 +101,5 @@ public class DisplayContentDialog extends JDialog {
         dispose();
     }
 
-    private JScrollPane scrollPane;
-    private JButton okButton;
     protected JTextArea textArea;
 }

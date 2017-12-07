@@ -47,7 +47,7 @@ public class PlacedOrderDetailPage extends FulfillmentPage {
             }
 
             if (!order.quantity_purchased.equals(order.quantity_fulfilled)) {
-                OrderHelper.addQuantChangeRemark(order, order.quantity_fulfilled);
+                OrderHelper.addQuantityChangeRemark(order, order.quantity_fulfilled);
             }
 
             Address address = parseShippingAddress();
@@ -117,8 +117,7 @@ public class PlacedOrderDetailPage extends FulfillmentPage {
 
         String total = JXBrowserHelper.text(browser, "#od-subtotals .a-text-right.a-span-last .a-color-base.a-text-bold");
         try {
-            Money money = Money.fromText(total, country);
-            return money;
+            return Money.fromText(total, country);
         } catch (Exception e) {
             //ignore
         }

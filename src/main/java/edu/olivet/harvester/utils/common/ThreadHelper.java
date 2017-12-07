@@ -9,8 +9,9 @@ import java.util.List;
 public class ThreadHelper {
     /**
      * 将待处理的集合按照线程总数分解
-     * @param list			待处理集合
-     * @param threadCount	线程总数
+     *
+     * @param list 待处理集合
+     * @param threadCount 线程总数
      */
     public static <T> List<List<T>> assign(List<T> list, int threadCount) {
         if (list == null || threadCount <= 0) {

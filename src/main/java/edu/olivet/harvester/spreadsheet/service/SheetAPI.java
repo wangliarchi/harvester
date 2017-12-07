@@ -85,12 +85,12 @@ public class SheetAPI {
     }
 
     @Repeat(expectedExceptions = BusinessException.class)
-    public List<ValueRange> bactchGetSpreadsheetValues(Spreadsheet spreadsheet, List<String> ranges) {
-        return bactchGetSpreadsheetValues(spreadsheet.getSpreadsheetId(), ranges);
+    public List<ValueRange> batchGetSpreadsheetValues(Spreadsheet spreadsheet, List<String> ranges) {
+        return batchGetSpreadsheetValues(spreadsheet.getSpreadsheetId(), ranges);
     }
 
     @Repeat(expectedExceptions = BusinessException.class)
-    public List<ValueRange> bactchGetSpreadsheetValues(String spreadsheetId, List<String> ranges) {
+    public List<ValueRange> batchGetSpreadsheetValues(String spreadsheetId, List<String> ranges) {
         try {
             Sheets.Spreadsheets.Values.BatchGet request = sheetService.spreadsheets().values().batchGet(spreadsheetId).setRanges(ranges);
             BatchGetValuesResponse response = request.execute();
@@ -250,7 +250,7 @@ public class SheetAPI {
         List<ValueRange> dateToUpdate = new ArrayList<>();
 
         for (Order order : orders) {
-            //update remart cell
+            //update remark cell
 
             if (!StringUtils.containsIgnoreCase(order.remark, "cancel")) {
                 StringBuilder remarkText = new StringBuilder("Buyer Canceled. ");

@@ -151,14 +151,14 @@ public class OrderHelper {
      * 当订单的预期购买数量与实际购买数量不一致时，添加批注提示
      *
      * @param order       当前订单
-     * @param actualQuant 实际可以购买数量
+     * @param actualQuantity 实际可以购买数量
      */
-    public static void addQuantChangeRemark(Order order, String actualQuant) {
-        if (order.quantity_purchased.equals(actualQuant)) {
+    public static void addQuantityChangeRemark(Order order, String actualQuantity) {
+        if (order.quantity_purchased.equals(actualQuantity)) {
             return;
         }
 
-        int count = Integer.parseInt(actualQuant);
+        int count = Integer.parseInt(actualQuantity);
         int qtyLeft = Integer.parseInt(order.quantity_purchased) - count;
 
         order.quantity_fulfilled = String.valueOf(count);

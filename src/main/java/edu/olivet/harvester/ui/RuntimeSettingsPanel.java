@@ -11,7 +11,7 @@ import edu.olivet.harvester.fulfill.model.setting.AdvancedSubmitSetting;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.DailyBudgetHelper;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
-import edu.olivet.harvester.fulfill.service.ProgressUpdator;
+import edu.olivet.harvester.fulfill.service.ProgressUpdater;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.model.OrderEnums.OrderItemType;
@@ -50,8 +50,6 @@ public class RuntimeSettingsPanel extends JPanel {
     private RuntimeSettings settings;
 
     private static RuntimeSettingsPanel instance;
-
-    private Thread psEventListenerThread;
 
     public static RuntimeSettingsPanel getInstance() {
         if (instance == null) {
@@ -102,12 +100,12 @@ public class RuntimeSettingsPanel extends JPanel {
         noInvoiceTextField.setText(settings.getNoInvoiceText());
 
 
-        lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"5", "7"}));
+        lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"5", "7"}));
         if (StringUtils.isNotBlank(settings.getLostLimit())) {
             lostLimitComboBox.setSelectedItem(settings.getLostLimit());
         }
 
-        priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"3", "5"}));
+        priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"3", "5"}));
         if (StringUtils.isNotBlank(settings.getPriceLimit())) {
             priceLimitComboBox.setSelectedItem(settings.getPriceLimit());
         }
@@ -119,7 +117,9 @@ public class RuntimeSettingsPanel extends JPanel {
         finderCodeTextField.setText(settings.getFinderCode());
 
 
-        maxDaysOverEddComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}));
+        maxDaysOverEddComboBox.setModel(new DefaultComboBoxModel<>(
+                new String[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}
+        ));
         if (StringUtils.isNotBlank((settings.getEddLimit()))) {
             maxDaysOverEddComboBox.setSelectedItem(settings.getEddLimit());
         }
@@ -136,7 +136,8 @@ public class RuntimeSettingsPanel extends JPanel {
 
     public void loadBudget() {
         if (StringUtils.isNotBlank(settings.getSpreadsheetId())) {
-            Map<String, Float> budgets = ApplicationContext.getBean(DailyBudgetHelper.class).getData(settings.getSpreadsheetId(), new Date());
+            Map<String, Float> budgets = ApplicationContext.getBean(DailyBudgetHelper.class)
+                    .getData(settings.getSpreadsheetId(), new Date());
             todayBudgetTextField.setText(budgets.get("budget").toString());
             todayUsedTextField.setText(budgets.get("cost").toString());
         }
@@ -259,7 +260,7 @@ public class RuntimeSettingsPanel extends JPanel {
             JXBrowserHelper.loadSpreadsheet(panel.getBrowserView().getBrowser(), sellerEmail, settings.getSpreadsheetId());
         });
 
-        psEventListenerThread = new Thread(() -> {
+        Thread psEventListenerThread = new Thread(() -> {
             //noinspection InfiniteLoopStatement
             while (true) {
                 switch (PSEventListener.status) {
@@ -271,7 +272,7 @@ public class RuntimeSettingsPanel extends JPanel {
                     case Ended:
                         hidePauseBtn();
                         break;
-                    case NotRuning:
+                    case NotRunning:
                         hidePauseBtn();
                         break;
                     default:
@@ -294,7 +295,7 @@ public class RuntimeSettingsPanel extends JPanel {
         new Thread(() -> {
             try {
                 disableAllBtns();
-                ApplicationContext.getBean(MarkStatusEvent.class).excute();
+                ApplicationContext.getBean(MarkStatusEvent.class).execute();
             } catch (Exception e) {
                 UITools.error("ERROR while marking order status:" + e.getMessage(), UIText.title("title.code_error"));
                 LOGGER.error("ERROR while marking order status:", e);
@@ -309,7 +310,7 @@ public class RuntimeSettingsPanel extends JPanel {
         new Thread(() -> {
             try {
                 disableAllBtns();
-                ApplicationContext.getBean(SubmitOrdersEvent.class).excute();
+                ApplicationContext.getBean(SubmitOrdersEvent.class).execute();
             } catch (Exception e) {
                 UITools.error(UIText.message("message.submit.exception", e.getMessage()), UIText.title("title.code_error"));
                 LOGGER.error("做单过程中出现异常:", e);
@@ -403,7 +404,7 @@ public class RuntimeSettingsPanel extends JPanel {
         List<edu.olivet.harvester.spreadsheet.Spreadsheet> spreadsheets = Settings.load().listSpreadsheets(selectedCountry, appScript);
 
         if (CollectionUtils.isEmpty(spreadsheets)) {
-            UITools.error("No order update google sheet found. Please make sure it's configured and shared with " + Constants.RND_EMAIL, "Error");
+            UITools.error("No order update sheet found. Please make sure it's configured and shared with " + Constants.RND_EMAIL, "Error");
         }
 
         ChooseSheetDialog chooseSheetDialog = new ChooseSheetDialog(spreadsheets, appScript);
@@ -496,7 +497,7 @@ public class RuntimeSettingsPanel extends JPanel {
 
 
         Account seller = configuration.getSeller();
-        Account[] sellers = seller == null ? new Account[0] : new Account[]{seller};
+        Account[] sellers = seller == null ? new Account[0] : new Account[] {seller};
         sellerComboBox.setModel(new DefaultComboBoxModel<>(sellers));
 
         //default to book
@@ -521,10 +522,10 @@ public class RuntimeSettingsPanel extends JPanel {
             buyer = configuration.getProdBuyer();
             primeBuyer = configuration.getProdPrimeBuyer();
         }
-        Account[] buyers = buyer == null ? new Account[0] : new Account[]{buyer};
+        Account[] buyers = buyer == null ? new Account[0] : new Account[] {buyer};
         buyerComboBox.setModel(new DefaultComboBoxModel<>(buyers));
 
-        Account[] primeBuyers = primeBuyer == null ? new Account[0] : new Account[]{primeBuyer};
+        Account[] primeBuyers = primeBuyer == null ? new Account[0] : new Account[] {primeBuyer};
         primeBuyerComboBox.setModel(new DefaultComboBoxModel<>(primeBuyers));
 
     }
@@ -582,16 +583,6 @@ public class RuntimeSettingsPanel extends JPanel {
     private JButton selectRangeButton;
     private JComboBox<String> lostLimitComboBox;
     private JComboBox<String> priceLimitComboBox;
-    private JLabel marketplaceLabel;
-    private JLabel sellerLabel;
-    private JLabel buyerLabel;
-    private JLabel primeBuyerLabel;
-    private JLabel selectRangeLabel;
-    private JLabel lostLimitLabel;
-    private JLabel priceLimitLabel;
-    private JLabel googleSheetLabel;
-    private JLabel noInvoiceLabel;
-    private JLabel codeFinderLabel;
     private JLabel selectedRangeLabel;
     private JTextField googleSheetTextField;
     private JTextField noInvoiceTextField;
@@ -603,17 +594,14 @@ public class RuntimeSettingsPanel extends JPanel {
     private JButton pauseButton;
     private JButton stopButton;
 
-    private JLabel maxEddLabel;
     private JComboBox<String> maxDaysOverEddComboBox;
 
-    private JLabel skipCheckLabel;
     private JComboBox<OrderValidator.SkipValidation> skipCheckComboBox;
 
     private JLabel progressLabel;
     public JProgressBar progressBar;
     public JLabel progressTextLabel;
 
-    private JLabel todayBudgetLabel;
     private JTextField todayBudgetTextField;
     public JTextField todayUsedTextField;
 
@@ -622,33 +610,33 @@ public class RuntimeSettingsPanel extends JPanel {
     private void initComponents() {
         setBorder(BorderFactory.createTitledBorder(BorderFactory.createTitledBorder("Runtime Settings")));
 
-        marketplaceLabel = new JLabel();
+        JLabel marketplaceLabel = new JLabel();
         marketplaceComboBox = new JComboBox<>();
 
-        sellerLabel = new JLabel();
+        JLabel sellerLabel = new JLabel();
         sellerComboBox = new JComboBox<>();
 
-        buyerLabel = new JLabel();
+        JLabel buyerLabel = new JLabel();
         buyerComboBox = new JComboBox<>();
-        primeBuyerLabel = new JLabel();
+        JLabel primeBuyerLabel = new JLabel();
         primeBuyerComboBox = new JComboBox<>();
 
-        googleSheetLabel = new JLabel();
+        JLabel googleSheetLabel = new JLabel();
         googleSheetTextField = new JTextField();
-        selectRangeLabel = new JLabel();
+        JLabel selectRangeLabel = new JLabel();
         selectRangeButton = new JButton();
-        lostLimitLabel = new JLabel();
+        JLabel lostLimitLabel = new JLabel();
         lostLimitComboBox = new JComboBox<>();
-        priceLimitLabel = new JLabel();
+        JLabel priceLimitLabel = new JLabel();
         priceLimitComboBox = new JComboBox<>();
-        noInvoiceLabel = new JLabel();
+        JLabel noInvoiceLabel = new JLabel();
         noInvoiceTextField = new JTextField();
-        codeFinderLabel = new JLabel();
+        JLabel codeFinderLabel = new JLabel();
         finderCodeTextField = new JTextField();
         selectedRangeLabel = new JLabel();
         selectedRangeLabel.setForeground(Color.BLUE);
 
-        maxEddLabel = new JLabel();
+        JLabel maxEddLabel = new JLabel();
         maxDaysOverEddComboBox = new JComboBox<>();
 
         huntSupplierButton = new JButton();
@@ -689,7 +677,7 @@ public class RuntimeSettingsPanel extends JPanel {
         maxEddLabel.setText("EDD Limit");
 
 
-        skipCheckLabel = new JLabel();
+        JLabel skipCheckLabel = new JLabel();
         skipCheckLabel.setText("Skip Check");
         skipCheckLabel.setForeground(Color.RED);
 
@@ -716,7 +704,7 @@ public class RuntimeSettingsPanel extends JPanel {
         progressBar.setVisible(false);
 
 
-        todayBudgetLabel = new JLabel();
+        JLabel todayBudgetLabel = new JLabel();
         todayBudgetLabel.setText("Today's Budget");
         JLabel todayUsedLabel = new JLabel();
         todayUsedLabel.setText("Used");
@@ -915,7 +903,7 @@ public class RuntimeSettingsPanel extends JPanel {
         frame.getContentPane().add(runtimeSettingsPanel);
         frame.setVisible(true);
         runtimeSettingsPanel.showPauseBtn();
-        ProgressUpdator.success();
+        ProgressUpdater.success();
 
     }
 

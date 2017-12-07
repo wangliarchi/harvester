@@ -9,15 +9,18 @@ import edu.olivet.foundations.utils.CurrencyRateCalculator;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/1/17 10:18 AM
  */
 @Singleton
-public class CurrencyConvertor implements CurrencyRateCalculator {
-    private static CurrencyConvertor instance = new CurrencyConvertor();
+public class CurrencyConverter implements CurrencyRateCalculator {
+    private static CurrencyConverter instance = null;
     private CurrencyRateCalculator currencyRateCalculator;
 
-    public static CurrencyConvertor getInstance() {
+    public static CurrencyConverter getInstance() {
+        if (instance == null) {
+            instance = new CurrencyConverter();
+        }
         return instance;
     }
 
-    private CurrencyConvertor() {
+    private CurrencyConverter() {
         currencyRateCalculator = ApplicationContext.getBean(CurrencyRateCalculator.class);
     }
 

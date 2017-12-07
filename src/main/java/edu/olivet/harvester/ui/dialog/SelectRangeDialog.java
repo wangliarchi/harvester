@@ -22,6 +22,7 @@ import java.util.List;
  *
  * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Oct 21, 2014 3:08:49 PM
  */
+@SuppressWarnings("Duplicates")
 public class SelectRangeDialog extends BaseDialog {
     private static final long serialVersionUID = -4173627453729748332L;
     private FocusListener selectAll;
@@ -174,11 +175,10 @@ public class SelectRangeDialog extends BaseDialog {
 
         this.initScopePane();
 
-        okBtn = new JButton();
-        cancelBtn = new JButton();
-
+        JButton okBtn = new JButton();
+        JButton cancelBtn = new JButton();
         JPanel typePanel = new JPanel();
-        typeGroup = new ButtonGroup();
+        ButtonGroup typeGroup = new ButtonGroup();
         typeAll = new JRadioButton();
         typePrime = new JRadioButton();
         typePt = new JRadioButton();
@@ -200,10 +200,10 @@ public class SelectRangeDialog extends BaseDialog {
         cancelBtn.setText(UIText.label("label.cancel"));
         cancelBtn.addActionListener(this::cancelBtnActionPerformed);
 
-        markStatusButton = new JButton();
+        JButton markStatusButton = new JButton();
         markStatusButton.setText("Mark Status");
         markStatusButton.setIcon(UITools.getIcon("status.png"));
-        submitButton = new JButton();
+        JButton submitButton = new JButton();
         submitButton.setText("Submit");
         submitButton.setIcon(UITools.getIcon("start.png"));
 
@@ -339,7 +339,6 @@ public class SelectRangeDialog extends BaseDialog {
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
                                                 .addComponent(scopePanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                                 .addComponent(typePanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        //.addComponent(loopPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 )
                                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -351,7 +350,6 @@ public class SelectRangeDialog extends BaseDialog {
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(typePanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                //.addComponent(loopPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(cancelBtn)
@@ -378,7 +376,7 @@ public class SelectRangeDialog extends BaseDialog {
 
     public void initScopePane() {
         scopePanel = new JPanel();
-        scopeBtnGroup = new ButtonGroup();
+        ButtonGroup scopeBtnGroup = new ButtonGroup();
         allBtn = new JRadioButton();
         allBtn.addActionListener(e -> switchRadioBtn());
 
@@ -626,22 +624,18 @@ public class SelectRangeDialog extends BaseDialog {
         this.setVisible(false);
     }
 
-    private JButton cancelBtn;
-    private JButton okBtn;
     private JCheckBox autoLoop;
     private JTextField loopInterval;
     private JTextField singleTxt;
     private JTextField startRowNo;
     private JTextField endRowNo;
     private JTextField multiRowsTxt;
-    private ButtonGroup scopeBtnGroup;
     private JRadioButton allBtn;
     private JRadioButton limitCountBtn;
     private JTextField limitCountTxt;
     private JRadioButton singleBtn;
     private JRadioButton scopeBtn;
     private JRadioButton multiBtn;
-    private ButtonGroup typeGroup;
     private JRadioButton typeAll;
     private JRadioButton typeBw;
     private JRadioButton typeHalf;
@@ -650,8 +644,6 @@ public class SelectRangeDialog extends BaseDialog {
     private JRadioButton typePrime;
     private JRadioButton typePt;
     private JPanel scopePanel;
-    private JButton markStatusButton;
-    private JButton submitButton;
 
     public static void main(String[] args) {
 

@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/18/17 11:00 AM
  */
-public class ProgressUpdator {
+public class ProgressUpdater {
     static JProgressBar progressBar = RuntimeSettingsPanel.getInstance().progressBar;
     static JLabel progressTextLabel = RuntimeSettingsPanel.getInstance().progressTextLabel;
     static int successCount = 0;

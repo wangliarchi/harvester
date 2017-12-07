@@ -182,7 +182,7 @@ public class ChooseSheetDialog extends BaseDialog {
             ok();
 
         });
-        //set first spreadsheet selected by defaut
+        //set first spreadsheet selected by default
         this.spreadList.setSelectedIndex(0);
         formsValueChanged();
     }

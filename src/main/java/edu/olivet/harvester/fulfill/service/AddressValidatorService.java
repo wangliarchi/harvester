@@ -15,14 +15,15 @@ public class AddressValidatorService implements AddressValidator {
     @Inject USPSAddressValidator uspsAddressValidator;
     @Inject OrderManAddressValidator orderManAddressValidator;
 
+    @SuppressWarnings("SimplifiableIfStatement")
     public boolean verify(Address old, Address entered) {
-        if(old.isUSAddress()) {
-            if(uspsAddressValidator.verify(old,entered)) {
+        if (old.isUSAddress()) {
+            if (uspsAddressValidator.verify(old, entered)) {
                 return true;
             }
         }
 
-        if(googleAddressValidator.verify(old,entered)) {
+        if (googleAddressValidator.verify(old, entered)) {
             return true;
         }
 

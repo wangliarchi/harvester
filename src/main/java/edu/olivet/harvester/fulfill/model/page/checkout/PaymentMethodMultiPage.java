@@ -7,8 +7,6 @@ import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/2/17 3:44 PM
@@ -26,7 +24,7 @@ public class PaymentMethodMultiPage extends PaymentMethodAbstractPage {
         //wait until it's loaded
         JXBrowserHelper.wait(browser, By.cssSelector("#new-payment-methods"));
 
-        JXBrowserHelper.saveOrderScreenshot(order,buyerPanel,"1");
+        JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
         //
         selectCreditCard(order);
 
@@ -38,7 +36,7 @@ public class PaymentMethodMultiPage extends PaymentMethodAbstractPage {
     public void click() {
         //continue;
         DOMElement continueBtn = JXBrowserHelper.selectElementByCssSelector(browser, CONTINUE_BTN_SELECTOR);
-        if(continueBtn != null && JXBrowserHelper.isVisible(continueBtn)) {
+        if (continueBtn != null && JXBrowserHelper.isVisible(continueBtn)) {
             //JXBrowserHelper.insertChecker(browser);
             continueBtn.click();
             WaitTime.Shortest.execute();

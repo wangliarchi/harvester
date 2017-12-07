@@ -101,7 +101,7 @@ public class UIHarvester extends AbstractApplicationUI {
 
     @UIEvent
     public void confirmShipment() {
-        confirmShipmentEvent.excute();
+        confirmShipmentEvent.execute();
     }
 
     @Inject
@@ -109,7 +109,7 @@ public class UIHarvester extends AbstractApplicationUI {
 
     @UIEvent
     public void orderConfirmationHistory() {
-        orderConfirmationHistoryEvent.excute();
+        orderConfirmationHistoryEvent.execute();
     }
 
     @Inject
@@ -117,7 +117,7 @@ public class UIHarvester extends AbstractApplicationUI {
 
     @UIEvent
     public void orderSubmissionLog() {
-        orderSubmissionLogEvent.excute();
+        orderSubmissionLogEvent.execute();
     }
 
     @Inject
@@ -138,7 +138,7 @@ public class UIHarvester extends AbstractApplicationUI {
 
     @UIEvent
     public void settings() {
-        settingEvent.excute();
+        settingEvent.execute();
         this.setTitle(String.format(APP_TITLE, Settings.load().getSid()));
     }
 
@@ -156,7 +156,7 @@ public class UIHarvester extends AbstractApplicationUI {
 
     @UIEvent
     public void reportBug() {
-        reportBugEvent.excute();
+        reportBugEvent.execute();
     }
 
     @Override

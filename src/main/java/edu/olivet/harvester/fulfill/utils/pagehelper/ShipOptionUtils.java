@@ -98,6 +98,7 @@ public class ShipOptionUtils {
             int daysExceedOrderEdd = Days.daysBetween(start, end).getDays();
 
             //Expedited Shipping requested
+            //noinspection SimplifiableIfStatement
             if (Remark.fastShipping(order.remark) && !it.isExpedited()) {
                 return false;
             }

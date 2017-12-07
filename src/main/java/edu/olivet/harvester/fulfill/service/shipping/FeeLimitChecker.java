@@ -25,9 +25,12 @@ public class FeeLimitChecker {
 
     public static final HashMap<Country, HashMap<ShippingType, HashMap<ShippingSpeed, Float>>> LIMIT_MAP = new HashMap<>();
 
-    public static final FeeLimitChecker instance = new FeeLimitChecker();
+    public static FeeLimitChecker instance = null;
 
     public static FeeLimitChecker getInstance() {
+        if (instance == null) {
+            instance = new FeeLimitChecker();
+        }
         return instance;
     }
 
@@ -69,7 +72,7 @@ public class FeeLimitChecker {
         try {
             return LIMIT_MAP.get(fulfillmentCountry).get(shippingType).get(shippingSpeed);
         } catch (Exception e) {
-            LOGGER.error("No shipping limt found for {} {} {}", fulfillmentCountry, shippingType, shippingSpeed, e);
+            LOGGER.error("No shipping limit found for {} {} {}", fulfillmentCountry, shippingType, shippingSpeed, e);
             return 0f;
         }
     }

@@ -4,7 +4,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.CurrencyRateCalculator;
 import edu.olivet.foundations.utils.RegexUtils;
-import edu.olivet.harvester.utils.CurrencyConvertor;
+import edu.olivet.harvester.utils.CurrencyConverter;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
@@ -23,7 +23,7 @@ public class Money {
     private Currency currency;
     private BigDecimal amount;
 
-    CurrencyRateCalculator currencyRateCalculator = CurrencyConvertor.getInstance();
+    CurrencyRateCalculator currencyRateCalculator = CurrencyConverter.getInstance();
 
     public Money(BigDecimal amount, Country country) {
         this.amount = amount;
@@ -95,7 +95,7 @@ public class Money {
      */
     private static int DECIMALS = 2;
 
-    private BigDecimal rounded(BigDecimal aNumber) {
-        return aNumber.setScale(DECIMALS, ROUNDING_MODE);
+    private BigDecimal rounded(BigDecimal decimalNumber) {
+        return decimalNumber.setScale(DECIMALS, ROUNDING_MODE);
     }
 }

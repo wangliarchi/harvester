@@ -11,7 +11,7 @@ import java.util.Random;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/4/17 9:00 PM
  */
 public class FinderCodeUtils {
-    private final static List<String> names = Configs.readLines(Config.Names.fileName());
+    private static final List<String> names = Configs.readLines(Config.Names.fileName());
 
     public static String generate() {
         Random rand = new Random();

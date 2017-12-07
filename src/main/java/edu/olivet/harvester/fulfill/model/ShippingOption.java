@@ -129,7 +129,7 @@ public class ShippingOption {
 
             String[] dateStringParts = dateString.split(" ");
             List<String> list = Lists.newArrayList(dateStringParts);
-            list.removeIf(it -> StringUtils.isBlank(it));
+            list.removeIf(StringUtils::isBlank);
 
             dateString = list.get(list.size() - 2) + " " + list.get(list.size() - 1);
             index = 3;
@@ -155,7 +155,7 @@ public class ShippingOption {
                     return date;
                 } catch (ParseException e) {
                     //LOGGER.error("", e);
-                    //ingore
+                    //ignore
                     //throw new BusinessException(e);
                 }
             }
@@ -192,10 +192,6 @@ public class ShippingOption {
         throw new BusinessException("Cant parse shipping option edd " + eddText);
     }
 
-    public static void main(String[] args) {
-
-        //
-    }
 
 }
 

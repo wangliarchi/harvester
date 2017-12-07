@@ -110,7 +110,7 @@ public class OrderSubmitter {
 
         //mark status first
         long start = System.currentTimeMillis();
-        markStatusService.excute(settings, false);
+        markStatusService.execute(settings, false);
         List<Order> orders = appScript.readOrders(settings);
         String resultSummary = String.format("Finished loading orders to submit for %s, %d orders found, took %s", settings.toString(), orders.size(), Strings.formatElapsedTime(start));
         LOGGER.info(resultSummary);
@@ -176,7 +176,7 @@ public class OrderSubmitter {
         LOGGER.info(resultSummary);
         messageListener.addMsg(resultSummary, validOrders.size() > 0 ? InformationLevel.Information : InformationLevel.Negative);
 
-        ProgressUpdator.init(validOrders);
+        ProgressUpdater.init(validOrders);
         for (Order order : validOrders) {
             //if stop btn clicked, break the process
             if (PSEventListener.stopped()) {
@@ -200,7 +200,7 @@ public class OrderSubmitter {
 
         RuntimeSettingsPanel.getInstance().resetSkipSetting();
 
-        StatisticLogger.log(String.format("%s\t%s", ProgressUpdator.toTable(), Strings.formatElapsedTime(start)));
+        StatisticLogger.log(String.format("%s\t%s", ProgressUpdater.toTable(), Strings.formatElapsedTime(start)));
 
         //reset after done
         PSEventListener.end();
@@ -241,9 +241,9 @@ public class OrderSubmitter {
         }
 
         if (StringUtils.isNotBlank(order.order_number)) {
-            ProgressUpdator.success();
+            ProgressUpdater.success();
         } else {
-            ProgressUpdator.failed();
+            ProgressUpdater.failed();
         }
 
 
@@ -271,7 +271,6 @@ public class OrderSubmitter {
                 Address address = Address.loadFromOrder(it);
                 System.out.println(String.format("%s\t2017-11-23T06:19:12+00:00\thttp://www.amazon.com/product/dp/B01A0CPHNC\tJiuUSBk2016-0718-C61316\t9.75\t1\t24.95\t%s", address.getName(), address.getState()));
                 System.out.println(String.format("%s\t%s\t%s\t%s\t%s\t\t\t\t\t%s", address.getAddress1(), address.getAddress2(), address.getCity(), address.getZip(), address.getPhoneNumber(), address.getCountry()));
-//                System.out.println(CountryStateUtils.getInstance().getCountryCode(address.getCountry()));
             } catch (Exception e) {
                 System.out.println(it);
                 throw e;

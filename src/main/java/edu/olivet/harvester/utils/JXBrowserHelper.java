@@ -93,7 +93,10 @@ public class JXBrowserHelper {
         try {
             String title = buyerPanel.getBrowserView().getBrowser().getTitle().replaceAll(" ", "");
             title = title.replaceAll(RegexUtils.Regex.NON_ALPHA_LETTER_DIGIT.val(), "");
-            String filePath = Directory.WebPage.path() + "/orders/" + order.sheetName.replaceAll("/", "") + "/" + order.row + "_" + order.order_id + "/images/" + step + "-" + title + ".png";
+            String filePath = Directory.WebPage.path() + "/orders/" +
+                    order.sheetName.replaceAll("/", "") + "/" +
+                    order.row + "_" + order.order_id + "/images/" +
+                    step + "-" + title + ".png";
             saveScreenshot(filePath, buyerPanel.getBrowserView());
 
             String htmlFilePath = filePath.replaceAll(".png", ".html").replaceAll("/images/", "/html/");
@@ -109,7 +112,7 @@ public class JXBrowserHelper {
      * 初始化一个JXBrowser View
      *
      * @param profileDirName 该BrowserView对应Profile路径名称，需要注意：一个路径同一时间只能一个Browser使用
-     * @param zoomLevel      缩放级别，100%常规模式可设定为1，放大或缩小可以设置其他值
+     * @param zoomLevel 缩放级别，100%常规模式可设定为1，放大或缩小可以设置其他值
      * @return 初始化好的BrowserView实例
      */
     public static BrowserView init(String profileDirName, double zoomLevel) {
@@ -415,6 +418,16 @@ public class JXBrowserHelper {
         return null;
     }
 
+    public static boolean isVisible(Browser browser, String selector) {
+        JSValue result = browser.executeJavaScriptAndReturnValue(String.format("var elm = document.querySelector('%s');var style = window.getComputedStyle(elm); style.display;", selector));
+        try {
+            return !"none".equalsIgnoreCase(result.getStringValue());
+        } catch (Exception e) {
+            return false;
+        }
+
+
+    }
 
     public static boolean isVisible(DOMElement element) {
         return !isHidden(element);
@@ -423,6 +436,7 @@ public class JXBrowserHelper {
     public static boolean isHidden(DOMElement element) {
         return element.getBoundingClientRect().isEmpty();
     }
+
 
     public static String text(DOMElement doc, String selector) {
         DOMElement element = selectElementByCssSelector(doc, selector);
@@ -453,6 +467,7 @@ public class JXBrowserHelper {
     public static void fillValueForFormField(Browser browser, String selector, String value) {
         try {
             DOMElement element = JXBrowserHelper.selectElementByCssSelector(browser, selector);
+            assert ((DOMFormControlElement) element) != null;
             ((DOMFormControlElement) element).setValue(value);
         } catch (Exception e) {
             LOGGER.error("Error fill data {} for {}", value, selector);
@@ -481,7 +496,7 @@ public class JXBrowserHelper {
         }
 
         if (select == null) {
-            LOGGER.error("no elelment {} found", selector);
+            LOGGER.error("no element {} found", selector);
             return;
         }
 
@@ -505,16 +520,6 @@ public class JXBrowserHelper {
         }
     }
 
-    public static boolean isVisible(Browser browser, String selector) {
-        JSValue result = browser.executeJavaScriptAndReturnValue(String.format("var elm = document.querySelector('%s');var style = window.getComputedStyle(elm); style.display;", selector));
-        try {
-            return !"none".equalsIgnoreCase(result.getStringValue());
-        } catch (Exception e) {
-            return false;
-        }
-
-
-    }
 
     @Repeat
     public static void click(DOMElement element) {
@@ -541,6 +546,7 @@ public class JXBrowserHelper {
             //enter password
             wait(browser, By.id("passwordNext"));
             DOMElement passwordField = selectElementByName(browser, "password");
+            assert ((DOMFormControlElement) passwordField) != null;
             ((DOMFormControlElement) passwordField).setValue(password);
             WaitTime.Short.execute();
             selectElementByCssSelectorWaitUtilLoaded(browser, "#passwordNext").click();
@@ -550,7 +556,6 @@ public class JXBrowserHelper {
 
     public static void main(String[] args) {
         String title = "https://www.amazon.com/MAIRICO-Premium-Kitchen-Purpose-Scissors/dp/B01HEPY216/ref=br_msw_pdt-2/131-7729985-1997618?_encoding=UTF8&smid=AXMKZ0APSAWJU&pf_rd_m=ATVPDKIKX0DER&pf_rd_s=&pf_rd_r=V563FE5ZVK4QCH3FVHQ0&pf_rd_t=36701&pf_rd_p=3c84e109-52be-4449-91bb-95cb9b9b2a9f&pf_rd_i=desktop";
-        title = title.replaceAll(RegexUtils.Regex.NON_ALPHA_LETTER_DIGIT.val(), "");
 
         Tools.switchLogMode(Configs.LogMode.Development);
         JFrame frame = new JFrame("Prototype of Harvester Web");
@@ -562,8 +567,7 @@ public class JXBrowserHelper {
         UITools.setDialogAttr(frame, true);
 
 
-        Browser.invokeAndWaitFinishLoadingMainFrame(view.getBrowser(),
-                it -> it.loadURL("https://www.amazon.com/dp/B01FLO5914"));
+        Browser.invokeAndWaitFinishLoadingMainFrame(view.getBrowser(), it -> it.loadURL("https://www.amazon.com/dp/B01FLO5914"));
 
         System.out.println(JXBrowserHelper.isVisible(view.getBrowser(), "#be"));
     }

@@ -86,6 +86,7 @@ public class BugReportDialog extends BaseDialog {
         final JLabel lblPriority = new JLabel(UIText.labelWithColon("label.bug.priority"));
         priority = new JComboBox<>(new DefaultComboBoxModel<>(Priority.values()));
         priority.setSelectedIndex(1);
+        assert ((Priority) priority.getSelectedItem()) != null;
         priority.setToolTipText(((Priority) priority.getSelectedItem()).tooltip());
         priority.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {

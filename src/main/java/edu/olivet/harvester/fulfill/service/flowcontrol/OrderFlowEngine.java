@@ -32,6 +32,7 @@ public class OrderFlowEngine extends FlowParent {
     @Inject
     SheetService sheetService;
 
+    @SuppressWarnings("UnusedReturnValue")
     @Repeat(expectedExceptions = BusinessException.class)
     public FlowState process(Order order, BuyerPanel buyerPanel) {
 
@@ -51,6 +52,7 @@ public class OrderFlowEngine extends FlowParent {
         } catch (Exception e) {
             LOGGER.error("", e);
             clearShoppingCart.processStep(state);
+            //noinspection UnusedAssignment
             order = sheetService.reloadOrder(order);
             throw new BusinessException(e);
         }

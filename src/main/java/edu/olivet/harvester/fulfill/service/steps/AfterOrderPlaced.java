@@ -25,8 +25,8 @@ public class AfterOrderPlaced extends Step {
         try {
             OrderPlacedSuccessPage orderPlacedSuccessPage = new OrderPlacedSuccessPage(state.getBuyerPanel());
             orderPlacedSuccessPage.execute(state.getOrder());
-        }catch (Exception e) {
-            LOGGER.error("",e);
+        } catch (Exception e) {
+            LOGGER.error("", e);
         }
 
         //fill data back to google sheet
@@ -41,6 +41,7 @@ public class AfterOrderPlaced extends Step {
     }
 
     @Inject StepHelper stepHelper;
+
     @Override
     public Step createDynamicInstance(FlowState state) {
         state.setPrevStep(this);
@@ -48,6 +49,7 @@ public class AfterOrderPlaced extends Step {
     }
 
     @Inject SheetService sheetService;
+
     @Repeat(expectedExceptions = BusinessException.class)
     private void updateInfoToOrderSheet(String spreadsheetId, Order order) {
         sheetService.fillFulfillmentOrderInfo(spreadsheetId, order);

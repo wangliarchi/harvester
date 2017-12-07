@@ -1,7 +1,7 @@
 package edu.olivet.harvester.fulfill.model;
 
-/**
- * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/11/17 8:46 AM
+/*
+  @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/11/17 8:46 AM
  */
 
 import edu.olivet.foundations.db.PrimaryKey;

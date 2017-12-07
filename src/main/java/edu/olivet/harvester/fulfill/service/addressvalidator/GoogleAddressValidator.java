@@ -13,7 +13,7 @@ public class GoogleAddressValidator implements AddressValidator {
 
     @Override
     public boolean verify(Address old, Address entered) {
-        String url = String.format(ENDPOINT, entered.withouName());
+        String url = String.format(ENDPOINT, entered.withoutName());
         LOGGER.debug("{}", url);
         return false;
     }

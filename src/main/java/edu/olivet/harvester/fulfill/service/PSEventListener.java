@@ -8,18 +8,18 @@ import javax.inject.Singleton;
 @Singleton
 public class PSEventListener {
     public enum Status {
-        NotRuning,
+        NotRunning,
         Running,
         Paused,
         Stopped,
         Ended,
     }
 
-    public static Status status = Status.NotRuning;
+    public static Status status = Status.NotRunning;
 
 
     public static void reset() {
-        status = Status.NotRuning;
+        status = Status.NotRunning;
     }
 
     public static void stop() {

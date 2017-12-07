@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * reprensent a google spreadsheet
+ * represent a google spreadsheet
  */
 
 @Data

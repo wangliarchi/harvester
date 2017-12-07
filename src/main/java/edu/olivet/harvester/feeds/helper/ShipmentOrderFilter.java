@@ -111,7 +111,7 @@ public class ShipmentOrderFilter {
             if (!OrderEnums.Status.WaitCancel.value().toLowerCase().equals(order.status.toLowerCase())) {
                 filtered.add(order);
             } else {
-                messagePanel.displayMsg("Row " + order.getRow() + " " + order.order_id + " ignored as it's marcked WC gray order. ",
+                messagePanel.displayMsg("Row " + order.getRow() + " " + order.order_id + " ignored as it's marked WC gray order. ",
                         LOGGER, InformationLevel.Negative);
                 grayWCOrderIds.add(order.order_id);
             }

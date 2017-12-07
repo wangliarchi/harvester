@@ -32,8 +32,8 @@ public class ShippingEnums {
 
         public static ShippingSpeed get(String description) {
             for (ShippingSpeed shippingSpeed : ShippingSpeed.values()) {
-                String[] keyworkds = StringUtils.split(shippingSpeed.getKeywords(), ",");
-                if (Strings.containsAnyIgnoreCase(description, keyworkds)) {
+                String[] keywords = StringUtils.split(shippingSpeed.getKeywords(), ",");
+                if (Strings.containsAnyIgnoreCase(description, keywords)) {
                     return shippingSpeed;
                 }
 

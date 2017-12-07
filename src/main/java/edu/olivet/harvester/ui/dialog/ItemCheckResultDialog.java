@@ -31,12 +31,12 @@ public class ItemCheckResultDialog extends javax.swing.JDialog {
     private final List<ItemCompareResult> results;
     private boolean validReturn;
     private DefaultTableModel tableModel;
-    private String[] COLUMN_NAMES;
+    @SuppressWarnings("CheckStyle") private String[] COLUMN_NAMES;
 
     public ItemCheckResultDialog(JFrame parent, boolean modal, List<ItemCompareResult> results) {
         super(parent, modal);
         this.results = results;
-        COLUMN_NAMES = new String[]{
+        COLUMN_NAMES = new String[] {
                 UIText.label("label.itemcheck.column.rowno"),
                 UIText.label("label.itemcheck.column.isbn"),
                 UIText.label("label.itemcheck.column.isbnname"),
@@ -57,10 +57,10 @@ public class ItemCheckResultDialog extends javax.swing.JDialog {
         tableModel = new DefaultTableModel(rowCount, colColunt) {
             private static final long serialVersionUID = -2054247119434140726L;
 
-            Class<?>[] types = new Class[]{
+            Class<?>[] types = new Class[] {
                     Integer.class, String.class, String.class, String.class, Boolean.class, String.class, Boolean.class
             };
-            boolean[] canEdit = new boolean[]{
+            boolean[] canEdit = new boolean[] {
                     false, false, false, false, false, false, true
             };
 
@@ -89,13 +89,13 @@ public class ItemCheckResultDialog extends javax.swing.JDialog {
             } else {
                 fail++;
             }
-            data[i++] = new Object[]{icr.getRow(), icr.getIsbn(), icr.getIsbnName(), icr.getItemName(), icr.isPreCheckPass(), icr.getPreCheckReport(), false};
+            data[i++] = new Object[] {icr.getRow(), icr.getIsbn(), icr.getIsbnName(), icr.getItemName(), icr.isPreCheckPass(), icr.getPreCheckReport(), false};
         }
         return data;
     }
 
     private void initComponents() {
-        scrollPanel = new JScrollPane();
+        JScrollPane scrollPanel = new JScrollPane();
         resultTable = new JTable(tableModel) {
             private static final long serialVersionUID = -7996493405307614317L;
 
@@ -115,8 +115,8 @@ public class ItemCheckResultDialog extends javax.swing.JDialog {
         };
         setColumnWidths();
 
-        okBtn = new javax.swing.JButton();
-        cancelBtn = new javax.swing.JButton();
+        JButton okBtn = new JButton();
+        JButton cancelBtn = new JButton();
 
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         String title = UIText.title("title.itemname.compare.result");
@@ -150,7 +150,7 @@ public class ItemCheckResultDialog extends javax.swing.JDialog {
         JScrollPane rulePanel = new JScrollPane();
         rulePanel.setBorder(new TitledBorder(null, UIText.title("title.compare.rules"), TitledBorder.LEADING, TitledBorder.TOP, null, null));
 
-        summaryTxtFld = new JLabel();
+        JLabel summaryTxtFld = new JLabel();
         summaryTxtFld.setForeground(Color.BLUE);
         summaryTxtFld.setText(UIText.text("text.compare.summary", count, pass, fail));
 
@@ -189,7 +189,7 @@ public class ItemCheckResultDialog extends javax.swing.JDialog {
                                                 .addComponent(passAllBtn))))
         );
 
-        rulesTextArea = new JTextArea();
+        JTextArea rulesTextArea = new JTextArea();
         rulesTextArea.setBackground(SystemColor.info);
         rulesTextArea.setForeground(SystemColor.desktop);
         rulesTextArea.setEditable(false);
@@ -199,6 +199,7 @@ public class ItemCheckResultDialog extends javax.swing.JDialog {
         pack();
     }
 
+    @SuppressWarnings("UnusedAssignment")
     public void setColumnWidths() {
         int j = 0;
         resultTable.getColumnModel().getColumn(j++).setPreferredWidth(60);
@@ -273,13 +274,8 @@ public class ItemCheckResultDialog extends javax.swing.JDialog {
     }
 
 
-    private javax.swing.JButton cancelBtn;
-    private javax.swing.JButton okBtn;
-    private JScrollPane scrollPanel;
     private JTable resultTable;
     private JCheckBox filterCheckbox;
-    private JTextArea rulesTextArea;
-    private JLabel summaryTxtFld;
     private JCheckBox passAllBtn;
 
     public boolean isValidReturn() {

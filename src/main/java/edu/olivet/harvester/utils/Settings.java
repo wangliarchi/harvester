@@ -46,10 +46,9 @@ public class Settings {
         return instance;
     }
 
-    public static Settings reload() {
+    public static void reload() {
         File file = new File(getConfigPath());
         instance = Settings.load(file);
-        return instance;
     }
 
     public static Settings load(String filePath) {

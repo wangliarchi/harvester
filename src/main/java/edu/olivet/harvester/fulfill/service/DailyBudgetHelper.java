@@ -55,7 +55,7 @@ public class DailyBudgetHelper {
 
     public Map<String, Float> getData(String spreadsheetId, Date date) {
         List<String> ranges = com.google.common.collect.Lists.newArrayList("Daily Cost");
-        List<ValueRange> valueRanges = sheetService.bactchGetSpreadsheetValues(spreadsheetId, ranges);
+        List<ValueRange> valueRanges = sheetService.batchGetSpreadsheetValues(spreadsheetId, ranges);
         int rowNo = 2;
 
         Map<String, Float> budgetData = new HashMap<>();
@@ -106,23 +106,6 @@ public class DailyBudgetHelper {
         return getCost(spreadsheetId, Dates.parseDate(date));
     }
 
-
-    public Float getBudget(String spreadsheetId, Date date) {
-
-
-        int row = BUDGET_ROW_CACHE.getOrDefault(spreadsheetId + dateToGoogleSheetName(date), 2);
-
-        List<String> ranges = com.google.common.collect.Lists.newArrayList("Daily Cost!C" + row);
-
-        try {
-            List<ValueRange> valueRanges = sheetService.bactchGetSpreadsheetValues(spreadsheetId, ranges);
-            return FloatUtils.parseFloat(valueRanges.get(0).getValues().get(0).get(0).toString(), 0);
-        } catch (Exception e) {
-            return 0f;
-        }
-    }
-
-
     public Float getCost(String spreadsheetId, Date date) {
 
         int row = BUDGET_ROW_CACHE.getOrDefault(spreadsheetId + dateToGoogleSheetName(date), 2);
@@ -130,7 +113,21 @@ public class DailyBudgetHelper {
         List<String> ranges = com.google.common.collect.Lists.newArrayList("Daily Cost!B" + row);
 
         try {
-            List<ValueRange> valueRanges = sheetService.bactchGetSpreadsheetValues(spreadsheetId, ranges);
+            List<ValueRange> valueRanges = sheetService.batchGetSpreadsheetValues(spreadsheetId, ranges);
+            return FloatUtils.parseFloat(valueRanges.get(0).getValues().get(0).get(0).toString(), 0);
+        } catch (Exception e) {
+            return 0f;
+        }
+    }
+
+    public Float getBudget(String spreadsheetId, Date date) {
+
+        int row = BUDGET_ROW_CACHE.getOrDefault(spreadsheetId + dateToGoogleSheetName(date), 2);
+
+        List<String> ranges = com.google.common.collect.Lists.newArrayList("Daily Cost!C" + row);
+
+        try {
+            List<ValueRange> valueRanges = sheetService.batchGetSpreadsheetValues(spreadsheetId, ranges);
             return FloatUtils.parseFloat(valueRanges.get(0).getValues().get(0).get(0).toString(), 0);
         } catch (Exception e) {
             return 0f;

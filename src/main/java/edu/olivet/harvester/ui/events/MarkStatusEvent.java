@@ -27,7 +27,7 @@ public class MarkStatusEvent extends Observable implements HarvesterUIEvent {
     @Inject
     MarkStatusService markStatusService;
 
-    public void excute() {
+    public void execute() {
         //validate runtime setting
         PSEventListener.reset();
         RuntimeSettings settings = RuntimeSettings.load();
@@ -38,7 +38,7 @@ public class MarkStatusEvent extends Observable implements HarvesterUIEvent {
             UITools.error(StringUtils.join(messages, StringUtils.LF), UIText.title("title.conf_error"));
             return;
         }
-        markStatusService.excute(settings);
+        markStatusService.execute(settings);
     }
 
 

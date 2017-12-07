@@ -33,8 +33,5 @@ public class ShippingMethodMultiPage extends ShippingAddressAbstract {
         }
 
         JXBrowserHelper.click(continueBtn);
-//        JXBrowserHelper.insertChecker(browser);
-//        continueBtn.click();
-//        JXBrowserHelper.waitUntilNewPageLoaded(browser);
     }
 }

@@ -19,7 +19,7 @@ public class OrderConfirmationHistoryEvent implements HarvesterUIEvent {
     private DBManager dbManager;
 
     @Override
-    public void excute() {
+    public void execute() {
         List<OrderConfirmationLog> list = dbManager.query(OrderConfirmationLog.class,
                 Cnd.where("context", "!=", "").desc("uploadTime"));
         ListModel<OrderConfirmationLog> dialog = new ListModel<>(Actions.OrderConfirmationHistory.label(), list, OrderConfirmationLog.COLUMNS, null, OrderConfirmationLog.WIDTHS);

@@ -414,7 +414,7 @@ public class OrderValidator {
             }
         } catch (Exception e) {
             LOGGER.error("", e);
-            return String.format("order buyer account not set properly. %s - ", OrderCountryUtils.getFulfillmentCountry(order), Settings.load().getSpreadsheetType(order.getSpreadsheetId()));
+            return String.format("order buyer account not set properly. %s - %s", OrderCountryUtils.getFulfillmentCountry(order), Settings.load().getSpreadsheetType(order.getSpreadsheetId()));
         }
         return "";
     }

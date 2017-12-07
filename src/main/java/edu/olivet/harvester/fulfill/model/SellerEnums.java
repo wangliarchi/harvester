@@ -11,30 +11,6 @@ import java.util.List;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 10/31/17 11:26 AM
  */
 public class SellerEnums {
-    /**
-     * 找单模式枚举定义
-     *
-     * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Dec 30, 2014 9:46:37 AM
-     */
-    public enum SellerHuntStrategy {
-        /**
-         * 先静默无声，如有必要启动浏览器
-         */
-        SilentFirst,
-        /**
-         * 一直使用静默无声模式
-         */
-        AlwaysSilent,
-        /**
-         * 一直使用浏览器开启模式
-         */
-        AlwaysInBrowser;
-
-        //		@Override
-        public String toString() {
-            return UIText.label("label.hunt.strategy." + this.name().toLowerCase());
-        }
-    }
 
     /**
      * Seller参考信息中的Seller状态
@@ -50,10 +26,7 @@ public class SellerEnums {
          * 必选Seller
          */
         ShallBeChosen(512, "label.seller.best"),
-        /**
-         * 必选SellerID
-         */
-        //	ShallBeChosenID(512, "label.seller.best"),
+
         /**
          * 不在必选Seller库中的可选Seller，按照找单流程要求通过审核
          */
@@ -70,10 +43,6 @@ public class SellerEnums {
          * 绝对不能选的Seller
          */
         ShallNotBeChosen(-64, "label.seller.forbidden");
-        /**
-         * 绝对不能选的SellerID
-         */
-        //	ShallNotBeChosenID(-64, "label.seller.forbidden");
 
         /**
          * 某一种Seller状态对应的得分

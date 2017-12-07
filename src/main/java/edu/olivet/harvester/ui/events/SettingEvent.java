@@ -13,7 +13,7 @@ import edu.olivet.harvester.utils.SettingValidator;
 public class SettingEvent implements HarvesterUIEvent {
     @Inject
     private SheetAPI sheetAPI;
-    public void excute() {
+    public void execute() {
         SettingsDialog dialog = UITools.setDialogAttr(new SettingsDialog(new SettingValidator(new AppScript(), sheetAPI)));
     }
 }

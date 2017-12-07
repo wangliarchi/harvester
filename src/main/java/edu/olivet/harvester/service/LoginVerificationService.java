@@ -57,7 +57,7 @@ public class LoginVerificationService {
 
         //read code from gmail
         String code = readFromGmail(buyer);
-        if(StringUtils.isNotBlank(code)) {
+        if (StringUtils.isNotBlank(code)) {
             return code;
         }
         throw new BusinessException("Failed to read the verification code from " + gmailAddress);
@@ -90,6 +90,7 @@ public class LoginVerificationService {
             //enter password
             JXBrowserHelper.wait(browser, By.id("passwordNext"));
             DOMElement password = JXBrowserHelper.selectElementByName(browser, "password");
+            assert ((DOMFormControlElement) password) != null;
             ((DOMFormControlElement) password).setValue(buyer.getPassword());
             WaitTime.Short.execute();
 
@@ -113,9 +114,9 @@ public class LoginVerificationService {
         String code = "";
         for (DOMElement p : ps) {
             String t = p.getInnerHTML().trim();
-            if(t.length() == 6) {
-                code = t.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(),"");
-                if(code.length()== 6) {
+            if (t.length() == 6) {
+                code = t.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), "");
+                if (code.length() == 6) {
                     break;
                 }
             }

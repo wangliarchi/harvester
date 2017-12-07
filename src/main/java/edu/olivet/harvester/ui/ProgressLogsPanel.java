@@ -22,9 +22,7 @@ import java.awt.event.ComponentListener;
 @Singleton
 public class ProgressLogsPanel extends JPanel implements MessagePanel {
 
-    private JScrollPane jScrollPane1;
-    private JScrollPane jScrollPane2;
-    public JSplitPane jSplitPane1;
+    public JSplitPane progressSplitPane1;
     public JTextPane successRecordsTextPanel;
     public JTextPane failedRecordsTextPanel;
 
@@ -42,12 +40,11 @@ public class ProgressLogsPanel extends JPanel implements MessagePanel {
     private void initComponents() {
         setBorder(null);
 
-        jSplitPane1 = new JSplitPane();
-        jScrollPane1 = new JScrollPane();
+        progressSplitPane1 = new JSplitPane();
+        JScrollPane jScrollPane1 = new JScrollPane();
         successRecordsTextPanel = new JTextPane();
-        jScrollPane2 = new JScrollPane();
+        JScrollPane jScrollPane2 = new JScrollPane();
         failedRecordsTextPanel = new JTextPane();
-
 
 
         jScrollPane1.setBorder(BorderFactory.createTitledBorder("Success Records"));
@@ -59,29 +56,27 @@ public class ProgressLogsPanel extends JPanel implements MessagePanel {
         jScrollPane2.setViewportView(failedRecordsTextPanel);
 
 
-
-
-        jSplitPane1.setDividerLocation(0.5);
-        jSplitPane1.setLeftComponent(jScrollPane1);
-        jSplitPane1.setRightComponent(jScrollPane2);
-        jSplitPane1.setBorder(null);
+        progressSplitPane1.setDividerLocation(0.5);
+        progressSplitPane1.setLeftComponent(jScrollPane1);
+        progressSplitPane1.setRightComponent(jScrollPane2);
+        progressSplitPane1.setBorder(null);
 
 
         if (SystemUtils.IS_OS_WINDOWS) {
             failedRecordsTextPanel.setFont(new Font(failedRecordsTextPanel.getFont().getName(), Font.PLAIN, Constants.TEXT_FONT_SIZE - 2));
         } else if (SystemUtils.IS_OS_LINUX) {
-           failedRecordsTextPanel.setFont(new Font(Constants.LINUX_TEXT_FONT, Font.PLAIN, Constants.TEXT_FONT_SIZE - 2));
+            failedRecordsTextPanel.setFont(new Font(Constants.LINUX_TEXT_FONT, Font.PLAIN, Constants.TEXT_FONT_SIZE - 2));
         }
 
         GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(jSplitPane1, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                        .addComponent(progressSplitPane1, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(jSplitPane1, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                        .addComponent(progressSplitPane1, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
         );
 
 
@@ -90,7 +85,7 @@ public class ProgressLogsPanel extends JPanel implements MessagePanel {
     public void initEventListeners() {
         this.addComponentListener(new ComponentListener() {
             public void componentResized(ComponentEvent e) {
-                jSplitPane1.setDividerLocation(0.5);
+                progressSplitPane1.setDividerLocation(0.5);
             }
 
             @Override

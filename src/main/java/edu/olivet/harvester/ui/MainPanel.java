@@ -20,24 +20,25 @@ public class MainPanel extends JPanel {
 
         runtimeSettingsPanel = RuntimeSettingsPanel.getInstance();
         mainWindowPanel = TabbedBuyerPanel.getInstance();
-        progressLogsPanel = ProgressLogsPanel.getInstance();
+        ProgressLogsPanel progressLogsPanel = ProgressLogsPanel.getInstance();
         progressLogsPanel.setMinimumSize(new Dimension(100, 150));
 
-        jSplitPane1 = new JSplitPane();
-        jSplitPane2 = new JSplitPane();
+        verticalSplitPane1 = new JSplitPane();
+        horizontalSplitPane1 = new JSplitPane();
 
-        jSplitPane1.setDividerLocation(400);
-        jSplitPane1.setDividerSize(5);
-        jSplitPane1.setOrientation(JSplitPane.VERTICAL_SPLIT);
-        jSplitPane1.setBorder(null);
-        jSplitPane2.setDividerSize(5);
-        jSplitPane2.setBorder(null);
+        verticalSplitPane1.setDividerLocation(400);
+        verticalSplitPane1.setDividerSize(5);
+        verticalSplitPane1.setOrientation(JSplitPane.VERTICAL_SPLIT);
+        verticalSplitPane1.setBorder(null);
+
+        horizontalSplitPane1.setDividerSize(5);
+        horizontalSplitPane1.setBorder(null);
 
 
-        jSplitPane1.setTopComponent(jSplitPane2);
-        jSplitPane1.setBottomComponent(progressLogsPanel);
-        jSplitPane2.setLeftComponent(mainWindowPanel);
-        jSplitPane2.setRightComponent(runtimeSettingsPanel);
+        verticalSplitPane1.setTopComponent(horizontalSplitPane1);
+        verticalSplitPane1.setBottomComponent(progressLogsPanel);
+        horizontalSplitPane1.setLeftComponent(mainWindowPanel);
+        horizontalSplitPane1.setRightComponent(runtimeSettingsPanel);
 
 
         javax.swing.GroupLayout layout = new GroupLayout(this);
@@ -46,13 +47,13 @@ public class MainPanel extends JPanel {
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(layout.createSequentialGroup()
                                 .addContainerGap()
-                                .addComponent(jSplitPane1, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                                .addComponent(verticalSplitPane1, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
                                 .addContainerGap())
         );
         layout.setVerticalGroup(
                 layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
+                                .addComponent(verticalSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
         );
 
 
@@ -66,8 +67,8 @@ public class MainPanel extends JPanel {
             public void componentResized(ComponentEvent e) {
                 int height = Math.max(runtimeSettingsPanel.getPreferredSize().height + 50, getHeight() - 250);
                 height = Math.min(height, getHeight() - 100);
-                jSplitPane1.setDividerLocation(height);
-                jSplitPane2.setDividerLocation(getWidth() - runtimeSettingsPanel.getPreferredSize().width - 20);
+                verticalSplitPane1.setDividerLocation(height);
+                horizontalSplitPane1.setDividerLocation(getWidth() - runtimeSettingsPanel.getPreferredSize().width - 20);
                 mainWindowPanel.resetZoomLevel();
             }
 
@@ -88,11 +89,10 @@ public class MainPanel extends JPanel {
         });
     }
 
-    private javax.swing.JSplitPane jSplitPane1;
-    private javax.swing.JSplitPane jSplitPane2;
+    private JSplitPane verticalSplitPane1;
+    private JSplitPane horizontalSplitPane1;
     private RuntimeSettingsPanel runtimeSettingsPanel;
     public TabbedBuyerPanel mainWindowPanel;
-    private ProgressLogsPanel progressLogsPanel;
 
     /**
      * @param args the command line arguments
