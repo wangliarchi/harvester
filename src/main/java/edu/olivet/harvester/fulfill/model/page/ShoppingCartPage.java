@@ -46,16 +46,18 @@ public class ShoppingCartPage extends FulfillmentPage {
 
     public void processToCheckout() {
 
+        //Protection Plan popup
+        DOMElement noThanksBtn = JXBrowserHelper.selectElementByCssSelector(browser, "#siNoCoverage-announce");
+        if (noThanksBtn != null) {
+            JXBrowserHelper.click(noThanksBtn);
+            WaitTime.Shortest.execute();
+        }
+
         DOMElement checkoutLink = JXBrowserHelper.selectElementByCssSelector(browser, "#hlb-ptc-btn-native");
         if (checkoutLink != null) {
             JXBrowserHelper.insertChecker(browser);
             checkoutLink.click();
             JXBrowserHelper.waitUntilNewPageLoaded(browser);
-            //String url = checkoutLink.getAttribute(PageUtils.HREF);
-            //if (StringUtils.containsNone(url, "//")) {
-            //    url = country.baseUrl() + url;
-            //}
-            //JXBrowserHelper.loadPage(browser, url);
             return;
         }
 
