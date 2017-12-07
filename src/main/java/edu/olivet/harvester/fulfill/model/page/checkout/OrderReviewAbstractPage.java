@@ -2,6 +2,7 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 
 import com.google.common.collect.Lists;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
+import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
@@ -46,9 +47,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         Money grandTotal = parseTotal();
 
         if (!ProfitLostControl.canPlaceOrder(order, grandTotal.toUSDAmount().floatValue())) {
-            throw new OrderSubmissionException("Order cost exceed maximum limit. Seller price" + order.getSellerPrice() +
-                    ", shipping " + order.shippingCost + ", total " + order.getOrderTotalCost() + ", " +
-                    order.getOrderTotalCost().toUSDAmount().toPlainString() + "USD");
+            throw new OrderSubmissionException("Order cost exceed maximum limit");
         }
 
         RuntimeSettings settings = RuntimeSettings.load();
@@ -58,7 +57,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         }
 
         order.orderTotalCost = grandTotal;
-        order.cost = grandTotal.getAmount().toPlainString();
+        order.cost = grandTotal.toUSDAmount().toPlainString();
 
 
     }
@@ -98,16 +97,28 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
     }
 
     public Money parseTotal() {
+
+        DOMElement transactionalTablePriceElement = JXBrowserHelper.selectElementByCssSelector(browser, "#subtotals-transactional-table .order-summary-tfx-grand-total-stressed .a-color-price.a-text-right");
+
+        if (transactionalTablePriceElement != null) {
+            String grandTotalText = transactionalTablePriceElement.getInnerText().trim();
+            try {
+                float amount =  Money.getAmountFromText(grandTotalText,buyerPanel.getCountry());
+                return new  Money(amount, Country.US);
+            } catch (Exception e) {
+                LOGGER.error("Error reading grand total. ", e);
+            }
+        }
+
         String grandTotalText = JXBrowserHelper.text(browser, "#subtotals-marketplace-table .grand-total-price");
-        Money grandTotal;
+
         try {
-            grandTotal = Money.fromText(grandTotalText, buyerPanel.getCountry());
+            return Money.fromText(grandTotalText, buyerPanel.getCountry());
         } catch (Exception e) {
             LOGGER.error("Error reading grand total. ", e);
             throw new BusinessException("Cannt read grand total - " + e.getMessage());
         }
 
-        return grandTotal;
     }
 
     public Address parseEnteredAddress() {

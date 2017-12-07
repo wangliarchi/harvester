@@ -2,9 +2,11 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 
 import com.teamdev.jxbrowser.chromium.dom.By;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
+import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils;
+import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.model.page.FulfillmentPage;
 import edu.olivet.harvester.model.Money;
@@ -16,10 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/9/17 4:38 PM
@@ -105,13 +104,17 @@ public class PlacedOrderDetailPage extends FulfillmentPage {
         return items;
     }
 
-    /**
-     * <pre>Jin Janice, [Dec 1, 2017, 4:15:11 PM]:
-     * ca 的书一律贴加元，其余的单在哪个国家做单就贴哪个国家的货币单位”
-     * 这个时现状，之后可以统一 在哪个卖场做单就贴相应卖场的币种
-     * </pre>
-     */
+
     public Money parseTotalCost() {
+        List<DOMElement> totalTrs = JXBrowserHelper.selectElementsByCssSelector(browser, "#od-subtotals .a-text-right.a-span-last");
+        for (DOMElement totalTr : totalTrs) {
+            if (Strings.containsAnyIgnoreCase(totalTr.getInnerText(), "USD")) {
+                String total = JXBrowserHelper.text(totalTr, ".a-color-base.a-text-bold");
+                float amount = Money.getAmountFromText(total, country);
+                return new Money(amount, Country.US);
+            }
+        }
+
         String total = JXBrowserHelper.text(browser, "#od-subtotals .a-text-right.a-span-last .a-color-base.a-text-bold");
         try {
             Money money = Money.fromText(total, country);

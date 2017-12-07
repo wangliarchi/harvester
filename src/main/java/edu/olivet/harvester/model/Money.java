@@ -47,10 +47,15 @@ public class Money {
 
     //
     public static Money fromText(String text, Country country) {
+        return new Money(getAmountFromText(text, country), country);
+    }
+
+
+    public static float getAmountFromText(String text, Country country) {
         String amt = RegexUtils.getMatched(text.replaceAll(" ", ""), RegexUtils.Regex.AMOUNT);
 
         if (StringUtils.isBlank(amt)) {
-            return new Money(0, country);
+            return 0;
         }
 
         //for FR, amazon using different locale format!!!
@@ -61,15 +66,16 @@ public class Money {
         if (format instanceof DecimalFormat) {
             ((DecimalFormat) format).setParseBigDecimal(true);
         }
+
         BigDecimal amount;
         try {
             amount = (BigDecimal) format.parse(amt);
         } catch (ParseException e) {
             throw new BusinessException("Failed to parse money from text " + text + " " + e.getMessage());
         }
-        return new Money(amount, country);
-    }
 
+        return amount.floatValue();
+    }
 
     public String toString() {
         return currency.getSymbol() + rounded(amount).toString();

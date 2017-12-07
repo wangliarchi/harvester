@@ -7,6 +7,7 @@ import edu.olivet.foundations.utils.Tools;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.fulfill.model.Address;
+import edu.olivet.harvester.model.Money;
 import edu.olivet.harvester.ui.BuyerPanel;
 import org.testng.annotations.Test;
 
@@ -46,6 +47,19 @@ public class PlacedOrderDetailPageTest extends BaseTest {
     @Test void testParseTotalCost() {
         prepareBrowser();
         assertEquals(placedOrderDetailPage.parseTotalCost(),"10.94");
+    }
+
+    @Test void testUKParseTotalCost() {
+        Account buyer = new Account("jxiang@olivetuniversity.edu/q1w2e3AA", Account.AccountType.Buyer);
+        BuyerPanel buyerPanel = new BuyerPanel(0, Country.UK, buyer, 1);
+        Browser browser = buyerPanel.getBrowserView().getBrowser();
+        File file = new File(TEST_DATA_ROOT + File.separator + "pages" + File.separator + "UKOrderDetails.html");
+        browser.loadHTML(Tools.readFileToString(file));
+        WaitTime.Shortest.execute();
+
+        PlacedOrderDetailPage orderDetailPage = new PlacedOrderDetailPage(buyerPanel);
+        Money grandTotal = orderDetailPage.parseTotalCost();
+        assertEquals(grandTotal.toString(),"$13.03");
     }
 
     @Test void testParseLastCode() {

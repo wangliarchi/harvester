@@ -19,6 +19,7 @@ import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.ui.BuyerPanel;
 import org.apache.commons.lang3.Range;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringExclude;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -28,6 +29,8 @@ import java.io.FileFilter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/13/17 1:07 PM
@@ -107,8 +110,22 @@ public class OrderReviewOnePageTest extends BaseTest {
 
 
     @Test
+    public void testUKReviewTotalCost() {
+        Account buyer = new Account("jxiang@olivetuniversity.edu/q1w2e3AA", Account.AccountType.Buyer);
+        buyerPanel = new BuyerPanel(0, Country.UK, buyer, 1);
+        browser = buyerPanel.getBrowserView().getBrowser();
+        File file = new File(TEST_DATA_ROOT + File.separator + "pages" + File.separator + "UKCheckoutReview.html");
+        browser.loadHTML(Tools.readFileToString(file));
+        WaitTime.Shortest.execute();
+
+        orderReviewOnePage = new OrderReviewOnePage(buyerPanel);
+        Money grandTotal = orderReviewOnePage.parseTotal();
+        assertEquals(grandTotal.toString(),"$13.03");
+    }
+    @Test
     public void testReviewTotalCost() {
         prepareData();
+
 
 
         for (File dir : directories) {
