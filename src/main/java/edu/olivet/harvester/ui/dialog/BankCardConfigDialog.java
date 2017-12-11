@@ -64,8 +64,8 @@ public class BankCardConfigDialog extends BaseDialog {
         vSequentialGroup.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE);
         List<String> emails = new ArrayList<>(creditCards.keySet());
         for (String buyerEmail : buyerAccountEmails) {
-            if (!emails.contains(buyerEmail)) {
-                emails.add(buyerEmail);
+            if (!emails.contains(buyerEmail.toLowerCase())) {
+                emails.add(buyerEmail.toLowerCase());
             }
         }
 
@@ -146,19 +146,19 @@ public class BankCardConfigDialog extends BaseDialog {
         if (settings != null && CollectionUtils.isNotEmpty(settings.getConfigs())) {
             settings.getConfigs().forEach(config -> {
                 if (config.getBuyer() != null && StringUtils.isNotBlank(config.getBuyer().getEmail())) {
-                    buyerAccounts.add(config.getBuyer().getEmail());
+                    buyerAccounts.add(config.getBuyer().getEmail().toLowerCase());
                 }
 
                 if (config.getPrimeBuyer() != null && StringUtils.isNotBlank(config.getPrimeBuyer().getEmail())) {
-                    buyerAccounts.add(config.getPrimeBuyer().getEmail());
+                    buyerAccounts.add(config.getPrimeBuyer().getEmail().toLowerCase());
                 }
 
                 if (config.getProdBuyer() != null && StringUtils.isNotBlank(config.getProdBuyer().getEmail())) {
-                    buyerAccounts.add(config.getProdBuyer().getEmail());
+                    buyerAccounts.add(config.getProdBuyer().getEmail().toLowerCase());
                 }
 
                 if (config.getProdPrimeBuyer() != null && StringUtils.isNotBlank(config.getProdPrimeBuyer().getEmail())) {
-                    buyerAccounts.add(config.getProdPrimeBuyer().getEmail());
+                    buyerAccounts.add(config.getProdPrimeBuyer().getEmail().toLowerCase());
                 }
             });
         }
