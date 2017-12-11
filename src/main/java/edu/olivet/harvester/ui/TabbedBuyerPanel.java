@@ -81,7 +81,9 @@ public class TabbedBuyerPanel extends JTabbedPane {
         String tabKey = getTabKey(country, account);
         if (buyerPanels.containsKey(tabKey)) {
             LOGGER.info("Buyer account {} already initialized. ", tabKey);
-            return buyerPanels.get(tabKey);
+            BuyerPanel buyerPanel =  buyerPanels.get(tabKey);
+            buyerPanel.getBuyer().setPassword(account.getPassword());
+            return buyerPanel;
         }
 
         final long start = System.currentTimeMillis();
