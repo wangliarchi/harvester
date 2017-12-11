@@ -418,17 +418,6 @@ public class JXBrowserHelper {
         return null;
     }
 
-    public static boolean isVisible(Browser browser, String selector) {
-        JSValue result = browser.executeJavaScriptAndReturnValue(String.format("var elm = document.querySelector('%s');var style = window.getComputedStyle(elm); style.display;", selector));
-        try {
-            return !"none".equalsIgnoreCase(result.getStringValue());
-        } catch (Exception e) {
-            return false;
-        }
-
-
-    }
-
     public static boolean isVisible(DOMElement element) {
         return !isHidden(element);
     }
@@ -569,6 +558,6 @@ public class JXBrowserHelper {
 
         Browser.invokeAndWaitFinishLoadingMainFrame(view.getBrowser(), it -> it.loadURL("https://www.amazon.com/dp/B01FLO5914"));
 
-        System.out.println(JXBrowserHelper.isVisible(view.getBrowser(), "#be"));
+
     }
 }

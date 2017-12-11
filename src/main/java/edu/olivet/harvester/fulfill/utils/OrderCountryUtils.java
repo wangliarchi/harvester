@@ -4,6 +4,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.model.OrderEnums.OrderItemType;
 import edu.olivet.harvester.model.Remark;
 import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.lang3.StringUtils;
@@ -38,13 +39,16 @@ public class OrderCountryUtils {
 
     public static Country getFulfillmentCountry(Order order) {
         // 批注中直寄和买回同时存在的情况下，先考虑直寄，随后考虑买回, 如果非直寄 和 转运，默认和order order 的sales channel 相同
+        // for EU books, if it's not direct ship, us fwd, or uk fwd, then it's uk shipment
         if (order.isDirectShip()) {
             return Remark.getDirectShipFromCountry(order.remark);
         } else if (order.purchaseBack()) {
             return Country.US;
         } else if (Remark.ukFwd(order.remark)) {
             return Country.UK;
-        } else {
+        } else if(order.getType() == OrderItemType.BOOK && getMarketplaceCountry(order).europe()) {
+            return Country.UK;
+        } else  {
             return getMarketplaceCountry(order);
         }
     }

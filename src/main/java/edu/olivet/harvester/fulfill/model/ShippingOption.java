@@ -45,13 +45,16 @@ public class ShippingOption {
         this.fullText = fullText;
         estimatedDeliveryDate = eddText;
         title = priceText;
+
+        shippingSpeed = ShippingSpeed.get(fullText);
+
         try {
             latestDeliveryDate = parseEDD(eddText, country);
         } catch (Exception e) {
             latestDeliveryDate = parseEDD(fullText, country);
         }
         price = parsePrice(priceText, country);
-        shippingSpeed = ShippingSpeed.get(fullText);
+
 
     }
 
@@ -168,30 +171,42 @@ public class ShippingOption {
                     daysString = daysString.replaceAll(RegexUtils.Regex.NON_DIGITS.val(), "");
                     int days = IntegerUtils.parseInt(daysString, 1);
 
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(now);
-                    for (int i = 0; i <= days; ) {
-                        calendar.add(Calendar.DAY_OF_MONTH, 1);
-                        //here even sat and sun are added
-                        //but at the end it goes to the correct week day.
-                        //because i is only increased if it is week day
-                        if (calendar.get(Calendar.DAY_OF_WEEK) <= 5) {
-                            i++;
-                        }
+                    return afterWorkDays(days);
 
-                    }
-
-                    return calendar.getTime();
                 } catch (Exception e) {
                     //
                 }
             }
         }
 
+        if (country != Country.US) {
+            return parseEDD(eddText, Country.US);
+        }
 
+        if (shippingSpeed == ShippingSpeed.Standard) {
+            return afterWorkDays(10);
+        } else if (shippingSpeed == ShippingSpeed.Expedited) {
+            return afterWorkDays(5);
+        }
         throw new BusinessException("Cant parse shipping option edd " + eddText);
     }
 
+    public Date afterWorkDays(int days) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(now);
+        for (int i = 0; i <= days; ) {
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+            //here even sat and sun are added
+            //but at the end it goes to the correct week day.
+            //because i is only increased if it is week day
+            if (calendar.get(Calendar.DAY_OF_WEEK) <= 5) {
+                i++;
+            }
+
+        }
+
+        return calendar.getTime();
+    }
 
 }
 

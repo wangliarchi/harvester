@@ -1,6 +1,5 @@
 package edu.olivet.harvester.fulfill.model.page.checkout;
 
-import com.sun.java.browser.plugin2.DOM;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import com.teamdev.jxbrowser.chromium.dom.DOMInputElement;
 import edu.olivet.foundations.utils.BusinessException;
@@ -17,7 +16,6 @@ import org.slf4j.LoggerFactory;
 public class ShippingAddressMultiPage extends ShippingAddressAbstract {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShippingAddressMultiPage.class);
-    private DOMElement btn;
 
     public ShippingAddressMultiPage(BuyerPanel buyerPanel) {
         super(buyerPanel);
@@ -37,6 +35,7 @@ public class ShippingAddressMultiPage extends ShippingAddressAbstract {
         DOMElement errorMsg = JXBrowserHelper.selectElementByCssSelector(browser, "#identity-add-new-address #addressIMB");
         if (errorMsg != null) {
             JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
+            LOGGER.error("Wrong address " + errorMsg.getInnerText());
             throw new BusinessException("Wrong address " + errorMsg.getInnerText());
         }
 

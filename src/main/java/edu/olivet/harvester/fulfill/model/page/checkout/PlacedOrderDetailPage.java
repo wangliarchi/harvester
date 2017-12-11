@@ -18,7 +18,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/9/17 4:38 PM
@@ -110,8 +113,12 @@ public class PlacedOrderDetailPage extends FulfillmentPage {
         for (DOMElement totalTr : totalTrs) {
             if (Strings.containsAnyIgnoreCase(totalTr.getInnerText(), "USD")) {
                 String total = JXBrowserHelper.text(totalTr, ".a-color-base.a-text-bold");
-                float amount = Money.getAmountFromText(total, country);
-                return new Money(amount, Country.US);
+                if (StringUtils.isNotBlank(total)) {
+                    float amount = Money.getAmountFromText(total, Country.US);
+                    if (amount > 0) {
+                        return new Money(amount, Country.US);
+                    }
+                }
             }
         }
 

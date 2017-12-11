@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 public class ShippingEnums {
 
     public enum ShippingSpeed {
-        Standard("Standard,Estándar,Rapide,Standardversand,Entrega", "S"),
+        Standard("Standard,Estándar,Rapide,Standardversand,Entrega,Economy", "S"),
         Expedited("Expedited,Priority,Two-Day,Same-Day,One-Day,Express,Prioritaire,Éclair,Eclair,Premiumversand,Livraison en 1 jour ouvré,Livraison ce soir", "E");
 
 

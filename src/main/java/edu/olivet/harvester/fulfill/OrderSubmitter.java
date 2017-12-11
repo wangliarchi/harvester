@@ -13,6 +13,7 @@ import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Strings;
+import edu.olivet.harvester.fulfill.exception.Exceptions.*;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.model.FulfillmentEnum;
 import edu.olivet.harvester.fulfill.model.ItemCompareResult;
@@ -195,6 +196,11 @@ public class OrderSubmitter {
             } catch (Exception e) {
                 LOGGER.error("Error submit order {}", order.order_id, e);
                 messageListener.addMsg(order, e.getMessage(), InformationLevel.Negative);
+
+                if (e instanceof OutOfBudgetException) {
+                    UITools.error("No more money to spend :(");
+                    break;
+                }
             }
         }
 
@@ -229,6 +235,8 @@ public class OrderSubmitter {
             }
 
 
+        } catch (OutOfBudgetException e) {
+            throw e;
         } catch (Exception e) {
             LOGGER.error("Error submit order {}", order.order_id, e);
 
@@ -238,16 +246,17 @@ public class OrderSubmitter {
 
             messageListener.addMsg(order, msg + " - took " + Strings.formatElapsedTime(start), InformationLevel.Negative);
             sheetService.fillUnsuccessfulMsg(spreadsheetId, order, msg);
-        }
-
-        if (StringUtils.isNotBlank(order.order_number)) {
-            ProgressUpdater.success();
-        } else {
-            ProgressUpdater.failed();
+        } finally {
+            if (StringUtils.isNotBlank(order.order_number)) {
+                ProgressUpdater.success();
+            } else {
+                ProgressUpdater.failed();
+            }
         }
 
 
     }
+
 
     public void _noOrders() {
         LOGGER.info("No valid orders to submit.");

@@ -262,7 +262,7 @@ public class ConfirmShipments {
 
         try {
             result = submitFeed(feedFile, country);
-            if(StringUtils.isBlank(result)) {
+            if (StringUtils.isBlank(result)) {
                 throw new BusinessException("No result returned.");
             }
         } catch (Exception e) {
@@ -403,20 +403,39 @@ public class ConfirmShipments {
 
     }
 
-    @Repeat(expectedExceptions = BusinessException.class)
-    public String _submitFeed(File feedFile, Country country) {
-        MarketWebServiceIdentity credential;
-        if (country.europe()) {
-            credential = Settings.load().getConfigByCountry(Country.UK).getMwsCredential();
-            credential.setMarketPlaceId(country.marketPlaceId());
-        } else {
-            credential = Settings.load().getConfigByCountry(country).getMwsCredential();
+
+    public String _submitFeed(File feedFile, Country country)  {
+
+        for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
+            MarketWebServiceIdentity credential;
+            if (country.europe()) {
+                credential = Settings.load().getConfigByCountry(Country.UK).getMwsCredential();
+                credential.setMarketPlaceId(country.marketPlaceId());
+            } else {
+                credential = Settings.load().getConfigByCountry(country).getMwsCredential();
+            }
+
+
+            LOGGER.info("Submitting order confirmation feed to amazon {}, using credential {}", country.name(), credential.toString());
+
+            try {
+                return feedUploader.execute(feedFile, FeedGenerator.BatchFileType.ShippingConfirmation.feedType(), credential, 1);
+            } catch (Exception e) {
+                LOGGER.error("", e);
+                if (!isRepeatable(e) || i == Constants.MAX_REPEAT_TIMES - 1) {
+                    throw e;
+                }
+            }
         }
 
 
-        LOGGER.info("Submitting order confirmation feed to amazon {}, using credential {}", country.name(), credential.toString());
+        return null;
+    }
 
-        return feedUploader.execute(feedFile, FeedGenerator.BatchFileType.ShippingConfirmation.feedType(), credential, 1);
+    private static final String[] RECOVERABLE_ERROR_MESSAGES = {"Request is throttled", "You exceeded your quota", "Internal Error"};
+
+    protected boolean isRepeatable(Exception e) {
+        return Strings.containsAnyIgnoreCase(e.getMessage(), RECOVERABLE_ERROR_MESSAGES);
     }
 
     /**

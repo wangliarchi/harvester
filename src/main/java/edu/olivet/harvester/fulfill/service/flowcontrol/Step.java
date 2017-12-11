@@ -38,9 +38,9 @@ public abstract class Step {
             stepName = this.getClass().getName();
         }
         state.steps.add(this);
-        //save screenshot
-        //state.saveScreenshot();
+
         process(state);
+
         state.setPrevStep(this);
         state.saveScreenshot();
 

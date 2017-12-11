@@ -5,7 +5,7 @@ import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.WaitTime;
-import edu.olivet.harvester.fulfill.exception.OrderSubmissionException;
+import edu.olivet.harvester.fulfill.exception.Exceptions.*;
 import edu.olivet.harvester.fulfill.model.page.checkout.OrderReviewMultiPage;
 import edu.olivet.harvester.fulfill.service.AddressValidatorService;
 import edu.olivet.harvester.fulfill.service.flowcontrol.FlowState;
@@ -47,7 +47,7 @@ public class ReviewOrderMultiPage extends Step {
             LOGGER.info("Passed cost check.");
         } catch (Exception e) {
             LOGGER.error("Failed cost check. ", e);
-            throw new OrderSubmissionException(e);
+            throw e;
         }
 
 

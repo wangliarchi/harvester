@@ -69,6 +69,9 @@ public class FeeLimitChecker {
     }
 
     public Float getLimit(Country fulfillmentCountry, ShippingType shippingType, ShippingSpeed shippingSpeed) {
+        if (shippingSpeed == null) {
+            shippingSpeed = ShippingSpeed.Standard;
+        }
         try {
             return LIMIT_MAP.get(fulfillmentCountry).get(shippingType).get(shippingSpeed);
         } catch (Exception e) {

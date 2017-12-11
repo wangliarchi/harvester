@@ -1,6 +1,7 @@
 package edu.olivet.harvester.fulfill.utils;
 
 import edu.olivet.harvester.common.BaseTest;
+import edu.olivet.harvester.fulfill.service.ProfitLostControl;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

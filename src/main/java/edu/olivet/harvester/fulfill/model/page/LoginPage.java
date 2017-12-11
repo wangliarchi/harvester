@@ -11,6 +11,7 @@ import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
+import edu.olivet.harvester.fulfill.exception.Exceptions.FailedBuyerAccountAuthenticationException;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.service.LoginVerificationService;
 import edu.olivet.harvester.ui.BuyerPanel;
@@ -84,7 +85,11 @@ public class LoginPage extends FulfillmentPage implements PageObject {
             JXBrowserHelper.waitUntilNewPageLoaded(browser);
         }
 
-        DOMElement password = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, PASSWORD_SELECTOR);
+        DOMElement password = JXBrowserHelper.selectElementByCssSelector(browser, PASSWORD_SELECTOR);
+        if (password == null) {
+            return;
+        }
+
         ((DOMFormControlElement) password).setValue(buyer.getPassword());
         WaitTime.Shortest.execute();
 
@@ -98,6 +103,15 @@ public class LoginPage extends FulfillmentPage implements PageObject {
         JXBrowserHelper.insertChecker(browser);
         Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> ((DOMFormControlElement) password).getForm().submit());
         JXBrowserHelper.waitUntilNewPageLoaded(browser);
+
+        //check if errors
+        DOMElement errorDom = JXBrowserHelper.selectElementByCssSelector(browser, "#auth-error-message-box .a-alert-content");
+        if (errorDom != null) {
+            String errorText = errorDom.getInnerText();
+            if(StringUtils.isNotBlank(errorText)) {
+                throw new FailedBuyerAccountAuthenticationException("Failed to log in buyer account "+buyer.getEmail()+". Error msg");
+            }
+        }
 
         //check if verification code is requested
         DOMElement codeRequested = JXBrowserHelper.selectElementByName(browser, "claimspicker");

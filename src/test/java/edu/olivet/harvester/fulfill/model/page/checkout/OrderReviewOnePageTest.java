@@ -122,6 +122,34 @@ public class OrderReviewOnePageTest extends BaseTest {
         Money grandTotal = orderReviewOnePage.parseTotal();
         assertEquals(grandTotal.toString(),"$13.03");
     }
+
+    @Test
+    public void testCAReviewTotalCost() {
+        Account buyer = new Account("jxiang@olivetuniversity.edu/q1w2e3AA", Account.AccountType.Buyer);
+        buyerPanel = new BuyerPanel(0, Country.CA, buyer, 1);
+        browser = buyerPanel.getBrowserView().getBrowser();
+        File file = new File(TEST_DATA_ROOT + File.separator + "pages" + File.separator + "CACheckoutReview.html");
+        browser.loadHTML(Tools.readFileToString(file));
+        WaitTime.Shortest.execute();
+
+        orderReviewOnePage = new OrderReviewOnePage(buyerPanel);
+        Money grandTotal = orderReviewOnePage.parseTotal();
+        assertEquals(grandTotal.toString(),"$12.73");
+    }
+
+    @Test
+    public void testDEReviewTotalCost() {
+        Account buyer = new Account("jxiang@olivetuniversity.edu/q1w2e3AA", Account.AccountType.Buyer);
+        buyerPanel = new BuyerPanel(0, Country.DE, buyer, 1);
+        browser = buyerPanel.getBrowserView().getBrowser();
+        File file = new File(TEST_DATA_ROOT + File.separator + "pages" + File.separator + "DECheckoutReview.html");
+        browser.loadHTML(Tools.readFileToString(file));
+        WaitTime.Shortest.execute();
+
+        orderReviewOnePage = new OrderReviewOnePage(buyerPanel);
+        Money grandTotal = orderReviewOnePage.parseTotal();
+        assertEquals(grandTotal.toString(),"$12.24");
+    }
     @Test
     public void testReviewTotalCost() {
         prepareData();

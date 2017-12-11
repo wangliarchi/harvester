@@ -1,4 +1,4 @@
-package edu.olivet.harvester.fulfill.utils;
+package edu.olivet.harvester.fulfill.service;
 
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.model.Order;
@@ -35,18 +35,22 @@ public class ProfitLostControl {
      * 没有设置跳过检查，也没有标zuoba的时候，亏损上限可以在orderman里面设置，有7和5两个选项。
      *
      * cost is in USD
+     * 12/04/2017
+     * 对于利润判断：下午跟**干事和数据改价一起商量了，可以按照这个标准来
+     * seller price 在$20以下（包括20），赔钱5美金以内可以做单（包括5美金）；
+     * seller price 大于$20 ，利润小于seller price*5% 不做单
+     * 这个标准做成默认标准；
+     * 不过这个之外希望保留一个可以人工填写的可变标准。
+     * 其中$20  -5  5% 这三个量设成可以人工填写的变量。可变标准一般情况无法启动，需要中央允许的情况下可以开启
      * </pre>
      */
     public static boolean canPlaceOrder(Order order, Float cost) {
-
         float lostLimit;
         if (order.fulfilledFromUK()) {
             lostLimit = 0;
         } else if (OrderValidator.skipCheck(order, OrderValidator.SkipValidation.Profit)) {
             lostLimit = -20;
         } else {
-            //RuntimeSettings settings = RuntimeSettings.load();
-            //lostLimit = Float.parseFloat(settings.getLostLimit());
             if (cost <= 20) {
                 lostLimit = -5;
             } else {

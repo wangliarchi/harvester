@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.testng.Assert.assertEquals;
+
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/21/17 11:30 AM
  */
@@ -97,6 +99,24 @@ public class ShippingMethodOnePageTest extends BaseTest {
             }
         }
 
+    }
+
+    @Test
+    public void testDEShippingOptions() {
+        Account buyer = new Account("jxiang@olivetuniversity.edu/q1w2e3AA", Account.AccountType.Buyer);
+        buyerPanel = new BuyerPanel(0, Country.CA, buyer, 1);
+        browser = buyerPanel.getBrowserView().getBrowser();
+        File file = new File(TEST_DATA_ROOT + File.separator + "pages" + File.separator + "DECheckoutReview.html");
+        browser.loadHTML(Tools.readFileToString(file));
+        WaitTime.Shortest.execute();
+
+        order = prepareOrder();
+        order.estimated_delivery_date="2017-12-19 2018-01-05";
+        List<ShippingOption> options = ShipOptionUtils.listAllOptions(browser, Country.DE);
+
+        List<ShippingOption> validOptions = ShippingHandlerFactory.getHandler(order).getValidateOptions(order, options);
+
+        System.out.println(validOptions);
     }
 
 }

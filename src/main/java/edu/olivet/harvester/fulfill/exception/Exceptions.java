@@ -4,6 +4,27 @@ package edu.olivet.harvester.fulfill.exception;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/1/17 2:21 PM
  */
 public class Exceptions {
+
+    public static class OrderSubmissionException extends RuntimeException {
+        public OrderSubmissionException(String errorMsg) {
+            super(errorMsg);
+        }
+
+        public OrderSubmissionException(Throwable cause) {
+            super(cause);
+        }
+    }
+
+    public static class FailedBuyerAccountAuthenticationException extends OrderSubmissionException {
+
+        public FailedBuyerAccountAuthenticationException(String errorMsg) {
+            super(errorMsg);
+        }
+
+        public FailedBuyerAccountAuthenticationException(Throwable cause) {
+            super(cause);
+        }
+    }
     /**
      * Supplier为禁选Seller异常定义
      */
@@ -29,7 +50,7 @@ public class Exceptions {
     /**
      * 地址无法寄送到异常定义
      */
-    public static class CannotShipToException extends RuntimeException {
+    public static class CannotShipToException extends OrderSubmissionException {
         private static final long serialVersionUID = 5731139518478534873L;
 
         public CannotShipToException(String message) {
@@ -116,7 +137,7 @@ public class Exceptions {
     /**
      * gift card out of balance异常定义
      */
-    public static class OutOfBudgetException extends RuntimeException {
+    public static class OutOfBudgetException extends OrderSubmissionException {
         private static final long serialVersionUID = 548234872567663633L;
 
         public OutOfBudgetException(String message) {
@@ -200,7 +221,6 @@ public class Exceptions {
             super(message);
         }
     }
-
 
 
 }

@@ -3,7 +3,7 @@ package edu.olivet.harvester.fulfill.service.shipping;
 
 import com.google.inject.Singleton;
 import edu.olivet.foundations.utils.Strings;
-import edu.olivet.harvester.fulfill.exception.OrderSubmissionException;
+import edu.olivet.harvester.fulfill.exception.Exceptions.*;
 import edu.olivet.harvester.fulfill.model.ShippingEnums.ShippingSpeed;
 import edu.olivet.harvester.fulfill.model.ShippingOption;
 import edu.olivet.harvester.model.Order;

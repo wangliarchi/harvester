@@ -455,7 +455,9 @@ public class Order implements Keyable {
     }
 
     public OrderEnums.OrderItemType type = null;
-
+    public OrderEnums.OrderItemType getType() {
+        return type();
+    }
     public OrderEnums.OrderItemType type() {
         if (type == null) {
             try {

@@ -62,6 +62,19 @@ public class PlacedOrderDetailPageTest extends BaseTest {
         assertEquals(grandTotal.toString(),"$13.03");
     }
 
+    @Test void testCAParseTotalCost() {
+        Account buyer = new Account("jxiang@olivetuniversity.edu/q1w2e3AA", Account.AccountType.Buyer);
+        BuyerPanel buyerPanel = new BuyerPanel(0, Country.CA, buyer, 1);
+        Browser browser = buyerPanel.getBrowserView().getBrowser();
+        File file = new File(TEST_DATA_ROOT + File.separator + "pages" + File.separator + "CAOrderDetails.html");
+        browser.loadHTML(Tools.readFileToString(file));
+        WaitTime.Shortest.execute();
+
+        PlacedOrderDetailPage orderDetailPage = new PlacedOrderDetailPage(buyerPanel);
+        Money grandTotal = orderDetailPage.parseTotalCost();
+        assertEquals(grandTotal.toString(),"$12.73");
+    }
+
     @Test void testParseLastCode() {
         prepareBrowser();
         assertEquals(placedOrderDetailPage.parseLastCode(),"3576");

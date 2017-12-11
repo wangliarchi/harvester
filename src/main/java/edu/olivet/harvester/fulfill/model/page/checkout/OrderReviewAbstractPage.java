@@ -7,7 +7,7 @@ import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
-import edu.olivet.harvester.fulfill.exception.OrderSubmissionException;
+import edu.olivet.harvester.fulfill.exception.Exceptions.*;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.model.page.FulfillmentPage;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
@@ -16,7 +16,7 @@ import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.service.addressvalidator.AddressValidator;
 import edu.olivet.harvester.fulfill.service.shipping.FeeLimitChecker;
 import edu.olivet.harvester.fulfill.utils.OrderAddressUtils;
-import edu.olivet.harvester.fulfill.utils.ProfitLostControl;
+import edu.olivet.harvester.fulfill.service.ProfitLostControl;
 import edu.olivet.harvester.model.Money;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.BuyerPanel;
@@ -53,7 +53,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         RuntimeSettings settings = RuntimeSettings.load();
         float remainingBudget = ApplicationContext.getBean(DailyBudgetHelper.class).getRemainingBudget(settings.getSpreadsheetId(), new Date());
         if (remainingBudget < grandTotal.toUSDAmount().floatValue()) {
-            throw new OrderSubmissionException("You don't have enough fund to process this order. Need $" + grandTotal.toUSDAmount() + ", only have $" + String.format("%.2f", remainingBudget));
+            throw new OutOfBudgetException("You don't have enough fund to process this order. Need $" + grandTotal.toUSDAmount() + ", only have $" + String.format("%.2f", remainingBudget));
         }
 
         order.orderTotalCost = grandTotal;
@@ -84,8 +84,10 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
             if (Strings.containsAnyIgnoreCase(tr.getInnerText(), SHIPPING_KEYWORDS.toArray(new String[SHIPPING_KEYWORDS.size()]))) {
                 try {
                     String shippingCostString = JXBrowserHelper.text(tr, ".a-text-right");
-                    shippingCost = Money.fromText(shippingCostString, buyerPanel.getCountry());
-                    break;
+                    if (StringUtils.isNotBlank(shippingCostString)) {
+                        shippingCost = Money.fromText(shippingCostString, buyerPanel.getCountry());
+                        break;
+                    }
                 } catch (Exception e) {
                     LOGGER.error("Error reading shipping cost. ", e);
                     throw new BusinessException("Cant read shipping cost - " + e.getMessage());
@@ -98,15 +100,19 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
 
     public Money parseTotal() {
 
-        DOMElement transactionalTablePriceElement = JXBrowserHelper.selectElementByCssSelector(browser, "#subtotals-transactional-table .order-summary-tfx-grand-total-stressed .a-color-price.a-text-right");
+        DOMElement transactionalTablePriceElement = JXBrowserHelper.selectElementByCssSelector(browser, "#subtotals-transactional-table .order-summary-tfx-grand-total-stressed .a-color-price.a-text-right,#subtotals-transactional-table .grand-total-price");
 
         if (transactionalTablePriceElement != null) {
             String grandTotalText = transactionalTablePriceElement.getInnerText().trim();
-            try {
-                float amount =  Money.getAmountFromText(grandTotalText,buyerPanel.getCountry());
-                return new  Money(amount, Country.US);
-            } catch (Exception e) {
-                LOGGER.error("Error reading grand total. ", e);
+            if (StringUtils.isNotBlank(grandTotalText)) {
+                try {
+                    float amount = Money.getAmountFromText(grandTotalText, Country.US);
+                    if (amount > 0) {
+                        return new Money(amount, Country.US);
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("Error reading grand total. ", e);
+                }
             }
         }
 

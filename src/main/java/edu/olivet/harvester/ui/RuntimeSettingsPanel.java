@@ -322,13 +322,6 @@ public class RuntimeSettingsPanel extends JPanel {
 
     }
 
-    public void updateBudget() {
-        if (StringUtils.isNotBlank(settings.getSpreadsheetId())) {
-            Float budget = Float.parseFloat(todayBudgetTextField.getText());
-            ApplicationContext.getBean(DailyBudgetHelper.class).updateBudget(settings.getSpreadsheetId(), new Date(), budget);
-        }
-    }
-
     public void showPauseBtn() {
         pauseButton.setVisible(true);
         stopButton.setVisible(true);
