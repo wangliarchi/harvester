@@ -7,7 +7,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
-import edu.olivet.harvester.fulfill.exception.OrderSubmissionException;
+import edu.olivet.harvester.fulfill.exception.Exceptions.*;
 import edu.olivet.harvester.fulfill.model.Seller;
 import edu.olivet.harvester.fulfill.model.SellerEnums;
 import edu.olivet.harvester.fulfill.service.SellerService;
@@ -18,6 +18,7 @@ import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.Remark;
 import edu.olivet.harvester.ui.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ public class OfferListingPage extends FulfillmentPage {
 
     public void enter(Order order) {
         String url = OrderCountryUtils.getOfferListingUrl(order);
-        LOGGER.info("Offer listing page {}",url);
+        LOGGER.info("Offer listing page {}", url);
         JXBrowserHelper.loadPage(browser, url);
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
     }
@@ -77,23 +78,42 @@ public class OfferListingPage extends FulfillmentPage {
         LOGGER.info("Finding seller for order {}", order.order_id);
 
         Country currentCountry = OrderCountryUtils.getFulfillmentCountry(order);
-        List<Seller> sellers = sellerService.parseSellers(browser, currentCountry);
 
-        //List<Seller> results = new ArrayList<>();
-        for (Seller seller : sellers) {
-            String sellerName = seller.getName();
-            boolean sellerEq = (StringUtils.isNotBlank(seller.getUuid()) && StringUtils.isNotBlank(order.seller_id) && seller.getUuid().equalsIgnoreCase(order.seller_id) && seller.getType().abbrev().equalsIgnoreCase(order.character)) ||
-                    (StringUtils.isNotBlank(sellerName) && StringUtils.isNotBlank(order.seller) && sellerName.equalsIgnoreCase(order.seller) && seller.getType().abbrev().equalsIgnoreCase(order.character)) ||
-                    (seller.getType() == SellerEnums.SellerType.AP && order.sellerIsAP()) ||
-                    (seller.getType() == SellerEnums.SellerType.APWareHouse && order.sellerIsAPWarehouse());
+        while (true) {
+            List<Seller> sellers = sellerService.parseSellers(browser, currentCountry);
 
-            //ConditionUtils
-            if (sellerEq && ConditionUtils.goodToGo(order.condition, seller.getCondition())) {
-                return seller;
+            if (CollectionUtils.isEmpty(sellers)) {
+                break;
             }
+            //List<Seller> results = new ArrayList<>();
+            for (Seller seller : sellers) {
+                String sellerName = seller.getName();
+                boolean sellerEq = (StringUtils.isNotBlank(seller.getUuid()) && StringUtils.isNotBlank(order.seller_id) && seller.getUuid().equalsIgnoreCase(order.seller_id) && seller.getType().abbrev().equalsIgnoreCase(order.character)) ||
+                        (StringUtils.isNotBlank(sellerName) && StringUtils.isNotBlank(order.seller) && sellerName.equalsIgnoreCase(order.seller) && seller.getType().abbrev().equalsIgnoreCase(order.character)) ||
+                        (seller.getType() == SellerEnums.SellerType.AP && order.sellerIsAP()) ||
+                        (seller.getType() == SellerEnums.SellerType.APWareHouse && order.sellerIsAPWarehouse());
+
+                //ConditionUtils
+                if (sellerEq && ConditionUtils.goodToGo(order.condition, seller.getCondition())) {
+                    return seller;
+                }
+            }
+
+            //to next page
+
+            DOMElement nextPageLink = JXBrowserHelper.selectElementByCssSelector(browser, "#olpOfferListColumn .a-pagination li.a-last a");
+            if (nextPageLink != null) {
+                JXBrowserHelper.insertChecker(browser);
+                nextPageLink.click();
+                JXBrowserHelper.waitUntilNewPageLoaded(browser);
+            } else {
+                break;
+            }
+
+
         }
 
-        JXBrowserHelper.saveOrderScreenshot(order,buyerPanel,"1");
+        JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
         throw new OrderSubmissionException(String.format(Remark.SELLER_DISAPPEAR.text2Write(), order.seller, order.character));
     }
 
