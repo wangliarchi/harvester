@@ -10,6 +10,7 @@ import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Directory;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.model.OrderEnums;
+import edu.olivet.harvester.spreadsheet.model.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.Harvester;
 import lombok.AllArgsConstructor;
@@ -123,15 +124,15 @@ public class Settings {
         return spreadIds;
     }
 
-    public List<edu.olivet.harvester.spreadsheet.Spreadsheet> listSpreadsheets(Country country, AppScript appScript) {
+    public List<Spreadsheet> listSpreadsheets(Country country, AppScript appScript) {
         List<String> spreadsheetIds = listAllSpreadsheets();
-        List<edu.olivet.harvester.spreadsheet.Spreadsheet> spreadsheets = new ArrayList<>();
+        List<Spreadsheet> spreadsheets = new ArrayList<>();
 
         StringBuilder spreadsheetIdError = new StringBuilder();
         for (String spreadsheetId : spreadsheetIds) {
             try {
                 if (getSpreadsheetCountry(spreadsheetId) == country) {
-                    edu.olivet.harvester.spreadsheet.Spreadsheet spreadsheet = appScript.getSpreadsheet(spreadsheetId);
+                    Spreadsheet spreadsheet = appScript.getSpreadsheet(spreadsheetId);
                     spreadsheets.add(spreadsheet);
                 }
             } catch (Exception e) {

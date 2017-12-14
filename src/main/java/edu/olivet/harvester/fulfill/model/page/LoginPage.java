@@ -14,7 +14,7 @@ import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.exception.Exceptions.FailedBuyerAccountAuthenticationException;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.service.LoginVerificationService;
-import edu.olivet.harvester.ui.BuyerPanel;
+import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

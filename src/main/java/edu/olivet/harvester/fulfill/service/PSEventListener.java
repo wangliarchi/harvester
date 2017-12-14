@@ -38,6 +38,10 @@ public class PSEventListener {
         status = Status.Running;
     }
 
+    public static boolean isRunning() {
+        return status == Status.Running;
+    }
+
     public static boolean stopped() {
         return status == Status.Stopped;
     }

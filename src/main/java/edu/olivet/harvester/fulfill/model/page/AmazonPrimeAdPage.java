@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.ui.BuyerPanel;
+import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 
 import java.util.List;

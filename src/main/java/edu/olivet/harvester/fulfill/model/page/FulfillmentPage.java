@@ -3,7 +3,7 @@ package edu.olivet.harvester.fulfill.model.page;
 import com.teamdev.jxbrowser.chromium.Browser;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
-import edu.olivet.harvester.ui.BuyerPanel;
+import edu.olivet.harvester.ui.panel.BuyerPanel;
 import lombok.Getter;
 
 /**

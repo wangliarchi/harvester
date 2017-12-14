@@ -1,4 +1,4 @@
-package edu.olivet.harvester.ui;
+package edu.olivet.harvester.ui.panel;
 
 
 import edu.olivet.foundations.ui.InformationLevel;

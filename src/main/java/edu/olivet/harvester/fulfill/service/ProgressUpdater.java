@@ -2,7 +2,7 @@ package edu.olivet.harvester.fulfill.service;
 
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.ui.RuntimeSettingsPanel;
+import edu.olivet.harvester.ui.panel.RuntimeSettingsPanel;
 
 import javax.swing.*;
 import java.util.List;

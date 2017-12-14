@@ -10,7 +10,7 @@ import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.spreadsheet.service.OrderHelper;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
-import edu.olivet.harvester.utils.SheetUtils;
+import edu.olivet.harvester.spreadsheet.utils.SheetUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.Range;
 import org.apache.commons.lang3.StringUtils;

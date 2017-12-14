@@ -12,7 +12,7 @@ import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.spreadsheet.Spreadsheet;
+import edu.olivet.harvester.spreadsheet.model.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.Harvester;
 import edu.olivet.harvester.utils.Settings;

@@ -6,7 +6,7 @@ import edu.olivet.foundations.ui.VirtualMessagePanel;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
-import edu.olivet.harvester.spreadsheet.Worksheet;
+import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;

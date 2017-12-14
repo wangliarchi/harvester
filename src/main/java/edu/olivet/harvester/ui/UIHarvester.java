@@ -7,13 +7,11 @@ import edu.olivet.foundations.job.TaskScheduler;
 import edu.olivet.foundations.ui.*;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.harvester.bugreport.service.ReportBugEvent;
+import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.job.BackgroundJob;
 import edu.olivet.harvester.model.ConfigEnums;
 import edu.olivet.harvester.ui.dialog.BankCardConfigDialog;
-import edu.olivet.harvester.ui.events.ConfirmShipmentEvent;
-import edu.olivet.harvester.ui.events.OrderConfirmationHistoryEvent;
-import edu.olivet.harvester.ui.events.OrderSubmissionLogEvent;
-import edu.olivet.harvester.ui.events.SettingEvent;
+import edu.olivet.harvester.ui.events.*;
 import edu.olivet.harvester.utils.LogViewer;
 import edu.olivet.harvester.utils.Settings;
 import org.slf4j.Logger;
@@ -55,6 +53,10 @@ public class UIHarvester extends AbstractApplicationUI {
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
+                if (PSEventListener.isRunning()) {
+                    UITools.error("Order submission task is running. Please wait util it's finished, or stop the task first.");
+                    return;
+                }
                 if (!UITools.confirmed("Are you sure to close Harvester? \nBackground jobs may be running.")) {
                     return;
                 }
@@ -64,20 +66,20 @@ public class UIHarvester extends AbstractApplicationUI {
 
         final JMenuBar menuBar = UIElements.getInstance().createMenuBar();
         this.setJMenuBar(menuBar);
-        //final JToolBar toolbar = UIElements.getInstance().createToolBar();
+        final JToolBar toolbar = UIElements.getInstance().createToolBar();
 
 
         final MemoryUsageBar memoryUsageBar = new MemoryUsageBar();
         statusPane = new JTextPane();
         statusPane.setEditable(false);
 
-        JPanel mainPanel = new MainPanel();
+        JPanel mainPanel = MainPanel.getInstance();
         GroupLayout layout = new GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
                 layout.createParallelGroup(Alignment.LEADING)
-                        //.addGroup(layout.createSequentialGroup()
-                        //        .addComponent(toolbar))
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(toolbar))
                         .addGroup(layout.createSequentialGroup()
                                 .addComponent(mainPanel))
                         .addGroup(layout.createSequentialGroup()
@@ -87,7 +89,7 @@ public class UIHarvester extends AbstractApplicationUI {
         layout.setVerticalGroup(
                 layout.createParallelGroup(Alignment.CENTER)
                         .addGroup(layout.createSequentialGroup()
-                                //.addComponent(toolbar, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(toolbar, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
                                 .addComponent(mainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
                                 .addGroup(layout.createParallelGroup(Alignment.BASELINE)
                                         .addComponent(memoryUsageBar, 20, 20, 20).addComponent(statusPane, 20, 20, 20))
@@ -157,6 +159,20 @@ public class UIHarvester extends AbstractApplicationUI {
     @UIEvent
     public void reportBug() {
         reportBugEvent.execute();
+    }
+
+
+    @Inject
+    AddOrderSubmissionTaskEvent addOrderSubmissionTaskEvent;
+
+    @UIEvent
+    public void addOrderTask() {
+        addOrderSubmissionTaskEvent.execute();
+    }
+
+    @UIEvent
+    public void submitOrder() {
+        addOrderSubmissionTaskEvent.execute();
     }
 
     @Override

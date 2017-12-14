@@ -1,6 +1,10 @@
 package edu.olivet.harvester.ui;
 
+import com.google.inject.Singleton;
 import edu.olivet.foundations.ui.UITools;
+import edu.olivet.harvester.ui.panel.ProgressLogsPanel;
+import edu.olivet.harvester.ui.panel.RightTabPanel;
+import edu.olivet.harvester.ui.panel.TabbedBuyerPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,15 +14,22 @@ import java.awt.event.ComponentListener;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/6/17 5:51 PM
  */
+@Singleton
 public class MainPanel extends JPanel {
-    public MainPanel() {
+    private static final MainPanel instance = new MainPanel();
+
+    public static MainPanel getInstance() {
+        return instance;
+    }
+
+    private MainPanel() {
         initComponents();
         initEventListeners();
     }
 
     private void initComponents() {
 
-        runtimeSettingsPanel = RuntimeSettingsPanel.getInstance();
+        rightTabPanel = RightTabPanel.getInstance();
         mainWindowPanel = TabbedBuyerPanel.getInstance();
         ProgressLogsPanel progressLogsPanel = ProgressLogsPanel.getInstance();
         progressLogsPanel.setMinimumSize(new Dimension(100, 150));
@@ -26,7 +37,6 @@ public class MainPanel extends JPanel {
         verticalSplitPane1 = new JSplitPane();
         horizontalSplitPane1 = new JSplitPane();
 
-        verticalSplitPane1.setDividerLocation(400);
         verticalSplitPane1.setDividerSize(5);
         verticalSplitPane1.setOrientation(JSplitPane.VERTICAL_SPLIT);
         verticalSplitPane1.setBorder(null);
@@ -38,10 +48,12 @@ public class MainPanel extends JPanel {
         verticalSplitPane1.setTopComponent(horizontalSplitPane1);
         verticalSplitPane1.setBottomComponent(progressLogsPanel);
         horizontalSplitPane1.setLeftComponent(mainWindowPanel);
-        horizontalSplitPane1.setRightComponent(runtimeSettingsPanel);
+        horizontalSplitPane1.setRightComponent(rightTabPanel);
+
+        resetSplitPanelSizes();
 
 
-        javax.swing.GroupLayout layout = new GroupLayout(this);
+        GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
@@ -62,14 +74,16 @@ public class MainPanel extends JPanel {
         //mainWindowPanel.resetZoomLevel();
     }
 
+    public void resetSplitPanelSizes() {
+        int height = Math.min(rightTabPanel.getPreferredSize().height + 50, getHeight() - 100);
+        verticalSplitPane1.setDividerLocation(height);
+        horizontalSplitPane1.setDividerLocation(getWidth() - rightTabPanel.getPreferredSize().width - 20);
+    }
+
     public void initEventListeners() {
         this.addComponentListener(new ComponentListener() {
             public void componentResized(ComponentEvent e) {
-                int height = Math.max(runtimeSettingsPanel.getPreferredSize().height + 50, getHeight() - 250);
-                height = Math.min(height, getHeight() - 100);
-                verticalSplitPane1.setDividerLocation(height);
-                horizontalSplitPane1.setDividerLocation(getWidth() - runtimeSettingsPanel.getPreferredSize().width - 20);
-                mainWindowPanel.resetZoomLevel();
+                resetSplitPanelSizes();
             }
 
             @Override
@@ -91,7 +105,7 @@ public class MainPanel extends JPanel {
 
     private JSplitPane verticalSplitPane1;
     private JSplitPane horizontalSplitPane1;
-    private RuntimeSettingsPanel runtimeSettingsPanel;
+    private RightTabPanel rightTabPanel;
     public TabbedBuyerPanel mainWindowPanel;
 
     /**

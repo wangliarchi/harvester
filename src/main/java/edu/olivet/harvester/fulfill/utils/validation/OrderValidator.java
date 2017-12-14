@@ -96,16 +96,26 @@ public class OrderValidator {
     }
 
     public static boolean skipCheck(Order order, SkipValidation skipValidation) {
-        if (order != null && Remark.FORCE_FULFILL.isContainedBy(order.remark)) {
-            return true;
-        }
         RuntimeSettings settings = RuntimeSettings.load();
-        return settings != null && settings.getSkipValidation() != null && (settings.getSkipValidation() == skipValidation || settings.getSkipValidation() == SkipValidation.All);
+        return skipCheck(settings, order, skipValidation);
     }
 
     public static boolean needCheck(Order order, SkipValidation skipValidation) {
         return !skipCheck(order, skipValidation);
     }
+
+
+    public static boolean skipCheck(RuntimeSettings settings, Order order, SkipValidation skipValidation) {
+        if (order != null && Remark.FORCE_FULFILL.isContainedBy(order.remark)) {
+            return true;
+        }
+        return settings != null && settings.getSkipValidation() != null && (settings.getSkipValidation() == skipValidation || settings.getSkipValidation() == SkipValidation.All);
+    }
+
+    public static boolean needCheck(RuntimeSettings settings, Order order, SkipValidation skipValidation) {
+        return !skipCheck(settings, order, skipValidation);
+    }
+
 
     public String isValid(Order order, FulfillmentEnum.Action scenario) {
         switch (scenario) {
@@ -155,7 +165,7 @@ public class OrderValidator {
                 Validator.StatusMarkedCorrectForSubmit,
                 Validator.FulfillmentCountryIsValid,
                 Validator.IsNotForbiddenSeller,
-                Validator.HasEnoughBudgetToFulfill,
+                //Validator.HasEnoughBudgetToFulfill,
                 Validator.ProductTransferUrlIsValid
 
         );
@@ -479,7 +489,7 @@ public class OrderValidator {
 
     public String hasEnoughBudgetToFulfill(Order order) {
         try {
-            String spreadsheetId = RuntimeSettings.load().getSpreadsheetId();
+            String spreadsheetId = order.getSpreadsheetId();
             dailyBudgetHelper.getRemainingBudget(spreadsheetId, new Date());
             return "";
         } catch (Exception e) {

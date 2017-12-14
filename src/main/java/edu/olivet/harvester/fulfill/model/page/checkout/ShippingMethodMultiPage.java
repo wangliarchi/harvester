@@ -3,7 +3,7 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.ui.BuyerPanel;
+import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

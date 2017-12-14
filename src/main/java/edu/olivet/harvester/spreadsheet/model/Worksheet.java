@@ -1,4 +1,4 @@
-package edu.olivet.harvester.spreadsheet;
+package edu.olivet.harvester.spreadsheet.model;
 
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.BusinessException;

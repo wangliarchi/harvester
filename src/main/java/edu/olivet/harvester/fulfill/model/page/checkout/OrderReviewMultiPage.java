@@ -9,7 +9,7 @@ import edu.olivet.harvester.fulfill.utils.pagehelper.GiftOptionHelper;
 import edu.olivet.harvester.fulfill.utils.pagehelper.QtyUtils;
 import edu.olivet.harvester.model.CreditCard;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.ui.BuyerPanel;
+import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

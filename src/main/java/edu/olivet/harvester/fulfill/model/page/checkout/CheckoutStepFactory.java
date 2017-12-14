@@ -2,7 +2,7 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.harvester.fulfill.model.page.FulfillmentPage;
-import edu.olivet.harvester.ui.BuyerPanel;
+import edu.olivet.harvester.ui.panel.BuyerPanel;
 
 import java.lang.reflect.Constructor;
 

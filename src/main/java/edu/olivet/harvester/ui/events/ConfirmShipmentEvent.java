@@ -8,8 +8,8 @@ import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.feeds.ConfirmShipments;
-import edu.olivet.harvester.spreadsheet.Spreadsheet;
-import edu.olivet.harvester.spreadsheet.Worksheet;
+import edu.olivet.harvester.spreadsheet.model.Spreadsheet;
+import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.Actions;
 import edu.olivet.harvester.ui.dialog.ChooseSheetDialog;
@@ -38,7 +38,7 @@ public class ConfirmShipmentEvent implements HarvesterUIEvent {
         LOGGER.info("Confirm shipment button clicked");
 
         List<String> spreadsheetIds = Settings.load().listAllSpreadsheets();
-        List<edu.olivet.harvester.spreadsheet.Spreadsheet> spreadsheets = new ArrayList<>();
+        List<Spreadsheet> spreadsheets = new ArrayList<>();
 
         StringBuilder spreadsheetIdError = new StringBuilder();
         for (String spreadsheetId : spreadsheetIds) {

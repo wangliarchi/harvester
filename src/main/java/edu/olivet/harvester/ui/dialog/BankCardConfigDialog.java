@@ -6,7 +6,7 @@ import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.fulfill.utils.CreditCardUtils;
 import edu.olivet.harvester.model.CreditCard;
-import edu.olivet.harvester.ui.BankCardPanel;
+import edu.olivet.harvester.ui.panel.BankCardPanel;
 import edu.olivet.harvester.utils.Migration;
 import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.collections4.CollectionUtils;
@@ -48,8 +48,7 @@ public class BankCardConfigDialog extends BaseDialog {
         aboutBtn.setToolTipText("Access official website to get information, tutorial and community help");
         aboutBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        JPanel innerPanel = new javax.swing.JPanel();
-        innerPanel.setToolTipText("test");
+        JPanel innerPanel = new JPanel();
 
         GroupLayout innerLayout = new GroupLayout(innerPanel);
         innerPanel.setLayout(innerLayout);

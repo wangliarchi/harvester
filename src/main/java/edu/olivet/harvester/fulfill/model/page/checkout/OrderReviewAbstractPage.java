@@ -7,19 +7,20 @@ import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
-import edu.olivet.harvester.fulfill.exception.Exceptions.*;
+import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
+import edu.olivet.harvester.fulfill.exception.Exceptions.OutOfBudgetException;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.model.page.FulfillmentPage;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.DailyBudgetHelper;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
+import edu.olivet.harvester.fulfill.service.ProfitLostControl;
 import edu.olivet.harvester.fulfill.service.addressvalidator.AddressValidator;
 import edu.olivet.harvester.fulfill.service.shipping.FeeLimitChecker;
 import edu.olivet.harvester.fulfill.utils.OrderAddressUtils;
-import edu.olivet.harvester.fulfill.service.ProfitLostControl;
 import edu.olivet.harvester.model.Money;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.ui.BuyerPanel;
+import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -50,8 +51,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
             throw new OrderSubmissionException("Order cost exceed maximum limit");
         }
 
-        RuntimeSettings settings = RuntimeSettings.load();
-        float remainingBudget = ApplicationContext.getBean(DailyBudgetHelper.class).getRemainingBudget(settings.getSpreadsheetId(), new Date());
+        float remainingBudget = ApplicationContext.getBean(DailyBudgetHelper.class).getRemainingBudget(order.getSpreadsheetId(), new Date());
         if (remainingBudget < grandTotal.toUSDAmount().floatValue()) {
             throw new OutOfBudgetException("You don't have enough fund to process this order. Need $" + grandTotal.toUSDAmount() + ", only have $" + String.format("%.2f", remainingBudget));
         }

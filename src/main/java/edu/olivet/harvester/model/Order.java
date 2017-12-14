@@ -134,21 +134,17 @@ public class Order implements Keyable {
         return OrderColor.isGray(this.color);
     }
 
-    @JSONField(serialize = false)
     public String spreadsheetId;
 
-    @JSONField(serialize = false)
     public String sheetName;
 
     /**
      * 做单时的上下文：账号-国家-sheet名称
      */
-    @JSONField(serialize = false)
     private String context;
     /**
      * 做单时的上下文：sheet对应url地址
      */
-    @JSONField(serialize = false)
     private String contextUrl;
 
     /**
@@ -188,6 +184,7 @@ public class Order implements Keyable {
     /**
      * Determine whether a order number is valid or not by detecting whether it matches Amazon, BetterWorld or Ingram Order Number Pattern
      */
+    @JSONField(serialize = false)
     public boolean orderNumberValid() {
         String orderNo = StringUtils.defaultString(this.order_number).trim();
 
@@ -196,6 +193,7 @@ public class Order implements Keyable {
                 Regex.BW_ORDER_NUMBER.isMatched(orderNo);
     }
 
+    @JSONField(serialize = false)
     public boolean addressChanged() {
         return Remark.ADDRESS_CHANGED.isContainedBy(this.remark);
     }
@@ -208,6 +206,7 @@ public class Order implements Keyable {
      * 3. UK转运如果已经完成转移, 也视为满足条件。
      * </pre>
      */
+    @JSONField(serialize = false)
     public boolean fulfilled() {
         return !this.colorIsGray() && !this.canceledBySeller() &&
                 (this.orderNumberValid() ||
@@ -224,6 +223,7 @@ public class Order implements Keyable {
     /**
      * Determine whether current order has been canceled by seller
      */
+    @JSONField(serialize = false)
     public boolean canceledBySeller() {
         return Remark.SELLER_CANCELED.isContainedByAny(cost, order_number);
     }
@@ -231,6 +231,7 @@ public class Order implements Keyable {
     /**
      * 部分情况下客人取消的订单会在新单号一列标注Buyer Cancel等字样，据此判定该条订单是否已被客人取消
      */
+    @JSONField(serialize = false)
     public boolean buyerCanceled() {
         return Remark.CANCELLED.isContainedBy(this.order_number);
     }
@@ -239,6 +240,7 @@ public class Order implements Keyable {
      * Determine whether current order is purchased back and transfer via keyword match in column 'remark'
      * Currently used in Customer Service Email Generation <strong>ONLY!</strong>
      */
+    @JSONField(serialize = false)
     public boolean purchaseBack() {
 
         if (Remark.purchaseBack(this.remark)) {
@@ -253,6 +255,7 @@ public class Order implements Keyable {
     /**
      * 判定当前订单是否为切换国家直寄(<b>不同于买回转运</b>), DE Shipment, etc..
      */
+    @JSONField(serialize = false)
     public boolean isDirectShip() {
         return Remark.isDirectShip(this.remark);
     }
@@ -260,11 +263,12 @@ public class Order implements Keyable {
     /**
      * 判定当前订单是否为切换国家直寄(<b>不同于买回转运</b>)
      */
+    @JSONField(serialize = false)
     public boolean switchCountry() {
         return isDirectShip();
     }
 
-
+    @JSONField(serialize = false)
     public boolean isIntl() {
         String fulfillmentCountry = OrderCountryUtils.getFulfillmentCountry(this).name();
         String marketplaceCountry = CountryStateUtils.getInstance().getCountryCode(OrderCountryUtils.getShipToCountry(this));
@@ -274,6 +278,7 @@ public class Order implements Keyable {
     /**
      * Determine whether current order is fulfilled from US directly via its remark
      */
+    @JSONField(serialize = false)
     public boolean fulfilledFromUS() {
         return Remark.FULFILL_FROM_US.isContainedBy(this.remark);
     }
@@ -281,11 +286,12 @@ public class Order implements Keyable {
     /**
      * Determine whether current order is fulfilled from UK directly via its remark
      */
+    @JSONField(serialize = false)
     public boolean fulfilledFromUK() {
         return Remark.FULFILL_FROM_UK.isContainedBy(this.remark);
     }
 
-
+    @JSONField(serialize = false)
     public boolean isUKForward() {
         return Remark.ukFwd(this.remark);
     }
@@ -297,6 +303,7 @@ public class Order implements Keyable {
      * <strong>如果批注中包含了直寄，则先不视为买回转运</strong>
      * </pre>
      */
+    @JSONField(serialize = false)
     public boolean needBuyAndTransfer() {
         return this.statusIndicatePurchaseBack() ||
                 Remark.purchaseBack(this.remark) ||
@@ -304,26 +311,29 @@ public class Order implements Keyable {
                 (type() == OrderEnums.OrderItemType.PRODUCT && !isDirectShip());
     }
 
-
+    @JSONField(serialize = false)
     public boolean statusIndicatePurchaseBack() {
         return OrderEnums.Status.BuyAndTransfer.value().equalsIgnoreCase(status) ||
                 OrderEnums.Status.PrimeBuyAndTransfer.value().equalsIgnoreCase(status);
     }
 
+    @JSONField(serialize = false)
     public boolean ebay() {
         return Strings.containsAnyIgnoreCase(seller, "www.ebay.com") ||
                 Strings.containsAnyIgnoreCase(isbn, "www.ebay.com") ||
                 Strings.containsAnyIgnoreCase(remark, "ebay");
     }
 
+    @JSONField(serialize = false)
     public boolean japan() {
         return Strings.startsWithAnyIgnoreCase(seller, Country.JP.name());
     }
 
 
+    @JSONField(serialize = false)
     public String shippingCountryCode;
 
-
+    @JSONField(serialize = false)
     public Date getPurchaseDate() {
         return parsePurchaseDate(purchase_date);
     }
@@ -331,6 +341,7 @@ public class Order implements Keyable {
     public static final String[] PURCHASE_DATE_PATTERNS = {"yyyy-MM-dd'T'HH:mm:ssXXX", "yyyy-MM-dd'T'HH:mm:ssZ", "yyyy-MM-dd'T'HH:mm:ss.SSSZ", "yyyy-MM-dd'T'HH:mm:ss'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "M/d/yyyy H:mm",
             "M/d/yyyy H:mm:ss", "yyyy-MM-dd HH:mm:ss", "MM-dd-yyyy HH:mm", "yyyy-MM-dd"};
 
+    @JSONField(serialize = false)
     public static Date parsePurchaseDate(String purchaseDateText) {
         try {
             return DateUtils.parseDate(purchaseDateText, Locale.US, PURCHASE_DATE_PATTERNS);
@@ -345,14 +356,17 @@ public class Order implements Keyable {
 
     @Getter
     @Setter
+    @JSONField(serialize = false)
     private String amazonOrderStatus;
 
+    @JSONField(serialize = false)
     public Date latestEdd() {
         String estimatedDeliveryDateString = StringUtils.split(estimated_delivery_date, " ")[1];
 
         return Dates.parseDate(estimatedDeliveryDateString);
     }
 
+    @JSONField(serialize = false)
     public int maxEddDays() {
         String expectedShipDateString = StringUtils.split(expected_ship_date, " ")[1];
         String estimatedDeliveryDateString = StringUtils.split(estimated_delivery_date, " ")[1];
@@ -375,7 +389,7 @@ public class Order implements Keyable {
         return toIntExact(TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS));
     }
 
-
+    @JSONField(serialize = false)
     public int eddDays() {
         String estimatedDeliveryDateString = StringUtils.split(estimated_delivery_date, " ")[1];
 
@@ -394,6 +408,7 @@ public class Order implements Keyable {
         return toIntExact(TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS));
     }
 
+    @JSONField(serialize = false)
     public boolean selfBuy() {
         return StringUtils.isBlank(quantity_purchased) ||
                 "0".equals(quantity_purchased) ||
@@ -411,6 +426,7 @@ public class Order implements Keyable {
     /**
      * 判定当前订单是否为待检查状态
      */
+    @JSONField(serialize = false)
     public boolean toBeChecked() {
         return Remark.TO_BE_CHECKED.isContainedBy(this.remark);
     }
@@ -419,6 +435,7 @@ public class Order implements Keyable {
     /**
      * 判断当前订单对应Seller是否为AP Warehouse（亚马逊）
      */
+    @JSONField(serialize = false)
     public boolean sellerIsAPWarehouse() {
         return OrderEnums.SellerType.APWareHouse.abbrev().equalsIgnoreCase(this.character);
     }
@@ -426,6 +443,7 @@ public class Order implements Keyable {
     /**
      * 判断当前订单对应Seller是否为普通Seller
      */
+    @JSONField(serialize = false)
     public boolean sellerIsPt() {
         return OrderEnums.SellerType.Pt.abbrev().equalsIgnoreCase(this.character) ||
                 OrderEnums.SellerType.ImagePt.abbrev().equalsIgnoreCase(this.character);
@@ -443,6 +461,7 @@ public class Order implements Keyable {
     /**
      * 判断当前订单对应Seller是否为Prime
      */
+    @JSONField(serialize = false)
     public boolean sellerIsPrime() {
         return OrderEnums.SellerType.Prime.abbrev().equalsIgnoreCase(this.character) ||
                 OrderEnums.SellerType.ImagePrime.abbrev().equalsIgnoreCase(this.character) ||
@@ -450,14 +469,20 @@ public class Order implements Keyable {
                 sellerIsAPWarehouse();
     }
 
+    @JSONField(serialize = false)
     public boolean sellerIsAP() {
         return OrderEnums.SellerType.AP.name().equalsIgnoreCase(this.seller) || OrderEnums.SellerType.AP.abbrev().equalsIgnoreCase(this.character);
     }
 
+    @JSONField(serialize = false)
     public OrderEnums.OrderItemType type = null;
+
+    @JSONField(serialize = false)
     public OrderEnums.OrderItemType getType() {
         return type();
     }
+
+    @JSONField(serialize = false)
     public OrderEnums.OrderItemType type() {
         if (type == null) {
             try {
@@ -478,6 +503,7 @@ public class Order implements Keyable {
     /**
      * 一条订单提交成功时的相关信息: 原单基本信息、新单提交结果、提交时间
      */
+    @JSONField(serialize = false)
     public String successRecord() {
         return Dates.now() + Constants.TAB +
                 StringUtils.defaultString(this.sheetName) + Constants.TAB +
@@ -499,6 +525,7 @@ public class Order implements Keyable {
                 StringUtils.defaultString(this.fulfilledASIN) + Constants.TAB;
     }
 
+    @JSONField(serialize = false)
     public String basicSuccessRecord() {
         return StringUtils.defaultString(this.cost) + Constants.TAB +
                 StringUtils.defaultString(this.order_number) + Constants.TAB +
@@ -509,6 +536,7 @@ public class Order implements Keyable {
     @JSONField(serialize = false)
     private Money sellerPrice;
 
+    @JSONField(serialize = false)
     public Money getSellerPrice() {
         if (sellerPrice == null) {
             float price = 0;
@@ -526,6 +554,7 @@ public class Order implements Keyable {
     @JSONField(serialize = false)
     private Money orderPrice;
 
+    @JSONField(serialize = false)
     public Money getOrderPrice() {
         if (orderPrice == null) {
             float priceFloat = 0;
@@ -543,6 +572,7 @@ public class Order implements Keyable {
     @JSONField(serialize = false)
     private Money orderTotalPrice;
 
+    @JSONField(serialize = false)
     public Money getOrderTotalPrice() {
         //if (orderTotalPrice == null) {
         float priceFloat = 0;
@@ -562,7 +592,7 @@ public class Order implements Keyable {
     @JSONField(serialize = false)
     public Money orderTotalCost;
 
-
+    @JSONField(serialize = false)
     public boolean expeditedShipping() {
         return Remark.fastShipping(remark);
     }
@@ -573,6 +603,7 @@ public class Order implements Keyable {
         return this.order_id;
     }
 
+    @JSONField(serialize = false)
     public boolean equalsLite(Object o) {
         if (this == o) {
             return true;

@@ -1,4 +1,4 @@
-package edu.olivet.harvester.spreadsheet;
+package edu.olivet.harvester.spreadsheet.model;
 
 
 import com.alibaba.fastjson.annotation.JSONField;

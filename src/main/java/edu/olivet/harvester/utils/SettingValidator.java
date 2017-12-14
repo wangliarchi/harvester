@@ -3,7 +3,7 @@ package edu.olivet.harvester.utils;
 import com.google.api.services.drive.model.File;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.Constants;
-import edu.olivet.harvester.spreadsheet.Spreadsheet;
+import edu.olivet.harvester.spreadsheet.model.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import org.apache.commons.collections4.CollectionUtils;

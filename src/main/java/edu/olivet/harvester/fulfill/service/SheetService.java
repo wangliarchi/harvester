@@ -171,6 +171,40 @@ public class SheetService extends SheetAPI {
 
     }
 
+
+    public List<Order> reloadOrders(List<Order> orders) {
+        //id, sku, seller, price, remark
+        List<Order> allOrders = appScript.readOrders(orders.get(0).spreadsheetId, orders.get(0).sheetName);
+
+        Map<String, List<Order>> orderMap = new HashMap<>();
+        allOrders.forEach(it -> {
+            List<Order> os = orderMap.getOrDefault(it.order_id, new ArrayList<>());
+            os.add(it);
+            orderMap.put(it.order_id, os);
+        });
+
+        List<Order> reloadedOrders = new ArrayList<>();
+        for (Order order : orders) {
+            if (!orderMap.containsKey(order.order_id)) {
+                LOGGER.info("Cant find order " + order.order_id + "on sheet" + order.sheetName);
+                continue;
+            }
+            List<Order> os = orderMap.get(order.order_id);
+
+            for (Order o : os) {
+                if (StringUtils.equalsAnyIgnoreCase(o.remark, order.remark, order.originalRemark)) {
+                    o.setContext(order.getContext());
+                    reloadedOrders.add(o);
+                }
+            }
+
+
+        }
+
+        return reloadedOrders;
+
+    }
+
     public Order reloadOrder(Order order) {
         //id, sku, seller, price, remark
         List<Order> orders = appScript.readOrders(order.spreadsheetId, order.sheetName);

@@ -1,4 +1,4 @@
-package edu.olivet.harvester.ui;
+package edu.olivet.harvester.ui.panel;
 
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
@@ -15,7 +15,8 @@ import edu.olivet.harvester.fulfill.service.ProgressUpdater;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.model.OrderEnums.OrderItemType;
-import edu.olivet.harvester.spreadsheet.Worksheet;
+import edu.olivet.harvester.spreadsheet.model.Spreadsheet;
+import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.dialog.ChooseSheetDialog;
 import edu.olivet.harvester.ui.dialog.SelectRangeDialog;
@@ -43,23 +44,24 @@ import java.util.Map;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/6/17 7:32 PM
  */
-public class RuntimeSettingsPanel extends JPanel {
+public class SimpleOrderSubmissionRuntimePanel extends JPanel {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RuntimeSettingsPanel.class);
 
     private Worksheet selectedWorksheet;
     private RuntimeSettings settings;
 
-    private static RuntimeSettingsPanel instance;
+    private static SimpleOrderSubmissionRuntimePanel instance;
 
-    public static RuntimeSettingsPanel getInstance() {
+    public static SimpleOrderSubmissionRuntimePanel getInstance() {
         if (instance == null) {
-            instance = new RuntimeSettingsPanel();
+            instance = new SimpleOrderSubmissionRuntimePanel();
         }
 
         return instance;
     }
 
-    private RuntimeSettingsPanel() {
+    private SimpleOrderSubmissionRuntimePanel() {
         initComponents();
         initData();
         initEvents();
@@ -100,12 +102,12 @@ public class RuntimeSettingsPanel extends JPanel {
         noInvoiceTextField.setText(settings.getNoInvoiceText());
 
 
-        lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"5", "7"}));
+        lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"5", "7"}));
         if (StringUtils.isNotBlank(settings.getLostLimit())) {
             lostLimitComboBox.setSelectedItem(settings.getLostLimit());
         }
 
-        priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"3", "5"}));
+        priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"3", "5"}));
         if (StringUtils.isNotBlank(settings.getPriceLimit())) {
             priceLimitComboBox.setSelectedItem(settings.getPriceLimit());
         }
@@ -118,7 +120,7 @@ public class RuntimeSettingsPanel extends JPanel {
 
 
         maxDaysOverEddComboBox.setModel(new DefaultComboBoxModel<>(
-                new String[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}
+                new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}
         ));
         if (StringUtils.isNotBlank((settings.getEddLimit()))) {
             maxDaysOverEddComboBox.setSelectedItem(settings.getEddLimit());
@@ -394,7 +396,7 @@ public class RuntimeSettingsPanel extends JPanel {
 
         AppScript appScript = new AppScript();
         Country selectedCountry = (Country) marketplaceComboBox.getSelectedItem();
-        List<edu.olivet.harvester.spreadsheet.Spreadsheet> spreadsheets = Settings.load().listSpreadsheets(selectedCountry, appScript);
+        List<Spreadsheet> spreadsheets = Settings.load().listSpreadsheets(selectedCountry, appScript);
 
         if (CollectionUtils.isEmpty(spreadsheets)) {
             UITools.error("No order update sheet found. Please make sure it's configured and shared with " + Constants.RND_EMAIL, "Error");
@@ -490,7 +492,7 @@ public class RuntimeSettingsPanel extends JPanel {
 
 
         Account seller = configuration.getSeller();
-        Account[] sellers = seller == null ? new Account[0] : new Account[] {seller};
+        Account[] sellers = seller == null ? new Account[0] : new Account[]{seller};
         sellerComboBox.setModel(new DefaultComboBoxModel<>(sellers));
 
         //default to book
@@ -515,10 +517,10 @@ public class RuntimeSettingsPanel extends JPanel {
             buyer = configuration.getProdBuyer();
             primeBuyer = configuration.getProdPrimeBuyer();
         }
-        Account[] buyers = buyer == null ? new Account[0] : new Account[] {buyer};
+        Account[] buyers = buyer == null ? new Account[0] : new Account[]{buyer};
         buyerComboBox.setModel(new DefaultComboBoxModel<>(buyers));
 
-        Account[] primeBuyers = primeBuyer == null ? new Account[0] : new Account[] {primeBuyer};
+        Account[] primeBuyers = primeBuyer == null ? new Account[0] : new Account[]{primeBuyer};
         primeBuyerComboBox.setModel(new DefaultComboBoxModel<>(primeBuyers));
 
     }
@@ -892,7 +894,7 @@ public class RuntimeSettingsPanel extends JPanel {
         JFrame frame = new JFrame();
         frame.setTitle("Runtime Settings");
         frame.setSize(400, 580);
-        RuntimeSettingsPanel runtimeSettingsPanel = RuntimeSettingsPanel.getInstance();
+        SimpleOrderSubmissionRuntimePanel runtimeSettingsPanel = SimpleOrderSubmissionRuntimePanel.getInstance();
         frame.getContentPane().add(runtimeSettingsPanel);
         frame.setVisible(true);
         runtimeSettingsPanel.showPauseBtn();

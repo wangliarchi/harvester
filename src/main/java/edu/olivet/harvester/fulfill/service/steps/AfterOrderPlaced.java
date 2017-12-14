@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.harvester.fulfill.model.page.checkout.OrderPlacedSuccessPage;
-import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.SheetService;
 import edu.olivet.harvester.fulfill.service.StepHelper;
 import edu.olivet.harvester.fulfill.service.flowcontrol.FlowState;
@@ -32,7 +31,7 @@ public class AfterOrderPlaced extends Step {
         //fill data back to google sheet
         new Thread(() -> {
             try {
-                updateInfoToOrderSheet(RuntimeSettings.load().getSpreadsheetId(), state.getOrder());
+                updateInfoToOrderSheet(state.getOrder().getSpreadsheetId(), state.getOrder());
             } catch (Exception e) {
                 LOGGER.error("Failed to update order fulfillment info to order update sheet", e);
             }
@@ -40,7 +39,8 @@ public class AfterOrderPlaced extends Step {
 
     }
 
-    @Inject StepHelper stepHelper;
+    @Inject
+    StepHelper stepHelper;
 
     @Override
     public Step createDynamicInstance(FlowState state) {
@@ -48,7 +48,8 @@ public class AfterOrderPlaced extends Step {
         return stepHelper.detectStep(state);
     }
 
-    @Inject SheetService sheetService;
+    @Inject
+    SheetService sheetService;
 
     @Repeat(expectedExceptions = BusinessException.class)
     private void updateInfoToOrderSheet(String spreadsheetId, Order order) {

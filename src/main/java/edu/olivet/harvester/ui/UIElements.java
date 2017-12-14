@@ -26,7 +26,7 @@ public class UIElements extends AbstractUIContainer {
 
     @Override
     public Menu[] getMenus() {
-        return new Menu[] {
+        return new Menu[]{
                 harvester,
                 submitOrder,
                 confirmShipment,
@@ -38,7 +38,7 @@ public class UIElements extends AbstractUIContainer {
     @Override
     public Map<Menu, Action[]> getMenuActions() {
         Map<Menu, Action[]> map = new HashMap<>();
-        map.put(harvester, new Action[] {
+        map.put(harvester, new Action[]{
                 Action.CurrentVersion,
                 Action.UpgradeCheck,
                 Action.Separator,
@@ -46,8 +46,10 @@ public class UIElements extends AbstractUIContainer {
 
         });
 
-        map.put(submitOrder, new Action[] {
+        map.put(submitOrder, new Action[]{
                 //Actions.DuplicatedOrders,
+                Actions.AddOrderTask,
+                Action.Separator,
                 Actions.OrderSubmissionLog,
                 Action.Separator,
                 Actions.OrderSuccessLog,
@@ -55,12 +57,12 @@ public class UIElements extends AbstractUIContainer {
 
         });
 
-        map.put(confirmShipment, new Action[] {
+        map.put(confirmShipment, new Action[]{
                 Actions.ConfirmShipment,
                 Action.Separator,
                 Actions.OrderConfirmationHistory
         });
-        map.put(Menu.Settings, new Action[] {
+        map.put(Menu.Settings, new Action[]{
                 Action.Settings,
                 Actions.ConfigBankCard,
                 Action.Separator,
@@ -69,7 +71,7 @@ public class UIElements extends AbstractUIContainer {
                 Action.CreateShortCut
 
         });
-        map.put(Menu.Help, new Action[] {
+        map.put(Menu.Help, new Action[]{
 
                 Actions.ReportBug,
                 Action.Documentation
@@ -84,11 +86,12 @@ public class UIElements extends AbstractUIContainer {
 
     @Override
     public Action[] getToolbarActions() {
-        return new Action[] {
+        return new Action[]{
                 Actions.SubmitOrder,
-                Actions.FindSupplier,
+                //Actions.FindSupplier,
                 Actions.ConfirmShipment,
-                Action.Settings
+                Action.Settings,
+                Actions.ReportBug
         };
     }
 

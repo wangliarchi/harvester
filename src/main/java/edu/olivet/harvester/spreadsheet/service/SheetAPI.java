@@ -16,7 +16,7 @@ import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
-import edu.olivet.harvester.spreadsheet.Worksheet;
+import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;

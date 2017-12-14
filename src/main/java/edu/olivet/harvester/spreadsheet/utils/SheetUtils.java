@@ -1,13 +1,14 @@
-package edu.olivet.harvester.utils;
+package edu.olivet.harvester.spreadsheet.utils;
 
 import com.google.api.services.sheets.v4.model.Color;
+import edu.olivet.foundations.utils.Strings;
+import edu.olivet.harvester.model.OrderEnums.OrderItemType;
 import org.apache.commons.lang3.time.FastDateFormat;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 10/24/17 10:30 AM
  */
 public class SheetUtils {
-
 
 
     public static String getTodaySheetName() {
@@ -28,5 +29,8 @@ public class SheetUtils {
         return String.format("#%02x%02x%02x", r, g, b);
     }
 
+    public static OrderItemType getTypeFromSpreadsheetName(String spreadName) {
+        return Strings.containsAnyIgnoreCase(spreadName, "product") ? OrderItemType.PRODUCT : OrderItemType.BOOK;
+    }
 
 }

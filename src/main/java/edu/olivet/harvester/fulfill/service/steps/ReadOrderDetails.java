@@ -12,7 +12,6 @@ import edu.olivet.harvester.fulfill.model.OrderFulfillmentRecord;
 import edu.olivet.harvester.fulfill.model.page.LoginPage;
 import edu.olivet.harvester.fulfill.model.page.checkout.CheckoutEnum.CheckoutPage;
 import edu.olivet.harvester.fulfill.model.page.checkout.PlacedOrderDetailPage;
-import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.DailyBudgetHelper;
 import edu.olivet.harvester.fulfill.service.SheetService;
 import edu.olivet.harvester.fulfill.service.StepHelper;
@@ -59,7 +58,7 @@ public class ReadOrderDetails extends Step {
 
         new Thread(() -> {
             try {
-                updateSpending(RuntimeSettings.load().getSpreadsheetId(), order);
+                updateSpending(order.getSpreadsheetId(), order);
             } catch (Exception e) {
                 LOGGER.error("Failed to update spending.", e);
             }
@@ -90,7 +89,6 @@ public class ReadOrderDetails extends Step {
     }
 
 
-
     @Repeat(expectedExceptions = BusinessException.class)
     private void saveToDB(Order order) {
         OrderFulfillmentRecord record = new OrderFulfillmentRecord();
@@ -100,7 +98,7 @@ public class ReadOrderDetails extends Step {
         record.setSku(order.sku);
         record.setPurchaseDate(order.purchase_date);
         record.setSheetName(order.sheetName);
-        record.setSpreadsheetId(RuntimeSettings.load().getSpreadsheetId());
+        record.setSpreadsheetId(order.getSpreadsheetId());
         record.setIsbn(order.isbn);
         record.setSeller(order.seller);
         record.setSellerId(order.seller_id);

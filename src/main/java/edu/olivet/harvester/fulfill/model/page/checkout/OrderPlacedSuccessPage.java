@@ -5,7 +5,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.harvester.fulfill.model.page.FulfillmentPage;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.ui.BuyerPanel;
+import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

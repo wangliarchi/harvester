@@ -20,7 +20,7 @@ public class PreValidator {
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PreValidator.class);
-    private static final int COMPARE_JOB_NUMBER = 5;
+    private static final int COMPARE_JOB_NUMBER = 2;
 
 
     public static List<ItemCompareResult> compareItemNames4Orders(List<Order> orders) {

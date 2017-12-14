@@ -11,7 +11,7 @@ import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.*;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.ui.BuyerPanel;
+import edu.olivet.harvester.ui.panel.BuyerPanel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.CookieStore;
 import org.apache.http.impl.client.BasicCookieStore;
@@ -456,7 +456,7 @@ public class JXBrowserHelper {
     public static void fillValueForFormField(Browser browser, String selector, String value) {
         try {
             DOMElement element = JXBrowserHelper.selectElementByCssSelector(browser, selector);
-            assert ((DOMFormControlElement) element) != null;
+            assert element != null;
             ((DOMFormControlElement) element).setValue(value);
         } catch (Exception e) {
             LOGGER.error("Error fill data {} for {}", value, selector);
@@ -535,7 +535,7 @@ public class JXBrowserHelper {
             //enter password
             wait(browser, By.id("passwordNext"));
             DOMElement passwordField = selectElementByName(browser, "password");
-            assert ((DOMFormControlElement) passwordField) != null;
+            assert passwordField != null;
             ((DOMFormControlElement) passwordField).setValue(password);
             WaitTime.Short.execute();
             selectElementByCssSelectorWaitUtilLoaded(browser, "#passwordNext").click();

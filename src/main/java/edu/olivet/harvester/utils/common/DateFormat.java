@@ -12,6 +12,8 @@ import java.util.Date;
 public enum DateFormat {
     /** 记录当前时间的日期格式 */
     DATE_TIME("yyyy-MM-dd HH:mm:ss"),
+    /** 记录当前时间的日期格式 */
+    DATE_TIME_SHORT("M/d HH:mm"),
     /** 以当前时间为文件命名格式 */
     DATE_TIME_AS_FILENAME("yyyyMMdd_HHmmss"),
     /** 最终Confirm文件的ship-date列格式，形如:2014-10-8 */

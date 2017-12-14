@@ -11,7 +11,7 @@ import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.ui.DualMessagePanel;
+import edu.olivet.harvester.ui.panel.DualMessagePanel;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

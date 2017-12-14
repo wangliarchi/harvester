@@ -16,7 +16,7 @@ import edu.olivet.harvester.fulfill.service.shipping.ShippingHandlerFactory;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.service.OrderService;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
-import edu.olivet.harvester.ui.BuyerPanel;
+import edu.olivet.harvester.ui.panel.BuyerPanel;
 import org.apache.commons.lang3.Range;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -28,8 +28,6 @@ import java.io.FileFilter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static org.testng.Assert.assertEquals;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/21/17 11:30 AM

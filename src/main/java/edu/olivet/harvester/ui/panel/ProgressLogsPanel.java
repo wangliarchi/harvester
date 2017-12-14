@@ -1,9 +1,10 @@
-package edu.olivet.harvester.ui;
+package edu.olivet.harvester.ui.panel;
 
 
 import com.google.inject.Singleton;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.MessagePanel;
+import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.Constants;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -55,6 +56,8 @@ public class ProgressLogsPanel extends JPanel implements MessagePanel {
         failedRecordsTextPanel.setEditable(false);
         jScrollPane2.setViewportView(failedRecordsTextPanel);
 
+        UITools.setAutoScroll(successRecordsTextPanel);
+        UITools.setAutoScroll(failedRecordsTextPanel);
 
         progressSplitPane1.setDividerLocation(0.5);
         progressSplitPane1.setLeftComponent(jScrollPane1);
@@ -144,7 +147,6 @@ public class ProgressLogsPanel extends JPanel implements MessagePanel {
             // -> Ignore
         }
 
-        textArea.setCaretPosition(textArea.getDocument().getLength());
 
     }
 }

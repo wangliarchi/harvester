@@ -4,8 +4,8 @@ import com.google.inject.Inject;
 import edu.olivet.foundations.mock.MockDBModule;
 import edu.olivet.foundations.mock.MockDateModule;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.spreadsheet.Spreadsheet;
-import edu.olivet.harvester.spreadsheet.Worksheet;
+import edu.olivet.harvester.spreadsheet.model.Spreadsheet;
+import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
