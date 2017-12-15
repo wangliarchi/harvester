@@ -115,11 +115,13 @@ public class TasksAndProgressPanel extends JPanel {
     public void loadTasksToTable() {
         delete = new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                JTable table = (JTable) e.getSource();
                 int modelRow = Integer.valueOf(e.getActionCommand());
                 OrderSubmissionTask task = taskList.get(modelRow);
 
                 if (task.getStatus().equalsIgnoreCase(OrderTaskStatus.Stopped.name())) {
+                    task.setStatus(OrderTaskStatus.Scheduled.name());
+                    task.save(dbManager);
+                } else if (task.getStatus().equalsIgnoreCase(OrderTaskStatus.Completed.name())) {
                     task.setStatus(OrderTaskStatus.Scheduled.name());
                     task.save(dbManager);
                 } else if (UITools.confirmed("Please confirm that you want to delete this task.")) {
@@ -271,7 +273,7 @@ public class TasksAndProgressPanel extends JPanel {
         this.setLayout(layout);
         layout.setHorizontalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                        .addComponent(jScrollPane1, GroupLayout.DEFAULT_SIZE, 388, Short.MAX_VALUE)
+                        .addComponent(jScrollPane1, 200, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
                         .addComponent(runtimeSettingsPanel)
                         .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                                 .addGroup(layout.createSequentialGroup()
@@ -288,7 +290,7 @@ public class TasksAndProgressPanel extends JPanel {
         layout.setVerticalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(layout.createSequentialGroup()
-                                .addComponent(jScrollPane1, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jScrollPane1, 150, GroupLayout.PREFERRED_SIZE, 300)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(runtimeSettingsPanel)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
@@ -297,7 +299,9 @@ public class TasksAndProgressPanel extends JPanel {
                                         .addComponent(stopButton)
                                         .addComponent(addTaskButton)
                                         .addComponent(startButton))
+                                .addContainerGap()
                         )
+
 
         );
     }

@@ -75,7 +75,7 @@
         <dependency>
             <groupId>com.teamdev.jxbrowser</groupId>
             <artifactId>license</artifactId>
-            <version>6.x</version>
+            <version>${jx.browser.version}</version>
         </dependency>
         <dependency>
             <groupId>edu.olivet</groupId>

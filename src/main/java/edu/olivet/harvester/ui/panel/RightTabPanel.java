@@ -28,7 +28,7 @@ public class RightTabPanel extends JTabbedPane {
 
     private RightTabPanel() {
         this.addTab("Simple Task", SimpleOrderSubmissionRuntimePanel.getInstance());
-        this.addTab("Multiple Tasks", TasksAndProgressPanel.getInstance());
+        this.addTab("Multiple Sheet Tasks", TasksAndProgressPanel.getInstance());
     }
 
 

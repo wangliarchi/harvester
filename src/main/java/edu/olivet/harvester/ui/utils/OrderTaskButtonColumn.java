@@ -14,7 +14,7 @@ public class OrderTaskButtonColumn extends ButtonColumn {
      * renderer and editor will automatically be installed on the TableColumn
      * of the specified column.
      *
-     * @param table  the table containing the button renderer/editor
+     * @param table the table containing the button renderer/editor
      * @param action the Action to be invoked when the button is invoked
      * @param column the column to which the button renderer/editor is added
      */
@@ -27,9 +27,11 @@ public class OrderTaskButtonColumn extends ButtonColumn {
         String status = table.getModel().getValueAt(row, column - 1).toString();
         if (status.equalsIgnoreCase(OrderTaskStatus.Stopped.name())) {
             value = "Resume";
+        } else if (status.equalsIgnoreCase(OrderTaskStatus.Completed.name())) {
+            value = "Retry";
         }
 
-        if (StringUtils.equalsAnyIgnoreCase(status, OrderTaskStatus.Scheduled.name(), OrderTaskStatus.Error.name(), OrderTaskStatus.Stopped.name())) {
+        if (StringUtils.equalsAnyIgnoreCase(status, OrderTaskStatus.Scheduled.name(), OrderTaskStatus.Error.name(), OrderTaskStatus.Stopped.name(), OrderTaskStatus.Completed.name())) {
             return super.getTableCellEditorComponent(table, value, isSelected, row, column);
         }
 
@@ -45,9 +47,11 @@ public class OrderTaskButtonColumn extends ButtonColumn {
         String status = table.getModel().getValueAt(row, column - 1).toString();
         if (status.equalsIgnoreCase(OrderTaskStatus.Stopped.name())) {
             value = "Resume";
+        } else if (status.equalsIgnoreCase(OrderTaskStatus.Completed.name())) {
+            value = "Retry";
         }
 
-        if (StringUtils.equalsAnyIgnoreCase(status, OrderTaskStatus.Scheduled.name(), OrderTaskStatus.Error.name(), OrderTaskStatus.Stopped.name())) {
+        if (StringUtils.equalsAnyIgnoreCase(status, OrderTaskStatus.Scheduled.name(), OrderTaskStatus.Error.name(), OrderTaskStatus.Stopped.name(), OrderTaskStatus.Completed.name())) {
             return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         } else {
             return getEmptyRendererComponent();

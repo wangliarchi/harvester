@@ -186,7 +186,9 @@ public class ItemCheckResultDialog extends javax.swing.JDialog {
                                         .addGroup(layout.createParallelGroup(Alignment.BASELINE)
                                                 .addComponent(filterCheckbox)
                                                 .addComponent(summaryTxtFld, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                .addComponent(passAllBtn))))
+                                                .addComponent(passAllBtn)))
+                                .addContainerGap())
+
         );
 
         JTextArea rulesTextArea = new JTextArea();

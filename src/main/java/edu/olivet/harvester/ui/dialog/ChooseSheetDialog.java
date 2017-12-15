@@ -125,6 +125,7 @@ public class ChooseSheetDialog extends BaseDialog {
                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
 
                         .addComponent(continueBtn)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 ));
 
 
@@ -133,7 +134,11 @@ public class ChooseSheetDialog extends BaseDialog {
                         .addComponent(spreadPane, 150, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
                         .addComponent(sheetPane, 300, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(Alignment.BASELINE)
-                                .addComponent(clearCacheBtn).addComponent(cancelBtn).addComponent(okBtn).addComponent(continueBtn))));
+                                .addComponent(clearCacheBtn)
+                                .addComponent(cancelBtn)
+                                .addComponent(okBtn)
+                                .addComponent(continueBtn))
+                        .addContainerGap()));
 
         getContentPane().setLayout(layout);
         getRootPane().setDefaultButton(okBtn);

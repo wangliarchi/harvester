@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.LayoutStyle.ComponentPlacement;
 import java.awt.*;
 import java.util.Date;
 import java.util.List;
@@ -58,7 +59,6 @@ public class RuntimeSettingsPanel extends JPanel {
         //RuntimeSettings
         settings = RuntimeSettings.load();
         Settings systemSettings = Settings.load();
-        List<Country> countries = systemSettings.listAllCountries();
         settings.setSid(systemSettings.getSid());
 
         marketplaceTextField.setText(settings.getMarketplaceName());
@@ -68,7 +68,6 @@ public class RuntimeSettingsPanel extends JPanel {
         if (StringUtils.isNotBlank(settings.getSheetName())) {
             googleSheetTextField.setText(settings.getSpreadsheetName());
             googleSheetTextField.setToolTipText(settings.getSpreadsheetName() + " - " + settings.getSheetName());
-            loadSheetTabButton.setEnabled(true);
         }
 
         selectedRangeLabel.setText(settings.getSheetName() + " " + settings.getAdvancedSubmitSetting().toString());
@@ -80,12 +79,12 @@ public class RuntimeSettingsPanel extends JPanel {
         noInvoiceTextField.setText(settings.getNoInvoiceText());
 
 
-        lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"5", "7"}));
+        lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"5", "7"}));
         if (StringUtils.isNotBlank(settings.getLostLimit())) {
             lostLimitComboBox.setSelectedItem(settings.getLostLimit());
         }
 
-        priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"3", "5"}));
+        priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"3", "5"}));
         priceLimitComboBox.setSelectedItem(settings.getPriceLimit());
 
         setOrderFinder();
@@ -96,7 +95,7 @@ public class RuntimeSettingsPanel extends JPanel {
 
 
         maxDaysOverEddComboBox.setModel(new DefaultComboBoxModel<>(
-                new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}
+                new String[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}
         ));
         maxDaysOverEddComboBox.setSelectedItem(settings.getEddLimit());
 
@@ -122,18 +121,6 @@ public class RuntimeSettingsPanel extends JPanel {
 
     public void initEvents() {
 
-        loadSheetTabButton.addActionListener(evt -> {
-            if (StringUtils.isBlank(settings.getSpreadsheetId())) {
-                return;
-            }
-            loadSheetTabButton.setEnabled(false);
-            Country country = Country.fromCode(settings.getMarketplaceName());
-            Account sellerEmail = Settings.load().getConfigByCountry(country).getSellerEmail();
-            BuyerPanel panel = TabbedBuyerPanel.getInstance().addSheetTab(country, sellerEmail);
-            TabbedBuyerPanel.getInstance().setSelectedIndex(panel.getId());
-            JXBrowserHelper.loadSpreadsheet(panel.getBrowserView().getBrowser(), sellerEmail, settings.getSpreadsheetId());
-        });
-
         showHideDetailButton.addActionListener(evt -> {
             if (showHideDetailButton.getText().equalsIgnoreCase("Show Details")) {
                 showHideDetailButton.setText("Hide Details");
@@ -143,7 +130,11 @@ public class RuntimeSettingsPanel extends JPanel {
                 hideDetails();
             }
 
-            MainPanel.getInstance().resetSplitPanelSizes();
+            try {
+                MainPanel.getInstance().resetSplitPanelSizes();
+            } catch (Exception e) {
+                //
+            }
         });
     }
 
@@ -167,7 +158,6 @@ public class RuntimeSettingsPanel extends JPanel {
         noInvoiceTextField.setEnabled(false);
         finderCodeTextField.setEnabled(false);
         skipCheckComboBox.setEnabled(false);
-        loadSheetTabButton.setEnabled(false);
     }
 
     public void setAccounts4Country() {
@@ -285,12 +275,8 @@ public class RuntimeSettingsPanel extends JPanel {
     private JLabel progressLabel;
     public JProgressBar progressBar;
     public JLabel progressTextLabel;
-
-
     private JTextField todayBudgetTextField;
     public JTextField todayUsedTextField;
-
-    private JButton loadSheetTabButton;
     private JButton showHideDetailButton;
 
     private void initComponents() {
@@ -324,15 +310,11 @@ public class RuntimeSettingsPanel extends JPanel {
         maxEddLabel = new JLabel();
         maxDaysOverEddComboBox = new JComboBox<>();
 
-        loadSheetTabButton = new JButton();
-        loadSheetTabButton.setText("Load Sheet");
-        loadSheetTabButton.setEnabled(false);
-
-        marketplaceLabel.setText("Marketplace");
+        marketplaceLabel.setText("Country");
         sellerLabel.setText("Seller");
         buyerLabel.setText("Buyer");
         primeBuyerLabel.setText("Prime Buyer");
-        googleSheetLabel.setText("Google Sheet");
+        googleSheetLabel.setText("Sheet");
         selectRangeLabel.setText("Range");
         lostLimitLabel.setText("Lost Limit");
         priceLimitLabel.setText("Price Limit");
@@ -383,7 +365,7 @@ public class RuntimeSettingsPanel extends JPanel {
         this.setLayout(layout);
 
         int fieldWidth = 150;
-        int labelMinWidth = 70;
+        int labelMinWidth = 55;
         layout.setHorizontalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(layout.createSequentialGroup()
@@ -391,12 +373,12 @@ public class RuntimeSettingsPanel extends JPanel {
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addGroup(layout.createSequentialGroup()
                                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                                        .addComponent(marketplaceLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(buyerLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(selectRangeLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(lostLimitLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(maxEddLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(codeFinderLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(marketplaceLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(buyerLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(selectRangeLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(lostLimitLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(maxEddLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(codeFinderLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
 
                                                 )
                                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
@@ -408,18 +390,19 @@ public class RuntimeSettingsPanel extends JPanel {
 
                                                         .addComponent(finderCodeTextField, labelMinWidth, fieldWidth, fieldWidth)
                                                 )
+                                                .addPreferredGap(ComponentPlacement.UNRELATED)
                                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                                        .addComponent(sellerLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(primeBuyerLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(sellerLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(primeBuyerLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
                                                         .addGap(labelMinWidth)
-                                                        .addComponent(priceLimitLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(noInvoiceLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(skipCheckLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(priceLimitLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(noInvoiceLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(skipCheckLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
                                                 )
                                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                                         .addComponent(sellerTextField, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(primeBuyerTextField, labelMinWidth, fieldWidth, fieldWidth)
-                                                        .addComponent(loadSheetTabButton)
+                                                        .addGap(labelMinWidth)
                                                         .addComponent(priceLimitComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(noInvoiceTextField, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(skipCheckComboBox, labelMinWidth, fieldWidth, fieldWidth)
@@ -433,7 +416,7 @@ public class RuntimeSettingsPanel extends JPanel {
                                         .addGroup(layout.createSequentialGroup()
                                                 .addComponent(todayBudgetLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                 .addComponent(todayBudgetTextField, labelMinWidth, fieldWidth, fieldWidth)
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                .addPreferredGap(ComponentPlacement.UNRELATED)
                                                 .addComponent(todayUsedLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(todayUsedTextField, labelMinWidth, fieldWidth, fieldWidth)
@@ -486,7 +469,6 @@ public class RuntimeSettingsPanel extends JPanel {
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(selectRangeLabel)
                                         .addComponent(selectedRangeLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(loadSheetTabButton)
                                 )
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
 

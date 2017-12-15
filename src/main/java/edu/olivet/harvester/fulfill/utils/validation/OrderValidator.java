@@ -162,7 +162,7 @@ public class OrderValidator {
                 Validator.HasValidCreditCard,
                 Validator.IsNotAddOn,
                 Validator.AddressNotChanged,
-                Validator.StatusMarkedCorrectForSubmit,
+                //Validator.StatusMarkedCorrectForSubmit,
                 Validator.FulfillmentCountryIsValid,
                 Validator.IsNotForbiddenSeller,
                 //Validator.HasEnoughBudgetToFulfill,

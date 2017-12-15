@@ -172,7 +172,7 @@ public class OrderSubmissionTask extends PrimaryKey implements ArrayConvertable 
 
     public static final String[] COLUMNS = {"Date Created", "MKTPL", "Type", "Range", "T", "S", "F", "Status", ""};
 
-    public static final int[] WIDTHS = {75, 35, 35, 70, 20, 20, 20, 60, 50};
+    public static final int[] WIDTHS = {70, 35, 35, 70, 20, 20, 20, 60, 50};
 
     @Override
     public Object[] toArray() {

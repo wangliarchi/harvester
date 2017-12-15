@@ -5,13 +5,14 @@ import edu.olivet.foundations.ui.BaseDialog;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
-import edu.olivet.harvester.fulfill.model.OrdereSubmissionTaskHandler;
+import edu.olivet.harvester.fulfill.model.OrderSubmissionTaskHandler;
 import edu.olivet.harvester.ui.panel.OrderSubmissionSettingsPanel;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.LayoutStyle.ComponentPlacement;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,11 +23,11 @@ import java.util.List;
  */
 public class AddOrderSubmissionTaskDialog extends BaseDialog {
     private static final Logger LOGGER = LoggerFactory.getLogger(AddOrderSubmissionTaskDialog.class);
-    private OrdereSubmissionTaskHandler ordereSubmissionTaskHandler;
+    private OrderSubmissionTaskHandler orderSubmissionTaskHandler;
 
-    public AddOrderSubmissionTaskDialog(OrdereSubmissionTaskHandler ordereSubmissionTaskHandler) {
+    public AddOrderSubmissionTaskDialog(OrderSubmissionTaskHandler orderSubmissionTaskHandler) {
         super(null, true);
-        this.ordereSubmissionTaskHandler = ordereSubmissionTaskHandler;
+        this.orderSubmissionTaskHandler = orderSubmissionTaskHandler;
         initComponents();
     }
 
@@ -41,7 +42,7 @@ public class AddOrderSubmissionTaskDialog extends BaseDialog {
         aboutBtn.setToolTipText("Access official website to get information, tutorial and community help");
         aboutBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        orderSubmissionSettingsPanel = new OrderSubmissionSettingsPanel();
+        orderSubmissionSettingsPanel = new OrderSubmissionSettingsPanel(this);
 
         GroupLayout layout = new GroupLayout(getContentPane());
 
@@ -52,28 +53,22 @@ public class AddOrderSubmissionTaskDialog extends BaseDialog {
                         .addComponent(cancelBtn, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH)
                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(okBtn, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addContainerGap()
                 ));
 
 
         layout.setVerticalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(
                 layout.createSequentialGroup()
                         .addComponent(orderSubmissionSettingsPanel, 100, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(cancelBtn).addComponent(okBtn))));
-
+                                .addComponent(cancelBtn).addComponent(okBtn))
+                        .addContainerGap()
+        ));
 
         getContentPane().setLayout(layout);
         getRootPane().setDefaultButton(okBtn);
         pack();
-
-    }
-
-    public static void main(String[] args) {
-        UIText.setLocale(Language.current());
-        UITools.setTheme();
-        UITools.setDialogAttr(new AddOrderSubmissionTaskDialog(null), true);
-        System.exit(0);
 
     }
 
@@ -88,8 +83,8 @@ public class AddOrderSubmissionTaskDialog extends BaseDialog {
             ok = true;
             okBtn.setEnabled(false);
             cancelBtn.setEnabled(false);
-            if (ordereSubmissionTaskHandler != null) {
-                ordereSubmissionTaskHandler.saveTasks(orderSubmissionTasks);
+            if (orderSubmissionTaskHandler != null) {
+                orderSubmissionTaskHandler.saveTasks(orderSubmissionTasks);
             }
 
             doClose();
@@ -97,4 +92,14 @@ public class AddOrderSubmissionTaskDialog extends BaseDialog {
             UITools.error(e.getMessage());
         }
     }
+
+    public static void main(String[] args) {
+        UIText.setLocale(Language.current());
+        UITools.setTheme();
+        UITools.setDialogAttr(new AddOrderSubmissionTaskDialog(null), true);
+        System.exit(0);
+
+    }
+
+
 }
