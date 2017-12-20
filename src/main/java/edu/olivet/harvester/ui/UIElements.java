@@ -62,6 +62,7 @@ public class UIElements extends AbstractUIContainer {
                 Action.Separator,
                 Actions.OrderConfirmationHistory
         });
+
         map.put(Menu.Settings, new Action[]{
                 Action.Settings,
                 Actions.ConfigBankCard,
@@ -72,7 +73,6 @@ public class UIElements extends AbstractUIContainer {
 
         });
         map.put(Menu.Help, new Action[]{
-
                 Actions.ReportBug,
                 Action.Documentation
         });
@@ -87,6 +87,7 @@ public class UIElements extends AbstractUIContainer {
     @Override
     public Action[] getToolbarActions() {
         return new Action[]{
+                Actions.ExportOrders,
                 Actions.SubmitOrder,
                 //Actions.FindSupplier,
                 Actions.ConfirmShipment,

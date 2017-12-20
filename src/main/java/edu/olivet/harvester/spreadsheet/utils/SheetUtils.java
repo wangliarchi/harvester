@@ -3,7 +3,10 @@ package edu.olivet.harvester.spreadsheet.utils;
 import com.google.api.services.sheets.v4.model.Color;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.model.OrderEnums.OrderItemType;
+import edu.olivet.harvester.utils.common.DateFormat;
 import org.apache.commons.lang3.time.FastDateFormat;
+
+import java.util.Date;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 10/24/17 10:30 AM
@@ -17,6 +20,10 @@ public class SheetUtils {
 
     public static String getSheetNameByDate(long millis) {
         return FastDateFormat.getInstance("MM/dd").format(millis);
+    }
+
+    public static String getSheetNameByDate(Date date) {
+        return DateFormat.FULL_MONTH_DAY.format(date);
     }
 
     public static String colorToHex(Color color) {

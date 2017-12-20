@@ -53,6 +53,29 @@ public class CountryStateUtils {
         return countryCode;
     }
 
+
+    /**
+     * 根据国家代码获取对应国家完整名称
+     *
+     * @param countryCode 国家代码，比如US
+     */
+    public String getCountryName(String countryCode) {
+        if (StringUtils.isBlank(countryCode)) {
+            return Country.US.name();
+        }
+
+        if (StringUtils.length(countryCode) > 2) {
+            return countryCode;
+        }
+
+        String countryName = MapUtils.invertMap(countryCodes).get(countryCode.toUpperCase());
+        if (StringUtils.isBlank(countryName)) {
+            return countryCode;
+        }
+
+        return countryName;
+    }
+
     public String getUSStateAbbr(String stateName) {
         if (StringUtils.length(stateName) == 2) {
             return stateName.toUpperCase();

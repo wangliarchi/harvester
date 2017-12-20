@@ -10,10 +10,7 @@ import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.google.GoogleAPIHelper;
 import edu.olivet.foundations.google.GoogleServiceProvider;
 import edu.olivet.foundations.google.SpreadService;
-import edu.olivet.foundations.utils.BusinessException;
-import edu.olivet.foundations.utils.Constants;
-import edu.olivet.foundations.utils.Dates;
-import edu.olivet.foundations.utils.Strings;
+import edu.olivet.foundations.utils.*;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.spreadsheet.model.Worksheet;
@@ -130,7 +127,7 @@ public class SheetAPI {
                     .append(spreadsheetId, range, values)
                     .setValueInputOption("USER_ENTERED")
                     .setInsertDataOption("INSERT_ROWS");
-
+            WaitTime.Shortest.execute();
             request.execute();
         } catch (IOException e) {
             throw googleAPIHelper.wrapException(e);

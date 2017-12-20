@@ -153,6 +153,7 @@ public class UIHarvester extends AbstractApplicationUI {
         }
     }
 
+
     @Inject
     ReportBugEvent reportBugEvent;
 
@@ -173,6 +174,14 @@ public class UIHarvester extends AbstractApplicationUI {
     @UIEvent
     public void submitOrder() {
         addOrderSubmissionTaskEvent.execute();
+    }
+
+    @Inject
+    ExportOrderEvent exportOrderEvent;
+
+    @UIEvent
+    public void exportOrders() {
+        exportOrderEvent.execute();
     }
 
     @Override
