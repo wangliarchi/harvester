@@ -57,6 +57,10 @@ public class ISBNUtils {
         return cache.get(key) != null;
     }
 
+    public static void add2Cache(Country country, String isbn, String title) {
+        String key = isbn + Constants.HYPHEN + country.name();
+        add2Cache(key,title);
+    }
     public static void add2Cache(String key, String title) {
         cache.put(key, title);
     }
@@ -69,15 +73,27 @@ public class ISBNUtils {
         initFlag.set(false);
     }
 
+
+    public static String getTitleFromCache(Country country, String isbn) {
+        String key = isbn + Constants.HYPHEN + country.name();
+        String title = cache.get(key);
+        if (StringUtils.isNotBlank(title)) {
+            return title;
+        }
+
+        return null;
+    }
+
+
     /**
      * 获取亚马逊上面一个ISBN对应产品的名称
      *
      * @param country 亚马逊国家
-     * @param isbn    10位isbn
+     * @param isbn 10位isbn
      */
     public static String getTitle(Country country, String isbn) {
         String key = isbn + Constants.HYPHEN + country.name();
-        String title = cache.get(key);
+        String title = getTitleFromCache(country,isbn);
         if (StringUtils.isNotBlank(title)) {
             return title;
         }
@@ -94,7 +110,7 @@ public class ISBNUtils {
      * 获取亚马逊上面一个ISBN对应产品的名称
      *
      * @param baseUrl 亚马逊网址Host
-     * @param isbn    10位isbn
+     * @param isbn 10位isbn
      */
     public static String _getTitle(String baseUrl, String isbn) {
         String title = StringUtils.EMPTY;
