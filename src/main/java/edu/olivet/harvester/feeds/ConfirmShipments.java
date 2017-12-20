@@ -404,7 +404,7 @@ public class ConfirmShipments {
     }
 
 
-    public String _submitFeed(File feedFile, Country country)  {
+    public String _submitFeed(File feedFile, Country country) {
 
         for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
             MarketWebServiceIdentity credential;
@@ -432,7 +432,7 @@ public class ConfirmShipments {
         return null;
     }
 
-    private static final String[] RECOVERABLE_ERROR_MESSAGES = {"Request is throttled", "You exceeded your quota", "Internal Error"};
+    private static final String[] RECOVERABLE_ERROR_MESSAGES = {"Request is throttled", "You exceeded your quota", "Internal Error", "Failed to retrieve batch id"};
 
     protected boolean isRepeatable(Exception e) {
         return Strings.containsAnyIgnoreCase(e.getMessage(), RECOVERABLE_ERROR_MESSAGES);
@@ -532,9 +532,13 @@ public class ConfirmShipments {
             }
 
             String carrierCode = carrierHelper.getCarrierCodeByCountryAndType(country, orderItemType);
-
-
-            String[] row = {order.order_id, carrierCode, defaultShipDate};
+            String[] codes = StringUtils.split(carrierCode, ",");
+            String carrierName = "";
+            if (codes.length == 2) {
+                carrierCode = codes[0];
+                carrierName = codes[1];
+            }
+            String[] row = {order.order_id, carrierCode, carrierName, defaultShipDate};
             ordersToBeConfirmed.add(row);
         }
 

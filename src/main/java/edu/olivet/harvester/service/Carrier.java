@@ -24,12 +24,12 @@ public class Carrier {
 
         //All non-US products:  DHL Global Mail
         if (orderItemType == OrderEnums.OrderItemType.PRODUCT) {
-            return "DHL Global Mail";
+            return "Other,DHL eCommerce";
         }
 
         //Mx product/book： DHL Global Mail
         if (country == Country.MX) {
-            return "DHL Global Mail";
+            return "Other,DHL eCommerce";
         }
 
         //EU book: Royal Mail
