@@ -1,0 +1,33 @@
+<Product xmlns="http://mws.amazonservices.com/schema/Products/2011-10-01" xmlns:ns2="http://mws.amazonservices.com/schema/Products/2011-10-01/default.xsd">
+    <Identifiers>
+        <MarketplaceASIN>
+            <MarketplaceId>ATVPDKIKX0DER</MarketplaceId>
+            <ASIN>B01N5L2SU4</ASIN>
+        </MarketplaceASIN>
+    </Identifiers>
+    <AttributeSets>
+        <ns2:ItemAttributes xml:lang="en-US">
+            <ns2:Binding>Mass Market Paperback</ns2:Binding>
+            <ns2:Label>Pocket Books</ns2:Label>
+            <ns2:Manufacturer>Pocket Books</ns2:Manufacturer>
+            <ns2:ProductGroup>Book</ns2:ProductGroup>
+            <ns2:ProductTypeName>BOOKS_1973_AND_LATER</ns2:ProductTypeName>
+            <ns2:PublicationDate>1745-01-01</ns2:PublicationDate>
+            <ns2:Publisher>Pocket Books</ns2:Publisher>
+            <ns2:SmallImage>
+                <ns2:URL>http://ecx.images-amazon.com/images/I/51ixgCgzTqL._SL75_.jpg</ns2:URL>
+                <ns2:Height Units="pixels">75</ns2:Height>
+                <ns2:Width Units="pixels">45</ns2:Width>
+            </ns2:SmallImage>
+            <ns2:Studio>Pocket Books</ns2:Studio>
+            <ns2:Title>Nigger: An Autobiography by Dick Gregory (1995-08-26)</ns2:Title>
+        </ns2:ItemAttributes>
+    </AttributeSets>
+    <Relationships/>
+    <SalesRankings>
+        <SalesRank>
+            <ProductCategoryId>book_display_on_website</ProductCategoryId>
+            <Rank>756465</Rank>
+        </SalesRank>
+    </SalesRankings>
+</Product>

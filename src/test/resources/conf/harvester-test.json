@@ -1,0 +1,152 @@
+{
+  "configs": [
+    {
+      "bookDataSourceUrl": "1IMbmaLUjqvZ7w8OdPd59fpTuad8U__5PAyKg3yR0DjY",
+      "buyer": {
+        "email": "acc@gmail.com",
+        "password": "1",
+        "type": "Buyer"
+      },
+      "country": "US",
+      "ebayBuyer": {
+        "email": "acc@gmail.com",
+        "password": "1",
+        "type": "Buyer"
+      },
+      "mwsCredential": {
+        "accessKey": "AKIAI73MGXM4FSWB6TIQ",
+        "marketPlaceId": "ATVPDKIKX0DER",
+        "secretKey": "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",
+        "sellerId": "A3BEPQLI451F6I"
+      },
+      "primeBuyer": {
+        "email": "primebuyer@gmail.com",
+        "password": "pbpw",
+        "type": "PrimeBuyer"
+      },
+      "prodBuyer": {
+        "email": "acc@gmail.com",
+        "password": "1",
+        "type": "Buyer"
+      },
+      "prodPrimeBuyer": {
+        "email": "acc@gmail.com",
+        "password": "1",
+        "type": "PrimeBuyer"
+      },
+      "productDataSourceUrl": "1qxcCkAPvvBaR3KHa2MZv1V39m2E1IMytVDn1yXDaVEM",
+      "seller": {
+        "email": "acc@gmail.com",
+        "password": "1",
+        "type": "Seller"
+      },
+      "sellerEmail": {
+        "email": "johnnyxiang2017@gmail.com",
+        "password": "q1w2e3AA",
+        "type": "Seller"
+      },
+      "signature": "Mike",
+      "storeName": "Mike Pro",
+      "userCode": "Mike"
+    },
+    {
+      "bookDataSourceUrl": "1VIar2m0_78mUk3wcmfiqLWQOBB34NBsac94R4EYgcOU",
+      "buyer": {
+        "email": "acc@gmail.com",
+        "password": "1",
+        "type": "Buyer"
+      },
+      "country": "CA",
+      "ebayBuyer": {
+        "email": "acc@gmail.com",
+        "password": "1",
+        "type": "Buyer"
+      },
+      "mwsCredential": {
+        "accessKey": "AKIAI73MGXM4FSWB6TIQ",
+        "marketPlaceId": "A2EUQ1WTGCTBG2",
+        "secretKey": "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",
+        "sellerId": "A3BEPQLI451F6I"
+      },
+      "primeBuyer": {
+        "email": "acc@gmail.com",
+        "password": "1",
+        "type": "PrimeBuyer"
+      },
+      "prodBuyer": {
+        "email": "acc@gmail.com",
+        "password": "1",
+        "type": "Buyer"
+      },
+      "prodPrimeBuyer": {
+        "email": "acc@gmail.com",
+        "password": "1",
+        "type": "PrimeBuyer"
+      },
+      "productDataSourceUrl": "17k9ohj5RTCeMKKbpEbBb7azB4u3yZ3aHs1FfYTPaAMoYYY",
+      "seller": {
+        "email": "acc@gmail.com",
+        "password": "1",
+        "type": "Seller"
+      },
+      "sellerEmail": {
+        "email": "acc@gmail.com",
+        "password": "1",
+        "type": "Seller"
+      },
+      "signature": "Mike",
+      "storeName": "Mike Pro",
+      "userCode": "JOHN"
+    },
+    {
+      "bookDataSourceUrl": "19pVN9f9ayfBiyMpdRpLsCmZlSjh8dYGDVgYihFFUcqU",
+      "buyer": {
+        "email": "acc@gmail.com",
+        "password": "1",
+        "type": "Buyer"
+      },
+      "country": "MX",
+      "ebayBuyer": {
+        "email": "acc@gmail.com",
+        "password": "1",
+        "type": "Buyer"
+      },
+      "mwsCredential": {
+        "accessKey": "AKIAI73MGXM4FSWB6TIQ",
+        "marketPlaceId": "A2EUQ1WTGCTBG2",
+        "secretKey": "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",
+        "sellerId": "A3BEPQLI451F6I"
+      },
+      "primeBuyer": {
+        "email": "acc@gmail.com",
+        "password": "1",
+        "type": "PrimeBuyer"
+      },
+      "prodBuyer": {
+        "email": "acc@gmail.com",
+        "password": "1",
+        "type": "Buyer"
+      },
+      "prodPrimeBuyer": {
+        "email": "acc@gmail.com",
+        "password": "1",
+        "type": "PrimeBuyer"
+      },
+      "productDataSourceUrl": "17k9ohj5RTCeMKKbpEbBb7azB4u3yZ3aHs1FfYTPaAMo",
+      "seller": {
+        "email": "acc@gmail.com",
+        "password": "1",
+        "type": "Seller"
+      },
+      "sellerEmail": {
+        "email": "acc@gmail.com",
+        "password": "1",
+        "type": "Seller"
+      },
+      "signature": "Mike",
+      "storeName": "Mike Pro",
+      "userCode": "JOHN"
+    }
+  ],
+  "sid": "714"
+}

@@ -1,0 +1,22 @@
+{
+	"advancedSubmitSetting":{
+		"autoLoop":false,
+		"countLimit":0,
+		"endRowNo":0,
+		"loopInterval":0,
+		"singleRowNo":7,
+		"startRowNo":0,
+		"submitRange":"SINGLE"
+	},
+	"eddLimit":"7",
+	"finderCode":"Blaise",
+	"lostLimit":"5",
+	"marketplaceName":"US",
+	"noInvoiceText":"{No Invoice}",
+	"priceLimit":"3",
+	"sheetName":"11/28",
+	"sid":"704",
+	"skipValidation":"None",
+	"spreadsheetId":"1Xmjr6XC2nGFoqeK_Zf_u9BCP2cnMTo0cZGugFNH07OE",
+	"spreadsheetName":"!!! TEST ONLY  ACC704 US Order Update_"
+}

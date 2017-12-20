@@ -1,9 +1,319 @@
-版本更新历史记录
+﻿版本更新历史记录
 
 ======================================================================
-版本：1.0-2017-09-23.1
+版本：1.0-2017-09-23.1,1.0-2017-09-23.2-BETA
 代号：收割机
 性质：0
 
 更新内容：
-1. 初始版本，包含自动Confirm及Unshipped订单提醒功能。
+1. 初始版本，包含自动Confirm及Unshipped订单提醒功能;
+2. Fix migration issue when configuration file incomplete.
+
+======================================================================
+版本：1.0-2017-09-23.2-BETA,1.0-2017-09-24.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. Reset message panel to virtual for shipment confirmation cron job.
+
+======================================================================
+版本：1.0-2017-09-24.1,1.0-2017-09-25.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. Fix a bug in setting migration.
+2. Account code in auto order confirmation email subject should use country name, not country code
+
+======================================================================
+版本：1.0-2017-09-25.1,1.0-2017-09-25.2
+代号：Harvester
+性质：0
+
+更新内容：
+1. Fixed sales channle data missing bug, which caused order confirmation feed cant be generated.
+
+======================================================================
+版本：1.0-2017-09-25.2,1.0-2017-10-07.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. added order update sheet validation for account configurations
+2. check if there are unprocessed/processing order confirmation feed before submitting new ones.
+3. other minor fixes
+
+======================================================================
+版本：1.0-2017-10-07.1,1.0-2017-10-11.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. improved order confirmation log, more readable.
+2. some mws secret key contains tab \t!
+3. check order purchase date if it's recent order
+4. other minor fixes
+
+======================================================================
+版本：1.0-2017-10-11.1,1.0-2017-10-11.2
+代号：Harvester
+性质：0
+
+更新内容：
+1. add more info on order confirmation log on spreadsheet
+
+======================================================================
+版本：1.0-2017-10-11.2,1.0-2017-10-12.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. mark gray and insert "buyer canceled" if order is canceled
+
+======================================================================
+版本：1.0-2017-10-12.1,1.0-2017-10-12.2
+代号：Harvester
+性质：0
+
+更新内容：
+1. stop sending order confirmation notification emails to order fulfillment people.
+2. added starting program bat file. it was missed in previous versions
+3. change to check Harvester running status every 4 hours. it was once at 2AM everyday.
+4. other fixes
+
+======================================================================
+版本：1.0-2017-10-12.2,1.0-2017-10-13.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. added context uploader.
+2. other fixes
+
+======================================================================
+版本：1.0-2017-10-13.1,1.0-2017-10-16.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. add order conformation cronjob to db, check to run on program started if missed.
+2. bug fixes
+
+======================================================================
+版本：1.0-2017-10-16.1,1.0-2017-10-17.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. sleep random time to reduce concurrency load of dropbox server when auto upgrading .
+2. upload daily log to Dropbox
+
+======================================================================
+版本：1.0-2017-10-17.1,1.0-2017-10-18.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. add confirmation window when user trying to close Harvester
+2. minor bug fixes
+
+======================================================================
+版本：1.0-2017-10-18.1,1.0-2017-10-20.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. check all 5 eu marketplace for active mws credential
+2. minor bug fixes
+
+
+======================================================================
+版本：1.0-2017-10-20.1,1.0-2017-10-24.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. change order confirmation to between 12:00-2:00pm
+2. minor bug fixes
+
+======================================================================
+版本：1.0-2017-10-24.1,1.0-2017-11-07.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. for order confirmation, use date of marketplace timezone instead of system timezone.
+
+======================================================================
+版本：1.0-2017-11-07.1,1.0-2017-11-08.1
+代号：Harvester
+性质：0
+
+更新内容：
+1. Fixed Harvester cant start on non-english and non-chinese system bug.
+
+======================================================================
+版本：1.0-2017-11-08.1,1.0-2017-11-11.1
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. Not using product api to check product type，rely on sku pattern only.
+
+======================================================================
+版本：1.0-2017-11-11.1,1.0-2017-11-14.1-BETA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. order fulfillment alpha version
+
+======================================================================
+版本：1.0-2017-11-14.1-BETA,1.0-2017-11-17.1-BETA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. Not using product api to check mws api status.
+2. Add more validation on order sheet settings
+
+======================================================================
+版本：1.0-2017-11-17.1-BETA,1.0-2017-11-23.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. first version of order submission - support orders from amazon.com to US addresses.
+======================================================================
+版本：1.0-2017-11-23.1-GA,1.0-2017-11-24.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. fixed qty not updated bug.
+
+======================================================================
+版本：1.0-2017-11-24.1-GA,1.0-2017-11-25.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. several bug fixes.
+
+======================================================================
+版本：1.0-2017-11-25.1-GA,1.0-2017-11-25.2-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. load one buyer panel on start up
+2. add more address validation methods
+3. several bug fixes.
+
+
+======================================================================
+版本：1.0-2017-11-25.2-GA,1.0-2017-11-27.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. several bug fixes and improvements.
+
+======================================================================
+版本：1.0-2017-11-27.1-GA,1.0-2017-11-28.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. fix a bug on order confirmation for EU marketplaces.
+
+======================================================================
+版本：1.0-2017-11-28.1-GA,1.0-2017-11-28.2-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. report bug function.
+2. several bug fixes and improvements.
+
+======================================================================
+版本：1.0-2017-11-28.2-GA,1.0-2017-11-29.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. fixed 2 bugs on order confirmation.
+2. several bug fixes and improvements on order submission.
+
+======================================================================
+版本：1.0-2017-11-29.1-GA,1.0-2017-11-30.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. add support for us intl orders
+2. if two ship options has see title, the more expensive one was chosen... use index instead
+
+======================================================================
+版本：1.0-2017-11-30.1-GA,1.0-2017-12-02.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. add gift option
+
+======================================================================
+版本：1.0-2017-12-02.1-GA,1.0-2017-12-04.1-BETA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. CA order submission
+2. bug fixes and improvements
+
+======================================================================
+版本：1.0-2017-12-04.1-BETA,1.0-2017-12-05.1-BETA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. UK order submission
+2. bug fixes and improvements
+
+======================================================================
+版本：1.0-2017-12-05.1-BETA,1.0-2017-12-06.1-BETA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. ALL EU countries order submission, except UK FWD
+2. bug fixes and improvements
+
+======================================================================
+版本：1.0-2017-12-06.1-BETA,1.0-2017-12-19.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. order submission support for ca and eu countries.
+2. multiple sheets order submission support
+3. use DHL eCommerce instead of DHL Global Mail for order confirmation
+4. bug fixes and improvements

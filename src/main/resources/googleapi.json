@@ -1,0 +1,25 @@
+{
+  "_module": "oauth2client.client",
+  "scopes": [
+    "https://spreadsheets.google.com/feeds",
+    "https://www.googleapis.com/auth/drive.readonly"
+  ],
+  "token_expiry": "2017-09-28T19:55:52Z",
+  "id_token": null,
+  "user_agent": "olivet-rnd",
+  "access_token": "ya29.GlvUBOaVjC2qfcMU74NrLRaLi22-ulukbS6z3uKem3BIqLtQ3XQnRUu8e-pvvO9EbGrU52FU183tQjmuc2vmbV2A_jeC2Pcl6sJuBbUoXVc5zKNuhjj3aENkRLrh",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "invalid": false,
+  "token_response": {
+    "access_token": "ya29.GlvUBOaVjC2qfcMU74NrLRaLi22-ulukbS6z3uKem3BIqLtQ3XQnRUu8e-pvvO9EbGrU52FU183tQjmuc2vmbV2A_jeC2Pcl6sJuBbUoXVc5zKNuhjj3aENkRLrh",
+    "token_type": "Bearer",
+    "expires_in": 3600,
+    "refresh_token": "1/wGYm8Khrb3wFCVdnLVl-rLZEDlb7w7Y6vN_u4pl9A28"
+  },
+  "client_id": "692627219491-enpjefctatd2a57jv1ocmmefkiflh32t.apps.googleusercontent.com",
+  "token_info_uri": "https://www.googleapis.com/oauth2/v3/tokeninfo",
+  "client_secret": "-nWADNry-GwXowcXbpqsZL-3",
+  "revoke_uri": "https://accounts.google.com/o/oauth2/revoke",
+  "_class": "OAuth2Credentials",
+  "refresh_token": "1/wGYm8Khrb3wFCVdnLVl-rLZEDlb7w7Y6vN_u4pl9A28"
+}

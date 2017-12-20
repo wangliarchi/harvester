@@ -1,0 +1,26 @@
+<Product xmlns="http://mws.amazonservices.com/schema/Products/2011-10-01" xmlns:ns2="http://mws.amazonservices.com/schema/Products/2011-10-01/default.xsd">
+    <Identifiers>
+        <MarketplaceASIN>
+            <MarketplaceId>ATVPDKIKX0DER</MarketplaceId>
+            <ASIN>B015LYC2S2</ASIN>
+        </MarketplaceASIN>
+    </Identifiers>
+    <AttributeSets>
+        <ns2:ItemAttributes xml:lang="en-US">
+            <ns2:Binding>Kitchen</ns2:Binding>
+            <ns2:Brand>Unika 7</ns2:Brand>
+            <ns2:PackageQuantity>1</ns2:PackageQuantity>
+            <ns2:PartNumber>CLEANAST-3</ns2:PartNumber>
+            <ns2:ProductGroup>Major Appliances</ns2:ProductGroup>
+            <ns2:ProductTypeName>HOME</ns2:ProductTypeName>
+            <ns2:SmallImage>
+                <ns2:URL>http://ecx.images-amazon.com/images/I/412p0pNMm5L._SL75_.jpg</ns2:URL>
+                <ns2:Height Units="pixels">56</ns2:Height>
+                <ns2:Width Units="pixels">75</ns2:Width>
+            </ns2:SmallImage>
+            <ns2:Title>Unika Anti-Static Gloss Surface Cleaner  microfibre cloth 200ml x 3 tins by Unika</ns2:Title>
+        </ns2:ItemAttributes>
+    </AttributeSets>
+    <Relationships/>
+    <SalesRankings/>
+</Product>

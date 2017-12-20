@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<ListOrdersResponse xmlns="https://mws.amazonservices.com/Orders/2013-09-01">
+    <ListOrdersResult>
+        <Orders/>
+        <CreatedBefore>2017-09-30T21:19:49Z</CreatedBefore>
+    </ListOrdersResult>
+    <ResponseMetadata>
+        <RequestId>b268b789-1cde-4dd7-a9f1-0e4ec9170d4f</RequestId>
+    </ResponseMetadata>
+</ListOrdersResponse>

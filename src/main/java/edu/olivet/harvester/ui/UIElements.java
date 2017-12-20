@@ -21,38 +21,61 @@ public class UIElements extends AbstractUIContainer {
     }
 
     private final Menu harvester = new Menu("Harvester", "H");
+    private final Menu submitOrder = new Menu("Submit Order", "O");
+    private final Menu confirmShipment = new Menu("Confirm Shipment", "C");
 
     @Override
     public Menu[] getMenus() {
-        return new Menu[] {
-            harvester,
-            Menu.Settings,
-            Menu.Help
+        return new Menu[]{
+                harvester,
+                submitOrder,
+                confirmShipment,
+                Menu.Settings,
+                Menu.Help
         };
     }
 
     @Override
     public Map<Menu, Action[]> getMenuActions() {
         Map<Menu, Action[]> map = new HashMap<>();
-        map.put(harvester, new Action[] {
-            Actions.SubmitOrder,
-            Action.Separator,
-            Actions.FindSupplier,
-            Action.Separator,
-            Actions.ConfirmShipment
+        map.put(harvester, new Action[]{
+                Action.CurrentVersion,
+                Action.UpgradeCheck,
+                Action.Separator,
+                Action.Restart
+
         });
-        map.put(Menu.Settings, new Action[] {
-            Action.Settings,
-            Action.Separator,
-            Action.CreateAutoStartTask,
-            Action.DeleteAutoStartTask,
-            Action.CreateShortCut,
-            Action.Separator,
-            Action.Restart
+
+        map.put(submitOrder, new Action[]{
+                //Actions.DuplicatedOrders,
+                Actions.AddOrderTask,
+                Action.Separator,
+                Actions.OrderSubmissionTasks,
+                Actions.OrderSubmissionLog,
+                Action.Separator,
+                Actions.OrderSuccessLog,
+                Actions.OrderStatisticLog
+
         });
-        map.put(Menu.Help, new Action[] {
-            Action.CurrentVersion,
-            Action.UpgradeCheck
+
+        map.put(confirmShipment, new Action[]{
+                Actions.ConfirmShipment,
+                Action.Separator,
+                Actions.OrderConfirmationHistory
+        });
+        map.put(Menu.Settings, new Action[]{
+                Action.Settings,
+                Actions.ConfigBankCard,
+                Action.Separator,
+                Action.CreateAutoStartTask,
+                Action.DeleteAutoStartTask,
+                Action.CreateShortCut
+
+        });
+        map.put(Menu.Help, new Action[]{
+
+                Actions.ReportBug,
+                Action.Documentation
         });
         return map;
     }
@@ -64,11 +87,12 @@ public class UIElements extends AbstractUIContainer {
 
     @Override
     public Action[] getToolbarActions() {
-        return new Action[] {
-            Actions.SubmitOrder,
-            Actions.FindSupplier,
-            Actions.ConfirmShipment,
-            Action.Settings
+        return new Action[]{
+                Actions.SubmitOrder,
+                //Actions.FindSupplier,
+                Actions.ConfirmShipment,
+                Action.Settings,
+                Actions.ReportBug
         };
     }
 
@@ -76,4 +100,6 @@ public class UIElements extends AbstractUIContainer {
     public Action getAction(String command) {
         return this.getActionByCommand(command, Action.class, Actions.class);
     }
+
+
 }

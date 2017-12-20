@@ -73,10 +73,12 @@ public enum State {
     /**
      * 地址位置横坐标
      */
+    @SuppressWarnings("CheckStyle")
     private final int x;
     /**
      * 地址位置纵坐标
      */
+    @SuppressWarnings("CheckStyle")
     private final int y;
     /**
      * 完整名称描述
@@ -116,7 +118,7 @@ public enum State {
 
         for (State state : State.values()) {
             if (state.desc.equalsIgnoreCase(lowerSrc) || state.name().equalsIgnoreCase(lowerSrc) ||
-                Strings.containsAnyIgnoreCase(lowerSrc, state.desc)) {
+                    Strings.containsAnyIgnoreCase(lowerSrc, state.desc)) {
                 cache.put(lowerSrc, state);
                 return state;
             }

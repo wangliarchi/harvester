@@ -70,6 +70,12 @@ public enum Remark {
      */
     UK_TRANSFER(new String[] {"UK转运"}, new String[] {"UK FWD"}, true),
 
+
+    /**
+     * 自买单
+     */
+    SELF_ORDER(new String[] {"自買單"}, new String[] {"self order", "self-order"}, true),
+
     /**
      * UK转运中Seller为AP，需要直接寄到美国LA WareHouse的特定类型，仅用于多单一做场景，注意，这里无需进行US直寄也即切换到美国亚马逊做单的操作
      */
@@ -117,7 +123,7 @@ public enum Remark {
      * 客户取消了订单, 此时不能再继续做单
      */
     BUYER_CANCELLED(new String[] {"Buyer Cancel", "Buyer Canceled", "Buyer Cancelled"},
-        new String[] {"Buyer Cancel", "Buyer Canceled", "Buyer Cancelled"}, true),
+            new String[] {"Buyer Cancel", "Buyer Canceled", "Buyer Cancelled"}, true),
     /**
      * 普通Cancel标识，可能是客户取消，或是Supplier取消
      */
@@ -229,7 +235,7 @@ public enum Remark {
 
     private static String removeSpaceAndPunctuation(String source) {
         return StringUtils.defaultString(source).replaceAll(Regex.BLANK.val(), StringUtils.EMPTY)
-            .replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY);
+                .replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY);
     }
 
     /**
@@ -299,11 +305,11 @@ public enum Remark {
      * 做单成功之后，原先存在的异常提醒批注需要一并清除
      */
     private static final Remark[] NEED_REMOVE_AFTER_SUCCESS = {
-        Remark.NO_FAST_SHIPPING, Remark.CANNOT_SHIP_TO,
-        Remark.SELLER_OUT_OF_STOCK, Remark.SELLER_DISAPPEAR,
-        Remark.CONDITION_NOT_ACCEPTABLE, Remark.SHIPPING_FEE_TOO_HIGH,
-        Remark.SELLER_PRICE_HIGHER_THAN_ORIGINAL, Remark.NO_GIFT_OPTION,
-        Remark.SELLER_PRICE_RISE
+            Remark.NO_FAST_SHIPPING, Remark.CANNOT_SHIP_TO,
+            Remark.SELLER_OUT_OF_STOCK, Remark.SELLER_DISAPPEAR,
+            Remark.CONDITION_NOT_ACCEPTABLE, Remark.SHIPPING_FEE_TOO_HIGH,
+            Remark.SELLER_PRICE_HIGHER_THAN_ORIGINAL, Remark.NO_GIFT_OPTION,
+            Remark.SELLER_PRICE_RISE
     };
 
     /**
@@ -370,7 +376,7 @@ public enum Remark {
      */
     public static boolean needASINDeletion(String text) {
         return matchAny(text, Remark.INVALID_ITEM, Remark.MERGED_LISTING,
-            Remark.WRONG_PICTURE, Remark.WRONG_LISTING, Remark.MISC_LISTING_TO_DELETE);
+                Remark.WRONG_PICTURE, Remark.WRONG_LISTING, Remark.MISC_LISTING_TO_DELETE);
     }
 
     /**
@@ -409,10 +415,10 @@ public enum Remark {
      * 部分批注移除时，也需要将附加的金额信息一并移除
      */
     private static final Remark[] NEED_REMOVE_AMOUNT = {
-        Remark.SHIPPING_FEE_TOO_HIGH,
-        Remark.SELLER_PRICE_HIGHER_THAN_ORIGINAL,
-        Remark.NO_GIFT_OPTION,
-        Remark.SELLER_PRICE_RISE
+            Remark.SHIPPING_FEE_TOO_HIGH,
+            Remark.SELLER_PRICE_HIGHER_THAN_ORIGINAL,
+            Remark.NO_GIFT_OPTION,
+            Remark.SELLER_PRICE_RISE
     };
 
     /**
@@ -477,7 +483,7 @@ public enum Remark {
      *
      * @param text 订单批注文本
      */
-    public static Country getFulfillCountry(String text) {
+    public static Country getDirectShipFromCountry(String text) {
         if (StringUtils.isBlank(text)) {
             throw new IllegalArgumentException("Remark cannot be empty");
         }
@@ -507,14 +513,15 @@ public enum Remark {
         throw new IllegalArgumentException("Failed to get fulfill country via analyzing text: " + text);
     }
 
+
     /**
-     * 通过订单批注判定该条订单是否需要切换到其他国家直寄做单
+     * 通过订单批注判定该条订单是否需要切换到其他国家直寄做单, DE Shipment, FR Shipment...
      *
      * @param text 订单批注文本
      */
-    public static boolean needFulfillInOtherCountry(String text) {
+    public static boolean isDirectShip(String text) {
         try {
-            getFulfillCountry(text);
+            getDirectShipFromCountry(text);
             return true;
         } catch (IllegalArgumentException e) {
             return false;
@@ -530,7 +537,11 @@ public enum Remark {
      * @param text 订单批注
      */
     public static boolean purchaseBack(String text) {
-        return matchAny(text, Remark.PURCHASE_BACK, Remark.PURCHASE_BACK_EX) && !Remark.needFulfillInOtherCountry(text);
+        return matchAny(text, Remark.PURCHASE_BACK, Remark.PURCHASE_BACK_EX) && !Remark.isDirectShip(text);
+    }
+
+    public static boolean ukFwd(String text) {
+        return matchAny(text, Remark.UK_TRANSFER);
     }
 
     /**
@@ -608,6 +619,11 @@ public enum Remark {
         return ArrayUtils.contains(GRAY_REMARKS, converted);
     }
 
+    public static boolean isDN(String remark) {
+        return !StringUtils.isBlank(remark) && remark.contains("dn");
+
+    }
+
     public static void main(String[] args) {
         for (Country country : Country.values()) {
             if (country.ordinal() >= Country.JP.ordinal()) {
@@ -616,7 +632,7 @@ public enum Remark {
             String c = country.name();
             System.out.println("/** " + country.label() + "直寄 */");
             System.out.println(String.format("FULFILL_FROM_%s(new String[] {\"%s做单\", \"%s直寄\"}, " +
-                "new String[] {\"%s Shipment\"}, true),", c, c, c, c));
+                    "new String[] {\"%s Shipment\"}, true),", c, c, c, c));
         }
 
         System.out.println("var REMARKS_EN_US = [");
@@ -633,7 +649,7 @@ public enum Remark {
         System.out.println("代码\t中文特征词\t英文特征词\t出现于下拉框");
         for (Remark r : Remark.values()) {
             System.out.println(r.name() + "\t" + StringUtils.join(r.chinese, ",") + "\t" +
-                StringUtils.join(r.english, ",") + "\t" + (r.inDropdown ? "是" : "否"));
+                    StringUtils.join(r.english, ",") + "\t" + (r.inDropdown ? "是" : "否"));
         }
         for (String s : Remark.GRAY_REMARKS) {
             System.out.println(s + "\t" + s + "\t" + s + "\t" + "是");
@@ -644,7 +660,7 @@ public enum Remark {
         for (Remark r : Remark.values()) {
             if (r.inDropdown) {
                 System.out.println(String.format(format, index++,
-                    StringUtils.join(r.chinese, "<br>"), StringUtils.join(r.english, "<br>"), "Yes"));
+                        StringUtils.join(r.chinese, "<br>"), StringUtils.join(r.english, "<br>"), "Yes"));
             }
         }
         for (String s : Remark.GRAY_REMARKS) {
@@ -653,7 +669,7 @@ public enum Remark {
         for (Remark r : Remark.values()) {
             if (!r.inDropdown) {
                 System.out.println(String.format(format, index++,
-                    StringUtils.join(r.chinese, "<br>"), StringUtils.join(r.english, "<br>"), "No"));
+                        StringUtils.join(r.chinese, "<br>"), StringUtils.join(r.english, "<br>"), "No"));
             }
         }
     }

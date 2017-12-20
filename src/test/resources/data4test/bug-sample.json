@@ -1,0 +1,17 @@
+{
+  "accountEmails": "nathanael4ever@gmail.com, nathanaelibport@gmail.com",
+  "context": "999US(Nathanael Yang)",
+  "detail": "<p><font face=\"Segoe UI\"><b>Hello World</b></font></p>\n<p><font face=\"Segoe UI\">15:00:14 [main] DEBUG c.m.s.b.BatchJobHelper:130 - 定时任务CleanObsoleteFiles - Activated处理完毕</font></p>\n<p><font face=\"Segoe UI\">15:00:14 [main] INFO &nbsp;c.a.s.c.TaskScheduler:68 - 定时任务UploadUsageLogJob(0 45 23 ? * *)下一次执行时间为2017-05-15 23:45:00</font></p>\n<p><font face=\"Segoe UI\">15:00:14 [main] DEBUG c.m.s.b.BatchJobHelper:130 - 定时任务UploadUsageLog - Activated处理完毕</font></p>\n<p><font face=\"Segoe UI\">15:00:14 [main] INFO &nbsp;c.a.s.c.TaskScheduler:68 - 定时任务UploadConfigJob(0 0 3,9,15,21 ? * *)下一次执行时间为2017-05-15 21:00:00</font></p>\n<p><font face=\"Segoe UI\">15:00:14 [main] DEBUG c.m.s.b.BatchJobHelper:130 - 定时任务UploadConfig - Activated处理完毕</font></p>\n<p><font face=\"Segoe UI\">15:00:14 [main] INFO &nbsp;c.a.s.c.TaskScheduler:68 - 定时任务MailManAutoUpgradeJob(0 30 4,13,19 ? * *)下一次执行时间为2017-05-15 19:30:00</font></p>\n<p><font face=\"Segoe UI\"></font></p>\n<p><font face=\"Segoe UI\">15:00:14 [main] DEBUG c.m.s.b.BatchJobHelper:130 - 定时任务AutoUpgrade - Activated处理完毕</font></p>",
+  "id": "4332208413090205392",
+  "issue": "ShippingInquiry",
+  "issueCategory": "OrderConfirmation",
+  "level": "High",
+  "version": "3.0-2017-05-11.1-GA(Canaan)",
+  "country": "UK",
+  "orderId": "",
+  "priority": "High",
+  "progressMessage": "",
+  "reporterEmail": "nathanael4ever@gmail.com",
+  "spreadSheets": "DO NOT USE!!Test Only!!仅作测试!!-ACC_999_US_Book_Order_Update(1OcYjSoGTroo-PPzKrA-xoW0RRiKGCuMwonleR9Xban4)\nUK Import Forward (_KB_) 77 Order Update(1unlKsRhyfVgBAJc5Rjo1GY00U6A-_L55ZtciTfOQKrA)\nUK Import Forward (KB) 77 Order Update History (2016.11/1-2017.02/28)(1vHaCmydof7bAmxR0rXwZgFbjoThWKhPpDy4EtBkt6xw)\nUS Forward (KB) 120 Order Update(17QWG-jNQHk6j8fV26BHosMrhmexJj_XaUOOXtP37A-E)",
+  "title": "Hello World"
+}

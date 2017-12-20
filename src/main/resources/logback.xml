@@ -19,6 +19,17 @@
         </encoder>
     </appender>
 
+    <appender name="profile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_ROOT}/profile.%d{yyyy-M-d}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss}  %logger{2}:%L - %msg%n</pattern>
+        </encoder>
+    </appender>
+
     <appender name="usages" class="ch.qos.logback.core.FileAppender">
         <file>${LOG_ROOT}/usages.log</file>
         <encoder>
@@ -27,9 +38,58 @@
         </encoder>
     </appender>
 
+    <!-- 成功记录备份日志 -->
+    <appender name="success" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_ROOT}/success.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_ROOT}/success.%d{yyyy-M-d}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <!-- ISBN书名文件 -->
+    <appender name="isbn" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_ROOT}/isbn.txt</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 统计日志 -->
+    <appender name="statistic" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_ROOT}/statistic.log</file>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss}\t%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="order_submission" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_ROOT}/order_submission.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_ROOT}/order_submission.%d{yyyy-M-d}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss}  %-5level - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+
+
     <logger name="console" additivity="false" level="debug">
         <appender-ref ref="console"/>
     </logger>
+
+
 
     <logger name="usage.track" additivity="false" level="info">
         <appender-ref ref="usages"/>
@@ -51,9 +111,31 @@
     </logger>
 
     <logger name="edu.olivet.foundations.aop.ProfileInterceptor" additivity="false" level="debug">
-        <appender-ref ref="harvester"/>
+        <appender-ref ref="profile"/>
         <appender-ref ref="console"/>
     </logger>
+
+    <logger name="edu.olivet.harvester.logger.StatisticLogger" additivity="false" level="debug">
+        <appender-ref ref="statistic"/>
+        <appender-ref ref="console"/>
+    </logger>
+
+    <logger name="edu.olivet.harvester.logger.ISBNLogger" additivity="false" level="debug">
+        <appender-ref ref="isbn"/>
+        <appender-ref ref="console"/>
+    </logger>
+
+    <logger name="edu.olivet.harvester.logger.SuccessLogger" additivity="false" level="debug">
+        <appender-ref ref="success"/>
+        <appender-ref ref="console"/>
+    </logger>
+
+    <logger name="edu.olivet.harvester.logger.OrderSubmissionLogger" additivity="false" level="debug">
+        <appender-ref ref="order_submission"/>
+        <appender-ref ref="console"/>
+    </logger>
+
+
 
     <root level="info">
         <appender-ref ref="console"/>

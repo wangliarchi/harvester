@@ -1,0 +1,56 @@
+<Product xmlns="http://mws.amazonservices.com/schema/Products/2011-10-01" xmlns:ns2="http://mws.amazonservices.com/schema/Products/2011-10-01/default.xsd">
+    <Identifiers>
+        <MarketplaceASIN>
+            <MarketplaceId>ATVPDKIKX0DER</MarketplaceId>
+            <ASIN>B008KTVD90</ASIN>
+        </MarketplaceASIN>
+    </Identifiers>
+    <AttributeSets>
+        <ns2:ItemAttributes xml:lang="en-US">
+            <ns2:Author>Orwell, George</ns2:Author>
+            <ns2:Binding>Paperback</ns2:Binding>
+            <ns2:Edition>Older Edition</ns2:Edition>
+            <ns2:Label>Plume</ns2:Label>
+            <ns2:Languages>
+                <ns2:Language>
+                    <ns2:Name>english</ns2:Name>
+                    <ns2:Type>Published</ns2:Type>
+                </ns2:Language>
+                <ns2:Language>
+                    <ns2:Name>german</ns2:Name>
+                    <ns2:Type>Unknown</ns2:Type>
+                </ns2:Language>
+            </ns2:Languages>
+            <ns2:Manufacturer>Plume</ns2:Manufacturer>
+            <ns2:PackageDimensions>
+                <ns2:Height Units="inches">0.75</ns2:Height>
+                <ns2:Length Units="inches">8.43</ns2:Length>
+                <ns2:Width Units="inches">5.87</ns2:Width>
+                <ns2:Weight Units="pounds">0.79</ns2:Weight>
+            </ns2:PackageDimensions>
+            <ns2:PackageQuantity>1</ns2:PackageQuantity>
+            <ns2:ProductGroup>Book</ns2:ProductGroup>
+            <ns2:ProductTypeName>BOOKS_1973_AND_LATER</ns2:ProductTypeName>
+            <ns2:PublicationDate>1983-01-01</ns2:PublicationDate>
+            <ns2:Publisher>Plume</ns2:Publisher>
+            <ns2:SmallImage>
+                <ns2:URL>http://ecx.images-amazon.com/images/I/41bdzKMAPqL._SL75_.jpg</ns2:URL>
+                <ns2:Height Units="pixels">75</ns2:Height>
+                <ns2:Width Units="pixels">50</ns2:Width>
+            </ns2:SmallImage>
+            <ns2:Studio>Plume</ns2:Studio>
+            <ns2:Title>1984: 60th-Anniversary Edition (Plume)</ns2:Title>
+        </ns2:ItemAttributes>
+    </AttributeSets>
+    <Relationships/>
+    <SalesRankings>
+        <SalesRank>
+            <ProductCategoryId>book_display_on_website</ProductCategoryId>
+            <Rank>21856</Rank>
+        </SalesRank>
+        <SalesRank>
+            <ProductCategoryId>10132</ProductCategoryId>
+            <Rank>2365</Rank>
+        </SalesRank>
+    </SalesRankings>
+</Product>
