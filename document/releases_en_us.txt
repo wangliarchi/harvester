@@ -304,3 +304,14 @@
 更新内容：
 1. ALL EU countries order submission, except UK FWD
 2. bug fixes and improvements
+======================================================================
+版本：1.0-2017-12-06.1-BETA,1.0-2017-12-19.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. order submission support for ca and eu countries.
+2. multiple sheets order submission support
+3. use DHL eCommerce instead of DHL Global Mail for order confirmation
+4. bug fixes and improvements
