@@ -6,10 +6,12 @@ import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.MessagePanel;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.Constants;
+import edu.olivet.harvester.logger.OrderSubmissionLogger;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SystemUtils;
 
 import javax.swing.*;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
@@ -42,22 +44,30 @@ public class ProgressLogsPanel extends JPanel implements MessagePanel {
         setBorder(null);
 
         progressSplitPane1 = new JSplitPane();
-        JScrollPane jScrollPane1 = new JScrollPane();
+
         successRecordsTextPanel = new JTextPane();
-        JScrollPane jScrollPane2 = new JScrollPane();
         failedRecordsTextPanel = new JTextPane();
 
 
-        jScrollPane1.setBorder(BorderFactory.createTitledBorder("Success Records"));
-        successRecordsTextPanel.setEditable(false);
-        jScrollPane1.setViewportView(successRecordsTextPanel);
 
-        jScrollPane2.setBorder(BorderFactory.createTitledBorder("Failed Records"));
-        failedRecordsTextPanel.setEditable(false);
-        jScrollPane2.setViewportView(failedRecordsTextPanel);
+        JScrollPane jScrollPane1 = new JScrollPane(successRecordsTextPanel);
+        JScrollPane jScrollPane2 = new JScrollPane(failedRecordsTextPanel);
 
         UITools.setAutoScroll(successRecordsTextPanel);
         UITools.setAutoScroll(failedRecordsTextPanel);
+
+        jScrollPane1.setPreferredSize(new Dimension(200, 150));
+        jScrollPane2.setPreferredSize(new Dimension(200, 150));
+
+        jScrollPane1.setBorder(BorderFactory.createTitledBorder("Success Records"));
+        successRecordsTextPanel.setEditable(false);
+
+        jScrollPane2.setBorder(BorderFactory.createTitledBorder("Failed Records"));
+        failedRecordsTextPanel.setEditable(false);
+
+
+        //UITools.setAutoScroll(successRecordsTextPanel);
+        //UITools.setAutoScroll(failedRecordsTextPanel);
 
         progressSplitPane1.setDividerLocation(0.5);
         progressSplitPane1.setLeftComponent(jScrollPane1);
@@ -75,11 +85,11 @@ public class ProgressLogsPanel extends JPanel implements MessagePanel {
         this.setLayout(layout);
         layout.setHorizontalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(progressSplitPane1, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                        .addComponent(progressSplitPane1, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(progressSplitPane1, GroupLayout.Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                layout.createParallelGroup(Alignment.BASELINE)
+                        .addComponent(progressSplitPane1, GroupLayout.Alignment.TRAILING, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
         );
 
 
@@ -145,6 +155,12 @@ public class ProgressLogsPanel extends JPanel implements MessagePanel {
             doc.insertString(length, msg, as);
         } catch (BadLocationException e) {
             // -> Ignore
+        }
+
+        if (textArea == successRecordsTextPanel) {
+            OrderSubmissionLogger.info(msg);
+        } else {
+            OrderSubmissionLogger.error(msg);
         }
 
 

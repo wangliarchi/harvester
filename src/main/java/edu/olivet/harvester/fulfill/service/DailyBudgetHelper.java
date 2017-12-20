@@ -10,6 +10,8 @@ import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.ui.panel.RuntimeSettingsPanel;
+import edu.olivet.harvester.utils.common.NumberUtils;
+import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -29,6 +31,8 @@ public class DailyBudgetHelper {
     @Inject
     private SheetService sheetService;
 
+    @Setter
+    private RuntimePanelObserver runtimePanelObserver;
 
     public Float getRemainingBudget(String spreadsheetId, String dateString) {
         Date date = Dates.parseDate(dateString);
@@ -81,6 +85,11 @@ public class DailyBudgetHelper {
 
                                 budgetData.put("budget", budget);
                                 budgetData.put("cost", totalCost);
+
+                                if (runtimePanelObserver != null) {
+                                    runtimePanelObserver.updateSpending(Float.toString(NumberUtils.round(totalCost,2)));
+                                    runtimePanelObserver.updateBudget(Float.toString(NumberUtils.round(budget,2)));
+                                }
                                 return budgetData;
                             }
                         } catch (Exception e) {
@@ -99,8 +108,9 @@ public class DailyBudgetHelper {
         createBudgetRow(spreadsheetId, date);
         BUDGET_ROW_CACHE.put(spreadsheetId + dateToGoogleSheetName(date), rowNo);
         return budgetData;
-        //throw new BusinessException("Today's budget has not been entered yet. Please fill in 'Daily Cost' sheet.");
     }
+
+    public float totalSpent = 0f;
 
     public Float getCost(String spreadsheetId, String date) {
         return getCost(spreadsheetId, Dates.parseDate(date));
@@ -165,9 +175,11 @@ public class DailyBudgetHelper {
         DecimalFormat df = new DecimalFormat("#.##");
         df.setRoundingMode(RoundingMode.CEILING);
 
+        if (runtimePanelObserver != null) {
+            runtimePanelObserver.updateSpending(df.format(cost));
+        }
 
-        RuntimeSettingsPanel.getInstance().todayUsedTextField.setText(df.format(cost));
-
+        totalSpent = cost;
         int row = BUDGET_ROW_CACHE.getOrDefault(spreadsheetId + dateToGoogleSheetName(date), 2);
 
         List<ValueRange> dateToUpdate = new ArrayList<>();

@@ -38,7 +38,7 @@ public class FeedGenerator {
         /**
          * 订单Tracking文件
          */
-        ShippingConfirmation("ShippingConfirmation", "order-id\tcarrier-code\tship-date",
+        ShippingConfirmation("ShippingConfirmation", "order-id\tcarrier-code\tcarrier-name\tship-date",
             "_POST_FLAT_FILE_FULFILLMENT_DATA_"),
         /**
          * 更改库存数量文件
@@ -93,7 +93,7 @@ public class FeedGenerator {
         contents.add(BatchFileType.ShippingConfirmation.headers());
 
         for (String[] row : orders) {
-            contents.add(String.format("%s\t%s\t%s", row[0], row[1], row[2]));
+            contents.add(String.format("%s\t%s\t%s\t%s", row[0], row[1], row[2],row[3]));
         }
 
         File file;

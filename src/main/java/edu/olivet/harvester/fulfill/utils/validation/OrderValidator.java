@@ -1,9 +1,12 @@
 package edu.olivet.harvester.fulfill.utils.validation;
 
+import com.amazonservices.mws.orders._2013_09_01.model.OrderItem;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
+import edu.olivet.foundations.amazon.OrderFetcher;
 import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.utils.BusinessException;
@@ -14,7 +17,9 @@ import edu.olivet.harvester.fulfill.model.Seller;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.DailyBudgetHelper;
 import edu.olivet.harvester.fulfill.service.ForbiddenSeller;
+import edu.olivet.harvester.fulfill.service.SheetService;
 import edu.olivet.harvester.fulfill.utils.*;
+import edu.olivet.harvester.model.CreditCard;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.model.Remark;
@@ -27,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -507,18 +513,65 @@ public class OrderValidator {
      *     2. if is has fulfillment record in local db
      *
      *     for buyer canceled order, may have same order id + sku + qty, but different remark
+     *
+     *     如果remark有所改变的话，只是检查remark 就 不足了
      * </pre>
      */
     @Inject
     private DBManager dbManager;
 
+    @Inject OrderFetcher orderFetcher;
+
+    @Inject
+    SheetService sheetService;
+    //todo need more careful check!!!
     public String notDuplicatedOrder(Order order) {
         List<OrderFulfillmentRecord> list = dbManager.query(OrderFulfillmentRecord.class,
                 Cnd.where("orderId", "=", order.order_id)
-                        .and("sku", "=", order.sku)
-                        .and("remark", "=", order.remark));
-        if (list.size() > 0) {
+                        .and("sku", "=", order.sku));
+
+        List<OrderFulfillmentRecord> finalList = new ArrayList<>();
+
+        for (OrderFulfillmentRecord item : list) {
+            if (Remark.removeFailedRemark(order.remark.trim()).equalsIgnoreCase(Remark.removeFailedRemark(item.getRemark().trim()))) {
+                finalList.add(item);
+            } else if (!Remark.FORCE_FULFILL.isContainedBy(order.remark)) {
+                finalList.add(item);
+            }
+        }
+
+        if (finalList.size() == 0 && list.size() > 0) {
+            Country country = OrderCountryUtils.getMarketplaceCountry(order);
+            MarketWebServiceIdentity credential = Settings.load().getConfigByCountry(country).getValidMwsCredential();
+            List<OrderItem> items = orderFetcher.readItems(order.order_id, credential);
+            items.removeIf(item -> !order.sku.equalsIgnoreCase(item.getSellerSKU()));
+
+            //only one item
+            if (items.size() == 1) {
+                OrderItem orderItem = items.get(0);
+                //if qty is 1, then it must be the same
+                if (orderItem.getQuantityOrdered() <= Integer.parseInt(order.quantity_purchased)) {
+                    finalList = list;
+                } else {
+                    int totalFulfilled = list.stream().mapToInt(it -> it.getQuantityBought()).sum();
+                    if (totalFulfilled == orderItem.getQuantityOrdered()) {
+                        finalList = list;
+                    }
+                }
+            }
+        }
+
+        if (finalList.size() > 0) {
             OrderFulfillmentRecord record = list.get(0);
+
+            //restore from record
+            order.remark = Remark.RESTORE_FROM_LOG.appendTo(order.remark);
+            order.cost = record.getCost();
+            order.account = record.getBuyerAccount();
+            order.order_number = record.getOrderNumber();
+            order.last_code = record.getLastCode();
+
+            sheetService.fillFulfillmentOrderInfo(order.getSpreadsheetId(), order);
             return String.format("Order fulfilled at %s with order number %s by buyer account %s. Please check if this order is a duplicated record. If not, please update remark.",
                     DateFormat.DATE_TIME.format(record.getFulfillDate()), record.getOrderNumber(), record.getBuyerAccount()
             );

@@ -11,6 +11,7 @@ import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.ui.panel.ConfigurationPanel;
 import edu.olivet.harvester.ui.panel.RuntimeSettingsPanel;
+import edu.olivet.harvester.ui.panel.SimpleOrderSubmissionRuntimePanel;
 import edu.olivet.harvester.utils.Migration;
 import edu.olivet.harvester.utils.SettingValidator;
 import edu.olivet.harvester.utils.Settings;
@@ -41,7 +42,7 @@ public class SettingsDialog extends BaseDialog {
     @Getter
     private Settings settings;
 
-    private final List<Country> marketplaces = Arrays.asList(Country.US, Country.CA, Country.UK, Country.JP, Country.IN, Country.MX);
+    private final List<Country> marketplaces = Arrays.asList(Country.US, Country.CA, Country.UK, Country.JP, Country.IN, Country.MX, Country.AU);
     private Map<Country, JCheckBox> checkBoxes = new HashMap<>();
 
     private JTextField sidFld;
@@ -245,7 +246,7 @@ public class SettingsDialog extends BaseDialog {
         //clear cache
 
         //update info on runtime settings panel
-        RuntimeSettingsPanel.getInstance().resetAfterSettingUpdated();
+        SimpleOrderSubmissionRuntimePanel.getInstance().resetAfterSettingUpdated();
 
         //UITools.info(String.format("Congratulations! Harvester configuration successfully saved into%n%s", file.getAbsolutePath()));
         UITools.info("Configuration has been saved successfully.");

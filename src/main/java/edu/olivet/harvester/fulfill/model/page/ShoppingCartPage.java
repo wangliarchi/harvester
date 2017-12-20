@@ -46,10 +46,11 @@ public class ShoppingCartPage extends FulfillmentPage {
     public void processToCheckout() {
 
         //Protection Plan popup
-        DOMElement noThanksBtn = JXBrowserHelper.selectElementByCssSelector(browser, "#siNoCoverage-announce");
-        if (noThanksBtn != null) {
-            JXBrowserHelper.click(noThanksBtn);
-            WaitTime.Shortest.execute();
+        DOMElement popoverElement = JXBrowserHelper.selectVisibleElement(browser, ".a-popover");
+        if (popoverElement != null) {
+            DOMElement closeBtn = JXBrowserHelper.selectElementByCssSelector(popoverElement,".a-button-close.a-declarative");
+            JXBrowserHelper.click(closeBtn);
+            WaitTime.Short.execute();
         }
 
         DOMElement checkoutLink = JXBrowserHelper.selectElementByCssSelector(browser, "#hlb-ptc-btn-native");
@@ -66,8 +67,11 @@ public class ShoppingCartPage extends FulfillmentPage {
         }
         LOGGER.info("Current at {} - {}", browser.getTitle(), browser.getURL());
         DOMElement checkoutBtn = JXBrowserHelper.selectElementByName(browser, "proceedToCheckout");
+
+        if(checkoutBtn == null) {
+            throw new BusinessException("Item not added to cart successfully.");
+        }
         JXBrowserHelper.insertChecker(browser);
-        assert checkoutBtn != null;
         checkoutBtn.click();
         JXBrowserHelper.waitUntilNewPageLoaded(browser);
         LOGGER.info("Current at {} - {}", browser.getTitle(), browser.getURL());

@@ -48,7 +48,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         Money grandTotal = parseTotal();
 
         if (!ProfitLostControl.canPlaceOrder(order, grandTotal.toUSDAmount().floatValue())) {
-            throw new OrderSubmissionException("Order cost exceed maximum limit");
+            throw new OrderSubmissionException("Order cost " + grandTotal.usdText() + " exceed maximum limit");
         }
 
         float remainingBudget = ApplicationContext.getBean(DailyBudgetHelper.class).getRemainingBudget(order.getSpreadsheetId(), new Date());
@@ -68,7 +68,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         Money shippingCost = parseShippingFee();
 
         if (!FeeLimitChecker.getInstance().notExceed(order, shippingCost.getAmount().floatValue())) {
-            throw new OrderSubmissionException("Order shipping cost exceed maximum limit.");
+            throw new OrderSubmissionException("Order shipping cost " + shippingCost.usdText() + " exceed maximum limit. ");
         }
 
 

@@ -58,6 +58,8 @@ public class StepHelper {
     @Inject
     ReadOrderDetails readOrderDetails;
 
+    @Inject GiftOption giftOption;
+
 
     public Step detectStep(FlowState state) {
 
@@ -128,6 +130,8 @@ public class StepHelper {
                 return readOrderDetails;
             case LoginPage:
                 return login;
+            case GiftOptionPage:
+                return giftOption;
             default:
                 return null;
 

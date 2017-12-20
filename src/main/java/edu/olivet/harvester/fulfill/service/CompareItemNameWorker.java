@@ -1,9 +1,14 @@
 package edu.olivet.harvester.fulfill.service;
 
 import com.ECS.client.jax.Item;
+import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.ApplicationContext;
+import edu.olivet.foundations.utils.Constants;
 import edu.olivet.harvester.fulfill.model.ItemCompareResult;
+import edu.olivet.harvester.fulfill.utils.ISBNUtils;
+import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.fulfill.utils.validation.ItemValidator;
+import edu.olivet.harvester.logger.ISBNLogger;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.service.AmazonProductApi;
 import org.apache.commons.lang3.StringUtils;
@@ -45,9 +50,14 @@ public class CompareItemNameWorker extends SwingWorker<List<ItemCompareResult>, 
             }
             String title = items.get(order.isbn).getItemAttributes().getTitle();
             if (StringUtils.isBlank(title)) {
+                title = ISBNUtils.getTitle(OrderCountryUtils.getFulfillmentCountry(order), order.isbn);
+            }
+
+            if (StringUtils.isBlank(title)) {
                 continue;
             }
 
+            ISBNLogger.save(Country.US + Constants.HYPHEN + order.isbn + "=" + title);
             String itemName = order.item_name.trim();
             ItemValidator.ValidateReport report = itemValidator.validateItemName(title, itemName);
             results.add(new ItemCompareResult(order, title, report.pass, false, report.toString()));

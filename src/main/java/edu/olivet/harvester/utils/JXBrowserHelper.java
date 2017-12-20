@@ -4,6 +4,8 @@ import com.teamdev.jxbrowser.chromium.*;
 import com.teamdev.jxbrowser.chromium.dom.*;
 import com.teamdev.jxbrowser.chromium.events.FinishLoadingEvent;
 import com.teamdev.jxbrowser.chromium.events.LoadAdapter;
+import com.teamdev.jxbrowser.chromium.events.RenderAdapter;
+import com.teamdev.jxbrowser.chromium.events.RenderEvent;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import com.teamdev.jxbrowser.chromium.swing.internal.LightWeightWidget;
 import edu.olivet.foundations.amazon.Account;
@@ -39,7 +41,7 @@ import static com.teamdev.jxbrowser.chromium.BrowserKeyEvent.KeyEventType.*;
 public class JXBrowserHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(JXBrowserHelper.class);
     private static final int TIME_OUT_SECONDS = 20;
-
+    public static final String CHANNEL_CLOSED_MESSAGE = "Failed to send message. Channel is already closed";
     static {
         try {
             Field e = ay.class.getDeclaredField("e");
@@ -138,6 +140,15 @@ public class JXBrowserHelper {
             }
         });
 
+        browser.addRenderListener(new RenderAdapter() {
+            @Override
+            public void onRenderGone(RenderEvent event) {
+                Browser browser = event.getBrowser();
+                // Restore Browser instance by loading the same URL
+                browser.loadURL(browser.getURL());
+            }
+        });
+
         return new BrowserView(browser);
     }
 
@@ -229,8 +240,9 @@ public class JXBrowserHelper {
 
                 if (timeConsumed > TIME_OUT_SECONDS) {
                     saveHTMLSourceFile(browser);
-                    throw new BusinessException(String.format("等待%d秒之后，期待的Dom元素%s还在",
+                    LOGGER.error(String.format("等待%d秒之后，期待的Dom元素%s还在",
                             timeConsumed, selector));
+                    break;
                 }
                 continue;
             }
@@ -318,7 +330,12 @@ public class JXBrowserHelper {
     }
 
     public static void loadPage(Browser browser, String url) {
-        Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> it.loadURL(url));
+        try {
+            Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> it.loadURL(url));
+        } catch (Exception e) {
+            LOGGER.error("Fail to load page {}", url, e);
+            throw new BusinessException("Fail to load page " + url);
+        }
     }
 
 
@@ -338,10 +355,17 @@ public class JXBrowserHelper {
     public static DOMElement selectElementByCssSelector(Browser browser, String selector) {
         for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
             try {
+                if(browser.getDocument() == null) {
+                    browser.reload();
+                }
                 return selectElementByCssSelector(browser.getDocument(), selector);
             } catch (Exception e) {
+                if (Strings.containsAnyIgnoreCase(e.getMessage(), CHANNEL_CLOSED_MESSAGE)) {
+                    throw e;
+                }
                 LOGGER.error("", e);
                 WaitTime.Short.execute();
+
             }
         }
 

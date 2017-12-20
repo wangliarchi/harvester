@@ -29,7 +29,6 @@ public class MarkStatusEvent extends Observable implements HarvesterUIEvent {
 
     public void execute() {
         //validate runtime setting
-        PSEventListener.reset();
         RuntimeSettings settings = RuntimeSettings.load();
         RuntimeSettingsValidator.CheckResult result = validator.validate(settings, FulfillmentEnum.Action.UpdateStatus);
 

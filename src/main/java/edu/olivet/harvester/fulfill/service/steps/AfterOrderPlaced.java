@@ -51,7 +51,6 @@ public class AfterOrderPlaced extends Step {
     @Inject
     SheetService sheetService;
 
-    @Repeat(expectedExceptions = BusinessException.class)
     private void updateInfoToOrderSheet(String spreadsheetId, Order order) {
         sheetService.fillFulfillmentOrderInfo(spreadsheetId, order);
     }

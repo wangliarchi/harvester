@@ -74,14 +74,14 @@ public class OrderFulfillmentRecord extends PrimaryKey implements ArrayConvertab
 
     @Override
     public Object[] toArray() {
-        return new Object[]{DateFormat.DATE_TIME.format(this.fulfillDate), orderId, sku, quantityPurchased, quantityBought, orderNumber, cost, buyerAccount, lastCode, purchaseDate, isbn, seller, character, condition, spreadsheetId, sheetName,shippingAddress,fulfilledAddress,fulfilledASIN};
+        return new Object[] {DateFormat.DATE_TIME.format(this.fulfillDate), orderId, sku, quantityPurchased, quantityBought, orderNumber, cost, buyerAccount, lastCode, purchaseDate, isbn, seller, character, condition, remark, spreadsheetId, sheetName, shippingAddress, fulfilledAddress, fulfilledASIN};
     }
 
 
     public static final String[] COLUMNS = {"Fulfill Date", "OrderId", "sku", "quantityPurchased", "quantityBought", "orderNumber", "cost", "buyerAccount",
-            "lastCode", "purchaseDate", "isbn", "seller", "character", "condition", "spreadsheetId", "sheetName","shippingAddress","fulfilledAddress","fulfilledASIN"};
+            "lastCode", "purchaseDate", "isbn", "seller", "character", "condition", "remark", "spreadsheetId", "sheetName", "shippingAddress", "fulfilledAddress", "fulfilledASIN"};
 
-    public static final int[] WIDTHS = {100, 100, 50, 20, 20, 70, 50, 100, 30, 100, 60, 60, 10, 50, 100, 50,250,250,50};
+    public static final int[] WIDTHS = {100, 100, 50, 20, 20, 70, 50, 100, 30, 100, 60, 60, 10, 50, 100, 100, 50, 250, 250, 50};
 
 
 }

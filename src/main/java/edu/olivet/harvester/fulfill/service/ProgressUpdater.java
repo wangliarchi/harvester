@@ -11,13 +11,15 @@ import java.util.List;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/18/17 11:00 AM
  */
 public class ProgressUpdater {
-    static JProgressBar progressBar = RuntimeSettingsPanel.getInstance().progressBar;
-    static JLabel progressTextLabel = RuntimeSettingsPanel.getInstance().progressTextLabel;
+    static JProgressBar progressBar;
+    static JLabel progressTextLabel;
     static int successCount = 0;
     static int failedCount = 0;
     static long start;
 
-    public static void init(List<Order> orders) {
+    public static void init(List<Order> orders,JProgressBar progressBar,JLabel progressTextLabel) {
+        ProgressUpdater.progressBar = progressBar;
+        ProgressUpdater.progressTextLabel = progressTextLabel;
         successCount = 0;
         failedCount = 0;
         progressBar.setMinimum(0);

@@ -2,6 +2,7 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 
 import com.teamdev.jxbrowser.chromium.Browser;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
+import edu.olivet.harvester.fulfill.utils.pagehelper.GiftOptionHelper;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
@@ -31,7 +32,8 @@ public class CheckoutEnum {
         AmazonPrimeAdAfterPlaceOrderBtnClicked("#prime-piv-steps-container"),
         OrderPlacedSuccessPage("#a-page .a-box.a-alert.a-alert-success"),
         OrderDetailPage("#orderDetails"),
-        LoginPage("#ap_email,#ap_password");
+        LoginPage("#ap_email,#ap_password"),
+        GiftOptionPage(GiftOptionHelper.continueBtnSelector);
 
         @Getter
         private String idSelector;

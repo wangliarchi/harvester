@@ -5,13 +5,12 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
+import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.model.setting.AdvancedSubmitSetting;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
-import edu.olivet.harvester.fulfill.service.DailyBudgetHelper;
-import edu.olivet.harvester.fulfill.service.PSEventListener;
-import edu.olivet.harvester.fulfill.service.ProgressUpdater;
+import edu.olivet.harvester.fulfill.service.*;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.model.OrderEnums.OrderItemType;
@@ -25,6 +24,7 @@ import edu.olivet.harvester.ui.events.SubmitOrdersEvent;
 import edu.olivet.harvester.utils.FinderCodeUtils;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.Settings;
+import edu.olivet.harvester.utils.common.NumberUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -44,7 +44,7 @@ import java.util.Map;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/6/17 7:32 PM
  */
-public class SimpleOrderSubmissionRuntimePanel extends JPanel {
+public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEventHandler, RuntimePanelObserver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RuntimeSettingsPanel.class);
 
@@ -134,6 +134,16 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel {
 
         loadBudget();
         settings.save();
+    }
+
+    @Override
+    public void updateSpending(String spending) {
+        todayUsedTextField.setText(spending);
+    }
+
+    @Override
+    public void updateBudget(String budget) {
+        todayBudgetTextField.setText(budget);
     }
 
     public void loadBudget() {
@@ -235,7 +245,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel {
         submitButton.addActionListener(evt -> submitOrders());
 
         pauseButton.addActionListener(evt -> {
-            if (PSEventListener.status == PSEventListener.Status.Paused) {
+            if (PSEventListener.paused()) {
                 PSEventListener.resume();
                 resetPauseBtn();
             } else {
@@ -262,29 +272,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel {
             JXBrowserHelper.loadSpreadsheet(panel.getBrowserView().getBrowser(), sellerEmail, settings.getSpreadsheetId());
         });
 
-        Thread psEventListenerThread = new Thread(() -> {
-            //noinspection InfiniteLoopStatement
-            while (true) {
-                switch (PSEventListener.status) {
-                    case Paused:
-                    case Running:
-                        showPauseBtn();
-                        break;
-                    case Stopped:
-                    case Ended:
-                        hidePauseBtn();
-                        break;
-                    case NotRunning:
-                        hidePauseBtn();
-                        break;
-                    default:
-                        hidePauseBtn();
-                        break;
-                }
-                WaitTime.Shortest.execute();
-            }
-        }, "PSEventListener");
-        psEventListenerThread.start();
+
     }
 
     public void resetSkipSetting() {
@@ -308,16 +296,21 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel {
     }
 
     public void submitOrders() {
-        PSEventListener.reset();
         new Thread(() -> {
+            if (PSEventListener.isRunning()) {
+                UITools.error("Other task is running!");
+                return;
+            }
             try {
                 disableAllBtns();
+                PSEventListener.reset(this);
                 ApplicationContext.getBean(SubmitOrdersEvent.class).execute();
             } catch (Exception e) {
                 UITools.error(UIText.message("message.submit.exception", e.getMessage()), UIText.title("title.code_error"));
                 LOGGER.error("做单过程中出现异常:", e);
             } finally {
                 restAllBtns();
+                resetSkipSetting();
             }
         }).start();
 

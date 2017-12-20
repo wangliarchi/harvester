@@ -15,8 +15,10 @@ public class ProcessToCheckout extends Step {
 
 
     protected void process(FlowState state) {
+
         ShoppingCartPage shoppingCartPage = new ShoppingCartPage(state.getBuyerPanel());
         shoppingCartPage.processToCheckout();
+
     }
 
     @Inject Checkout checkout;

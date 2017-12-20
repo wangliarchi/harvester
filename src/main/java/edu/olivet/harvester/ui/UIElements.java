@@ -50,6 +50,7 @@ public class UIElements extends AbstractUIContainer {
                 //Actions.DuplicatedOrders,
                 Actions.AddOrderTask,
                 Action.Separator,
+                Actions.OrderSubmissionTasks,
                 Actions.OrderSubmissionLog,
                 Action.Separator,
                 Actions.OrderSuccessLog,

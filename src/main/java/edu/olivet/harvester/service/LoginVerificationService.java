@@ -90,7 +90,7 @@ public class LoginVerificationService {
             //enter password
             JXBrowserHelper.wait(browser, By.id("passwordNext"));
             DOMElement password = JXBrowserHelper.selectElementByName(browser, "password");
-            assert ((DOMFormControlElement) password) != null;
+            assert password != null;
             ((DOMFormControlElement) password).setValue(buyer.getPassword());
             WaitTime.Short.execute();
 

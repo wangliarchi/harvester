@@ -55,11 +55,4 @@ public class Worksheet {
         return this.spreadsheet.getTitle() + " - " + this.sheetName;
     }
 
-    public static void main(String[] args) {
-        Spreadsheet spreadsheet = new Spreadsheet();
-        spreadsheet.setSpreadsheetCountry(Country.US);
-        Worksheet worksheet = new Worksheet(spreadsheet, "11/07");
-        System.out.println(worksheet.getOrderConfirmationDate());
-
-    }
 }

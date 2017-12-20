@@ -3,12 +3,17 @@ package edu.olivet.harvester.fulfill.service.flowcontrol;
 import com.google.inject.Inject;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.foundations.utils.Constants;
+import edu.olivet.foundations.utils.Strings;
+import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.service.SheetService;
 import edu.olivet.harvester.fulfill.service.steps.ClearShoppingCart;
 import edu.olivet.harvester.fulfill.service.steps.Login;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
+import edu.olivet.harvester.ui.panel.TabbedBuyerPanel;
+import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.MessageListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +36,10 @@ public class OrderFlowEngine extends FlowParent {
 
     @Inject
     SheetService sheetService;
+    private BuyerPanel buyerPanel;
+    private Exception exception;
 
     @SuppressWarnings("UnusedReturnValue")
-    @Repeat(expectedExceptions = BusinessException.class)
     public FlowState process(Order order, BuyerPanel buyerPanel) {
 
         FlowState state = new FlowState();
@@ -44,21 +50,36 @@ public class OrderFlowEngine extends FlowParent {
         Step step = login;
         step.stepName = login.getClass().toString();
 
-        try {
-            processSteps(step, state);
-        } catch (OrderSubmissionException e) {
-            clearShoppingCart.processStep(state);
-            throw e;
-        } catch (Exception e) {
-            LOGGER.error("", e);
-            clearShoppingCart.processStep(state);
-            //noinspection UnusedAssignment
-            order = sheetService.reloadOrder(order);
-            throw new BusinessException(e);
+        Exception exception = null;
+
+        for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
+            try {
+                processSteps(step, state);
+                return state;
+            } catch (OrderSubmissionException e) {
+                clearShoppingCart.processStep(state);
+                throw e;
+            } catch (Exception e) {
+                LOGGER.error("", e);
+                if (Strings.containsAnyIgnoreCase(e.getMessage(), JXBrowserHelper.CHANNEL_CLOSED_MESSAGE)) {
+                    buyerPanel = TabbedBuyerPanel.getInstance().reInitTabForOrder(order);
+                    state.setBuyerPanel(buyerPanel);
+                    WaitTime.Short.execute();
+                }
+                //noinspection UnusedAssignment
+                order = sheetService.reloadOrder(order);
+                state.setOrder(order);
+
+                exception = e;
+
+                //throw
+            }
+
+
+
         }
 
-
-        return state;
+        throw new BusinessException(exception);
     }
 
 

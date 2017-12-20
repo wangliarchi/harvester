@@ -32,7 +32,6 @@ public class MainPanel extends JPanel {
         rightTabPanel = RightTabPanel.getInstance();
         mainWindowPanel = TabbedBuyerPanel.getInstance();
         ProgressLogsPanel progressLogsPanel = ProgressLogsPanel.getInstance();
-        progressLogsPanel.setMinimumSize(new Dimension(100, 150));
 
         verticalSplitPane1 = new JSplitPane();
         horizontalSplitPane1 = new JSplitPane();
@@ -71,11 +70,11 @@ public class MainPanel extends JPanel {
 
         mainWindowPanel.addFirstBuyerAccountTab();
         mainWindowPanel.getSelectedBuyerPanel().toWelcomePage();
-        //mainWindowPanel.resetZoomLevel();
+
     }
 
     public void resetSplitPanelSizes() {
-        int height = Math.min(rightTabPanel.getPreferredSize().height + 50, getHeight() - 100);
+        int height = Math.min(rightTabPanel.getPreferredSize().height + 50, getHeight() - 150);
         verticalSplitPane1.setDividerLocation(height);
         horizontalSplitPane1.setDividerLocation(getWidth() - rightTabPanel.getPreferredSize().width - 20);
     }

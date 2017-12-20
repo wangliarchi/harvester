@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.UIText;
@@ -31,7 +32,10 @@ import edu.olivet.harvester.service.OrderService;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.dialog.ItemCheckResultDialog;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
+import edu.olivet.harvester.ui.panel.RuntimeSettingsPanel;
+import edu.olivet.harvester.ui.panel.SimpleOrderSubmissionRuntimePanel;
 import edu.olivet.harvester.ui.panel.TabbedBuyerPanel;
+import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.MessageListener;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -50,7 +54,6 @@ import java.util.stream.Collectors;
 @Singleton
 public class OrderSubmitter {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderSubmitter.class);
-
 
     @Inject
     AppScript appScript;
@@ -74,13 +77,15 @@ public class OrderSubmitter {
     @Inject
     OrderService orderService;
 
+    @Inject OrderSubmissionTaskService orderSubmissionTaskService;
+
     private static final Map<String, Boolean> DUPLICATION_CHECK_CACHE = new HashMap<>();
 
     private static final List<Country> SUPPORTED_MARKETPLACES = Lists.newArrayList(Country.US, Country.CA, Country.UK, Country.DE, Country.FR, Country.ES, Country.IT);
 
     public void execute(RuntimeSettings settings) {
         if (PSEventListener.isRunning()) {
-            throw new BusinessException("Other taks is running!");
+            throw new BusinessException("Other task is running!");
         }
         messageListener.empty();
 
@@ -89,6 +94,7 @@ public class OrderSubmitter {
         }
 
         //check daily budget
+        dailyBudgetHelper.setRuntimePanelObserver(SimpleOrderSubmissionRuntimePanel.getInstance());
         try {
             String spreadsheetId = settings.getSpreadsheetId();
             dailyBudgetHelper.getRemainingBudget(spreadsheetId, new Date());
@@ -105,45 +111,25 @@ public class OrderSubmitter {
         //mark status first
         long start = System.currentTimeMillis();
         markStatusService.execute(settings, false);
+
+        //load orders
         List<Order> orders = appScript.readOrders(settings);
         String resultSummary = String.format("Finished loading orders to submit for %s, %d orders found, took %s", settings.toString(), orders.size(), Strings.formatElapsedTime(start));
         LOGGER.info(resultSummary);
         messageListener.addLongMsg(resultSummary, orders.size() > 0 ? InformationLevel.Information : InformationLevel.Negative);
 
         if (CollectionUtils.isEmpty(orders)) {
-            UITools.info(UIText.message("message.info.nostatus"), UIText.title("title.result"));
+            UITools.info(UIText.message("No order found."), UIText.title("title.result"));
             return;
         }
 
         //remove if not valid
         List<Order> validOrders = validateOrders(orders);
-
+        validOrders = titleCheck(validOrders);
         if (CollectionUtils.isEmpty(validOrders)) {
             _noOrders();
             return;
         }
-
-
-        if (OrderValidator.needCheck(null, OrderValidator.SkipValidation.ItemName)) {
-            List<ItemCompareResult> results = PreValidator.compareItemNames4Orders(validOrders);
-            ItemCheckResultDialog dialog = UITools.setDialogAttr(new ItemCheckResultDialog(null, true, results));
-
-            if (dialog.isValidReturn()) {
-                List<ItemCompareResult> sync = dialog.getIsbn2Sync();
-                sync.forEach(it -> {
-                    if (!it.isManualCheckPass()) {
-                        messageListener.addMsg(it.getOrder(), "Failed item name check. " + it.getPreCheckReport(), InformationLevel.Negative);
-                        validOrders.remove(it.getOrder());
-                    }
-                });
-            }
-
-            if (CollectionUtils.isEmpty(validOrders)) {
-                _noOrders();
-                return;
-            }
-        }
-
 
         //inform event listener.
         PSEventListener.start();
@@ -152,7 +138,7 @@ public class OrderSubmitter {
         LOGGER.info(resultSummary);
         messageListener.addMsg(resultSummary, validOrders.size() > 0 ? InformationLevel.Information : InformationLevel.Negative);
 
-        ProgressUpdater.init(validOrders);
+        ProgressUpdater.init(validOrders, SimpleOrderSubmissionRuntimePanel.getInstance().progressBar, SimpleOrderSubmissionRuntimePanel.getInstance().progressTextLabel);
         for (Order order : validOrders) {
             //if stop btn clicked, break the process
             if (PSEventListener.stopped()) {
@@ -160,11 +146,7 @@ public class OrderSubmitter {
             }
 
             try {
-                Account buyer = OrderBuyerUtils.getBuyer(order);
-                Country country = OrderCountryUtils.getFulfillmentCountry(order);
-                BuyerPanel buyerPanel = TabbedBuyerPanel.getInstance().getOrAddTab(country, buyer);
-                TabbedBuyerPanel.getInstance().highlight(buyerPanel);
-                //order = sheetService.reloadOrder(order);
+                BuyerPanel buyerPanel = TabbedBuyerPanel.getInstance().initTabForOrder(order);
                 submit(order, buyerPanel);
             } catch (Exception e) {
                 LOGGER.error("Error submit order {}", order.order_id, e);
@@ -185,44 +167,37 @@ public class OrderSubmitter {
 
     }
 
-    @Inject
-    DBManager dbManager;
 
     public void execute(OrderSubmissionTask task) {
         if (PSEventListener.isRunning()) {
-            throw new BusinessException("Other taks is running!");
+            throw new BusinessException("Other task is running!");
         }
+
         long start = System.currentTimeMillis();
 
+        dailyBudgetHelper.setRuntimePanelObserver(RuntimeSettingsPanel.getInstance());
         List<Order> validOrders = prepareOrderSubmission(task);
         if (CollectionUtils.isEmpty(validOrders)) {
+            orderSubmissionTaskService.completed(task);
             return;
         }
 
-
-        task.setStatus(OrderTaskStatus.Processing.name());
-        task.setDateStarted(new Date());
-        task.save(dbManager);
+        orderSubmissionTaskService.startTask(task);
 
         //inform event listener.
         PSEventListener.start();
-        ProgressUpdater.init(validOrders);
+        ProgressUpdater.init(validOrders, RuntimeSettingsPanel.getInstance().progressBar, RuntimeSettingsPanel.getInstance().progressTextLabel);
 
         for (Order order : validOrders) {
             //if stop btn clicked, break the process
             if (PSEventListener.stopped()) {
-                task.setStatus(OrderTaskStatus.Stopped.name());
-                task.setDateEnded(new Date());
-                task.save(dbManager);
+                orderSubmissionTaskService.stopTask(task);
+                messageListener.addMsg("Task stopped as requested");
                 throw new BusinessException("Task stopped as requested");
             }
 
             try {
-                Account buyer = OrderBuyerUtils.getBuyer(order);
-                Country country = OrderCountryUtils.getFulfillmentCountry(order);
-                BuyerPanel buyerPanel = TabbedBuyerPanel.getInstance().getOrAddTab(country, buyer);
-                TabbedBuyerPanel.getInstance().highlight(buyerPanel);
-                //order = sheetService.reloadOrder(order);
+                BuyerPanel buyerPanel = TabbedBuyerPanel.getInstance().initTabForOrder(order);
                 submit(order, buyerPanel);
 
                 if (StringUtils.isNotBlank(order.order_number)) {
@@ -234,90 +209,31 @@ public class OrderSubmitter {
             } catch (Exception e) {
                 LOGGER.error("Error submit order {}", order.order_id, e);
                 messageListener.addMsg(order, e.getMessage(), InformationLevel.Negative);
-
                 task.setFailed(task.getFailed() + 1);
                 if (e instanceof OutOfBudgetException) {
                     throw new BusinessException("No more money to spend :(");
                 }
             } finally {
                 task.setDateEnded(new Date());
-                task.save(dbManager);
+                orderSubmissionTaskService.saveTask(task);
             }
         }
 
-        task.setStatus(OrderTaskStatus.Completed.name());
-        task.setDateEnded(new Date());
-        task.save(dbManager);
-
+        orderSubmissionTaskService.completed(task);
 
         StatisticLogger.log(String.format("%s\t%s", ProgressUpdater.toTable(), Strings.formatElapsedTime(start)));
-
         //reset after done
         PSEventListener.end();
 
     }
 
 
-    private List<Order> prepareOrderSubmission(OrderSubmissionTask task) {
-        RuntimeSettings settings = task.convertToRuntimeSettings();
-
-        long start = System.currentTimeMillis();
-
-
-        if (!SUPPORTED_MARKETPLACES.contains(Country.valueOf(settings.getMarketplaceName()))) {
-            messageListener.addMsg(String.format("Harvester can only support %s marketplaces at this moment. Sorry for inconvenience.", SUPPORTED_MARKETPLACES), InformationLevel.Negative);
-            task.setStatus(OrderTaskStatus.Error.name());
-            task.setDateStarted(new Date());
-            task.save(dbManager);
-            return null;
-        }
-
-        //check daily budget
-        try {
-            String spreadsheetId = settings.getSpreadsheetId();
-            dailyBudgetHelper.getRemainingBudget(spreadsheetId, new Date());
-        } catch (Exception e) {
-            LOGGER.error("Error when fetch daily budget", e);
-            throw e;
-        }
-
-        //checkDuplicates(settings.getSpreadsheetId());
-        //mark status first
-        markStatusService.execute(settings, false);
-        List<Order> orders = task.getOrderList();
-        if (System.currentTimeMillis() - task.getDateCreated().getTime() > 60 * 1000) {
-            orders = sheetService.reloadOrders(orders);
-        }
-
-        String resultSummary = String.format("Finished loading orders to submit for %s, %d orders found, took %s", settings.toString(), orders.size(), Strings.formatElapsedTime(start));
-        LOGGER.info(resultSummary);
-        messageListener.addLongMsg(resultSummary, orders.size() > 0 ? InformationLevel.Information : InformationLevel.Negative);
-
-        if (CollectionUtils.isEmpty(orders)) {
-            UITools.info(UIText.message("message.info.nostatus"), UIText.title("title.result"));
-            task.setStatus(OrderTaskStatus.Completed.name());
-            task.save(dbManager);
-            return null;
-        }
-
-        //remove if not valid
-        List<Order> validOrders = validateOrders(orders);
-
-        if (CollectionUtils.isEmpty(validOrders)) {
-            task.setStatus(OrderTaskStatus.Completed.name());
-            task.save(dbManager);
-            return null;
-        }
-
-
-        resultSummary = String.format("%d order(s) to be submitted.", validOrders.size());
-        task.setTotalOrders(validOrders.size());
-        LOGGER.info(resultSummary);
-        messageListener.addMsg(resultSummary, validOrders.size() > 0 ? InformationLevel.Information : InformationLevel.Negative);
-
-        return validOrders;
-    }
-
+    /**
+     * Submit a single order
+     *
+     * @param order the order to be submitted
+     * @param buyerPanel the browser panel
+     */
     public void submit(Order order, BuyerPanel buyerPanel) {
         String spreadsheetId = order.spreadsheetId;
         long start = System.currentTimeMillis();
@@ -325,10 +241,11 @@ public class OrderSubmitter {
             //validate again!
             String error = orderValidator.isValid(order, FulfillmentEnum.Action.SubmitOrder);
             if (StringUtils.isNotBlank(error)) {
-                messageListener.addMsg(order, error);
+                messageListener.addMsg(order, error, InformationLevel.Negative);
                 return;
             }
-            order.originalRemark = order.remark;
+
+            order.originalRemark = new String(order.remark);
             orderFlowEngine.process(order, buyerPanel);
 
             if (StringUtils.isNotBlank(order.order_number)) {
@@ -338,9 +255,7 @@ public class OrderSubmitter {
             throw e;
         } catch (Exception e) {
             LOGGER.error("Error submit order {}", order.order_id, e);
-            Pattern pattern = Pattern.compile(Pattern.quote("xception:"));
-            String[] parts = pattern.split(e.getMessage());
-            String msg = parts[parts.length - 1].trim();
+            String msg = parseErrorMsg(e.getMessage());
             messageListener.addMsg(order, msg + " - took " + Strings.formatElapsedTime(start), InformationLevel.Negative);
             sheetService.fillUnsuccessfulMsg(spreadsheetId, order, msg);
         } finally {
@@ -350,8 +265,6 @@ public class OrderSubmitter {
                 ProgressUpdater.failed();
             }
         }
-
-
     }
 
     public List<Order> validateOrders(List<Order> orders) {
@@ -393,4 +306,95 @@ public class OrderSubmitter {
             }
         }
     }
+
+    private List<Order> prepareOrderSubmission(OrderSubmissionTask task) {
+        RuntimeSettings settings = task.convertToRuntimeSettings();
+
+        long start = System.currentTimeMillis();
+
+        if (!SUPPORTED_MARKETPLACES.contains(Country.valueOf(settings.getMarketplaceName()))) {
+            messageListener.addMsg(String.format("Harvester can only support %s marketplaces at this moment. Sorry for inconvenience.", SUPPORTED_MARKETPLACES), InformationLevel.Negative);
+            task.setStatus(OrderTaskStatus.Error.name());
+            task.setDateStarted(new Date());
+            orderSubmissionTaskService.saveTask(task);
+            return null;
+        }
+
+        //check daily budget
+        try {
+            String spreadsheetId = settings.getSpreadsheetId();
+            dailyBudgetHelper.getRemainingBudget(spreadsheetId, new Date());
+        } catch (Exception e) {
+            LOGGER.error("Error when fetch daily budget", e);
+            throw e;
+        }
+
+        //checkDuplicates(settings.getSpreadsheetId());
+        //mark status first
+        markStatusService.execute(settings, false);
+        List<Order> orders = task.getOrderList();
+        if (CollectionUtils.isEmpty(orders)) {
+            orders = appScript.readOrders(settings);
+            orders = validateOrders(orders);
+            orders = titleCheck(orders);
+        } else if (System.currentTimeMillis() - task.getDateCreated().getTime() > 60 * 1000) {
+            orders = sheetService.reloadOrders(orders);
+        }
+
+        String resultSummary = String.format("Finished loading orders to submit for %s, %d orders found, took %s", settings.toString(), orders.size(), Strings.formatElapsedTime(start));
+        LOGGER.info(resultSummary);
+        messageListener.addLongMsg(resultSummary, orders.size() > 0 ? InformationLevel.Information : InformationLevel.Negative);
+
+        if (CollectionUtils.isEmpty(orders)) {
+            return orders;
+        }
+
+        //remove if not valid
+        List<Order> validOrders = validateOrders(orders);
+
+        if (CollectionUtils.isEmpty(validOrders)) {
+            return validOrders;
+        }
+
+        resultSummary = String.format("%d order(s) to be submitted.", validOrders.size());
+        task.setTotalOrders(validOrders.size());
+        LOGGER.info(resultSummary);
+        messageListener.addMsg(resultSummary, validOrders.size() > 0 ? InformationLevel.Information : InformationLevel.Negative);
+
+        return validOrders;
+    }
+
+    public List<Order> titleCheck(List<Order> orders) {
+        if (CollectionUtils.isEmpty(orders)) {
+            return orders;
+        }
+
+        if (OrderValidator.needCheck(null, OrderValidator.SkipValidation.ItemName)) {
+            List<ItemCompareResult> results = PreValidator.compareItemNames4Orders(orders);
+            ItemCheckResultDialog dialog = UITools.setDialogAttr(new ItemCheckResultDialog(null, true, results));
+
+            if (dialog.isValidReturn()) {
+                List<ItemCompareResult> sync = dialog.getIsbn2Sync();
+                sync.forEach(it -> {
+                    if (!it.isManualCheckPass()) {
+                        messageListener.addMsg(it.getOrder(), "Failed item name check. " + it.getPreCheckReport(), InformationLevel.Negative);
+                        orders.remove(it.getOrder());
+                    }
+                });
+            }
+        }
+
+        return orders;
+    }
+
+    public String parseErrorMsg(String fullMsg) {
+        if (Strings.containsAnyIgnoreCase(fullMsg, JXBrowserHelper.CHANNEL_CLOSED_MESSAGE)) {
+            return "JXBrowser Crashed";
+        }
+
+        Pattern pattern = Pattern.compile(Pattern.quote("xception:"));
+        String[] parts = pattern.split(fullMsg);
+        return parts[parts.length - 1].trim();
+    }
+
 }

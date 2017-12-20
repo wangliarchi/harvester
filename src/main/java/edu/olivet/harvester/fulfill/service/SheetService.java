@@ -3,6 +3,7 @@ package edu.olivet.harvester.fulfill.service;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
+import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.harvester.fulfill.utils.OrderStatusUtils;
 import edu.olivet.harvester.model.Order;
@@ -26,6 +27,7 @@ public class SheetService extends SheetAPI {
     @Inject
     AppScript appScript;
 
+    @Repeat
     public void fillFulfillmentOrderInfo(String spreadsheetId, Order order) {
         //need to relocate order row on google sheet, as it may be arranged during order fulfillment process.
         int row = locateOrder(order);
@@ -213,6 +215,11 @@ public class SheetService extends SheetAPI {
             throw new BusinessException("Cant find order " + order + "on order sheet");
         }
 
+        if(orders.size() == 1) {
+            Order o = orders.get(0);
+            o.setContext(order.getContext());
+            return o;
+        }
         for (Order o : orders) {
             if (StringUtils.equalsAnyIgnoreCase(o.remark, order.remark, order.originalRemark)) {
                 o.setContext(order.getContext());

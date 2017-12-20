@@ -308,8 +308,6 @@ public class OrderSubmissionSettingsPanel extends JPanel {
         selectSheetButton.setText("Select");
         selectedSheetName = new JLabel();
         selectedSheetName.setForeground(Color.BLUE);
-        Font font = selectedSheetName.getFont();
-        selectedSheetName.setFont(new Font(font.getName(), Font.PLAIN, font.getSize() - 1));
 
         showHideDetailButton = new JButton();
         showHideDetailButton.setText("Show More Runtime Settings");
@@ -327,9 +325,6 @@ public class OrderSubmissionSettingsPanel extends JPanel {
         skipCheckLabel.setText("Skip Check");
         skipCheckLabel.setForeground(Color.RED);
         skipCheckComboBox = new JComboBox<>();
-        if (SystemUtils.IS_OS_WINDOWS) {
-            skipCheckComboBox.setFont(new Font(font.getName(), Font.BOLD, font.getSize() - 1));
-        }
 
         showHideDetailButton.setVisible(false);
     }
@@ -350,12 +345,10 @@ public class OrderSubmissionSettingsPanel extends JPanel {
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addComponent(marketplaceLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
                                         .addComponent(sellerLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-
                                 )
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addComponent(marketplaceComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                         .addComponent(sellerComboBox, labelMinWidth, fieldWidth, fieldWidth)
-
                                 )
 
                         )

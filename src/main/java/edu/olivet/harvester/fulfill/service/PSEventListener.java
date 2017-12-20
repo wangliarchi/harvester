@@ -1,5 +1,7 @@
 package edu.olivet.harvester.fulfill.service;
 
+import edu.olivet.foundations.utils.WaitTime;
+
 import javax.inject.Singleton;
 
 /**
@@ -15,27 +17,39 @@ public class PSEventListener {
         Ended,
     }
 
-    public static Status status = Status.NotRunning;
+    private static Status status = Status.NotRunning;
 
+    private static PSEventHandler eventHandler;
 
-    public static void reset() {
+    public static void reset(PSEventHandler eventHandler) {
+        PSEventListener.eventHandler = eventHandler;
         status = Status.NotRunning;
-    }
-
-    public static void stop() {
-        status = Status.Stopped;
-    }
-
-    public static void pause() {
-        status = Status.Paused;
+        eventHandler.hidePauseBtn();
     }
 
     public static void start() {
         status = Status.Running;
+        eventHandler.showPauseBtn();
+    }
+
+    public static void pause() {
+        status = Status.Paused;
+        eventHandler.showPauseBtn();
+    }
+
+    public static void stop() {
+        status = Status.Stopped;
+        eventHandler.hidePauseBtn();
     }
 
     public static void resume() {
         status = Status.Running;
+        eventHandler.showPauseBtn();
+    }
+
+    public static void end() {
+        status = Status.Ended;
+        eventHandler.hidePauseBtn();
     }
 
     public static boolean isRunning() {
@@ -54,9 +68,8 @@ public class PSEventListener {
         return status == Status.Ended;
     }
 
-    public static void end() {
-        status = Status.Ended;
-    }
+
+
 
 
 }

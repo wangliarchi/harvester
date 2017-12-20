@@ -15,4 +15,6 @@ public class StatisticLogger {
         logger.info(msg);
     }
 
+
+
 }

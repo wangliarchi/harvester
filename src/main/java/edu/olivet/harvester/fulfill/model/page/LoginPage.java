@@ -81,7 +81,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
         DOMElement continueBtn = JXBrowserHelper.selectElementByCssSelector(browser, CONTINUE_BTN_SELECTOR);
         if (continueBtn != null) {
             JXBrowserHelper.insertChecker(browser);
-            Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> ((DOMFormControlElement) email).getForm().submit());
+            ((DOMFormControlElement) email).getForm().submit();
             JXBrowserHelper.waitUntilNewPageLoaded(browser);
         }
 
@@ -101,7 +101,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
         }
 
         JXBrowserHelper.insertChecker(browser);
-        Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> ((DOMFormControlElement) password).getForm().submit());
+        ((DOMFormControlElement) password).getForm().submit();
         JXBrowserHelper.waitUntilNewPageLoaded(browser);
 
         //check if errors
@@ -149,7 +149,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
             }
         }
 
-        Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> ((DOMFormControlElement) codeField).getForm().submit());
+         ((DOMFormControlElement) codeField).getForm().submit();
 
         if (JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, ".cvf-widget-input.cvf-widget-input-code") != null) {
             throw new BusinessException("Invalid code. Please check your code and try again.");

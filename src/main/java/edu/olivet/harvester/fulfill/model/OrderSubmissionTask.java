@@ -8,7 +8,7 @@ import edu.olivet.foundations.ui.ArrayConvertable;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.harvester.fulfill.model.setting.AdvancedSubmitSetting;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
-import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
+import edu.olivet.harvester.fulfill.utils.validation.OrderValidator.*;
 import edu.olivet.harvester.model.ConfigEnums;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.spreadsheet.model.OrderRange;
@@ -17,7 +17,9 @@ import edu.olivet.harvester.ui.panel.TasksAndProgressPanel;
 import edu.olivet.harvester.utils.common.DateFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.entity.annotation.Column;
@@ -34,6 +36,7 @@ import java.util.List;
 @Table(value = "order_submission_tasks")
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class OrderSubmissionTask extends PrimaryKey implements ArrayConvertable {
     @Name
     private String id;
@@ -61,7 +64,7 @@ public class OrderSubmissionTask extends PrimaryKey implements ArrayConvertable 
     @Column
     private String finderCode = "";
 
-    private OrderValidator.SkipValidation skipValidation = OrderValidator.SkipValidation.None;
+    private SkipValidation skipValidation = SkipValidation.None;
     @Column
     String skipValidationCol;
 
@@ -102,9 +105,9 @@ public class OrderSubmissionTask extends PrimaryKey implements ArrayConvertable 
         return orderRange;
     }
 
-    public OrderValidator.SkipValidation getSkipValidation() {
+    public SkipValidation getSkipValidation() {
         if (skipValidation == null && StringUtils.isNotBlank(skipValidationCol)) {
-            skipValidation = OrderValidator.SkipValidation.valueOf(skipValidationCol);
+            skipValidation = SkipValidation.valueOf(skipValidationCol);
         }
         return skipValidation;
     }
@@ -172,11 +175,11 @@ public class OrderSubmissionTask extends PrimaryKey implements ArrayConvertable 
 
     public static final String[] COLUMNS = {"Date Created", "MKTPL", "Type", "Range", "T", "S", "F", "Status", ""};
 
-    public static final int[] WIDTHS = {70, 35, 35, 70, 20, 20, 20, 60, 50};
+    public static final int[] WIDTHS = {70, 35, 35, 70, 20, 20, 20, 60, 65};
 
     @Override
     public Object[] toArray() {
-        return new Object[]{DateFormat.DATE_TIME_SHORT.format(this.dateCreated),
+        return new Object[] {DateFormat.DATE_TIME_SHORT.format(this.dateCreated),
                 marketplaceName,
                 SheetUtils.getTypeFromSpreadsheetName(spreadsheetName),
                 getOrderRange().getSheetName() + " " + convertToRuntimeSettings().getAdvancedSubmitSetting(),
@@ -194,13 +197,29 @@ public class OrderSubmissionTask extends PrimaryKey implements ArrayConvertable 
         return "";
     }
 
-    public void save(DBManager dbManager) {
-        dbManager.insertOrUpdate(this, OrderSubmissionTask.class);
-        TasksAndProgressPanel.getInstance().loadTasksToTable();
+    public OrderSubmissionTask copy() {
+        OrderSubmissionTask task = new OrderSubmissionTask();
+        task.sid = sid;
+        task.marketplaceName = marketplaceName;
+        task.spreadsheetId = spreadsheetId;
+        task.spreadsheetName = spreadsheetName;
+        task.orderRangeCol = orderRangeCol;
+        task.lostLimit = lostLimit;
+        task.priceLimit = priceLimit;
+        task.eddLimit = eddLimit;
+        task.noInvoiceText = noInvoiceText;
+        task.skipValidationCol = skipValidationCol;
+        task.finderCode = finderCode;
+        task.totalOrders = totalOrders;
+        task.dateCreated = new Date();
+
+        return task;
+
     }
 
+
+
     public static void main(String[] args) {
-        OrderSubmissionTask orderSubmissionTask;
         DBManager dbManager = ApplicationContext.getBean(DBManager.class);
         List<OrderSubmissionTask> list = dbManager.query(OrderSubmissionTask.class,
                 Cnd.where("status", "=", "Scheduled")

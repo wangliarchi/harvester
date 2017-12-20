@@ -81,7 +81,7 @@ public class UIHarvester extends AbstractApplicationUI {
                         .addGroup(layout.createSequentialGroup()
                                 .addComponent(toolbar))
                         .addGroup(layout.createSequentialGroup()
-                                .addComponent(mainPanel))
+                                .addComponent(mainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
                         .addGroup(layout.createSequentialGroup()
                                 .addComponent(statusPane, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
                                 .addComponent(memoryUsageBar, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, 200))
@@ -133,6 +133,12 @@ public class UIHarvester extends AbstractApplicationUI {
     @UIEvent
     public void orderStatisticLog() {
         logViewer.displayLogs(ConfigEnums.Log.Statistic);
+    }
+
+    @Inject ListOrderSubmissionTasks listOrderSubmissionTasks;
+    @UIEvent
+    public void orderSubmissionTasks () {
+        listOrderSubmissionTasks.execute();
     }
 
     @Inject

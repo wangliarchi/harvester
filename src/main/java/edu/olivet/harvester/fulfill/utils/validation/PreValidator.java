@@ -1,11 +1,15 @@
 package edu.olivet.harvester.fulfill.utils.validation;
 
+import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.model.ItemCompareResult;
 import edu.olivet.harvester.fulfill.service.CompareItemNameWorker;
+import edu.olivet.harvester.fulfill.utils.ISBNUtils;
+import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.utils.common.ThreadHelper;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,9 +30,31 @@ public class PreValidator {
     public static List<ItemCompareResult> compareItemNames4Orders(List<Order> orders) {
         long start = System.currentTimeMillis();
         final List<ItemCompareResult> results = new ArrayList<>(orders.size());
-        List<List<Order>> list = ThreadHelper.assign(orders, COMPARE_JOB_NUMBER);
+        List<Order> ordersToCheck = new ArrayList<>();
 
-        List<CompareItemNameWorker> jobs = new ArrayList<>(COMPARE_JOB_NUMBER);
+        //getTitleFromCache
+        ISBNUtils.initCache();
+        ItemValidator itemValidator = ApplicationContext.getBean(ItemValidator.class);
+        orders.forEach(order -> {
+            String title = ISBNUtils.getTitleFromCache(OrderCountryUtils.getFulfillmentCountry(order), order.isbn);
+            if (StringUtils.isNotBlank(title)) {
+                ItemValidator.ValidateReport report = itemValidator.validateItemName(title, order.item_name);
+                results.add(new ItemCompareResult(order, title, report.pass, false, report.toString()));
+            } else {
+                ordersToCheck.add(order);
+            }
+        });
+
+
+        int job_number = 1;
+        if (ordersToCheck.size() > 10) {
+            job_number = COMPARE_JOB_NUMBER;
+        }
+
+
+        List<List<Order>> list = ThreadHelper.assign(ordersToCheck, job_number);
+        List<CompareItemNameWorker> jobs = new ArrayList<>(job_number);
+
         for (List<Order> assignedOrders : list) {
             if (CollectionUtils.isEmpty(assignedOrders)) {
                 continue;

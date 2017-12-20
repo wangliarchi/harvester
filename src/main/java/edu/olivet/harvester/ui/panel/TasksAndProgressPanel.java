@@ -11,7 +11,10 @@ import edu.olivet.harvester.fulfill.OrderSubmitter;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.OrderTaskStatus;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
+import edu.olivet.harvester.fulfill.service.OrderSubmissionTaskService;
+import edu.olivet.harvester.fulfill.service.PSEventHandler;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
+import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.events.AddOrderSubmissionTaskEvent;
 import edu.olivet.harvester.ui.utils.ButtonColumn;
 import edu.olivet.harvester.ui.utils.OrderTaskButtonColumn;
@@ -30,10 +33,11 @@ import java.util.List;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/12/17 9:49 AM
  */
 @Singleton
-public class TasksAndProgressPanel extends JPanel {
+public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
 
     private static TasksAndProgressPanel instance;
     private DBManager dbManager;
+    private OrderSubmissionTaskService orderSubmissionTaskService;
 
     public static TasksAndProgressPanel getInstance() {
         if (instance == null) {
@@ -44,6 +48,7 @@ public class TasksAndProgressPanel extends JPanel {
 
     private TasksAndProgressPanel() {
         dbManager = ApplicationContext.getBean(DBManager.class);
+        orderSubmissionTaskService = ApplicationContext.getBean(OrderSubmissionTaskService.class);
         initComponents();
         initEvents();
     }
@@ -63,7 +68,7 @@ public class TasksAndProgressPanel extends JPanel {
         });
 
         pauseButton.addActionListener(evt -> {
-            if (PSEventListener.status == PSEventListener.Status.Paused) {
+            if (PSEventListener.paused()) {
                 PSEventListener.resume();
                 resetPauseBtn();
             } else {
@@ -78,28 +83,9 @@ public class TasksAndProgressPanel extends JPanel {
             }
         });
 
-        new Thread(() -> {
-            //noinspection InfiniteLoopStatement
-            while (true) {
-                switch (PSEventListener.status) {
-                    case Paused:
-                    case Running:
-                        showPauseBtn();
-                        break;
-                    case Stopped:
-                    case Ended:
-                        hidePauseBtn();
-                        break;
-                    case NotRunning:
-                        hidePauseBtn();
-                        break;
-                    default:
-                        hidePauseBtn();
-                        break;
-                }
-                WaitTime.Shortest.execute();
-            }
-        }, "PSEventListener").start();
+
+
+
 
 
         taskTable.addComponentListener(new ComponentAdapter() {
@@ -120,21 +106,20 @@ public class TasksAndProgressPanel extends JPanel {
 
                 if (task.getStatus().equalsIgnoreCase(OrderTaskStatus.Stopped.name())) {
                     task.setStatus(OrderTaskStatus.Scheduled.name());
-                    task.save(dbManager);
+                    orderSubmissionTaskService.saveTask(task);
                 } else if (task.getStatus().equalsIgnoreCase(OrderTaskStatus.Completed.name())) {
-                    task.setStatus(OrderTaskStatus.Scheduled.name());
-                    task.save(dbManager);
+                    OrderSubmissionTask newTask = task.copy();
+                    newTask.setStatus(OrderTaskStatus.Scheduled.name());
+                    orderSubmissionTaskService.saveTask(newTask);
                 } else if (UITools.confirmed("Please confirm that you want to delete this task.")) {
                     task.setStatus(OrderTaskStatus.Deleted.name());
-                    task.save(dbManager);
+                    orderSubmissionTaskService.saveTask(task);
                 }
 
             }
         };
 
-        taskList = dbManager.query(OrderSubmissionTask.class,
-                Cnd.where("dateCreated", ">=", Dates.beginOfDay(new DateTime()).toDate())
-                        .asc("dateCreated"));
+        taskList = orderSubmissionTaskService.todayTasks();
 
         ListModel<OrderSubmissionTask> listModel = new ListModel<>("Order Submission Tasks", taskList, OrderSubmissionTask.COLUMNS, null, OrderSubmissionTask.WIDTHS);
 
@@ -157,24 +142,23 @@ public class TasksAndProgressPanel extends JPanel {
 
     private void startButtonActionPerformed(ActionEvent evt) {
         new Thread(() -> {
+            if (PSEventListener.isRunning()) {
+                UITools.error("Other task is running!");
+                return;
+            }
+
             startButton.setEnabled(false);
             while (true) {
-                if (PSEventListener.stopped()) {
-                    break;
-                }
-
                 try {
-                    List<OrderSubmissionTask> scheduledTasks = dbManager.query(OrderSubmissionTask.class,
-                            Cnd.where("dateCreated", ">=", Dates.beginOfDay(new DateTime()).toDate())
-                                    .and("status", "=", OrderTaskStatus.Scheduled.name())
-                                    .asc("dateCreated"));
+                    List<OrderSubmissionTask> scheduledTasks = orderSubmissionTaskService.todayScheduledTasks();
+
                     if (CollectionUtils.isEmpty(scheduledTasks)) {
                         startButton.setEnabled(true);
                         UITools.info("No more tasks to run");
                         break;
                     }
 
-                    PSEventListener.reset();
+                    PSEventListener.reset(this);
 
                     OrderSubmissionTask task = scheduledTasks.get(0);
                     RuntimeSettings runtimeSettings = task.convertToRuntimeSettings();
@@ -187,10 +171,11 @@ public class TasksAndProgressPanel extends JPanel {
                     UITools.error(e.getMessage());
                     break;
                 } finally {
-                    startButton.setEnabled(true);
                     loadTasksToTable();
                 }
             }
+
+            startButton.setEnabled(true);
         }).start();
     }
 
@@ -249,14 +234,10 @@ public class TasksAndProgressPanel extends JPanel {
         taskTable.setRowSelectionAllowed(true);
         loadTasksToTable();
 
-
         jScrollPane1.setViewportView(taskTable);
-
         addTaskButton.setText("Add Task");
-
         startButton.setText("Start");
         startButton.setIcon(UITools.getIcon("start.png"));
-
 
         pauseButton.setText("Pause");
         pauseButton.setIcon(UITools.getIcon("pause.png"));
@@ -267,7 +248,6 @@ public class TasksAndProgressPanel extends JPanel {
         stopButton.setText("Stop");
         stopButton.setVisible(false);
         stopButton.setEnabled(false);
-
 
         GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);

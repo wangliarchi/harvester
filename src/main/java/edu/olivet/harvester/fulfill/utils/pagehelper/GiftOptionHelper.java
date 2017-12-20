@@ -14,7 +14,7 @@ import java.util.List;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/2/2017 1:50 PM
  */
 public class GiftOptionHelper {
-    private static final String continueBtnSelector = ".save-gift-button-box .a-button-primary .a-button-text,.save-gift-button-box .a-button-primary .a-button-input,  .popover-gift-bottom .a-button-primary .a-button-text,.popover-gift-bottom  .a-button-primary .a-button-input";
+    public static final String continueBtnSelector = ".save-gift-button-box .a-button-primary .a-button-text,.save-gift-button-box .a-button-primary .a-button-input,  .popover-gift-bottom .a-button-primary .a-button-text,.popover-gift-bottom  .a-button-primary .a-button-input";
     private static final String CHECKBOX_SELECTOR = "#giftForm .includeReceiptCheckbox input,.include-gift-receipt-checkbox input,.include-gift-receipt input,input.hide-prices-checkbox";
 
     public static void giftOption(Browser browser, Order order) {
@@ -54,6 +54,16 @@ public class GiftOptionHelper {
                 WaitTime.Shortest.execute();
             }
 
+            DOMElement continueBtn = JXBrowserHelper.selectVisibleElement(browser, continueBtnSelector);
+            assert continueBtn != null;
+            continueBtn.click();
+            WaitTime.Shortest.execute();
+            JXBrowserHelper.waitUntilNotFound(continueBtn);
+        }
+
+
+        DOMElement giftForm = JXBrowserHelper.selectVisibleElement(browser, "#giftForm");
+        if (giftForm != null) {
             DOMElement continueBtn = JXBrowserHelper.selectVisibleElement(browser, continueBtnSelector);
             assert continueBtn != null;
             continueBtn.click();

@@ -3,10 +3,10 @@ package edu.olivet.harvester.ui.panel;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.UITools;
-import edu.olivet.foundations.utils.BusinessException;
-import edu.olivet.foundations.utils.Configs;
-import edu.olivet.foundations.utils.Strings;
-import edu.olivet.foundations.utils.Tools;
+import edu.olivet.foundations.utils.*;
+import edu.olivet.harvester.fulfill.utils.OrderBuyerUtils;
+import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
+import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.utils.Settings;
 import edu.olivet.harvester.utils.Settings.Configuration;
 import org.apache.commons.lang3.StringUtils;
@@ -72,11 +72,42 @@ public class TabbedBuyerPanel extends JTabbedPane {
         });
     }
 
-    public BuyerPanel getOrAddTab(Country country, Account account) {
-        return addTab(country, account);
+    public BuyerPanel reInitTabForOrder(Order order) {
+        LOGGER.error("JXBrowser crashed, trying to recreate buyer panel");
+        BuyerPanel buyerPanel = initTabForOrder(order);
+        this.removeTab(buyerPanel);
+        buyerPanel =  initTabForOrder(order);
+
+        buyerPanel.toWelcomePage();
+        return buyerPanel;
     }
 
 
+    public BuyerPanel initTabForOrder(Order order) {
+        Account buyer = OrderBuyerUtils.getBuyer(order);
+        Country country = OrderCountryUtils.getFulfillmentCountry(order);
+        return getOrAddTab(country, buyer);
+    }
+    public BuyerPanel getOrAddTab(Country country, Account account) {
+        BuyerPanel buyerPanel =  addTab(country, account);
+        highlight(buyerPanel);
+        return buyerPanel;
+    }
+
+
+    public void removeTab(BuyerPanel buyerPanel) {
+        String tabKey = getTabKey(buyerPanel.getCountry(), buyerPanel.getBuyer());
+        try {
+            buyerPanel.getBrowserView().getBrowser().dispose();
+        }catch (Exception e) {
+            //
+        }
+        int index = buyerPanel.getId();
+        this.remove(index);
+
+        buyerPanels.remove(tabKey);
+        buyerPanelIndexes.remove(index);
+    }
     public BuyerPanel addTab(Country country, Account account) {
         String tabKey = getTabKey(country, account);
         if (buyerPanels.containsKey(tabKey)) {
@@ -169,25 +200,33 @@ public class TabbedBuyerPanel extends JTabbedPane {
         JFrame frame = new JFrame("TabbedPaneFrame");
         TabbedBuyerPanel panel = new TabbedBuyerPanel(-1);
 
-        Settings settings = Settings.load();
-        settings.getConfigs().forEach(config -> {
+        Account buyer = Settings.load().getConfigByCountry(Country.US).getBuyer();
+        panel.addTab(Country.US, buyer);
 
-            if (config.getBuyer() != null) {
-                panel.addTab(config.getCountry(), config.getBuyer());
-            }
-            if (config.getPrimeBuyer() != null) {
-                panel.addTab(config.getCountry(), config.getPrimeBuyer());
-            }
-
-        });
         panel.getBuyerPanel(0).toHomePage();
+
         panel.setVisible(true);
         frame.getContentPane().add(panel);
 
         frame.setSize(800, 768);
 
-
         UITools.setDialogAttr(frame, true);
+
+
+        WaitTime.Short.execute();
+
+        BuyerPanel buyerPanel = panel.getBuyerPanel(0);
+        buyerPanel.toHomePage();
+
+        buyerPanel.recreateBrowser();
+
+        //panel.removeTab(panel.getBuyerPanel(0));
+
+        //BuyerPanel buyerPanel = panel.addTab(Country.US,buyer);
+        buyerPanel.toHomePage();
+        WaitTime.Long.execute();
+
+
 
     }
 }

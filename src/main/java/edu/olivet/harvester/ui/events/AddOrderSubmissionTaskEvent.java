@@ -9,6 +9,7 @@ import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.OrderTaskStatus;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTaskHandler;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
+import edu.olivet.harvester.fulfill.service.OrderSubmissionTaskService;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.fulfill.utils.validation.PreValidator;
 import edu.olivet.harvester.model.Order;
@@ -31,8 +32,7 @@ import java.util.stream.Collectors;
 public class AddOrderSubmissionTaskEvent extends Observable implements HarvesterUIEvent, OrderSubmissionTaskHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(AddOrderSubmissionTaskEvent.class);
 
-    @Inject
-    DBManager dbManager;
+    @Inject OrderSubmissionTaskService orderSubmissionTaskService;
 
     @Override
     public void execute() {
@@ -41,6 +41,26 @@ public class AddOrderSubmissionTaskEvent extends Observable implements Harvester
             UITools.info(" Task created successfully");
         }
     }
+
+    @Override
+    public void saveTasks(List<OrderSubmissionTask> tasks) {
+        tasks.forEach(it -> {
+            it.setOrderRangeCol(it.getOrderRange().toString());
+            it.setSkipValidationCol(it.getSkipValidation().toString());
+            it.setStatus(OrderTaskStatus.Scheduled.name());
+            orderSubmissionTaskService.saveTask(it);
+        });
+
+        UITools.info(tasks.size() + " task(s) been created. Please wait a moment for title check.");
+        if (CollectionUtils.isNotEmpty(tasks)) {
+            checkTitle(tasks);
+        }
+
+        TasksAndProgressPanel.getInstance().loadTasksToTable();
+
+
+    }
+
 
     @Inject
     AppScript appScript;
@@ -63,10 +83,10 @@ public class AddOrderSubmissionTaskEvent extends Observable implements Harvester
             }
         });
 
+        orders.removeIf(order -> StringUtils.isNotBlank(orderValidator.canSubmit(order)));
 
         if (CollectionUtils.isNotEmpty(orders)) {
             List<ItemCompareResult> results = PreValidator.compareItemNames4Orders(orders);
-            //results.removeIf(it -> it.isPreCheckPass());
             ItemCheckResultDialog dialog = UITools.setDialogAttr(new ItemCheckResultDialog(null, true, results));
 
             if (dialog.isValidReturn()) {
@@ -92,29 +112,9 @@ public class AddOrderSubmissionTaskEvent extends Observable implements Harvester
             task.setTotalOrders(sheetValidOrders.size());
             task.setOrders(JSON.toJSONString(sheetValidOrders));
             task.setInvalidOrders(StringUtils.join(sheetInvalidOrders, "\n"));
-            task.save(dbManager);
+            orderSubmissionTaskService.saveTask(task);
         });
 
     }
 
-    @Override
-    public void saveTasks(List<OrderSubmissionTask> tasks) {
-        tasks.forEach(it -> {
-            it.setDateCreated(new Date());
-            it.setOrderRangeCol(it.getOrderRange().toString());
-            it.setSkipValidationCol(it.getSkipValidation().toString());
-            it.setStatus(OrderTaskStatus.Scheduled.name());
-            it.setId(DigestUtils.sha256Hex(it.toString()));
-            dbManager.insert(it, OrderSubmissionTask.class);
-        });
-
-        UITools.info(tasks.size() + " task(s) been created. Please wait a moment for title check.");
-        if (CollectionUtils.isNotEmpty(tasks)) {
-            checkTitle(tasks);
-        }
-
-        TasksAndProgressPanel.getInstance().loadTasksToTable();
-
-
-    }
 }

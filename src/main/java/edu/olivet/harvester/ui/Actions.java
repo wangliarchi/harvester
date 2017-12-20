@@ -18,6 +18,9 @@ public class Actions {
 
 
     public static final Action OrderSubmissionLog = new Action("OrderSubmissionLog", "Order Submission Logs", null, "list.png");
+
+    public static final Action OrderSubmissionTasks = new Action("OrderSubmissionTasks", "Order Submission Tasks", null, "list.png");
+
     public static final Action FindSupplier = new Action("FindSupplier", "Find Suppliers", null, "find.png");
 
     public static final Action ConfirmShipment = new Action("ConfirmShipment", "Confirm Shipments", null, "truck.png");

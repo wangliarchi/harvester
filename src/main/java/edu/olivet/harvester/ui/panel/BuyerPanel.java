@@ -7,6 +7,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.Configs;
 import edu.olivet.foundations.utils.Constants;
+import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.utils.OrderBuyerUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.model.Order;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 10/30/17 9:16 AM
@@ -41,12 +43,14 @@ public class BuyerPanel extends JPanel {
     @Getter
     private BrowserView browserView;
 
+    private double zoomLevel;
     @Getter
     @Setter
     /**
-     * current proccessing order
+     * current processing order
      */
     private Order order;
+    private int pid;
 
     public BuyerPanel(int id, Country country, Account buyer, double zoomLevel) {
         super(new BorderLayout());
@@ -54,6 +58,7 @@ public class BuyerPanel extends JPanel {
         this.id = id;
         this.country = country;
         this.buyer = buyer;
+        this.zoomLevel = zoomLevel;
         this.browserView = JXBrowserHelper.init(this.profilePathName(), zoomLevel);
         this.add(browserView, BorderLayout.CENTER);
     }
@@ -66,10 +71,24 @@ public class BuyerPanel extends JPanel {
         return this.buyer.key() + Constants.HYPHEN + this.id;
     }
 
+    public void recreateBrowser() {
+        try {
+            int pid = (int) browserView.getBrowser().getRenderProcessInfo().getPID();
+            browserView.getBrowser().dispose();
+            killProcess(pid);
+        } catch (Exception e) {
+            //
+            LOGGER.error("", e);
+        }
+
+        this.browserView = JXBrowserHelper.init(this.profilePathName(), zoomLevel);
+        toHomePage();
+        WaitTime.Short.execute();
+    }
 
     public void toHomePage() {
         Browser browser = browserView.getBrowser();
-        Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> it.loadURL(country.baseUrl()));
+        JXBrowserHelper.loadPage(browser, country.baseUrl());
     }
 
     public void toWelcomePage() {
@@ -77,6 +96,23 @@ public class BuyerPanel extends JPanel {
         String html = Configs.loadByFullPath("/welcome.html");
         browser.loadHTML(html);
 
+    }
+
+    private void killProcess(int pid) {
+        Runtime rt = Runtime.getRuntime();
+        if (System.getProperty("os.name").toLowerCase().indexOf("windows") > -1) {
+            try {
+                rt.exec("taskkill " + pid);
+            } catch (IOException e) {
+                LOGGER.error("",e);
+            }
+        } else {
+            try {
+                rt.exec("kill -9 " + pid);
+            } catch (IOException e) {
+                LOGGER.error("",e);
+            }
+        }
     }
 
     public static void main(String[] args) {

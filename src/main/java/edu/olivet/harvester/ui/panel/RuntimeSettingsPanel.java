@@ -7,6 +7,7 @@ import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.DailyBudgetHelper;
 import edu.olivet.harvester.fulfill.service.ProgressUpdater;
+import edu.olivet.harvester.fulfill.service.RuntimePanelObserver;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.spreadsheet.model.Worksheet;
@@ -15,6 +16,7 @@ import edu.olivet.harvester.ui.MainPanel;
 import edu.olivet.harvester.utils.FinderCodeUtils;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.Settings;
+import edu.olivet.harvester.utils.common.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
@@ -31,10 +33,9 @@ import java.util.Map;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/6/17 7:32 PM
  */
-public class RuntimeSettingsPanel extends JPanel {
+public class RuntimeSettingsPanel extends JPanel implements RuntimePanelObserver {
     private static final Logger LOGGER = LoggerFactory.getLogger(RuntimeSettingsPanel.class);
 
-    private Worksheet selectedWorksheet;
     private RuntimeSettings settings;
 
     private static RuntimeSettingsPanel instance;
@@ -58,9 +59,6 @@ public class RuntimeSettingsPanel extends JPanel {
     public void initData() {
         //RuntimeSettings
         settings = RuntimeSettings.load();
-        Settings systemSettings = Settings.load();
-        settings.setSid(systemSettings.getSid());
-
         marketplaceTextField.setText(settings.getMarketplaceName());
 
         setAccounts4Country();
@@ -107,6 +105,17 @@ public class RuntimeSettingsPanel extends JPanel {
 
         disableAllBtns();
     }
+
+    @Override
+    public void updateSpending(String spending) {
+        todayUsedTextField.setText(spending);
+    }
+
+    @Override
+    public void updateBudget(String budget) {
+        todayBudgetTextField.setText(budget);
+    }
+
 
     public void loadBudget() {
         if (StringUtils.isNotBlank(settings.getSpreadsheetId())) {
@@ -171,8 +180,6 @@ public class RuntimeSettingsPanel extends JPanel {
         } catch (Exception e) {
             return;
         }
-
-        String spreadsheetId = settings.getSpreadsheetId();
 
         Account seller = configuration.getSeller();
         sellerTextField.setText(seller.getEmail());
@@ -242,11 +249,6 @@ public class RuntimeSettingsPanel extends JPanel {
         skipCheckComboBox.setVisible(true);
     }
 
-    public void resetAfterSettingUpdated() {
-
-    }
-
-    // Variables declaration - do not modify
     private JTextField marketplaceTextField;
     private JLabel sellerLabel;
     private JTextField sellerTextField;
