@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS order_fulfillment_record (
   fulfillDate       DATETIME                NOT NULL
 );
 
-/* order submission record */
+/* order submission logs */
 CREATE TABLE IF NOT EXISTS order_fulfillment_logs (
   id                VARCHAR(40) PRIMARY KEY NOT NULL,
   orderId           VARCHAR(25)             NOT NULL DEFAULT '',
