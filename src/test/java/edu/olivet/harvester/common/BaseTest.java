@@ -2,15 +2,23 @@ package edu.olivet.harvester.common;
 
 
 import com.alibaba.fastjson.JSON;
+import com.amazonservices.mws.orders._2013_09_01.model.ListOrderItemsResult;
+import com.amazonservices.mws.orders._2013_09_01.model.ListOrdersResult;
+import com.amazonservices.mws.orders._2013_09_01.model.OrderItem;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import edu.olivet.deploy.Language;
+import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.amazon.MWSUtils;
+import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
+import edu.olivet.foundations.amazon.OrderFetcher;
 import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.mock.MockDBModule;
 import edu.olivet.foundations.mock.MockDateModule;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Tools;
+import edu.olivet.harvester.export.service.ExportOrderService;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.spreadsheet.model.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
@@ -21,6 +29,8 @@ import org.testng.annotations.Guice;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -28,7 +38,7 @@ import java.util.List;
  *
  * @author <a href="mailto:rnd@olivetuniversity.edu>OURnD</a> Sep 23, 2017 1:48:45 PM
  */
-@Guice(modules = {MockDateModule.class, MockDBModule.class, BaseTest.AppScriptModule.class})
+@Guice(modules = {MockDateModule.class, MockDBModule.class, BaseTest.TestMockModule.class})
 public class BaseTest {
 
     protected static String basePath;
@@ -84,11 +94,44 @@ public class BaseTest {
         }
     }
 
-    static class AppScriptModule extends AbstractModule {
+
+    static class MockExportOrderService extends ExportOrderService {
+        @Override
+        public List<com.amazonservices.mws.orders._2013_09_01.model.Order> listOrdersFromAmazon(Date lastExportedDate, Country country) {
+            try {
+                File localOrderXMLFile = new File(TEST_DATA_ROOT + File.separator + "list-orders-" + country.name() + ".xml");
+                String xmlFragment = Tools.readFileToString(localOrderXMLFile);
+                ListOrdersResult listOrdersResult = MWSUtils.buildMwsObject(xmlFragment, ListOrdersResult.class);
+                return listOrdersResult.getOrders();
+            } catch (Exception e) {
+                return new ArrayList<>();
+            }
+        }
+    }
+
+
+    static class MockOrderFetcher extends OrderFetcher {
+        @Override
+        public List<OrderItem> readItems(String orderId, MarketWebServiceIdentity credential) {
+            try {
+                File localOrderXMLFile = new File(TEST_DATA_ROOT + File.separator + "orderitems-" + orderId + ".xml");
+                String xmlFragment = Tools.readFileToString(localOrderXMLFile);
+                ListOrderItemsResult listOrdersResult = MWSUtils.buildMwsObject(xmlFragment, ListOrderItemsResult.class);
+                return listOrdersResult.getOrderItems();
+            } catch (Exception e) {
+                return new ArrayList<>();
+            }
+        }
+
+    }
+
+    static class TestMockModule extends AbstractModule {
 
         @Override
         protected void configure() {
             this.bind(AppScript.class).to(FakeAppScript.class);
+            this.bind(OrderFetcher.class).to(MockOrderFetcher.class);
+            this.bind(ExportOrderService.class).to(MockExportOrderService.class);
         }
     }
 

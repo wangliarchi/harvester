@@ -85,7 +85,7 @@ public class ContextUploadJob extends AbstractBackgroundJob {
         ContextUploadJob bean = ApplicationContext.getBean(ContextUploadJob.class);
         InstallationContext ctx = bean.buildContext();
 
-        System.out.println(JSON.toJSONString(ctx, true));
+        System.out.println(Strings.encode(JSON.toJSONString(JSON.toJSONString(ctx, true))));
 
         bean.execute();
         System.exit(0);

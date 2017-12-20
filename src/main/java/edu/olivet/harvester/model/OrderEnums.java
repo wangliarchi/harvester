@@ -122,6 +122,9 @@ public class OrderEnums {
         SHIPPING_SERVICE(37),
         EXPECTED_SHIP_DATE(38),
         ESTIMATED_DELIVERY_DATE(39),
+        ORDER_DATE(40),
+        SELLER_ESTIMATED_DELIVERY_DATE(41),
+        CARRIER(42),
         TRACKING_NUMBER(43);
 
         private final int number;

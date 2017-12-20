@@ -13,4 +13,8 @@ public class NumberUtils {
     public static float round(float value, int scale) {
         return (float) (Math.round(value * Math.pow(10, scale)) / Math.pow(10, scale));
     }
+
+    public static String toString(float value, int scale) {
+        return Float.toString(round(value,scale));
+    }
 }

@@ -302,6 +302,22 @@ public class Settings {
             return mwsCredential;
         }
 
+        public List<String> listSpreadsheetIds() {
+            List<String> spreadIds = new ArrayList<>();
+            if (!getBookDataSourceUrl().isEmpty()) {
+                if (!spreadIds.contains(getBookDataSourceUrl())) {
+                    spreadIds.add(getBookDataSourceUrl());
+                }
+            }
+            if (!getProductDataSourceUrl().isEmpty()) {
+                if (!spreadIds.contains(getProductDataSourceUrl())) {
+                    spreadIds.add(getProductDataSourceUrl());
+                }
+            }
+
+            return spreadIds;
+        }
+
     }
 
 }

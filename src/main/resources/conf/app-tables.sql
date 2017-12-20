@@ -107,3 +107,20 @@ CREATE TABLE IF NOT EXISTS order_submission_tasks (
   dateStarted       DATETIME                NULL,
   dateEnded         DATETIME                NULL
 );
+
+/* amazon_orders */
+CREATE TABLE IF NOT EXISTS amazon_orders (
+  orderId      VARCHAR  NOT NULL,
+  orderItemId      VARCHAR  NOT NULL,
+  asin         VARCHAR  NOT NULL,
+  sku          VARCHAR  NOT NULL,
+  orderStatus  VARCHAR  NOT NULL,
+  purchaseDate DATETIME NOT NULL,
+  xml          VARCHAR  NOT NULL,
+  itemXml      VARCHAR  NOT NULL,
+  isbn         VARCHAR  NOT NULL,
+  exportStatus INTEGER  NOT NULL,
+  lastUpdate   DATETIME NOT NULL,
+  PRIMARY KEY (orderItemId)
+    ON CONFLICT IGNORE
+);
