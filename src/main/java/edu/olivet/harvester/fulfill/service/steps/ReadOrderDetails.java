@@ -48,13 +48,19 @@ public class ReadOrderDetails extends Step {
             //return;
         }
 
-        new Thread(() -> {
-            try {
-                saveToDB(order);
-            } catch (Exception e) {
-                LOGGER.error("Failed to save order fulfillment info into database.", e);
-            }
-        }).start();
+
+        try {
+            saveToDB(order);
+        } catch (Exception e) {
+            LOGGER.error("Failed to save order fulfillment info into database.", e);
+        }
+
+        try {
+            SuccessLogger.log(order);
+        } catch (Exception e) {
+            //ignore
+        }
+
 
         new Thread(() -> {
             try {
@@ -64,13 +70,7 @@ public class ReadOrderDetails extends Step {
             }
         }).start();
 
-        new Thread(() -> {
-            try {
-                SuccessLogger.log(order);
-            } catch (Exception e) {
-                //ignore
-            }
-        }).start();
+
     }
 
     @Inject
