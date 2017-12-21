@@ -17,6 +17,7 @@ import edu.olivet.harvester.feeds.helper.ConfirmShipmentEmailSender;
 import edu.olivet.harvester.feeds.helper.FeedGenerator;
 import edu.olivet.harvester.feeds.helper.ShipmentOrderFilter;
 import edu.olivet.harvester.feeds.model.OrderConfirmationLog;
+import edu.olivet.harvester.feeds.service.ConfirmationFailedLogService;
 import edu.olivet.harvester.message.ErrorAlertService;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
@@ -111,9 +112,9 @@ public class ConfirmShipments {
                 LOGGER.info("Confirm shipments for spreadsheet {} in {}.", worksheet.toString(), Strings.formatElapsedTime(start));
             } catch (Exception e) {
                 LOGGER.info("Error confirming shipments for spreadsheet {} . ", worksheet.toString(), e);
+                Country country = worksheet.getSpreadsheet().getSpreadsheetCountry();
+                ConfirmationFailedLogService.logFailed(country, worksheet.getSheetName(), e.getMessage());
 
-                confirmShipmentEmailSender.sendErrorFoundEmail("Error confirming shipments for spreadsheet" + worksheet.toString(),
-                        e.getMessage(), worksheet.getSpreadsheet().getSpreadsheetCountry());
             }
 
         }
@@ -253,6 +254,8 @@ public class ConfirmShipments {
                         "Error when generating feed file. " + e.getMessage(), country);
             }
 
+            ConfirmationFailedLogService.logFailed(country, worksheet.getSheetName(), e.getMessage());
+
             return;
         }
 
@@ -266,8 +269,8 @@ public class ConfirmShipments {
                 throw new BusinessException("No result returned.");
             }
         } catch (Exception e) {
-            errorAlertService.sendMessage("Error when submitting order confirmation feed file via MWS.",
-                    e.getMessage(), country, feedFile);
+
+            ConfirmationFailedLogService.logFailed(country, worksheet.getSheetName(), e.getMessage());
 
             messagePanel.displayMsg("Error when submitting feed file. " + e.getMessage(), InformationLevel.Negative);
             LOGGER.error("Error when submitting feed file. ", e);
