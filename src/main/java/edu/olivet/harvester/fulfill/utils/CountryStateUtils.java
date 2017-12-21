@@ -16,6 +16,7 @@ import java.util.Map;
 @Singleton
 public class CountryStateUtils {
     private Map<String, String> countryCodes;
+    private Map<String, String> countryNames;
     private Map<String, String> usStates;
     private Map<String, String> caStates;
     private static final CountryStateUtils instance = new CountryStateUtils();
@@ -26,6 +27,7 @@ public class CountryStateUtils {
 
     private CountryStateUtils() {
         countryCodes = Configs.load(Config.CountryCode.fileName());
+        countryNames = Configs.load(Config.CountryName.fileName());
         usStates = Configs.load(Config.USStates.fileName(), Configs.KeyCase.UpperCase);
         caStates = Configs.load(Config.CAProvinces.fileName(), Configs.KeyCase.UpperCase);
     }
@@ -64,11 +66,11 @@ public class CountryStateUtils {
             return Country.US.name();
         }
 
-        if (StringUtils.length(countryCode) > 2) {
+        if (!countryNames.containsKey(countryCode.toUpperCase())) {
             return countryCode;
         }
 
-        String countryName = MapUtils.invertMap(countryCodes).get(countryCode.toUpperCase());
+        String countryName = countryNames.get(countryCode.toUpperCase());
         if (StringUtils.isBlank(countryName)) {
             return countryCode;
         }
