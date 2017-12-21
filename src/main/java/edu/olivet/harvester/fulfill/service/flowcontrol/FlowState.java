@@ -1,6 +1,7 @@
 package edu.olivet.harvester.fulfill.service.flowcontrol;
 
 import edu.olivet.foundations.utils.Directory;
+import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
@@ -31,11 +32,9 @@ public class FlowState {
         if (this.steps.get(this.steps.size() - 1) == this.prevStep) {
             substep = "1";
         }
-        String filePath = Directory.WebPage.path() + "/orders/" + order.sheetName.replaceAll("/", "") + "/" + order.row + "_" + order.order_id + "/images/" + steps.size() + "." + substep + "-" + buyerPanel.getBrowserView().getBrowser().getTitle().replaceAll(" ", "") + ".png";
-        JXBrowserHelper.saveScreenshot(filePath, buyerPanel.getBrowserView());
 
-        String htmlFilePath = filePath.replaceAll(".png", ".html").replaceAll("/images/", "/html/");
-        JXBrowserHelper.saveHTMLSourceFile(htmlFilePath, buyerPanel.getBrowserView().getBrowser());
+        JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, steps.size() + "." + substep);
+
 
     }
 
