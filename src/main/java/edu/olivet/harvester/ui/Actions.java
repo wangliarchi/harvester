@@ -33,4 +33,6 @@ public class Actions {
 
     public static final Action ExportOrders = new Action("ExportOrders", "Export Orders", null, "ordersheet.png");
 
+    public static final Action SystemSettings = new Action("SystemSettings", "System Settings", null, "settings.gif");
+
 }
