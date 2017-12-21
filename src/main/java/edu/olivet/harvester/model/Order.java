@@ -645,8 +645,8 @@ public class Order implements Keyable {
                 Objects.equal(ship_address_1, order.ship_address_1) &&
                 Objects.equal(ship_address_2, order.ship_address_2) &&
                 Objects.equal(ship_city, order.ship_city) &&
-                Objects.equal(ship_zip, order.ship_zip) &&
-                Objects.equal(ship_phone_number, order.ship_phone_number) &&
+                Objects.equal(StringUtils.stripStart(ship_zip, "0"), StringUtils.stripStart(order.ship_zip, "0")) &&
+                Objects.equal(StringUtils.stripStart(ship_phone_number, "0"), StringUtils.stripStart(order.ship_phone_number, "0")) &&
                 Objects.equal(order_number, order.order_number) &&
                 Objects.equal(account, order.account) &&
                 Objects.equal(ship_country, order.ship_country);

@@ -1,16 +1,16 @@
 package edu.olivet.harvester.export.service;
 
+import com.google.api.services.sheets.v4.model.SheetProperties;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.MessagePanel;
-import edu.olivet.foundations.utils.BusinessException;
-import edu.olivet.foundations.utils.Now;
-import edu.olivet.foundations.utils.Strings;
+import edu.olivet.foundations.utils.*;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.service.OrderItemTypeHelper;
+import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.spreadsheet.utils.SheetUtils;
 import edu.olivet.harvester.utils.Settings;
@@ -33,6 +33,7 @@ public class SheetService extends SheetAPI {
     private OrderItemTypeHelper orderItemTypeHelper;
     @Inject
     Now now;
+    @Inject AppScript appScript;
 
 
     public void fillOrders(Country country, List<Order> orders, MessagePanel messagePanel) {
@@ -80,13 +81,33 @@ public class SheetService extends SheetAPI {
     }
 
     public void fillOrders(String spreadsheetId, List<Order> orders) {
+        fillOrders(spreadsheetId, orders, 0);
+    }
+
+    public void fillOrders(String spreadsheetId, List<Order> orders, int repeatTime) {
 
         if (CollectionUtils.isEmpty(orders)) {
             return;
         }
 
+        if (repeatTime >= Constants.MAX_REPEAT_TIMES) {
+            return;
+        }
+
         Date date = now.get();
-        String sheetName = createOrGetOrderSheet(spreadsheetId, date);
+        SheetProperties sheetProperties = createOrGetOrderSheet(spreadsheetId, date);
+        String sheetName = sheetProperties.getTitle();
+
+        //lock sheet
+        int protectedId = lockSheet(spreadsheetId, sheetProperties.getSheetId(), "Order exporting process is running.");
+        //read current orders
+        List<Order> currentOrders;
+        try {
+            currentOrders = appScript.readOrders(spreadsheetId, sheetName);
+        } catch (Exception e) {
+            currentOrders = new ArrayList<>();
+        }
+        int lastRow = CollectionUtils.isEmpty(currentOrders) ? 2 : orders.stream().mapToInt(Order::getRow).max().getAsInt();
 
         List<List<Object>> values = convertOrdersToRangeValues(orders, spreadsheetId, sheetName);
 
@@ -94,9 +115,73 @@ public class SheetService extends SheetAPI {
             this.spreadsheetValuesAppend(spreadsheetId, sheetName, new ValueRange().setValues(values));
         } catch (BusinessException e) {
             throw new BusinessException(e);
+        } finally {
+            unlockSheet(spreadsheetId, protectedId);
+        }
+
+        List<Order> missedOrders = checkMissedOrders(orders, lastRow, spreadsheetId, sheetProperties);
+        if (CollectionUtils.isNotEmpty(missedOrders)) {
+            fillOrders(spreadsheetId, missedOrders, repeatTime + 1);
         }
     }
 
+
+    public List<Order> checkMissedOrders(List<Order> orders, int lastRow, String spreadsheetId, SheetProperties sheetProperties) {
+        //read date from order sheet, double check if entered correctly
+        String sheetName = sheetProperties.getTitle();
+        List<Order> ordersOnSheet = appScript.readOrders(spreadsheetId, sheetName);
+        ordersOnSheet.removeIf(it -> it.row <= lastRow);
+        Map<String, List<Order>> orderMap = new HashMap<>();
+        ordersOnSheet.forEach(it -> {
+            List<Order> os = orderMap.getOrDefault(it.order_id, new ArrayList<>());
+            os.add(it);
+            orderMap.put(it.order_id, os);
+        });
+
+        LOGGER.info("{} , {}", orders, orderMap);
+
+        List<Order> missedOrders = new ArrayList<>();
+        for (Order order : orders) {
+            if (!orderMap.containsKey(order.order_id)) {
+                LOGGER.info("Cant find order " + order.order_id + " on sheet " + sheetName);
+                missedOrders.add(order);
+                continue;
+            }
+
+            List<Order> os = orderMap.get(order.order_id);
+            Order found = null;
+            for (Order o : os) {
+                if (order.equals(o)) {
+                    found = o;
+                    break;
+                }
+            }
+
+            if (found == null) {
+                LOGGER.info("Cant find order " + order.order_id + " on sheet " + sheetName);
+                missedOrders.add(order);
+            } else {
+                os.remove(found);
+                orderMap.put(order.order_id, os);
+            }
+        }
+
+        //check and delete rest records in orderMap.
+        orderMap.forEach((k, os) -> {
+            if (CollectionUtils.isNotEmpty(os)) {
+                os.forEach(o -> {
+                    LOGGER.info("deleting row {} from {} {}", o.row, spreadsheetId, sheetName);
+                    try {
+                        deleteRow(spreadsheetId, sheetProperties.getSheetId(), o.row);
+                    } catch (Exception e) {
+                        LOGGER.error("", e);
+                    }
+                });
+            }
+        });
+
+        return missedOrders;
+    }
 
     private static final Map<String, Field> ORDER_FIELDS_CACHE = new HashMap<>();
 
@@ -104,7 +189,6 @@ public class SheetService extends SheetAPI {
         List<List<Object>> values = new ArrayList<>();
         orders.forEach(order -> {
             Object[] row = new String[OrderEnums.OrderColumn.values().length];
-            int col = 0;
             for (OrderEnums.OrderColumn orderColumn : OrderEnums.OrderColumn.values()) {
                 int index = orderColumn.index();
                 try {
@@ -113,20 +197,19 @@ public class SheetService extends SheetAPI {
                     Field filed = ORDER_FIELDS_CACHE.computeIfAbsent(fieldName, s -> {
                         try {
                             return Order.class.getDeclaredField(s);
-                        } catch (NoSuchFieldException e) {
-                            throw new BusinessException(e);
+                        } catch (Exception e) {
+                            return null;
                         }
                     });
 
                     try {
                         row[index] = filed.get(order);
-                    } catch (IllegalAccessException e) {
-                        throw new BusinessException(e);
+                    } catch (Exception e) {
+                        row[index] = StringUtils.EMPTY;
                     }
 
                 } catch (Exception e) {
-                    row[index] = "";
-                    //LOGGER.error("Error getting {} value, Order # {}. {}", colName, order.order_id, e.getMessage());
+                    row[index] = StringUtils.EMPTY;
                 }
             }
 
@@ -137,19 +220,19 @@ public class SheetService extends SheetAPI {
     }
 
 
-    public String createOrGetOrderSheet(String spreadsheetId, Date date) {
+    public SheetProperties createOrGetOrderSheet(String spreadsheetId, Date date) {
         return createNewSheetIfNotExisted(spreadsheetId, SheetUtils.getSheetNameByDate(date), TEMPLATE_SHEET_NAME);
     }
 
     //todo check if template sheet has correct format
-    public String createNewSheetIfNotExisted(String spreadsheetId, String sheetName, String templateSheetName) {
+    public SheetProperties createNewSheetIfNotExisted(String spreadsheetId, String sheetName, String templateSheetName) {
         long start = System.currentTimeMillis();
 
         //check if existed
         try {
-            getSheetProperties(spreadsheetId, sheetName);
+            SheetProperties sheetProperties = getSheetProperties(spreadsheetId, sheetName);
             LOGGER.info("Sheet {} already created.", sheetName);
-            return sheetName;
+            return sheetProperties;
         } catch (Exception e) {
             //LOGGER.error("", e);
         }
@@ -163,12 +246,23 @@ public class SheetService extends SheetAPI {
         }
 
         try {
-            duplicateSheet(spreadsheetId, templateSheetId, sheetName);
+            SheetProperties sheetProperties = duplicateSheet(spreadsheetId, templateSheetId, sheetName);
             LOGGER.info("Sheet {} created successfully, took {}.", sheetName, Strings.formatElapsedTime(start));
-            return sheetName;
+            return sheetProperties;
         } catch (Exception e) {
             LOGGER.error("Fail to copy template sheet  {} {} {}", spreadsheetId, templateSheetName, sheetName, e);
             throw new BusinessException(e);
         }
+    }
+
+    public static void main(String[] args) {
+        SheetService sheetService = ApplicationContext.getBean(SheetService.class);
+        String spreadsheetId = "1t1iEDNrokcqjE7cTEuYW07Egm6By2CNsMuog9TK1LhI";
+        int sheetId = 220481192;
+        sheetService.deleteRow(spreadsheetId,sheetId,4);
+//        sheetService.unlockSheet(spreadsheetId, 1718776808);
+        //int protectedId = sheetService.lockSheet(,220481192,"testing");
+        //1718776808
+        //System.out.println(protectedId);
     }
 }

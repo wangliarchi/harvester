@@ -66,6 +66,7 @@ public class UIElements extends AbstractUIContainer {
 
         map.put(Menu.Settings, new Action[]{
                 Action.Settings,
+                Actions.SystemSettings,
                 Actions.ConfigBankCard,
                 Action.Separator,
                 Action.CreateAutoStartTask,

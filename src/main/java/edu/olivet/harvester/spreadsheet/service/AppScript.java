@@ -228,6 +228,7 @@ public class AppScript {
             it.setSpreadsheetId(spreadId);
         });
 
+        //todo don't need to read every time
         try {
             FwdAddressUtils.getLastFWDIndex(spreadId, sheetName, orders);
         } catch (Exception e) {

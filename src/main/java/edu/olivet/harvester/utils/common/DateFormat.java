@@ -12,6 +12,8 @@ import java.util.Date;
 public enum DateFormat {
     /** 记录当前时间的日期格式 */
     DATE_TIME("yyyy-MM-dd HH:mm:ss"),
+
+    DATE_TIME_STR("yyyy-MM-dd_HH:mm:ss"),
     /** 记录当前时间的日期格式 */
     DATE_TIME_SHORT("M/d HH:mm"),
     /** 以当前时间为文件命名格式 */

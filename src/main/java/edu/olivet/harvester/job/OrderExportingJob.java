@@ -4,6 +4,7 @@ import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.job.AbstractBackgroundJob;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Dates;
+import edu.olivet.harvester.export.OrderExporter;
 import edu.olivet.harvester.feeds.ConfirmShipments;
 import edu.olivet.harvester.model.CronjobLog;
 import edu.olivet.harvester.model.SystemSettings;
@@ -20,18 +21,19 @@ import java.util.List;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 9/20/2017 3:00 PM
  */
-public class ShipmentConfirmationJob extends AbstractBackgroundJob {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ShipmentConfirmationJob.class);
+public class OrderExportingJob extends AbstractBackgroundJob {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderExportingJob.class);
 
 
     @Override
     public void execute() {
         SystemSettings systemSettings = SystemSettings.load();
-        if (!systemSettings.isEnableOrderConfirmation()) {
-            LOGGER.info("Auto order confirmation was not enabled. To enable this function, go to Settings->System Settings->Order Confirmation");
+        if (!systemSettings.isEnableOrderExport()) {
+            LOGGER.info("Auto order exporting was not enabled. To enable this function, go to Settings->System Settings->Order Export");
             return;
         }
-        ApplicationContext.getBean(ConfirmShipments.class).execute();
+
+        ApplicationContext.getBean(OrderExporter.class).execute();
         CronjobLog log = new CronjobLog();
         log.setId(this.getClass().getName() + Dates.nowAsFileName());
         log.setJobName(this.getClass().getName());
@@ -44,22 +46,22 @@ public class ShipmentConfirmationJob extends AbstractBackgroundJob {
     @Override
     public void runIfMissed(Date nextTriggerTime) {
         SystemSettings systemSettings = SystemSettings.load();
-        if (!systemSettings.isEnableOrderConfirmation()) {
-            LOGGER.info("Auto order confirmation was not enabled. To enable this function, go to Settings->System Settings->Order Confirmation");
+        if (!systemSettings.isEnableOrderExport()) {
+            LOGGER.info("Auto order exporting was not enabled. To enable this function, go to Settings->System Settings->Order Export");
             return;
         }
 
-
         Date now = new Date();
-
         //if current hour is less than next trigger time, cron job has not run yet, since its daily job
         if (Dates.getField(now, Calendar.HOUR_OF_DAY) < Dates.getField(nextTriggerTime, Calendar.HOUR_OF_DAY)) {
             return;
         }
 
-        if (nextTriggerTime.getTime() - now.getTime() < 2 * 3600 * 1000) {
+        if (nextTriggerTime.getTime() - now.getTime() < systemSettings.getOrderExportAllowedRange() * 60 * 1000) {
             return;
         }
+
+
 
         DBManager dbManager = ApplicationContext.getBean(DBManager.class);
         List<CronjobLog> list = dbManager.query(CronjobLog.class,

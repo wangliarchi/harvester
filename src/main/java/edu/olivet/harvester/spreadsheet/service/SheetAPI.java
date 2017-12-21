@@ -3,6 +3,7 @@ package edu.olivet.harvester.spreadsheet.service;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.*;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.mchange.lang.IntegerUtils;
 import edu.olivet.foundations.amazon.Country;
@@ -99,9 +100,9 @@ public class SheetAPI {
 
 
     @Repeat(expectedExceptions = BusinessException.class)
-    public void batchUpdate(String spreadsheetId, BatchUpdateSpreadsheetRequest request) {
+    public BatchUpdateSpreadsheetResponse batchUpdate(String spreadsheetId, BatchUpdateSpreadsheetRequest request) {
         try {
-            sheetService.spreadsheets().batchUpdate(spreadsheetId, request).execute();
+            return sheetService.spreadsheets().batchUpdate(spreadsheetId, request).execute();
         } catch (IOException e) {
             throw googleAPIHelper.wrapException(e);
         }
@@ -151,7 +152,7 @@ public class SheetAPI {
     }
 
     @Repeat(expectedExceptions = BusinessException.class)
-    public void duplicateSheet(String spreadsheetId, int templateSheetId, String newSheetName) {
+    public SheetProperties duplicateSheet(String spreadsheetId, int templateSheetId, String newSheetName) {
         DuplicateSheetRequest duplicateSheetRequest = new DuplicateSheetRequest();
         duplicateSheetRequest.setSourceSheetId(templateSheetId)
                 .setInsertSheetIndex(0)
@@ -164,7 +165,8 @@ public class SheetAPI {
                 new BatchUpdateSpreadsheetRequest().setRequests(requests);
 
         try {
-            this.batchUpdate(spreadsheetId, body);
+            BatchUpdateSpreadsheetResponse response = this.batchUpdate(spreadsheetId, body);
+            return response.getReplies().get(0).getDuplicateSheet().getProperties();
         } catch (Exception e) {
             throw new BusinessException(e);
         }
@@ -201,7 +203,7 @@ public class SheetAPI {
         try {
             this.batchUpdate(spreadsheetId, body);
         } catch (BusinessException e) {
-            LOGGER.error("Fail to rename sheet and move to first for {} {}. Try to delete the sheet - {}", sheetProperties.getTitle(), spreadsheetId, e.getMessage());
+            LOGGER.error("Fail to rename sheet and move to first for {} {}. Try to delete the sheet - {}", sheetProperties.getTitle(), spreadsheetId, e);
             deleteSheet(sheetProperties.getSheetId(), spreadsheetId);
         }
 
@@ -220,12 +222,73 @@ public class SheetAPI {
         try {
             this.batchUpdate(spreadsheetId, body);
         } catch (BusinessException e) {
-            LOGGER.error("Fail to delete sheet {} {} - {}", sheetId, spreadsheetId, e.getMessage());
+            LOGGER.error("Fail to delete sheet {} {} - {}", sheetId, spreadsheetId, e);
             throw new BusinessException(e);
         }
 
     }
 
+
+    public void deleteRow(String spreadsheetId, int sheetId, int row) {
+        List<Request> requests = new ArrayList<>();
+        Request request = new Request().setDeleteDimension(new DeleteDimensionRequest().setRange(
+                new DimensionRange().setSheetId(sheetId)
+                        .setStartIndex(row - 1).setEndIndex(row)
+                        .setDimension("ROWS")
+        ));
+        requests.add(request);
+
+        BatchUpdateSpreadsheetRequest body =
+                new BatchUpdateSpreadsheetRequest().setRequests(requests);
+
+        try {
+            this.batchUpdate(spreadsheetId, body);
+        } catch (BusinessException e) {
+            LOGGER.error("Fail to delete row {} from sheet {} {} - {}", row, sheetId, spreadsheetId, e);
+            throw new BusinessException(e);
+        }
+    }
+
+    public int lockSheet(String spreadsheetId, int sheetId, String description) {
+        List<Request> requests = new ArrayList<>();
+        Request request = new Request().setAddProtectedRange(new AddProtectedRangeRequest()
+                .setProtectedRange(new ProtectedRange().setDescription(description).setWarningOnly(false)
+                        .setEditors(new Editors().setUsers(Lists.newArrayList(Constants.RND_EMAIL)))
+                        .setRange(new GridRange().setSheetId(sheetId))
+                )
+        );
+        requests.add(request);
+
+        BatchUpdateSpreadsheetRequest body =
+                new BatchUpdateSpreadsheetRequest().setRequests(requests);
+
+        try {
+            BatchUpdateSpreadsheetResponse response = this.batchUpdate(spreadsheetId, body);
+            return response.getReplies().get(0).getAddProtectedRange().getProtectedRange().getProtectedRangeId();
+        } catch (BusinessException e) {
+            LOGGER.error("Fail to local sheet {} {} - {}", sheetId, spreadsheetId, e);
+            throw new BusinessException(e);
+        }
+    }
+
+    public void unlockSheet(String spreadsheetId, int protecttedRangeId) {
+        List<Request> requests = new ArrayList<>();
+        Request request = new Request().setDeleteProtectedRange(new DeleteProtectedRangeRequest()
+                .setProtectedRangeId(protecttedRangeId)
+        );
+        requests.add(request);
+
+        BatchUpdateSpreadsheetRequest body =
+                new BatchUpdateSpreadsheetRequest().setRequests(requests);
+
+        try {
+            this.batchUpdate(spreadsheetId, body);
+
+        } catch (BusinessException e) {
+            LOGGER.error("Fail to unlock sheet {} {} - {}", protecttedRangeId, spreadsheetId, e);
+            throw new BusinessException(e);
+        }
+    }
 
     @Inject
     private AppScript appScript;

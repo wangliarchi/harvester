@@ -194,7 +194,7 @@ public class SheetService extends SheetAPI {
             List<Order> os = orderMap.get(order.order_id);
 
             for (Order o : os) {
-                if (StringUtils.equalsAnyIgnoreCase(o.remark, order.remark, order.originalRemark)) {
+                if (o.equalsLite(order) && StringUtils.equalsAnyIgnoreCase(o.remark, order.remark, order.originalRemark)) {
                     o.setContext(order.getContext());
                     reloadedOrders.add(o);
                 }

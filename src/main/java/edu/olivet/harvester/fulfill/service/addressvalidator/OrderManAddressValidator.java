@@ -11,6 +11,7 @@ import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.harvester.fulfill.model.Address;
+import edu.olivet.harvester.fulfill.service.AddressValidatorService;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.message.ErrorAlertService;
 import edu.olivet.harvester.model.State;
@@ -77,9 +78,9 @@ public class OrderManAddressValidator implements AddressValidator {
                 //noinspection deprecation
                 double similarity = StringUtils.getJaroWinklerDistance(finalOrAddr, finalAddr);
                 if (similarity < MIN_SIMILARITY) {
+                    AddressValidatorService.logFailed(old.toString(), entered.toString(), finalOrAddr + ", " + finalAddr);
                     String msg = "OrderMan Address failed verification. Entered " + entered + ", original " + old + ", Addresses after rules applied " + finalOrAddr + ", " + finalAddr;
                     LOGGER.error(msg);
-                    errorAlertService.sendMessage("Address failed verification", msg);
                     return false;
                 }
             }
@@ -124,7 +125,7 @@ public class OrderManAddressValidator implements AddressValidator {
         if (CollectionUtils.isNotEmpty(results)) {
             String msg = "OrderMan Address failed verification. Entered " + entered + ", original " + old + ". " + StringUtils.join(results, "; ");
             LOGGER.error(msg);
-            errorAlertService.sendMessage("Address failed verification", msg);
+            AddressValidatorService.logFailed(old.toString(), entered.toString(), "");
             return false;
         }
         return true;

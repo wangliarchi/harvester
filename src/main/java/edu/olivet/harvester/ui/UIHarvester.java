@@ -11,6 +11,7 @@ import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.job.BackgroundJob;
 import edu.olivet.harvester.model.ConfigEnums;
 import edu.olivet.harvester.ui.dialog.BankCardConfigDialog;
+import edu.olivet.harvester.ui.dialog.SystemSettingsDialog;
 import edu.olivet.harvester.ui.events.*;
 import edu.olivet.harvester.utils.LogViewer;
 import edu.olivet.harvester.utils.Settings;
@@ -150,6 +151,13 @@ public class UIHarvester extends AbstractApplicationUI {
         this.setTitle(String.format(APP_TITLE, Settings.load().getSid()));
     }
 
+    @UIEvent
+    public void systemSettings() {
+        SystemSettingsDialog dialog = UITools.setDialogAttr(new SystemSettingsDialog());
+        if(dialog.isOk()) {
+            //
+        }
+    }
 
     @UIEvent
     public void configBankCard() {

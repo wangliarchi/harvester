@@ -97,7 +97,7 @@ public class BaseTest {
 
     static class MockExportOrderService extends ExportOrderService {
         @Override
-        public List<com.amazonservices.mws.orders._2013_09_01.model.Order> listOrdersFromAmazon(Date lastExportedDate, Country country) {
+        public List<com.amazonservices.mws.orders._2013_09_01.model.Order> listOrdersFromAmazon(Date lastExportedDate, Date toDate, Country country) {
             try {
                 File localOrderXMLFile = new File(TEST_DATA_ROOT + File.separator + "list-orders-" + country.name() + ".xml");
                 String xmlFragment = Tools.readFileToString(localOrderXMLFile);

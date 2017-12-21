@@ -10,6 +10,7 @@ import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.utils.Settings;
+import edu.olivet.harvester.utils.common.DateFormat;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -61,13 +62,33 @@ public class ExportStatService {
     }
 
 
+    public void updateStat(Country country, Date lastDate, int total) {
+        String sid = Settings.load().getSid();
+        String account = sid + country.name();
+
+        try {
+            String url = APPS_URL + "?method=UpdateStats&account=" + account + "&cm=" + SystemUtils.USER_NAME +
+                    "&lastUpdatedAt=" + (lastDate == null ? "" : DateFormat.DATE_TIME_STR.format(lastDate)) + "&total=" + total;
+            Jsoup.connect(url).ignoreContentType(true).timeout(12000).execute().body().trim();
+
+        } catch (Exception e) {
+            LOGGER.error("Fail to update order export stats for {}", country, e);
+            throw new BusinessException(e);
+        }
+
+    }
+
     public Date lastOrderDate(Country country) {
         List<String> spreadsheetIds = Settings.load().getConfigByCountry(country).listSpreadsheetIds();
-        Date date = DateUtils.addDays(new Date(), -2);
-        for (String spreadhsheetId : spreadsheetIds) {
-            Date lastDate = lastOrderDate(spreadhsheetId);
-            if (lastDate.after(date)) {
-                date = lastDate;
+        Date date = DateUtils.addDays(new Date(), -6);
+        for (String spreadsheetId : spreadsheetIds) {
+            try {
+                Date lastDate = lastOrderDate(spreadsheetId);
+                if (lastDate.after(date)) {
+                    date = lastDate;
+                }
+            } catch (Exception e) {
+                LOGGER.error("", e);
             }
         }
 

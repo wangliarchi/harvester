@@ -48,49 +48,62 @@ public class ExportOrderService extends OrderClient {
     Now now;
 
 
-    public List<edu.olivet.harvester.model.Order> listUnshippedOrders(Date lastExportedDate, Country country) {
-        List<Order> orders = listOrdersFromAmazon(lastExportedDate, country);
+    public List<edu.olivet.harvester.model.Order> listUnexportedOrders(Date lastExportedDate, Date toDate, Country country) {
+
+        //list orders from amazon for the specified date range. order status include shipped, unshipped, and partiallyShipped
+        List<Order> orders = listOrdersFromAmazon(lastExportedDate, toDate, country);
 
         if (CollectionUtils.isEmpty(orders)) {
             return null;
         }
 
-        orders = removeExportedOrders(orders, country);
+        //remove exported orders
+        orders = removeExportedOrders(orders, lastExportedDate, country);
         if (CollectionUtils.isEmpty(orders)) {
             return null;
         }
 
+        //save to db, read order item info, and finally convert to AmazonOrder object
         List<AmazonOrder> amazonOrders = saveAmazonOrders(orders, country);
 
-        List<edu.olivet.harvester.model.Order> orderList = new ArrayList<>();
-        for (AmazonOrder amazonOrder : amazonOrders) {
-            edu.olivet.harvester.model.Order order = amazonOrder.toOrder();
-            if (blacklistBuyer.isBlacklist(amazonOrder.getName(), amazonOrder.getEmail(), Address.loadFromOrder(order))) {
-                blacklistBuyer.appendRemark(order);
-            }
-            orderList.add(order);
-        }
+        return toOrders(amazonOrders);
 
-        return orderList;
 
     }
 
     /**
      * <pre>
-     *     For self-buy orders, Order ID, SKU, price and shipping fee must be included,
-     *     and quantity must NOT be included.
+     *     convert AmazonOrder to Order object
+     *     handle blacklist buyer and self order check
      * </pre>
      */
-    public List<edu.olivet.harvester.model.Order> markSelfOrders(List<edu.olivet.harvester.model.Order> orders) {
-        for (edu.olivet.harvester.model.Order order : orders) {
-            if (SelfOrderChecker.isSelfOrder(order)) {
-                order.quantity_purchased = StringUtils.EMPTY;
-                order.remark = Remark.SELF_ORDER.text2Write();
+    public List<edu.olivet.harvester.model.Order> toOrders(List<AmazonOrder> amazonOrders) {
+        List<edu.olivet.harvester.model.Order> orderList = new ArrayList<>();
+        for (AmazonOrder amazonOrder : amazonOrders) {
+            edu.olivet.harvester.model.Order order;
+            try {
+                order = amazonOrder.toOrder();
+            } catch (Exception e) {
+                LOGGER.error("error convert AmazonOrder {} to order object", amazonOrder, e);
+                continue;
             }
+
+            //mark blacklist buyer
+            if (blacklistBuyer.isBlacklist(amazonOrder.getName(), amazonOrder.getEmail(), Address.loadFromOrder(order))) {
+                blacklistBuyer.appendRemark(order);
+            }
+
+            //mark self order
+            if (SelfOrderChecker.isSelfOrder(amazonOrder)) {
+                SelfOrderChecker.markAsSelfOrder(order);
+            }
+
+            orderList.add(order);
         }
 
-        return orders;
+        return orderList;
     }
+
 
     /**
      * <pre>
@@ -99,11 +112,12 @@ public class ExportOrderService extends OrderClient {
      *     Return unshipped, partial shipped and shipped orders
      * </pre>
      */
-    public List<Order> listOrdersFromAmazon(Date lastExportedDate, Country country) {
+    public List<Order> listOrdersFromAmazon(Date lastExportedDate, Date toDate, Country country) {
         Map<OrderFetcher.DateRangeType, Date> dateMap = new HashMap<>();
         dateMap.put(OrderFetcher.DateRangeType.LastUpdatedAfter, lastExportedDate);
-        dateMap.put(OrderFetcher.DateRangeType.LastUpdatedBefore, now.get());
-
+        dateMap.put(OrderFetcher.DateRangeType.LastUpdatedBefore, toDate);
+        LOGGER.info("Fetching orders last updated between {} and {}", dateMap.get(OrderFetcher.DateRangeType.LastUpdatedAfter),
+                dateMap.get(OrderFetcher.DateRangeType.LastUpdatedBefore));
         List<Order> orders;
         try {
             orders = orderFetcher.readOrders(dateMap, Settings.load().getConfigByCountry(country).getMwsCredential(), STATUS_FILTERS);
@@ -123,12 +137,21 @@ public class ExportOrderService extends OrderClient {
      *     read last DAYS_BACK order from order update sheets
      * </pre>
      */
-    public List<Order> removeExportedOrders(List<Order> orders, Country country) {
+    public List<Order> removeExportedOrders(List<Order> orders, Date fromDate, Country country) {
         //load orders from last 7 days to check duplicates
         List<String> spreadsheetIds = Settings.load().getConfigByCountry(country).listSpreadsheetIds();
         Map<String, edu.olivet.harvester.model.Order> allOrders = new HashMap<>();
+
+
+        Date minDate;
+        if (fromDate.after(DateUtils.addDays(now.get(), DAYS_BACK))) {
+            minDate = DateUtils.addDays(now.get(), DAYS_BACK);
+        } else {
+            minDate = DateUtils.addDays(fromDate, -1);
+        }
+
         spreadsheetIds.forEach(it -> {
-            orderService.fetchOrders(sheetAPI.getSpreadsheet(it), DateUtils.addDays(now.get(), DAYS_BACK)).forEach(order -> {
+            orderService.fetchOrders(sheetAPI.getSpreadsheet(it), minDate).forEach(order -> {
                 allOrders.put(order.order_id, order);
             });
         });

@@ -47,6 +47,8 @@ public class ServiceUtils {
             return TimeZone.getTimeZone("IDT");
         } else if (country == Country.US || country == Country.MX || country == Country.CA) {
             return TimeZone.getTimeZone("PST");
+        }  else if (country == Country.AU) {
+            return TimeZone.getTimeZone("AET");
         } else {
             return TimeZone.getDefault();
         }

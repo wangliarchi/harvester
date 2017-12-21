@@ -135,10 +135,13 @@ public class OrderHelper {
                 try {
                     return Order.class.getDeclaredField(s);
                 } catch (NoSuchFieldException e) {
-                    throw new BusinessException(e);
+                    return null;
+                    //throw new BusinessException(e);
                 }
             });
-
+            if (filed == null) {
+                return;
+            }
             try {
                 filed.set(order, StringUtils.defaultString(value).trim());
             } catch (IllegalAccessException e) {
@@ -150,7 +153,7 @@ public class OrderHelper {
     /**
      * 当订单的预期购买数量与实际购买数量不一致时，添加批注提示
      *
-     * @param order       当前订单
+     * @param order 当前订单
      * @param actualQuantity 实际可以购买数量
      */
     public static void addQuantityChangeRemark(Order order, String actualQuantity) {

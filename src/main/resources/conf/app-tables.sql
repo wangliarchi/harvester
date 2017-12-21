@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS order_submission_tasks (
 /* amazon_orders */
 CREATE TABLE IF NOT EXISTS amazon_orders (
   orderId      VARCHAR  NOT NULL,
-  orderItemId      VARCHAR  NOT NULL,
+  orderItemId  VARCHAR  NOT NULL,
   asin         VARCHAR  NOT NULL,
   sku          VARCHAR  NOT NULL,
   orderStatus  VARCHAR  NOT NULL,

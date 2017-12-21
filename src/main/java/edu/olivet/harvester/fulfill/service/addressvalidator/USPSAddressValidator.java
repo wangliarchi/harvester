@@ -7,6 +7,7 @@ import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.model.Address;
+import edu.olivet.harvester.fulfill.service.AddressValidatorService;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.message.ErrorAlertService;
 import org.apache.commons.lang3.StringUtils;
@@ -59,8 +60,7 @@ public class USPSAddressValidator implements AddressValidator {
             //log error if failed
             if (!result) {
                 LOGGER.error("Address failed verification. Entered " + entered + ", original " + old + ", USPS returned " + corrected);
-                errorAlertService.sendMessage("Address failed verification", "Entered\n " + entered + "\n\n Original\n " + old + "\n\nUSPS returned\n" + corrected);
-
+                AddressValidatorService.logFailed(old.toString(), entered.toString(), corrected.toString());
                 if (StringUtils.isNotBlank(old.getAddress2())) {
                     Address copy = old.copy();
                     copy.setAddress2("APT " + copy.getAddress2());
