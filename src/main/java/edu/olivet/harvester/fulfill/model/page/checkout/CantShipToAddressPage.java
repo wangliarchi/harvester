@@ -22,22 +22,40 @@ public class CantShipToAddressPage extends FulfillmentPage {
     public void execute(Order order) {
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
 
-        DOMElement shipToOneAddressLink = JXBrowserHelper.selectElementByCssSelector(browser, "#changeQuantityFormId a.pipeline-link");
-        if (shipToOneAddressLink != null) {
-            String currentAddress = JXBrowserHelper.text(browser, "#changeQuantityFormId .address-dropdown .a-dropdown-prompt").trim();
-            if (StringUtils.isNotBlank(currentAddress) && !Strings.containsAnyIgnoreCase(currentAddress, OrderAddressUtils.recipientName(order))) {
-                shipToOneAddressLink.click();
-                JXBrowserHelper.waitUntilNotFound(shipToOneAddressLink);
-                return;
-            }
-        }
 
         String errorMsg = JXBrowserHelper.text(browser, "#changeQuantityFormId .alertMessage,#changeQuantityFormId .lineitem-error-message");
-        if (StringUtils.isBlank(errorMsg)) {
-            errorMsg = "Sorry, this item can't be shipped to selected address.";
+        if (StringUtils.isNotBlank(errorMsg)) {
+            throw new OrderSubmissionException(errorMsg);
         }
 
+        //if no error message, try to change to one address mode
+        DOMElement shipToOneAddressLink = JXBrowserHelper.selectElementByCssSelector(browser, "#changeQuantityFormId a.pipeline-link");
+        DOMElement useThisAddressBtn = JXBrowserHelper.selectElementByCssSelector(browser, "#changeQuantityFormId .a-button.primary-action-button input");
+        if (shipToOneAddressLink != null) {
+            String currentAddress = JXBrowserHelper.text(browser, "#changeQuantityFormId .address-dropdown .a-dropdown-prompt").trim();
+            if (StringUtils.isNotBlank(currentAddress)
+                    && Strings.containsAnyIgnoreCase(currentAddress, OrderAddressUtils.orderShippingAddress(order).getName())
+                    && useThisAddressBtn != null) {
+                useThisAddressBtn.click();
+            } else {
+                shipToOneAddressLink.click();
+            }
+
+            JXBrowserHelper.waitUntilNotFound(shipToOneAddressLink);
+            return;
+        }
+
+        //try to process anyway. address will be validated before placing the order
+        if (useThisAddressBtn != null) {
+            useThisAddressBtn.click();
+            JXBrowserHelper.waitUntilNotFound(useThisAddressBtn);
+            return;
+        }
+
+        //no use this address button?
+        errorMsg = "Sorry, this item can't be shipped to selected address.";
         throw new OrderSubmissionException(errorMsg);
+
 
     }
 
