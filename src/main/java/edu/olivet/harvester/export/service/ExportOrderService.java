@@ -48,6 +48,7 @@ public class ExportOrderService extends OrderClient {
     Now now;
 
 
+
     public List<edu.olivet.harvester.model.Order> listUnexportedOrders(Date lastExportedDate, Date toDate, Country country) {
 
         //list orders from amazon for the specified date range. order status include shipped, unshipped, and partiallyShipped
@@ -57,11 +58,13 @@ public class ExportOrderService extends OrderClient {
             return null;
         }
 
+
         //remove exported orders
         orders = removeExportedOrders(orders, lastExportedDate, country);
         if (CollectionUtils.isEmpty(orders)) {
             return null;
         }
+
 
         //save to db, read order item info, and finally convert to AmazonOrder object
         List<AmazonOrder> amazonOrders = saveAmazonOrders(orders, country);
@@ -69,10 +72,12 @@ public class ExportOrderService extends OrderClient {
         return toOrders(amazonOrders);
 
 
+
     }
 
     /**
      * <pre>
+
      *     convert AmazonOrder to Order object
      *     handle blacklist buyer and self order check
      * </pre>
@@ -112,6 +117,7 @@ public class ExportOrderService extends OrderClient {
      *     Return unshipped, partial shipped and shipped orders
      * </pre>
      */
+
     public List<Order> listOrdersFromAmazon(Date lastExportedDate, Date toDate, Country country) {
         Map<OrderFetcher.DateRangeType, Date> dateMap = new HashMap<>();
         dateMap.put(OrderFetcher.DateRangeType.LastUpdatedAfter, lastExportedDate);

@@ -27,10 +27,17 @@ public class ExportOrderServiceTest extends BaseTest {
     public void testRemoveExportedOrders() {
         now.set(Dates.parseDate("11/30/2017"));
         Date lastExportedDate = DateUtils.addDays(new Date(), -1);
+<<<<<<< HEAD
         List<Order> orders = exportOrderService.listOrdersFromAmazon(lastExportedDate, now.get(), Country.US);
         assertEquals(orders.size(), 6);
 
         orders = exportOrderService.removeExportedOrders(orders, now.get(), Country.US);
+=======
+        List<Order> orders = exportOrderService.listOrdersFromAmazon(lastExportedDate, Country.US);
+        assertEquals(orders.size(), 6);
+
+        orders = exportOrderService.removeExportedOrders(orders, Country.US);
+>>>>>>> 8563092df1e8aa9e270aa5071d56fab923389e48
 
     }
 
@@ -38,10 +45,17 @@ public class ExportOrderServiceTest extends BaseTest {
     public void testSaveAmazonOrders() {
         now.set(Dates.parseDate("11/30/2017"));
         Date lastExportedDate = DateUtils.addDays(new Date(), -1);
+<<<<<<< HEAD
         List<Order> orders = exportOrderService.listOrdersFromAmazon(lastExportedDate,now.get(), Country.US);
 
 
         orders = exportOrderService.removeExportedOrders(orders,now.get(), Country.US);
+=======
+        List<Order> orders = exportOrderService.listOrdersFromAmazon(lastExportedDate, Country.US);
+
+
+        orders = exportOrderService.removeExportedOrders(orders, Country.US);
+>>>>>>> 8563092df1e8aa9e270aa5071d56fab923389e48
 
         exportOrderService.saveAmazonOrders(orders, Country.US);
     }

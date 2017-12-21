@@ -33,6 +33,7 @@ public class SheetServiceTest extends BaseTest {
     public void testFillOrders() throws Exception {
         now.set(Dates.parseDate("11/30/2017"));
         Date lastExportedDate = DateUtils.addDays(new Date(), -1);
+
         List<Order> orders = exportOrderService.listUnexportedOrders(lastExportedDate, now.get(), Country.US);
 
         sheetService.fillOrders(spreadsheetId, orders);

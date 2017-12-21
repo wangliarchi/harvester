@@ -11,8 +11,6 @@ import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.export.model.OrderExportParams;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Getter;
-import org.apache.commons.lang3.ArrayUtils;
-
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
@@ -28,8 +26,6 @@ import java.util.List;
  */
 public class ChooseMarketplaceDialog extends BaseDialog {
     private static final long serialVersionUID = -1L;
-
-
     private JList<Country> marketplaceList;
     @Getter
     private List<Country> selectedMarketplaceNames;
@@ -106,6 +102,7 @@ public class ChooseMarketplaceDialog extends BaseDialog {
         GroupLayout layout = new GroupLayout(getContentPane());
 
 
+
         layout.setHorizontalGroup(layout.createParallelGroup(Alignment.LEADING)
                 .addComponent(spreadPane, 380, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createSequentialGroup()
@@ -174,7 +171,6 @@ public class ChooseMarketplaceDialog extends BaseDialog {
 
     }
 
-
     @Getter
     private OrderExportParams orderExportParams;
 
@@ -230,14 +226,11 @@ public class ChooseMarketplaceDialog extends BaseDialog {
 
         this.setVisible(false);
         ok = true;
-
-
     }
 
     public static void main(String[] args) {
         UIText.setLocale(Language.current());
         UITools.setTheme();
-
 
         ChooseMarketplaceDialog dialog = UITools.setDialogAttr(new ChooseMarketplaceDialog());
         dialog.pack();

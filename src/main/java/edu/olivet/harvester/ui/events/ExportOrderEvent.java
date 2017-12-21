@@ -1,7 +1,6 @@
 package edu.olivet.harvester.ui.events;
 
 import com.google.inject.Inject;
-import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.ProgressDetail;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.export.OrderExporter;
@@ -17,7 +16,9 @@ import java.util.List;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/4/17 10:59 AM
  */
 public class ExportOrderEvent implements HarvesterUIEvent {
+
     //private static final Logger LOGGER = LoggerFactory.getLogger(ExportOrderEvent.class);
+
 
     @Inject
     private OrderExporter orderExporter;

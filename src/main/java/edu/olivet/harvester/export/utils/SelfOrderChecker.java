@@ -13,7 +13,6 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class SelfOrderChecker {
 
-
     public static boolean isSelfOrder(AmazonOrder order) {
         OrderItem orderItem = MWSUtils.buildMwsObject(order.getItemXml(), OrderItem.class);
         String promotion = orderItem.getPromotionDiscount().getAmount();

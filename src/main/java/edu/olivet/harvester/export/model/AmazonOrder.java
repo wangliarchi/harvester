@@ -6,15 +6,12 @@ import com.amazonservices.mws.orders._2013_09_01.model.OrderItem;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.MWSUtils;
 import edu.olivet.foundations.db.PrimaryKey;
-import edu.olivet.harvester.export.utils.SelfOrderChecker;
 import edu.olivet.harvester.fulfill.utils.ConditionUtils;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.model.OrderEnums.OrderColumn;
 import edu.olivet.harvester.model.OrderEnums.Status;
-import edu.olivet.harvester.model.Remark;
 import edu.olivet.harvester.utils.ServiceUtils;
-import edu.olivet.harvester.utils.common.DateFormat;
 import edu.olivet.harvester.utils.common.NumberUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,7 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.nutz.dao.entity.annotation.Column;
 import org.nutz.dao.entity.annotation.Name;
-import org.nutz.dao.entity.annotation.PK;
 import org.nutz.dao.entity.annotation.Table;
 
 import java.util.Date;
@@ -33,15 +29,16 @@ import java.util.Date;
 @Table(value = "amazon_orders")
 @Data
 @EqualsAndHashCode(callSuper = false)
+
 public class AmazonOrder extends PrimaryKey {
     public static final int NOT_EXPORTED = 10;
     static final int EXPORTED = 100;
-
     @Name
     private String orderItemId;
 
     @Column
     private String orderId;
+
 
     @Column
     private String asin;
@@ -106,7 +103,6 @@ public class AmazonOrder extends PrimaryKey {
      * </pre>
      */
 
-
     public edu.olivet.harvester.model.Order toOrder() {
         Order amazonOrder = MWSUtils.buildMwsObject(this.xml, Order.class);
 
@@ -118,12 +114,14 @@ public class AmazonOrder extends PrimaryKey {
         order.status = Status.Initial.value();
         order.order_id = this.orderId;
         order.recipient_name = address.getName();
+
         order.sku_address = salesChanelCountry.baseUrl() + "/dp/" + this.asin;
         order.sku = this.sku;
         order.quantity_purchased = String.valueOf(item.getQuantityOrdered());
 
         //price and shipping fee is unit price
         order.price = NumberUtils.toString(Float.parseFloat(item.getItemPrice().getAmount()) / (float) item.getQuantityOrdered(), 2);
+
         order.shipping_fee = NumberUtils.toString(Float.parseFloat(item.getShippingPrice().getAmount()) / (float) item.getQuantityOrdered(), 2);
 
         if (StringUtils.isBlank(this.isbn)) {
@@ -133,10 +131,11 @@ public class AmazonOrder extends PrimaryKey {
         }
         order.isbn = this.isbn;
 
+
         order.seller = order.seller_id = order.seller_price = StringUtils.EMPTY;
         order.url = StringUtils.EMPTY;
 
-           // 此处是最终找单结果对应Condition，不同于原始Condition
+        // 此处是最终找单结果对应Condition，不同于原始Condition
         // 例：Used物品可能最终会找New的代替，New的物品也可能会寻找Used - Like New甚至Used - Good替换
         order.condition = StringUtils.EMPTY;
 
@@ -174,7 +173,6 @@ public class AmazonOrder extends PrimaryKey {
 
         return order;
     }
-
 
     @Override
     public String getPK() {

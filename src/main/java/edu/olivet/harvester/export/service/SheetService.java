@@ -33,7 +33,9 @@ public class SheetService extends SheetAPI {
     private OrderItemTypeHelper orderItemTypeHelper;
     @Inject
     Now now;
+
     @Inject AppScript appScript;
+
 
 
     public void fillOrders(Country country, List<Order> orders, MessagePanel messagePanel) {
@@ -90,6 +92,7 @@ public class SheetService extends SheetAPI {
             return;
         }
 
+
         if (repeatTime >= Constants.MAX_REPEAT_TIMES) {
             return;
         }
@@ -108,13 +111,13 @@ public class SheetService extends SheetAPI {
             currentOrders = new ArrayList<>();
         }
         int lastRow = CollectionUtils.isEmpty(currentOrders) ? 2 : orders.stream().mapToInt(Order::getRow).max().getAsInt();
-
         List<List<Object>> values = convertOrdersToRangeValues(orders, spreadsheetId, sheetName);
 
         try {
             this.spreadsheetValuesAppend(spreadsheetId, sheetName, new ValueRange().setValues(values));
         } catch (BusinessException e) {
             throw new BusinessException(e);
+
         } finally {
             unlockSheet(spreadsheetId, protectedId);
         }
@@ -122,6 +125,7 @@ public class SheetService extends SheetAPI {
         List<Order> missedOrders = checkMissedOrders(orders, lastRow, spreadsheetId, sheetProperties);
         if (CollectionUtils.isNotEmpty(missedOrders)) {
             fillOrders(spreadsheetId, missedOrders, repeatTime + 1);
+
         }
     }
 
@@ -183,6 +187,7 @@ public class SheetService extends SheetAPI {
         return missedOrders;
     }
 
+
     private static final Map<String, Field> ORDER_FIELDS_CACHE = new HashMap<>();
 
     public List<List<Object>> convertOrdersToRangeValues(List<Order> orders, String destSpreadId, String sheetName) {
@@ -197,6 +202,7 @@ public class SheetService extends SheetAPI {
                     Field filed = ORDER_FIELDS_CACHE.computeIfAbsent(fieldName, s -> {
                         try {
                             return Order.class.getDeclaredField(s);
+
                         } catch (Exception e) {
                             return null;
                         }
@@ -204,6 +210,7 @@ public class SheetService extends SheetAPI {
 
                     try {
                         row[index] = filed.get(order);
+
                     } catch (Exception e) {
                         row[index] = StringUtils.EMPTY;
                     }
@@ -218,6 +225,7 @@ public class SheetService extends SheetAPI {
 
         return values;
     }
+
 
 
     public SheetProperties createOrGetOrderSheet(String spreadsheetId, Date date) {

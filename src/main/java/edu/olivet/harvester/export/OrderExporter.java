@@ -47,17 +47,18 @@ public class OrderExporter {
     private MessagePanel messagePanel = new VirtualMessagePanel();
 
 
+
     /**
      * triggered by cronjob
      */
     public void execute() {
         //this method is for cronjob, keep silent.
         setMessagePanel(new ProgressDetail(Actions.ExportOrders));
-
         //list all marketplaces
         Settings settings = Settings.load();
         List<Country> marketplaces = settings.listAllCountries();
         if (CollectionUtils.isEmpty(marketplaces)) {
+
             messagePanel.displayMsg("No marketplace found. please check if you have correct settings.", LOGGER, InformationLevel.Negative);
             return;
         }
@@ -87,8 +88,8 @@ public class OrderExporter {
         }
     }
 
-    public void exportOrdersForMarketplace(Country country, Date fromDate, Date toDate) {
 
+    public void exportOrdersForMarketplace(Country country, Date fromDate, Date toDate) {
         messagePanel.wrapLineMsg("Exporting orders from " + country + "...");
         List<String> spreadsheetIds = Settings.load().getConfigByCountry(country).listSpreadsheetIds();
         if (CollectionUtils.isEmpty(spreadsheetIds)) {
@@ -146,7 +147,6 @@ public class OrderExporter {
         }
 
         exportStatService.updateStat(country, toDate, orders.size());
-
     }
 
     public void setMessagePanel(MessagePanel messagePanel) {
