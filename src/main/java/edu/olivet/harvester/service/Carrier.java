@@ -32,6 +32,11 @@ public class Carrier {
             return "Other,DHL eCommerce";
         }
 
+        if (country == Country.AU) {
+            return "Other,DHL eCommerce";
+        }
+
+
         //EU book: Royal Mail
         if (country.europe() && orderItemType == OrderEnums.OrderItemType.BOOK) {
             return "Royal Mail";
