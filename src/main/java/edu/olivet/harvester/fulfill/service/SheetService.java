@@ -194,9 +194,14 @@ public class SheetService extends SheetAPI {
             List<Order> os = orderMap.get(order.order_id);
 
             for (Order o : os) {
-                if (o.equalsLite(order) && StringUtils.equalsAnyIgnoreCase(o.remark, order.remark, order.originalRemark)) {
-                    o.setContext(order.getContext());
-                    reloadedOrders.add(o);
+                if (o.equalsLite(order)) {
+                    if (StringUtils.equalsAnyIgnoreCase(o.remark, order.remark, order.originalRemark)) {
+                        o.setContext(order.getContext());
+                        reloadedOrders.add(o);
+                    } else if (o.row == order.row || StringUtils.isBlank(order.remark)) {
+                        o.setContext(order.getContext());
+                        reloadedOrders.add(o);
+                    }
                 }
             }
 
@@ -221,10 +226,16 @@ public class SheetService extends SheetAPI {
             return o;
         }
         for (Order o : orders) {
-            if (StringUtils.equalsAnyIgnoreCase(o.remark, order.remark, order.originalRemark)) {
-                o.setContext(order.getContext());
-                return o;
+            if (o.equalsLite(order)) {
+                if (StringUtils.equalsAnyIgnoreCase(o.remark, order.remark, order.originalRemark)) {
+                    o.setContext(order.getContext());
+                    return o;
+                } else if (o.row == order.row || StringUtils.isBlank(order.remark)) {
+                    o.setContext(order.getContext());
+                    return o;
+                }
             }
+
         }
 
         throw new BusinessException("Cant find order " + order + "on order sheet");
