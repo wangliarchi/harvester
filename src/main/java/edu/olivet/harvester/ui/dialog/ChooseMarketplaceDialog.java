@@ -11,6 +11,8 @@ import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.export.model.OrderExportParams;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Getter;
+import org.apache.commons.lang3.time.DateUtils;
+
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
@@ -215,12 +217,26 @@ public class ChooseMarketplaceDialog extends BaseDialog {
         Instant instant = fromTime.atDate(LocalDate.of(fromDate.getYear(), fromDate.getMonth(), fromDate.getDayOfMonth()))
                 .atZone(ZoneId.systemDefault()).toInstant();
         Date from = Date.from(instant);
-        orderExportParams.setFromDate(from);
 
+        if(from.after(DateUtils.addMinutes(new Date(),-5))) {
+            UITools.error("From time should be at least 5 minutes before current time");
+            return;
+        }
 
         Instant toInstant = toTime.atDate(LocalDate.of(toDate.getYear(), toDate.getMonth(), toDate.getDayOfMonth()))
                 .atZone(ZoneId.systemDefault()).toInstant();
         Date to = Date.from(toInstant);
+
+        if(to.after(DateUtils.addMinutes(new Date(),-5))) {
+            UITools.error("To time should be at least 5 minutes before current time");
+            return;
+        }
+
+        if(from.after(to)) {
+            UITools.error("From time should be before to time.");
+            return;
+        }
+        orderExportParams.setFromDate(from);
         orderExportParams.setToDate(to);
 
 
