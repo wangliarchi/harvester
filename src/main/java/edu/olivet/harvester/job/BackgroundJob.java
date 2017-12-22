@@ -18,7 +18,7 @@ public enum BackgroundJob {
      */
     ShipmentConfirmation("0 30 16 ? * MON,TUE,WED,THU,FRI,SAT *", ShipmentConfirmationJob.class),
 
-    OrderExporting("0 30 7 ? * MON,TUE,WED,THU,FRI,SAT *", OrderExportingJob.class),
+    //OrderExporting("0 30 7 ? * MON,TUE,WED,THU,FRI,SAT *", OrderExportingJob.class),
     /**
      * check unshipped orders, and send notification to account owner
      * run all weekdays and Saturnday. random time between 17:00-18:00pm
@@ -55,12 +55,12 @@ public enum BackgroundJob {
             return String.format("%d %d %d ? * MON,TUE,WED,THU,FRI,SAT *", scheduledTime.getSecond(), scheduledTime.getMinute(), scheduledTime.getHour());
         }
 
-        if (this == OrderExporting) {
-            LocalTime orderExportTime = systemSettings.getOrderExportTime();
-            int allowedRange = systemSettings.getOrderExportAllowedRange();
-            LocalTime scheduledTime = DatetimeHelper.randomTimeBetween(orderExportTime, allowedRange);
-            return String.format("%d %d %d ? * MON,TUE,WED,THU,FRI,SAT *", scheduledTime.getSecond(), scheduledTime.getMinute(), scheduledTime.getHour());
-        }
+//        if (this == OrderExporting) {
+//            LocalTime orderExportTime = systemSettings.getOrderExportTime();
+//            int allowedRange = systemSettings.getOrderExportAllowedRange();
+//            LocalTime scheduledTime = DatetimeHelper.randomTimeBetween(orderExportTime, allowedRange);
+//            return String.format("%d %d %d ? * MON,TUE,WED,THU,FRI,SAT *", scheduledTime.getSecond(), scheduledTime.getMinute(), scheduledTime.getHour());
+//        }
 
         return this.cron;
     }
