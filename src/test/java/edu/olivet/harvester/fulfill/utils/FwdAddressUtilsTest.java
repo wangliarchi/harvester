@@ -32,6 +32,18 @@ public class FwdAddressUtilsTest extends BaseTest {
     }
 
     @Test
+    public void testGetUsFwdProductRecipient() throws Exception {
+        order = prepareOrder();
+        order.setType(OrderEnums.OrderItemType.PRODUCT);
+        order.setContext("704CA");
+        order.remark = "US FWD";
+        order.ship_country = "United Kingdom";
+        order.url = "Blaise/11/10/704CA001";
+        order.sheetName = "11/10";
+        assertEquals(FwdAddressUtils.usFwdProductRecipient(order),"BlaiseUK/11/10/704CA001");
+    }
+
+    @Test
     public void testGetLastFWDIndex() throws Exception {
         String spreadsheetId = "1Xmjr6XC2nGFoqeK_Zf_u9BCP2cnMTo0cZGugFNH07OE";
         String sheetName = "11/28";

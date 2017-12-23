@@ -1,7 +1,9 @@
 package edu.olivet.harvester.fulfill.utils;
 
 import com.mchange.lang.IntegerUtils;
+import com.sun.org.apache.xpath.internal.operations.Or;
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums.OrderItemType;
@@ -67,17 +69,43 @@ public class FwdAddressUtils {
 
     public static String usFwdProductRecipient(Order order) {
         //Ammy/12/04/701CA003
-        String prefix = String.format("%s/%s/%s", RuntimeSettings.load().getFinderCode(), order.sheetName, order.getContext());
-        if (StringUtils.isNotBlank(order.url) && order.url.contains(order.sheetName)) {
-            return order.url;
+        String url;
+        if (StringUtils.isNotBlank(order.url) && order.url.contains(order.sheetName) && order.url.contains(order.getContext())) {
+            url = order.url;
+        } else {
+            url = generateUrl(order);
         }
 
+        order.url = url;
+        appendCountryCodeToUrl(order);
+
+        return order.url;
+
+    }
+
+    public static void appendCountryCodeToUrl(Order order) {
+        String countryCode = CountryStateUtils.getInstance().getCountryCode(order.ship_country);
+        if (StringUtils.isBlank(countryCode)) {
+            return;
+        }
+
+        if ("GB".equals(countryCode)) {
+            countryCode = "UK";
+        }
+
+        String urlWithCountryCode = String.format("%s/%s", countryCode, order.sheetName);
+        if (Strings.containsAnyIgnoreCase(order.url, urlWithCountryCode)) {
+            return;
+        }
+
+        order.url = order.url.replace("/" + order.sheetName, urlWithCountryCode);
+    }
+
+    public static String generateUrl(Order order) {
         int lastIndex = getLastFWDIndex(order);
-        String code = prefix + String.format("%03d", lastIndex + 1);
+        String prefix = String.format("%s/%s/%s", RuntimeSettings.load().getFinderCode(), order.sheetName, order.getContext());
 
-        order.url = code;
-
-        return code;
+        return prefix + String.format("%03d", lastIndex + 1);
     }
 
 }
