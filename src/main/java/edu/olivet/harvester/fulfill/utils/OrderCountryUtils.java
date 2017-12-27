@@ -32,8 +32,12 @@ public class OrderCountryUtils {
             if (StringUtils.isNotBlank(order.spreadsheetId)) {
                 return Settings.load().getSpreadsheetCountry(order.spreadsheetId);
             }
-
-            return Country.fromCode(RuntimeSettings.load().getMarketplaceName());
+            try {
+                return Country.fromCode(RuntimeSettings.load().getMarketplaceName());
+            }catch (Exception e1) {
+                //
+                return null;
+            }
         }
     }
 

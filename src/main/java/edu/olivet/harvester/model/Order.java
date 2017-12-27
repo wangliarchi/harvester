@@ -493,7 +493,11 @@ public class Order implements Keyable {
         }
 
         if (type == null) {
-            type = RuntimeSettings.load().getCurrentType();
+            try {
+                type = RuntimeSettings.load().getCurrentType();
+            }catch (Exception e) {
+                //
+            }
         }
 
         return type;
