@@ -2,7 +2,6 @@ package edu.olivet.harvester.utils.common;
 
 import java.text.DecimalFormat;
 import java.time.LocalTime;
-import java.time.temporal.TemporalField;
 import java.util.Random;
 
 import static java.time.temporal.ChronoField.SECOND_OF_DAY;

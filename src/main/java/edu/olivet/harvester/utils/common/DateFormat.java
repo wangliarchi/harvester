@@ -20,6 +20,7 @@ public enum DateFormat {
     DATE_TIME_AS_FILENAME("yyyyMMdd_HHmmss"),
     /** 最终Confirm文件的ship-date列格式，形如:2014-10-8 */
     SHIP_DATE("yyyy-M-d"),
+    FULL_DATE("yyyy-MM-dd"),
     /** 仅包含年的日期格式 */
     YEAR("yyyy"),
     /** 仅包含月日的日期格式 */
