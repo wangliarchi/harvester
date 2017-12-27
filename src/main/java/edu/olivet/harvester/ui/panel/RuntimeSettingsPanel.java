@@ -157,6 +157,7 @@ public class RuntimeSettingsPanel extends JPanel implements RuntimePanelObserver
         noInvoiceTextField.setEnabled(false);
         finderCodeTextField.setEnabled(false);
         skipCheckComboBox.setEnabled(false);
+        todayBudgetTextField.setEnabled(false);
     }
 
     public void setAccounts4Country() {

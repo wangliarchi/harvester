@@ -134,6 +134,8 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
 
         //loadBudget();
         settings.save();
+
+        todayBudgetTextField.setEnabled(false);
     }
 
     @Override
@@ -154,7 +156,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
             todayUsedTextField.setText(budgets.get("cost").toString());
         }
 
-        todayBudgetTextField.setEnabled(false);
+
     }
 
     public void initEvents() {
