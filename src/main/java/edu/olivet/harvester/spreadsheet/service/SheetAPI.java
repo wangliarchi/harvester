@@ -98,7 +98,6 @@ public class SheetAPI {
         }
     }
 
-
     @Repeat(expectedExceptions = BusinessException.class)
     public BatchUpdateSpreadsheetResponse batchUpdate(String spreadsheetId, BatchUpdateSpreadsheetRequest request) {
         try {
@@ -201,7 +200,7 @@ public class SheetAPI {
                 new BatchUpdateSpreadsheetRequest().setRequests(requests);
 
         try {
-            this.batchUpdate(spreadsheetId, body);
+            BatchUpdateSpreadsheetResponse response = this.batchUpdate(spreadsheetId, body);
         } catch (BusinessException e) {
             LOGGER.error("Fail to rename sheet and move to first for {} {}. Try to delete the sheet - {}", sheetProperties.getTitle(), spreadsheetId, e);
             deleteSheet(sheetProperties.getSheetId(), spreadsheetId);
@@ -220,7 +219,7 @@ public class SheetAPI {
                 new BatchUpdateSpreadsheetRequest().setRequests(requests);
 
         try {
-            this.batchUpdate(spreadsheetId, body);
+            BatchUpdateSpreadsheetResponse response = this.batchUpdate(spreadsheetId, body);
         } catch (BusinessException e) {
             LOGGER.error("Fail to delete sheet {} {} - {}", sheetId, spreadsheetId, e);
             throw new BusinessException(e);
@@ -242,7 +241,7 @@ public class SheetAPI {
                 new BatchUpdateSpreadsheetRequest().setRequests(requests);
 
         try {
-            this.batchUpdate(spreadsheetId, body);
+           BatchUpdateSpreadsheetResponse response = this.batchUpdate(spreadsheetId, body);
         } catch (BusinessException e) {
             LOGGER.error("Fail to delete row {} from sheet {} {} - {}", row, sheetId, spreadsheetId, e);
             throw new BusinessException(e);
@@ -282,8 +281,7 @@ public class SheetAPI {
                 new BatchUpdateSpreadsheetRequest().setRequests(requests);
 
         try {
-            this.batchUpdate(spreadsheetId, body);
-
+            BatchUpdateSpreadsheetResponse response = this.batchUpdate(spreadsheetId, body);
         } catch (BusinessException e) {
             LOGGER.error("Fail to unlock sheet {} {} - {}", protecttedRangeId, spreadsheetId, e);
             throw new BusinessException(e);
