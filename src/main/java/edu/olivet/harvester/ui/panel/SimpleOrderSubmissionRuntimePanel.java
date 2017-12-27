@@ -132,7 +132,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
             skipCheckComboBox.setSelectedItem(settings.getSkipValidation());
         }
 
-        loadBudget();
+        //loadBudget();
         settings.save();
     }
 

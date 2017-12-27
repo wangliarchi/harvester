@@ -101,7 +101,7 @@ public class RuntimeSettingsPanel extends JPanel implements RuntimePanelObserver
         skipCheckComboBox.setModel(new DefaultComboBoxModel<>(OrderValidator.SkipValidation.values()));
         skipCheckComboBox.setSelectedItem(settings.getSkipValidation());
 
-        loadBudget();
+        //loadBudget();
 
         disableAllBtns();
     }
@@ -117,16 +117,6 @@ public class RuntimeSettingsPanel extends JPanel implements RuntimePanelObserver
     }
 
 
-    public void loadBudget() {
-        if (StringUtils.isNotBlank(settings.getSpreadsheetId())) {
-            Map<String, Float> budgets = ApplicationContext.getBean(DailyBudgetHelper.class)
-                    .getData(settings.getSpreadsheetId(), new Date());
-            todayBudgetTextField.setText(budgets.get("budget").toString());
-            todayUsedTextField.setText(budgets.get("cost").toString());
-        }
-
-        todayBudgetTextField.setEnabled(false);
-    }
 
     public void initEvents() {
 
