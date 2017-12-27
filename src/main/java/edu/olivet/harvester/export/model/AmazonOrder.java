@@ -8,10 +8,10 @@ import edu.olivet.foundations.amazon.MWSUtils;
 import edu.olivet.foundations.db.PrimaryKey;
 import edu.olivet.harvester.fulfill.utils.ConditionUtils;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
-import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.model.OrderEnums.OrderColumn;
 import edu.olivet.harvester.model.OrderEnums.Status;
 import edu.olivet.harvester.utils.ServiceUtils;
+import edu.olivet.harvester.utils.common.DateFormat;
 import edu.olivet.harvester.utils.common.NumberUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -127,7 +127,8 @@ public class AmazonOrder extends PrimaryKey {
         if (StringUtils.isBlank(this.isbn)) {
             order.isbn_address = this.isbn;
         } else {
-            order.isbn_address = salesChanelCountry.baseUrl() + "/dp/" + this.isbn;
+            //统一用amazon.com的地址，找单的时候 可以换成实际做单国家的地址
+            order.isbn_address = "https://www.amazon.com/dp/" + this.isbn;
         }
         order.isbn = this.isbn;
 
@@ -159,10 +160,10 @@ public class AmazonOrder extends PrimaryKey {
         order.original_condition = condition;
         order.shipping_service = amazonOrder.getShipmentServiceLevelCategory();
 
-        FastDateFormat ORDER_DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd_HH:mm:ss",
-                ServiceUtils.getTimeZone(OrderCountryUtils.getMarketplaceCountry(order)));
-        FastDateFormat SHIP_DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd",
-                ServiceUtils.getTimeZone(OrderCountryUtils.getMarketplaceCountry(order)));
+        FastDateFormat ORDER_DATE_FORMAT = FastDateFormat.getInstance(DateFormat.DATE_TIME_STR.pattern(),
+                ServiceUtils.getTimeZone(salesChanelCountry));
+        FastDateFormat SHIP_DATE_FORMAT = FastDateFormat.getInstance(DateFormat.FULL_DATE.pattern(),
+                ServiceUtils.getTimeZone(salesChanelCountry));
         order.expected_ship_date =
                 SHIP_DATE_FORMAT.format(amazonOrder.getEarliestShipDate().toGregorianCalendar().getTime()) + " " +
                         SHIP_DATE_FORMAT.format(amazonOrder.getLatestShipDate().toGregorianCalendar().getTime());
