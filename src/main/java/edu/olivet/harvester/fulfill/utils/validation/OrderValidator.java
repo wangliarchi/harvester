@@ -15,11 +15,11 @@ import edu.olivet.harvester.fulfill.model.FulfillmentEnum;
 import edu.olivet.harvester.fulfill.model.OrderFulfillmentRecord;
 import edu.olivet.harvester.fulfill.model.Seller;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
+import edu.olivet.harvester.fulfill.service.AmazonOrderService;
 import edu.olivet.harvester.fulfill.service.DailyBudgetHelper;
 import edu.olivet.harvester.fulfill.service.ForbiddenSeller;
 import edu.olivet.harvester.fulfill.service.SheetService;
 import edu.olivet.harvester.fulfill.utils.*;
-import edu.olivet.harvester.model.CreditCard;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.model.Remark;
@@ -386,6 +386,7 @@ public class OrderValidator {
 
     }
 
+    @Inject AmazonOrderService amazonOrderService;
 
     /**
      * 判定当前订单的地址信息是否有效：收件人地址至少需要有一个，目的地国家必须明确声明
@@ -398,6 +399,33 @@ public class OrderValidator {
         if (!result) {
             return "Order address is not valid, please check.";
         }
+
+        if (order.addressChanged()) {
+            return "";
+        }
+
+        try {
+            Order reloadedOrder = amazonOrderService.reloadOrder(order);
+            if (reloadedOrder != null) {
+
+                if (!StringUtils.equalsAnyIgnoreCase(order.recipient_name, reloadedOrder.recipient_name)) {
+                    return "Order recipient name is not the same from amazon. please check in seller center";
+                }
+
+                if (!StringUtils.equalsAnyIgnoreCase(order.ship_address_1, reloadedOrder.ship_address_1, reloadedOrder.ship_address_2) ||
+                        !StringUtils.equalsAnyIgnoreCase(order.ship_address_2, reloadedOrder.ship_address_1, reloadedOrder.ship_address_2)) {
+                    return "Order shipping address is not the same from amazon. please check in seller center";
+                }
+                if (!StringUtils.equalsAnyIgnoreCase(order.ship_country, reloadedOrder.ship_country)) {
+                    return "Order shipping country is not the same from amazon. please check in seller center";
+                }
+                if (!StringUtils.equalsAnyIgnoreCase(order.ship_state, reloadedOrder.ship_state)) {
+                    return "Order shipping state is the same from amazon. please check in seller center";
+                }
+            }
+        } catch (Exception e) {
+            //ignore
+        }
         return "";
     }
 
@@ -407,6 +435,12 @@ public class OrderValidator {
     public String itemInfoValid(Order order) {
         boolean result = StringUtils.isNotBlank(order.isbn) && StringUtils.isNotBlank(order.item_name) &&
                 StringUtils.isNotBlank(order.quantity_purchased) && StringUtils.isNotBlank(order.shipping_fee);
+
+        try {
+            order.latestEdd();
+        } catch (Exception e) {
+            return "Order edd field is not valid, please check Estimated Delivery Date column. It should be column AM on google sheet.";
+        }
 
         if (!result) {
             return "Order information is not valid, please check ISBN, item name, quantity purchased and shipping fee columns.";
@@ -524,6 +558,7 @@ public class OrderValidator {
 
     @Inject
     SheetService sheetService;
+
     //todo need more careful check!!!
     public String notDuplicatedOrder(Order order) {
         List<OrderFulfillmentRecord> list = dbManager.query(OrderFulfillmentRecord.class,
