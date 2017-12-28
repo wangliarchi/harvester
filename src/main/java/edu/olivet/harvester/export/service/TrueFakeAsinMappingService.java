@@ -3,7 +3,9 @@ package edu.olivet.harvester.export.service;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.foundations.utils.Strings;
+import edu.olivet.harvester.service.ElasticSearchService;
 import edu.olivet.harvester.utils.common.HttpUtils;
+import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -14,9 +16,11 @@ public class TrueFakeAsinMappingService {
 
 
     public static String getISBN(String sku, String asin) {
-
-
-        String isbn = HttpUtils.getText(String.format(SERVICE_URL, asin));
+        //String isbn = HttpUtils.getText(String.format(SERVICE_URL, asin));
+        String isbn = ElasticSearchService.searchISBN(asin);
+        if (StringUtils.isBlank(isbn)) {
+            isbn = HttpUtils.getText(String.format(SERVICE_URL, asin));
+        }
         if (RegexUtils.Regex.ASIN.isMatched(isbn)) {
             return isbn;
         } else if (Strings.containsAnyIgnoreCase(sku, "ZD", "zendian")) {

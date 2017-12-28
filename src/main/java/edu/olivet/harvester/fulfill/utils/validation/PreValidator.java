@@ -35,6 +35,7 @@ public class PreValidator {
         //getTitleFromCache
         ISBNUtils.initCache();
         ItemValidator itemValidator = ApplicationContext.getBean(ItemValidator.class);
+
         orders.forEach(order -> {
             String title = ISBNUtils.getTitleFromCache(OrderCountryUtils.getFulfillmentCountry(order), order.isbn);
             if (StringUtils.isNotBlank(title)) {

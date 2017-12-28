@@ -220,11 +220,22 @@ public class SheetService extends SheetAPI {
             throw new BusinessException("Cant find order " + order + "on order sheet");
         }
 
-        if(orders.size() == 1) {
+        if (orders.size() == 1) {
             Order o = orders.get(0);
             o.setContext(order.getContext());
             return o;
         }
+
+
+        for (Order o : orders) {
+            if (o.equalsLite(order)) {
+                if (o.row == order.row && StringUtils.equalsAnyIgnoreCase(o.remark, order.remark, order.originalRemark)) {
+                    return o;
+                }
+
+            }
+        }
+
         for (Order o : orders) {
             if (o.equalsLite(order)) {
                 if (StringUtils.equalsAnyIgnoreCase(o.remark, order.remark, order.originalRemark)) {

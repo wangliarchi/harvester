@@ -20,9 +20,6 @@ public class PreValidatorTest extends BaseTest {
 
         final String SPREADSHEET_ID = "1t1iEDNrokcqjE7cTEuYW07Egm6By2CNsMuog9TK1LhI";
         List<Order> orders = appScript.readOrders(SPREADSHEET_ID, "11/28");
-
-        String json = JSON.toJSONString(orders);
-        List<Order> os = JSON.parseArray(json, Order.class);
         long start = System.currentTimeMillis();
         List<ItemCompareResult> results = PreValidator.compareItemNames4Orders(orders);
         String summary = "Checked " + orders.size() + " items, took " + Strings.formatElapsedTime(start);

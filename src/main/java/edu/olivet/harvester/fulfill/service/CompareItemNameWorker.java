@@ -1,6 +1,7 @@
 package edu.olivet.harvester.fulfill.service;
 
 import com.ECS.client.jax.Item;
+import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Constants;
@@ -11,6 +12,7 @@ import edu.olivet.harvester.fulfill.utils.validation.ItemValidator;
 import edu.olivet.harvester.logger.ISBNLogger;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.service.AmazonProductApi;
+import edu.olivet.harvester.service.ElasticSearchService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +21,7 @@ import javax.swing.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -33,8 +36,11 @@ public class CompareItemNameWorker extends SwingWorker<List<ItemCompareResult>, 
         this.orders = orders;
     }
 
+
+
     @Override
     protected List<ItemCompareResult> doInBackground() throws Exception {
+        ElasticSearchService elasticSearchService = ApplicationContext.getBean(ElasticSearchService.class);
         Thread.currentThread().setName("CompareItemName");
 
         List<ItemCompareResult> results = new ArrayList<>(orders.size());
@@ -42,15 +48,24 @@ public class CompareItemNameWorker extends SwingWorker<List<ItemCompareResult>, 
 
         List<String> asins = orders.stream().map(it -> it.isbn).collect(Collectors.toList());
 
+        //check from elasticsearch service first
+        Map<String, String> asinTitles = elasticSearchService.searchTitle(asins);
+        asins.removeIf(it -> asinTitles.containsKey(it));
         HashMap<String, Item> items = AmazonProductApi.getInstance().itemLookup(asins);
 
         for (Order order : orders) {
-            if (!items.containsKey(order.isbn)) {
-                continue;
+            String title = "";
+            if (asinTitles.containsKey(order.isbn)) {
+                title = asinTitles.get(order.isbn);
+            } else if (items.containsKey(order.isbn)) {
+                title = items.get(order.isbn).getItemAttributes().getTitle();
+                String brand = items.get(order.isbn).getItemAttributes().getBrand();
+                elasticSearchService.addProductIndex(order.isbn, title, brand, Country.US);
             }
-            String title = items.get(order.isbn).getItemAttributes().getTitle();
+
             if (StringUtils.isBlank(title)) {
                 title = ISBNUtils.getTitle(OrderCountryUtils.getFulfillmentCountry(order), order.isbn);
+                elasticSearchService.addProductIndex(order.isbn, title, "", Country.US);
             }
 
             if (StringUtils.isBlank(title)) {
