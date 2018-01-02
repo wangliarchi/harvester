@@ -1,9 +1,13 @@
 package edu.olivet.harvester.fulfill.service;
 
 import com.google.inject.Inject;
+import com.sun.org.apache.xpath.internal.operations.Or;
 import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.spreadsheet.service.AppScript;
 import org.testng.annotations.Test;
+
+import java.util.List;
 
 import static org.testng.Assert.assertEquals;
 
@@ -14,6 +18,8 @@ import static org.testng.Assert.assertEquals;
 public class SheetServiceTest extends BaseTest {
 
     @Inject SheetService sheetService;
+    @Inject AppScript appScript;
+
     @Test
     public void testLocateOrder() throws Exception {
         Order order = prepareOrder();
@@ -30,9 +36,18 @@ public class SheetServiceTest extends BaseTest {
         order.condition = "Used - Good";
         order.character = "pt";
 
-        assertEquals(sheetService.locateOrder(order),11);
+        assertEquals(sheetService.locateOrder(order), 11);
 
 
     }
+
+    @Test
+    public void testLocateOrders() throws Exception {
+        List<Order> orders = appScript.readOrders("1t1iEDNrokcqjE7cTEuYW07Egm6By2CNsMuog9TK1LhI", "test");
+        for (Order order : orders) {
+            assertEquals(order.row, sheetService.reloadOrder(order).row);
+        }
+    }
+    //
 
 }

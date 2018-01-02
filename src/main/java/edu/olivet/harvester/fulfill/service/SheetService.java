@@ -11,6 +11,7 @@ import edu.olivet.harvester.model.OrderEnums.OrderColor;
 import edu.olivet.harvester.model.Remark;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
+import edu.olivet.harvester.utils.common.RandomUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -114,10 +115,15 @@ public class SheetService extends SheetAPI {
         for (Order order : orders) {
             //update status cell
             String status = OrderStatusUtils.determineStatus(order);
+            String randCode = RandomUtils.randomAlphaNumeric(8);
+            order.last_code = randCode;
             statusToUpdate.put(order.row, status);
             ValueRange rowData = new ValueRange().setValues(Collections.singletonList(Collections.singletonList(status)))
                     .setRange(order.getSheetName() + "!A" + order.row);
+            ValueRange codeRowData = new ValueRange().setValues(Collections.singletonList(Collections.singletonList(randCode)))
+                    .setRange(order.getSheetName() + "!AF" + order.row);
             dateToUpdate.add(rowData);
+            dateToUpdate.add(codeRowData);
         }
 
 
@@ -215,6 +221,7 @@ public class SheetService extends SheetAPI {
     public Order reloadOrder(Order order) {
         //id, sku, seller, price, remark
         List<Order> orders = appScript.readOrders(order.spreadsheetId, order.sheetName);
+
         orders.removeIf(it -> !it.equalsLite(order));
         if (CollectionUtils.isEmpty(orders)) {
             throw new BusinessException("Cant find order " + order + "on order sheet");
@@ -229,7 +236,12 @@ public class SheetService extends SheetAPI {
 
         for (Order o : orders) {
             if (o.equalsLite(order)) {
+                if (StringUtils.length(order.last_code) == 8 && StringUtils.equalsIgnoreCase(order.last_code, o.last_code)) {
+                    o.setContext(order.getContext());
+                    return o;
+                }
                 if (o.row == order.row && StringUtils.equalsAnyIgnoreCase(o.remark, order.remark, order.originalRemark)) {
+                    o.setContext(order.getContext());
                     return o;
                 }
 

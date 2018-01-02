@@ -12,6 +12,8 @@ import org.testng.annotations.Test;
 import java.util.Date;
 import java.util.List;
 
+import static org.testng.Assert.assertEquals;
+
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/19/17 8:45 PM
@@ -39,7 +41,12 @@ public class SheetServiceTest extends BaseTest {
         sheetService.fillOrders(spreadsheetId, orders);
     }
 
+    //
+    @Test
+    public void testGetLastRow() throws Exception {
 
+        assertEquals(sheetService.getLastRow(spreadsheetId,"11/29"),106);
+    }
     @Test
     public void testCreateOrGetOrderSheet() throws Exception {
         now.set(Dates.parseDate("11/30/2017"));

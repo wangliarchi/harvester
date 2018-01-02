@@ -37,7 +37,6 @@ public class SheetService extends SheetAPI {
     @Inject AppScript appScript;
 
 
-
     public void fillOrders(Country country, List<Order> orders, MessagePanel messagePanel) {
         List<String> spreadsheetIds = Settings.load().getConfigByCountry(country).listSpreadsheetIds();
 
@@ -103,21 +102,12 @@ public class SheetService extends SheetAPI {
 
         //lock sheet
         int protectedId = lockSheet(spreadsheetId, sheetProperties.getSheetId(), "Order exporting process is running.");
-        //read current orders
-        List<Order> currentOrders;
+        int lastRow = getLastRow(spreadsheetId, sheetName);
         try {
-            currentOrders = appScript.readOrders(spreadsheetId, sheetName);
-        } catch (Exception e) {
-            currentOrders = new ArrayList<>();
-        }
-        int lastRow = CollectionUtils.isEmpty(currentOrders) ? 2 : orders.stream().mapToInt(Order::getRow).max().getAsInt();
-        List<List<Object>> values = convertOrdersToRangeValues(orders, spreadsheetId, sheetName);
-
-        try {
+            List<List<Object>> values = convertOrdersToRangeValues(orders, spreadsheetId, sheetName);
             this.spreadsheetValuesAppend(spreadsheetId, sheetName, new ValueRange().setValues(values));
         } catch (BusinessException e) {
             throw new BusinessException(e);
-
         } finally {
             unlockSheet(spreadsheetId, protectedId);
         }
@@ -125,10 +115,19 @@ public class SheetService extends SheetAPI {
         List<Order> missedOrders = checkMissedOrders(orders, lastRow, spreadsheetId, sheetProperties);
         if (CollectionUtils.isNotEmpty(missedOrders)) {
             fillOrders(spreadsheetId, missedOrders, repeatTime + 1);
-
         }
     }
 
+    public int getLastRow(String spreadsheetId, String sheetName) {
+        //read current orders
+        List<Order> currentOrders;
+        try {
+            currentOrders = appScript.readOrders(spreadsheetId, sheetName);
+        } catch (Exception e) {
+            currentOrders = new ArrayList<>();
+        }
+        return CollectionUtils.isEmpty(currentOrders) ? 2 : currentOrders.stream().mapToInt(Order::getRow).max().getAsInt();
+    }
 
     public List<Order> checkMissedOrders(List<Order> orders, int lastRow, String spreadsheetId, SheetProperties sheetProperties) {
         //read date from order sheet, double check if entered correctly
@@ -169,12 +168,19 @@ public class SheetService extends SheetAPI {
                 orderMap.put(order.order_id, os);
             }
         }
-
         //check and delete rest records in orderMap.
+        deleteBrokenRows(orderMap, spreadsheetId, sheetProperties);
+
+        return missedOrders;
+    }
+
+
+    private void deleteBrokenRows(Map<String, List<Order>> orderMap, String spreadsheetId, SheetProperties sheetProperties) {
+
         orderMap.forEach((k, os) -> {
             if (CollectionUtils.isNotEmpty(os)) {
                 os.forEach(o -> {
-                    LOGGER.info("deleting row {} from {} {}", o.row, spreadsheetId, sheetName);
+                    LOGGER.info("deleting row {} from {} {}", o.row, spreadsheetId, sheetProperties.getTitle());
                     try {
                         deleteRow(spreadsheetId, sheetProperties.getSheetId(), o.row);
                     } catch (Exception e) {
@@ -183,10 +189,7 @@ public class SheetService extends SheetAPI {
                 });
             }
         });
-
-        return missedOrders;
     }
-
 
     private static final Map<String, Field> ORDER_FIELDS_CACHE = new HashMap<>();
 
@@ -227,7 +230,6 @@ public class SheetService extends SheetAPI {
     }
 
 
-
     public SheetProperties createOrGetOrderSheet(String spreadsheetId, Date date) {
         return createNewSheetIfNotExisted(spreadsheetId, SheetUtils.getSheetNameByDate(date), TEMPLATE_SHEET_NAME);
     }
@@ -263,14 +265,4 @@ public class SheetService extends SheetAPI {
         }
     }
 
-    public static void main(String[] args) {
-        SheetService sheetService = ApplicationContext.getBean(SheetService.class);
-        String spreadsheetId = "1t1iEDNrokcqjE7cTEuYW07Egm6By2CNsMuog9TK1LhI";
-        int sheetId = 220481192;
-        sheetService.deleteRow(spreadsheetId,sheetId,4);
-//        sheetService.unlockSheet(spreadsheetId, 1718776808);
-        //int protectedId = sheetService.lockSheet(,220481192,"testing");
-        //1718776808
-        //System.out.println(protectedId);
-    }
 }
