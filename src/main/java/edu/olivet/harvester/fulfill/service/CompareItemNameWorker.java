@@ -1,7 +1,6 @@
 package edu.olivet.harvester.fulfill.service;
 
 import com.ECS.client.jax.Item;
-import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Constants;
@@ -51,6 +50,7 @@ public class CompareItemNameWorker extends SwingWorker<List<ItemCompareResult>, 
         //check from elasticsearch service first
         Map<String, String> asinTitles = elasticSearchService.searchTitle(asins);
         asins.removeIf(it -> asinTitles.containsKey(it));
+
         HashMap<String, Item> items = AmazonProductApi.getInstance().itemLookup(asins);
 
         for (Order order : orders) {

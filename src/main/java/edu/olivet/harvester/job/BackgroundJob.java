@@ -31,7 +31,9 @@ public enum BackgroundJob {
 
     ContextUploadJob("0 0 5,13,21 1/1 * ? *", ContextUploadJob.class),
 
-    LogUpload("0 45 8,18 1/1 * ? *", LogUploader.class);
+    ProductTitleCheck("0 0 3 1/1 * ? *", ProductTitleCheckJob.class),
+
+    LogUpload("0 45 8,18,23 1/1 * ? *", LogUploader.class);
 
 
     private final String cron;

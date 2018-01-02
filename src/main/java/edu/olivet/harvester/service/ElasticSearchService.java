@@ -25,27 +25,29 @@ import java.util.stream.Collectors;
  */
 public class ElasticSearchService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchService.class);
-    private static final String ELASTIC_SEARCH_ADDRESS = "http://35.188.127.209";
-    private static final String PRODUCT_INDEX = "product";
-    private static final String LISTING_MAPPING_INDEX = "listing-mapping";
-    private static final int MAX_ASIN_COUNT_PER_REQUEST = 10;
+    public static final String ELASTIC_SEARCH_ADDRESS = "http://35.188.127.209";
+    public static final String PRODUCT_INDEX = "product";
+    public static final String LISTING_MAPPING_INDEX = "listing-mapping";
+    public static final int MAX_ASIN_COUNT_PER_REQUEST = 50;
 
-    public static String searchISBN(String asin) {
+    public String searchISBN(String asin) {
         Map<String, String> results = searchISBNs(Lists.newArrayList(asin));
-        if(results.isEmpty() || !results.containsKey(asin)) {
+        if (results.isEmpty() || !results.containsKey(asin)) {
             return null;
         }
 
         return results.get(asin);
     }
-    public static Map<String, String> searchISBNs(List<String> asins) {
+
+    public Map<String, String> searchISBNs(List<String> asins) {
         List<List<String>> lists = Lists.partition(asins, MAX_ASIN_COUNT_PER_REQUEST);
         Map<String, String> results = new HashMap<>();
 
         for (List<String> list : lists) {
             Map<String, Object> params = new HashMap<>();
-            params.put("q", "asin:" + StringUtils.join(list.stream().map(it->"\""+StringUtils.strip(it)+"\"").collect(Collectors.toList()), ","));
+            params.put("q", "asin:" + StringUtils.join(list.stream().map(it -> "\"" + StringUtils.strip(it) + "\"").collect(Collectors.toList()), ","));
             params.put("pretty", "true");
+            params.put("size", MAX_ASIN_COUNT_PER_REQUEST);
 
             String json = request(LISTING_MAPPING_INDEX, params);
             JSONObject response = JSON.parseObject(json);
@@ -62,15 +64,17 @@ public class ElasticSearchService {
 
         return results;
     }
-    public static Map<String, String> searchTitle(List<String> asins) {
+
+    public Map<String, String> searchTitle(List<String> asins) {
 
         List<List<String>> lists = Lists.partition(asins, MAX_ASIN_COUNT_PER_REQUEST);
         Map<String, String> results = new HashMap<>();
 
         for (List<String> list : lists) {
             Map<String, Object> params = new HashMap<>();
-            params.put("q", "asin:" + StringUtils.join(list.stream().map(it->"\""+StringUtils.strip(it)+"\"").collect(Collectors.toList()), ","));
+            params.put("q", "asin:" + StringUtils.join(list.stream().map(it -> "\"" + StringUtils.strip(it) + "\"").collect(Collectors.toList()), ","));
             params.put("pretty", "true");
+            params.put("size", MAX_ASIN_COUNT_PER_REQUEST);
 
 
             String json = request(PRODUCT_INDEX, params);
@@ -90,12 +94,12 @@ public class ElasticSearchService {
 
     }
 
-    public static void addProductIndex(String asin, String title, String brand, Country country) {
+    public void addProductIndex(String asin, String title, String brand, Country country) {
         String id = asin + "-" + country.name();
         if (StringUtils.isBlank(title)) {
             return;
         }
-        Map<String, String> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         params.put("asin", asin);
         params.put("title", title);
         if (StringUtils.isNotBlank(brand)) {
@@ -104,7 +108,8 @@ public class ElasticSearchService {
         addIndex(PRODUCT_INDEX, id, params);
     }
 
-    private static String request(String index, Map<String, Object> params) {
+
+    public String request(String index, Map<String, Object> params) {
         String params4Url = params2Url(params);
         String url = ELASTIC_SEARCH_ADDRESS + "/" + index + "/_search" + params4Url;
         try {
@@ -115,8 +120,11 @@ public class ElasticSearchService {
         }
     }
 
-    private static void addIndex(String index, String id, Map<String, String> params) {
-        String url = ELASTIC_SEARCH_ADDRESS + "/" + index + "/index/" + id;
+    public void addIndex(String index, String id, Map<String, Object> params) {
+        String url = ELASTIC_SEARCH_ADDRESS + "/" + index + "/" + index;
+        if (StringUtils.isNotBlank(id)) {
+            url = url + "/" + id;
+        }
         String json = JSON.toJSONString(params);
         try {
             Jsoup.connect(url).requestBody(json).header("Content-Type", "application/json")
@@ -125,10 +133,10 @@ public class ElasticSearchService {
         } catch (IOException e) {
             throw Lang.wrapThrow(e);
         }
-        ;
     }
 
-    private static String params2Url(Map<String, Object> params) {
+
+    private String params2Url(Map<String, Object> params) {
         StringBuilder sb = new StringBuilder();
         if (params != null && !params.isEmpty()) {
             sb.append("?");
@@ -147,7 +155,7 @@ public class ElasticSearchService {
 
     public static void main(String[] args) {
         ElasticSearchService elasticSearchService = ApplicationContext.getBean(ElasticSearchService.class);
-        List<String> asins = Lists.newArrayList("1423221656","158901698X", "1586484230");
+        List<String> asins = Lists.newArrayList("1423221656", "158901698X", "1586484230");
         Map<String, String> results = elasticSearchService.searchTitle(asins);
         System.out.println(results);
         //elasticSearchService.addProductIndex("B00006IJSG", "Bruder - MAN Garbage Truck Orange - 3+", "Bruder Toys", Country.US);

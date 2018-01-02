@@ -47,36 +47,28 @@ public class AmazonProductApi {
         int index = 0, errorCount = 0;
         List<List<String>> lists = Lists.partition(asins, MAX_ASIN_COUNT_PER_REQUEST);
 
-        outer:
+
         for (List<String> list : lists) {
-            if (errorCount >= MAX_ERROR_TOLERANT_TIMES) {
-                LOGGER.warn("Amazon Product API invocation reached error times limit {}!", errorCount);
+            index++;
+            try {
+                long start = System.currentTimeMillis();
+                ItemLookupRequest itemLookupRequest = new ItemLookupRequest();
+                ItemLookup itemLookup = new ItemLookup();
+                itemLookup.setAWSAccessKeyId(AWSProps.INSTANCE.getAccessKeyId());
+                itemLookup.setAssociateTag(AWSProps.INSTANCE.getDefaultAssociateTag());
+                itemLookupRequest.getItemId().addAll(list);
+                itemLookup.getRequest().add(itemLookupRequest);
+                ItemLookupResponse itemLookupResponse = portUS.itemLookup(itemLookup);
+                List<Item> items = itemLookupResponse.getItems().get(0).getItem();
+                items.forEach(item -> {
+                    result.put(item.getASIN(), item);
+                });
+                LOGGER.info("Read {} items in {}.", list.size(), Strings.formatElapsedTime(start));
                 break;
+            } catch (Exception e) {
+                LOGGER.warn("Failed to request in group {}: {}", index, Strings.getExceptionMsg(e));
             }
 
-            index++;
-            for (int j = 0; j < Constants.MAX_REPEAT_TIMES; j++) {
-                try {
-                    long start = System.currentTimeMillis();
-                    ItemLookupRequest itemLookupRequest = new ItemLookupRequest();
-                    ItemLookup itemLookup = new ItemLookup();
-                    itemLookup.setAWSAccessKeyId(AWSProps.INSTANCE.getAccessKeyId());
-                    itemLookup.setAssociateTag(AWSProps.INSTANCE.getDefaultAssociateTag());
-                    itemLookupRequest.getItemId().addAll(list);
-                    itemLookup.getRequest().add(itemLookupRequest);
-                    ItemLookupResponse itemLookupResponse = portUS.itemLookup(itemLookup);
-                    List<Item> items = itemLookupResponse.getItems().get(0).getItem();
-                    items.forEach(item -> {
-                        result.put(item.getASIN(), item);
-                    });
-                    LOGGER.info("Read {} items in {}.", list.size(), Strings.formatElapsedTime(start));
-                    break;
-                } catch (Exception e) {
-                    LOGGER.warn("Failed to request No.{} request in group {}: {}", j + 1, index, Strings.getExceptionMsg(e));
-                    errorCount++;
-                    WaitTime.Long.execute();
-                }
-            }
         }
         return result;
     }
