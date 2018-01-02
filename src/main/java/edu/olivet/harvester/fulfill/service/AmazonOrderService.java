@@ -37,10 +37,10 @@ public class AmazonOrderService {
         }
 
         //load from amazon
-        amazonOrder = loadOrder(order);
-        if (amazonOrder != null) {
-            return amazonOrder.toOrder();
-        }
+        //amazonOrder = loadOrder(order);
+        //if (amazonOrder != null) {
+        //    return amazonOrder.toOrder();
+        //}
 
         throw new BusinessException("Cant load order " + order.order_id + " " + order.sku);
     }

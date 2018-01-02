@@ -145,8 +145,8 @@ public class OrderValidator {
                 Validator.NotGrayOrder,
                 Validator.NotSelfOrder,
                 Validator.IsSupplierHunted,
-                Validator.IsNotUKForward,
-                Validator.StatusIsInitial
+                Validator.IsNotUKForward
+                //Validator.StatusIsInitial
         );
 
     }

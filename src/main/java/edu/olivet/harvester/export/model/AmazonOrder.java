@@ -26,7 +26,7 @@ import java.util.Date;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/18/17 2:46 PM
  */
-@Table(value = "amazon_orders")
+@Table(value = "amazon_orders_new")
 @Data
 @EqualsAndHashCode(callSuper = false)
 

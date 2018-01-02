@@ -124,3 +124,49 @@ CREATE TABLE IF NOT EXISTS amazon_orders (
   PRIMARY KEY (orderItemId)
     ON CONFLICT IGNORE
 );
+
+/* amazon_order_logs */
+CREATE TABLE IF NOT EXISTS amazon_order_logs (
+  orderId      VARCHAR  NOT NULL,
+  orderItemId  VARCHAR  NOT NULL,
+  asin         VARCHAR  NOT NULL,
+  sku          VARCHAR  NOT NULL,
+  orderStatus  VARCHAR  NOT NULL,
+  purchaseDate DATETIME NOT NULL,
+  xml          VARCHAR  NOT NULL,
+  itemXml      VARCHAR  NOT NULL,
+  isbn         VARCHAR  NOT NULL,
+  name         VARCHAR  NOT NULL,
+  email         VARCHAR  NOT NULL,
+  exportStatus INTEGER  NOT NULL,
+  lastUpdate   DATETIME NOT NULL,
+  PRIMARY KEY (orderItemId)
+    ON CONFLICT IGNORE
+);
+INSERT INTO amazon_order_logs (orderId, orderItemId, asin, sku, orderStatus, purchaseDate, xml, itemXml,
+                               isbn, exportStatus, lastUpdate)
+  SELECT *
+  FROM amazon_orders;
+
+/* amazon_orders_new */
+CREATE TABLE IF NOT EXISTS amazon_orders_new (
+  orderId      VARCHAR  NOT NULL,
+  orderItemId  VARCHAR  NOT NULL,
+  asin         VARCHAR  NOT NULL,
+  sku          VARCHAR  NOT NULL,
+  orderStatus  VARCHAR  NOT NULL,
+  purchaseDate DATETIME NOT NULL,
+  xml          VARCHAR  NOT NULL,
+  itemXml      VARCHAR  NOT NULL,
+  isbn         VARCHAR   NULL,
+  name         VARCHAR   NULL,
+  email         VARCHAR   NULL,
+  exportStatus INTEGER   NULL,
+  lastUpdate   DATETIME  NULL,
+  PRIMARY KEY (orderItemId)
+    ON CONFLICT IGNORE
+);
+
+INSERT INTO amazon_order_logs
+  SELECT *
+  FROM amazon_orders;
