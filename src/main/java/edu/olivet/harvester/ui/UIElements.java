@@ -31,6 +31,7 @@ public class UIElements extends AbstractUIContainer {
                 submitOrder,
                 confirmShipment,
                 Menu.Settings,
+                Menu.ToolBox,
                 Menu.Help
         };
     }
@@ -63,6 +64,11 @@ public class UIElements extends AbstractUIContainer {
                 Action.Separator,
                 Actions.OrderConfirmationHistory
         });
+
+        map.put(Menu.ToolBox, new Action[]{
+                Actions.TitleChecker
+        });
+
 
         map.put(Menu.Settings, new Action[]{
                 Action.Settings,

@@ -16,8 +16,8 @@ public class TrueFakeAsinMappingService {
 
 
     public static String getISBN(String sku, String asin) {
-        //String isbn = HttpUtils.getText(String.format(SERVICE_URL, asin));
-        String isbn = ElasticSearchService.searchISBN(asin);
+        ElasticSearchService elasticSearchService = new ElasticSearchService();
+        String isbn = elasticSearchService.searchISBN(asin);
         if (StringUtils.isBlank(isbn)) {
             isbn = HttpUtils.getText(String.format(SERVICE_URL, asin));
         }

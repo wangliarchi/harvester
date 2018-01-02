@@ -47,8 +47,11 @@ public class UIHarvester extends AbstractApplicationUI {
         this.setMinimumSize(new Dimension(800, 600));
         //maximized by default
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-
-        this.setTitle(String.format(APP_TITLE, Settings.load().getSid()));
+        try {
+            this.setTitle(String.format(APP_TITLE, Settings.load().getSid()));
+        } catch (Exception e) {
+            this.setTitle(APP_TITLE);
+        }
         UITools.setIcon(this, "harvester.png");
 
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -137,8 +140,9 @@ public class UIHarvester extends AbstractApplicationUI {
     }
 
     @Inject ListOrderSubmissionTasks listOrderSubmissionTasks;
+
     @UIEvent
-    public void orderSubmissionTasks () {
+    public void orderSubmissionTasks() {
         listOrderSubmissionTasks.execute();
     }
 
@@ -154,7 +158,7 @@ public class UIHarvester extends AbstractApplicationUI {
     @UIEvent
     public void systemSettings() {
         SystemSettingsDialog dialog = UITools.setDialogAttr(new SystemSettingsDialog());
-        if(dialog.isOk()) {
+        if (dialog.isOk()) {
             //
         }
     }
@@ -196,6 +200,13 @@ public class UIHarvester extends AbstractApplicationUI {
     @UIEvent
     public void exportOrders() {
         exportOrderEvent.execute();
+    }
+
+    @Inject TitleCheckerEvent titleCheckerEvent;
+
+    @UIEvent
+    public void titleChecker() {
+        titleCheckerEvent.execute();
     }
 
     @Override

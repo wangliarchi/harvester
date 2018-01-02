@@ -1,10 +1,14 @@
 package edu.olivet.harvester.spreadsheet.model;
 
+import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.foundations.utils.Dates;
+import edu.olivet.foundations.utils.Now;
 import edu.olivet.harvester.utils.ServiceUtils;
 import lombok.Data;
 import lombok.Getter;
+import org.apache.commons.lang3.time.DateUtils;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -23,6 +27,7 @@ public class Worksheet {
     @Getter
     private Spreadsheet spreadsheet;
 
+
     public Worksheet(Spreadsheet spreadsheet, String sheetName) {
         this.spreadsheet = spreadsheet;
         this.sheetName = sheetName;
@@ -31,23 +36,15 @@ public class Worksheet {
     public String getOrderConfirmationDate() {
         //current worksheet date
         DateFormat df = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date now = new Date();
         ZoneId zoneId = ServiceUtils.getTimeZone(spreadsheet.getSpreadsheetCountry()).toZoneId();
-        LocalDate localDate = now.toInstant().atZone(zoneId).toLocalDate();
 
-        Date sheetDate;
-        LocalDate sheetLocalDate;
-        try {
-            sheetDate = df.parse(localDate.getYear() + "/" + this.getSheetName() + " 07:00:00");
-            sheetLocalDate = sheetDate.toInstant().atZone(zoneId).toLocalDate();
-        } catch (ParseException e) {
-            throw new BusinessException("Sheet with name " + this.getSheetName() + " is not valid");
-        }
-
+        Date sheetDateFromName = Dates.parseDateOfGoogleSheet(sheetName);
+        sheetDateFromName = DateUtils.addHours(sheetDateFromName, 7);
+        LocalDate localDate = sheetDateFromName.toInstant().atZone(zoneId).toLocalDate();
 
         DateTimeFormatter feedDf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        return feedDf.format(sheetLocalDate);
+        return feedDf.format(localDate);
 
     }
 
