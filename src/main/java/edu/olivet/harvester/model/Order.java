@@ -361,7 +361,13 @@ public class Order implements Keyable {
 
     @JSONField(serialize = false)
     public Date latestEdd() {
-        String estimatedDeliveryDateString = StringUtils.split(estimated_delivery_date, " ")[1];
+        String estimatedDeliveryDateString;
+        if(Strings.containsAnyIgnoreCase(estimated_delivery_date," - ")) {
+            estimatedDeliveryDateString = estimated_delivery_date.split("\\s-\\s")[1];
+        } else {
+            estimatedDeliveryDateString = StringUtils.split(estimated_delivery_date, " ")[1];
+        }
+
 
         return Dates.parseDate(estimatedDeliveryDateString);
     }
@@ -601,6 +607,10 @@ public class Order implements Keyable {
         return Remark.fastShipping(remark);
     }
 
+    @JSONField(serialize = false)
+    public String getASIN() {
+        return RegexUtils.getMatched(sku_address, RegexUtils.Regex.ASIN);
+    }
 
     @Override
     public String getKey() {
@@ -650,7 +660,8 @@ public class Order implements Keyable {
                 Objects.equal(ship_address_2, order.ship_address_2) &&
                 Objects.equal(ship_city, order.ship_city) &&
                 Objects.equal(StringUtils.stripStart(ship_zip, "0"), StringUtils.stripStart(order.ship_zip, "0")) &&
-                Objects.equal(StringUtils.stripStart(ship_phone_number, "0"), StringUtils.stripStart(order.ship_phone_number, "0")) &&
+                //phone number is hard to compare as it may be formatted by google spreadsheet...  not crucial
+                //Objects.equal(StringUtils.stripStart(, "0"), StringUtils.stripStart(order.ship_phone_number, "0")) &&
                 Objects.equal(order_number, order.order_number) &&
                 Objects.equal(account, order.account) &&
                 Objects.equal(ship_country, order.ship_country);
