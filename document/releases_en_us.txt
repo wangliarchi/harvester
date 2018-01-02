@@ -323,3 +323,79 @@
 
 更新内容：
 1. order export beta
+
+======================================================================
+版本：1.0-2017-12-20.1-BETA,1.0-2017-12-21.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. bug fixes
+======================================================================
+版本：1.0-2017-12-21.1-GA,1.0-2017-12-22.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. add shipping country code to US FWD product order url
+
+======================================================================
+版本：1.0-2017-12-22.1-GA,1.0-2017-12-28.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. add more validations for order submission
+a. address validation against order data from amazon
+b. check if order sheet data is unbroken - columns deleted etc.
+2. updated title check and listing mapping service, using elastic search as priority and previous ones as backup
+3. performance and bug fix
+
+======================================================================
+版本：1.0-2017-12-28.1-GA,1.0-2017-12-29.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. run title check job in the night
+
+======================================================================
+版本：1.0-2017-12-29.1-GA,1.0-2017-12-30.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. update way to relocate order on google sheet.
+2. bug fixes
+
+======================================================================
+版本：1.0-2017-12-30.1-GA,1.0-2017-12-30.2-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. stop load order from amazon to validate data when submitting orders, tooooooo slow
+
+======================================================================
+版本：1.0-2017-12-30.2-GA,1.0-2018-01-02.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. bug fixes
+
+======================================================================
+版本：1.0-2018-01-02.1-GA,1.0-2018-01-02.2-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. updated order confirmation date rules
