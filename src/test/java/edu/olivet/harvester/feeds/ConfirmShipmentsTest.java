@@ -2,10 +2,12 @@ package edu.olivet.harvester.feeds;
 
 import com.amazonservices.mws.orders._2013_09_01.model.ListOrdersResult;
 import com.google.inject.Inject;
+import com.sun.org.apache.xpath.internal.operations.Or;
 import edu.olivet.foundations.amazon.*;
 import edu.olivet.foundations.mock.MockDBModule;
 import edu.olivet.foundations.mock.MockDateModule;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.feeds.helper.ConfirmShipmentEmailSender;
@@ -43,7 +45,7 @@ public class ConfirmShipmentsTest extends BaseTest {
         confirmShipments.setAppScript(appScript);
         String spreadsheetId = "1qxcCkAPvvBaR3KHa2MZv1V39m2E1IMytVDn1yXDaVEM";
         spreadsheet = appScript.getSpreadsheet(spreadsheetId);
-
+        spreadsheet.setSpreadsheetCountry(Country.US);
     }
 
 
@@ -184,6 +186,34 @@ public class ConfirmShipmentsTest extends BaseTest {
         Worksheet worksheet = new Worksheet(spreadsheet, "09/22");
         List<Order> orders = confirmShipments.getOrdersFromWorksheet(worksheet);
         assertEquals(confirmShipments.getOrderFinderEmail(orders),"johnnyxiang2017@gmail.com");
+    }
+
+    @Test
+    public void testGetShipDate() {
+        Order order = prepareOrder();
+
+        order.expected_ship_date = "2017-11-22 2017-11-25";
+        order.purchase_date = "2017-11-20T03:47:42+00:00";
+        order.sheetName = "11/21";
+        Worksheet worksheet = new Worksheet(spreadsheet, order.sheetName);
+        String defaultDate = worksheet.getOrderConfirmationDate();
+
+        assertEquals(confirmShipments.getShipDate(order,Dates.parseDate(defaultDate)),Dates.parseDate("11/21/2017"));
+
+        //如果sheet date 比latest expected shipping date 晚，使用 earliest expected shiping date
+        order.sheetName = "11/25";
+        order.expected_ship_date = "2017-11-22 2017-11-25";
+        worksheet = new Worksheet(spreadsheet, order.sheetName);
+        defaultDate = worksheet.getOrderConfirmationDate();
+        assertEquals(confirmShipments.getShipDate(order,Dates.parseDate(defaultDate)),Dates.parseDate("11/22/2017"));
+
+        //如果purchase date 比sheet date 晚， 使用purchase date
+        order.sheetName = "11/21";
+        order.expected_ship_date = "2017-11-22 2017-11-25";
+        order.purchase_date = "2017-11-22T08:47:42+00:00";
+        worksheet = new Worksheet(spreadsheet, order.sheetName);
+        defaultDate = worksheet.getOrderConfirmationDate();
+        assertEquals(confirmShipments.getShipDate(order,Dates.parseDate(defaultDate)),Dates.parseDate("11/22/2017"));
     }
 
 }

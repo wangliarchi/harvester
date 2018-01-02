@@ -35,7 +35,7 @@ public class Worksheet {
 
     public String getOrderConfirmationDate() {
         //current worksheet date
-        DateFormat df = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        //DateFormat df = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         ZoneId zoneId = ServiceUtils.getTimeZone(spreadsheet.getSpreadsheetCountry()).toZoneId();
 
         Date sheetDateFromName = Dates.parseDateOfGoogleSheet(sheetName);

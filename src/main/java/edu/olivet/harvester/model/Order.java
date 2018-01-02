@@ -343,14 +343,7 @@ public class Order implements Keyable {
 
     @JSONField(serialize = false)
     public static Date parsePurchaseDate(String purchaseDateText) {
-        try {
-            return DateUtils.parseDate(purchaseDateText, Locale.US, PURCHASE_DATE_PATTERNS);
-        } catch (ParseException e) {
-            throw new BusinessException(
-                    String.format("Failed to parse order purchase date in text: %s. Supported date patterns: %s.",
-                            purchaseDateText,
-                            StringUtils.join(PURCHASE_DATE_PATTERNS, " ")));
-        }
+        return Dates.parseDate(purchaseDateText);
     }
 
 

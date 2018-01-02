@@ -41,6 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.jetbrains.annotations.Nullable;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -511,9 +512,9 @@ public class ConfirmShipments {
 
     public File generateFeedFile(Worksheet worksheet, List<Order> orders) {
 
-        String defaultShipDate;
+        Date defaultShipDate;
         try {
-            defaultShipDate = worksheet.getOrderConfirmationDate();
+            defaultShipDate = Dates.parseDate(worksheet.getOrderConfirmationDate());
         } catch (Exception e) {
             //todo
             throw new BusinessException("Order confirmation for non mm/dd sheet is currently not supported.");
@@ -541,7 +542,9 @@ public class ConfirmShipments {
                 carrierCode = codes[0];
                 carrierName = codes[1];
             }
-            String[] row = {order.order_id, carrierCode, carrierName, defaultShipDate};
+
+            Date shipDate = getShipDate(order, defaultShipDate);
+            String[] row = {order.order_id, carrierCode, carrierName, edu.olivet.foundations.utils.DateFormat.SHIP_DATE.format(shipDate)};
             ordersToBeConfirmed.add(row);
         }
 
@@ -551,6 +554,46 @@ public class ConfirmShipments {
 
     }
 
+    /**
+     * <pre>
+     * 1. 如果sheet date 比latest expected shipping date 晚，使用 earliest expected shiping date
+     * 原因是 有导单比较晚的情况
+     * 2. 如果purchase date 比sheet date 晚， 使用purchase date
+     * 3. 其他情况直接使用sheet date
+     * </pre>
+     */
+    public Date getShipDate(Order order, Date defaultDate) {
+        Date shipDate = defaultDate;
+        String[] shipDates = new String[2];
+        if (StringUtils.isNotBlank(order.expected_ship_date)) {
+            if (Strings.containsAnyIgnoreCase(order.expected_ship_date, " - ")) {
+                shipDates = order.expected_ship_date.split("\\s-\\s");
+            } else {
+                shipDates = StringUtils.split(order.expected_ship_date, " ");
+            }
+        }
+        if (shipDates.length == 2 && StringUtils.isNotBlank(shipDates[0]) && StringUtils.isNotBlank(shipDates[1])) {
+            try {
+                Date earliestShipDate = Dates.parseDate(shipDates[0]);
+                Date latestShipDate = Dates.parseDate(shipDates[1]);
+                if (shipDate.after(DateUtils.addDays(latestShipDate, -1))) {
+                    shipDate = earliestShipDate;
+                }
+            } catch (Exception e) {
+                //
+            }
+        }
+        try {
+            Date purchaseDate = order.getPurchaseDate();
+            if (purchaseDate.after(shipDate)) {
+                shipDate = Dates.beginOfDay(new DateTime(purchaseDate)).toDate();
+            }
+        } catch (Exception e) {
+            //
+        }
+
+        return shipDate;
+    }
 
     @Inject
     @Setter
