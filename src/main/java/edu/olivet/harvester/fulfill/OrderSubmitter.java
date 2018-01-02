@@ -81,7 +81,7 @@ public class OrderSubmitter {
 
     private static final Map<String, Boolean> DUPLICATION_CHECK_CACHE = new HashMap<>();
 
-    private static final List<Country> SUPPORTED_MARKETPLACES = Lists.newArrayList(Country.US, Country.CA, Country.UK, Country.DE, Country.FR, Country.ES, Country.IT);
+    private static final List<Country> SUPPORTED_MARKETPLACES = Lists.newArrayList(Country.US, Country.CA, Country.UK, Country.DE, Country.FR, Country.ES, Country.IT, Country.AU);
 
     public void execute(RuntimeSettings settings) {
         if (PSEventListener.isRunning()) {
