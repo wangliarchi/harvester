@@ -144,7 +144,7 @@ public class OrderService {
                     Color color = colors.get(sheetName).get(row);
                     order.color = SheetUtils.colorToHex(color);
                 } catch (Exception e) {
-                    LOGGER.error("", e);
+                    //LOGGER.error("", e);
                 }
                 if (StringUtils.isEmpty(order.order_id) || StringUtils.isEmpty(order.sku)) {
                     continue;
