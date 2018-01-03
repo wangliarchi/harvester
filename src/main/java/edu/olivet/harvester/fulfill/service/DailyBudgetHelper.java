@@ -87,8 +87,8 @@ public class DailyBudgetHelper {
                                 budgetData.put("cost", totalCost);
 
                                 if (runtimePanelObserver != null) {
-                                    runtimePanelObserver.updateSpending(Float.toString(NumberUtils.round(totalCost,2)));
-                                    runtimePanelObserver.updateBudget(Float.toString(NumberUtils.round(budget,2)));
+                                    runtimePanelObserver.updateSpending(Float.toString(NumberUtils.round(totalCost, 2)));
+                                    runtimePanelObserver.updateBudget(Float.toString(NumberUtils.round(budget, 2)));
                                 }
                                 return budgetData;
                             }
@@ -190,6 +190,7 @@ public class DailyBudgetHelper {
 
         try {
             sheetService.batchUpdateValues(spreadsheetId, dateToUpdate);
+            LOGGER.info("Successfully updated spending {}， now total spent {}", df.format(spending), df.format(cost));
         } catch (BusinessException e) {
             LOGGER.error("Fail to update cost error msg {} - {}", spreadsheetId, e);
             throw new BusinessException(e);
