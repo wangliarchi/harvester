@@ -152,7 +152,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
          ((DOMFormControlElement) codeField).getForm().submit();
 
         if (JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, ".cvf-widget-input.cvf-widget-input-code") != null) {
-            throw new BusinessException("Invalid code. Please check your code and try again.");
+            throw new FailedBuyerAccountAuthenticationException("Fail to enter verification code");
         }
     }
 
