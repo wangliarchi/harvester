@@ -14,6 +14,7 @@ import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
+import edu.olivet.harvester.fulfill.exception.Exceptions.FailedBuyerAccountAuthenticationException;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OutOfBudgetException;
 import edu.olivet.harvester.fulfill.model.FulfillmentEnum;
 import edu.olivet.harvester.fulfill.model.ItemCompareResult;
@@ -155,6 +156,9 @@ public class OrderSubmitter {
                 if (e instanceof OutOfBudgetException) {
                     UITools.error("No more money to spend :(");
                     break;
+                } else if (e instanceof FailedBuyerAccountAuthenticationException) {
+                    UITools.error(e.getMessage());
+                    break;
                 }
             }
         }
@@ -212,6 +216,8 @@ public class OrderSubmitter {
                 task.setFailed(task.getFailed() + 1);
                 if (e instanceof OutOfBudgetException) {
                     throw new BusinessException("No more money to spend :(");
+                } else if (e instanceof FailedBuyerAccountAuthenticationException) {
+                    throw new BusinessException(e);
                 }
             } finally {
                 task.setDateEnded(new Date());
@@ -252,6 +258,8 @@ public class OrderSubmitter {
                 messageListener.addMsg(order, "order fulfilled successfully. " + order.basicSuccessRecord() + ", took " + Strings.formatElapsedTime(start));
             }
         } catch (OutOfBudgetException e) {
+            throw e;
+        } catch (FailedBuyerAccountAuthenticationException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.error("Error submit order {}", order.order_id, e);
