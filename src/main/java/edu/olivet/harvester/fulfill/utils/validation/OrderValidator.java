@@ -561,12 +561,19 @@ public class OrderValidator {
 
     //todo need more careful check!!!
     public String notDuplicatedOrder(Order order) {
+        if (Remark.FORCE_FULFILL.isContainedBy(order.remark)) {
+            return "";
+        }
+
         List<OrderFulfillmentRecord> list = dbManager.query(OrderFulfillmentRecord.class,
                 Cnd.where("orderId", "=", order.order_id)
                         .and("sku", "=", order.sku));
 
         List<OrderFulfillmentRecord> finalList = new ArrayList<>();
 
+        //check remark, mark as duplicated if
+        //1. have same remark
+        //2. no zuoba
         for (OrderFulfillmentRecord item : list) {
             if (Remark.removeFailedRemark(order.remark.trim()).equalsIgnoreCase(Remark.removeFailedRemark(item.getRemark().trim()))) {
                 finalList.add(item);
