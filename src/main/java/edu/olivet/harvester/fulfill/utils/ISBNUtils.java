@@ -1,9 +1,12 @@
 package edu.olivet.harvester.fulfill.utils;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.Configs;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.RegexUtils;
+import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.utils.pagehelper.HtmlParser;
 import edu.olivet.harvester.logger.ISBNLogger;
 import edu.olivet.harvester.model.ConfigEnums;
@@ -14,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.nutz.lang.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,8 +63,9 @@ public class ISBNUtils {
 
     public static void add2Cache(Country country, String isbn, String title) {
         String key = isbn + Constants.HYPHEN + country.name();
-        add2Cache(key,title);
+        add2Cache(key, title);
     }
+
     public static void add2Cache(String key, String title) {
         cache.put(key, title);
     }
@@ -93,7 +98,7 @@ public class ISBNUtils {
      */
     public static String getTitle(Country country, String isbn) {
         String key = isbn + Constants.HYPHEN + country.name();
-        String title = getTitleFromCache(country,isbn);
+        String title = getTitleFromCache(country, isbn);
         if (StringUtils.isNotBlank(title)) {
             return title;
         }
@@ -148,7 +153,30 @@ public class ISBNUtils {
         return doc.title().replaceFirst(RegexUtils.Regex.AMAZON_BUYING_CHOICE.val(), StringUtils.EMPTY).trim();
     }
 
+    /**
+     * {"asin":"B0027X8YT2",
+     * "title":"Gundam Mr. Color 174 - Fluorescent Pink (Gloss \/ Primary) Paint 10ml. Bottle Hobby",
+     * "binding":"Toy","publication_date":null,
+     * "brand":"Mr. Color","type":"Toy","region":"US","manufacturer":"Mr. Hobby"}
+     */
+    public static String getTitleAtESWeb(String isbn) {
+        String _isbn = ISBNUtils.correct(isbn);
+        try {
+            String json = Jsoup.connect(String.format("http://35.188.127.209/web/product.php?asin=%s", _isbn)).timeout(WaitTime.Longer.valInMS())
+                    .ignoreContentType(true).execute().body();
+            JSONObject response = JSON.parseObject(json);
+            return response.getString("title");
+        } catch (IOException e) {
+            throw Lang.wrapThrow(e);
+        }
+    }
+
     public static String getTitleAtProductPage(String baseUrl, String isbn) throws IOException {
+        try {
+            return getTitleAtESWeb(isbn);
+        } catch (Exception e) {
+            //
+        }
         String _isbn = ISBNUtils.correct(isbn);
         Connection conn = Jsoup.connect(String.format(PRODUCT_PAGE_URL, baseUrl, _isbn));
         conn.userAgent("Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36");
@@ -190,5 +218,10 @@ public class ISBNUtils {
             return StringUtils.EMPTY;
         }
         return StringUtils.leftPad(isbn, 10, DIGIT_ZERO);
+    }
+
+    public static void main(String[] args) {
+        String title = ISBNUtils.getTitleAtESWeb("B00UIM3TCG");
+        System.out.println(title);
     }
 }

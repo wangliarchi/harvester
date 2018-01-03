@@ -4,6 +4,8 @@ import com.ECS.client.jax.Item;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Constants;
+import edu.olivet.foundations.utils.RegexUtils;
+import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.harvester.fulfill.model.ItemCompareResult;
 import edu.olivet.harvester.fulfill.utils.ISBNUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
@@ -36,7 +38,6 @@ public class CompareItemNameWorker extends SwingWorker<List<ItemCompareResult>, 
     }
 
 
-
     @Override
     protected List<ItemCompareResult> doInBackground() throws Exception {
         ElasticSearchService elasticSearchService = ApplicationContext.getBean(ElasticSearchService.class);
@@ -45,7 +46,7 @@ public class CompareItemNameWorker extends SwingWorker<List<ItemCompareResult>, 
         List<ItemCompareResult> results = new ArrayList<>(orders.size());
         ItemValidator itemValidator = ApplicationContext.getBean(ItemValidator.class);
 
-        List<String> asins = orders.stream().map(it -> it.isbn).collect(Collectors.toList());
+        List<String> asins = orders.stream().filter(it -> Regex.ASIN.isMatched(it.isbn)).map(it -> it.isbn).collect(Collectors.toList());
 
         //check from elasticsearch service first
         Map<String, String> asinTitles = elasticSearchService.searchTitle(asins);

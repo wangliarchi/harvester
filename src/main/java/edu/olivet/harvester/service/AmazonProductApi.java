@@ -64,7 +64,8 @@ public class AmazonProductApi {
                     result.put(item.getASIN(), item);
                 });
                 LOGGER.info("Read {} items in {}.", list.size(), Strings.formatElapsedTime(start));
-                break;
+                WaitTime.Shortest.execute();
+                //break;
             } catch (Exception e) {
                 LOGGER.warn("Failed to request in group {}: {}", index, Strings.getExceptionMsg(e));
             }
