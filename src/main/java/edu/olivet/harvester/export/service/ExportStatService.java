@@ -65,9 +65,10 @@ public class ExportStatService {
     public void updateStat(Country country, Date lastDate, int total) {
         String sid = Settings.load().getSid();
         String account = sid + country.name();
-
+        Date nowDate = new Date();
         try {
             String url = APPS_URL + "?method=UpdateStats&account=" + account + "&cm=" + SystemUtils.USER_NAME +
+                    "&lastRunAt=" + DateFormat.DATE_TIME_STR.format(nowDate) +
                     "&lastUpdatedAt=" + (lastDate == null ? "" : DateFormat.DATE_TIME_STR.format(lastDate)) + "&total=" + total;
             Jsoup.connect(url).ignoreContentType(true).timeout(12000).execute().body().trim();
 

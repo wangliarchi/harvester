@@ -10,6 +10,7 @@ import edu.olivet.foundations.amazon.OrderFetcher;
 import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.model.FulfillmentEnum;
 import edu.olivet.harvester.fulfill.model.OrderFulfillmentRecord;
@@ -408,12 +409,12 @@ public class OrderValidator {
             Order reloadedOrder = amazonOrderService.reloadOrder(order);
             if (reloadedOrder != null) {
 
-                if (!StringUtils.equalsAnyIgnoreCase(order.recipient_name, reloadedOrder.recipient_name)) {
+                if (!StringUtils.equalsAnyIgnoreCase(order.recipient_name.replaceAll("^\"|\"$", ""), reloadedOrder.recipient_name.replaceAll("^\"|\"$", ""))) {
                     return "Order recipient name is not the same from amazon. please check in seller center";
                 }
 
-                if (!StringUtils.equalsAnyIgnoreCase(order.ship_address_1, reloadedOrder.ship_address_1, reloadedOrder.ship_address_2) ||
-                        !StringUtils.equalsAnyIgnoreCase(order.ship_address_2, reloadedOrder.ship_address_1, reloadedOrder.ship_address_2)) {
+                if (!StringUtils.equalsAnyIgnoreCase(order.ship_address_1.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""), reloadedOrder.ship_address_1.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""), reloadedOrder.ship_address_2.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), "")) ||
+                        !StringUtils.equalsAnyIgnoreCase(order.ship_address_2.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""), reloadedOrder.ship_address_1.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""), reloadedOrder.ship_address_2.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""))) {
                     return "Order shipping address is not the same from amazon. please check in seller center";
                 }
                 if (!StringUtils.equalsAnyIgnoreCase(order.ship_country, reloadedOrder.ship_country)) {
