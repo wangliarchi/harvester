@@ -28,15 +28,25 @@ public class ElasticSearchService {
     public static final String ELASTIC_SEARCH_ADDRESS = "http://35.188.127.209";
     public static final String PRODUCT_INDEX = "product";
     public static final String LISTING_MAPPING_INDEX = "listing-mapping";
-    public static final int MAX_ASIN_COUNT_PER_REQUEST = 50;
+    public static final int MAX_ASIN_COUNT_PER_REQUEST = 15;
 
     public String searchISBN(String asin) {
-        Map<String, String> results = searchISBNs(Lists.newArrayList(asin));
-        if (results.isEmpty() || !results.containsKey(asin)) {
-            return null;
+        Map<String, Object> params = new HashMap<>();
+        params.put("q", "asin:" + "\"" + StringUtils.strip(asin) + "\"");
+        params.put("pretty", "true");
+        params.put("size", 1);
+
+        String json = request(LISTING_MAPPING_INDEX, params);
+        JSONObject response = JSON.parseObject(json);
+        int total = response.getJSONObject("hits").getInteger("total");
+        if (total > 0) {
+            JSONArray hits = response.getJSONObject("hits").getJSONArray("hits");
+            for (Object hit : hits) {
+                return ((JSONObject) hit).getJSONObject("_source").getString("isbn");
+            }
         }
 
-        return results.get(asin);
+        return null;
     }
 
     public Map<String, String> searchISBNs(List<String> asins) {

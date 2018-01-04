@@ -1,8 +1,10 @@
 package edu.olivet.harvester.export.service;
 
+import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.foundations.utils.Strings;
+import edu.olivet.harvester.message.ErrorAlertService;
 import edu.olivet.harvester.service.ElasticSearchService;
 import edu.olivet.harvester.utils.common.HttpUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -17,10 +19,23 @@ public class TrueFakeAsinMappingService {
 
     public static String getISBN(String sku, String asin) {
         ElasticSearchService elasticSearchService = new ElasticSearchService();
-        String isbn = elasticSearchService.searchISBN(asin);
-        if (StringUtils.isBlank(isbn)) {
-            isbn = HttpUtils.getText(String.format(SERVICE_URL, asin));
+        String isbn = null;
+        try {
+            isbn = elasticSearchService.searchISBN(asin);
+        } catch (Exception e) {
+            //wrong with elasticsearch server, send alert
+            ErrorAlertService errorAlertService = ApplicationContext.getBean(ErrorAlertService.class);
+            errorAlertService.sendMessage("Error with elasticsearch server!!", asin + "\n" + e.getMessage());
         }
+
+        if (StringUtils.isBlank(isbn)) {
+            try {
+                isbn = HttpUtils.getText(String.format(SERVICE_URL, asin));
+            } catch (Exception e) {
+                //ignore
+            }
+        }
+
         if (RegexUtils.Regex.ASIN.isMatched(isbn)) {
             return isbn;
         } else if (Strings.containsAnyIgnoreCase(sku, "ZD", "zendian")) {
