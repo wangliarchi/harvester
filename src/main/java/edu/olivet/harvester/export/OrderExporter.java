@@ -52,14 +52,12 @@ public class OrderExporter {
      * triggered by cronjob
      */
     public void execute() {
-        messagePanel = new ProgressDetail(Actions.ExportOrders);
         //this method is for cronjob, keep silent.
         setMessagePanel(new ProgressDetail(Actions.ExportOrders));
         //list all marketplaces
         Settings settings = Settings.load();
         List<Country> marketplaces = settings.listAllCountries();
         if (CollectionUtils.isEmpty(marketplaces)) {
-
             messagePanel.displayMsg("No marketplace found. please check if you have correct settings.", LOGGER, InformationLevel.Negative);
             return;
         }
