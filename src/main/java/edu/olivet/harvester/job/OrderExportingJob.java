@@ -45,36 +45,7 @@ public class OrderExportingJob extends AbstractBackgroundJob {
 
     @Override
     public void runIfMissed(Date nextTriggerTime) {
-        SystemSettings systemSettings = SystemSettings.load();
-        if (!systemSettings.isEnableOrderExport()) {
-            LOGGER.info("Auto order exporting was not enabled. To enable this function, go to Settings->System Settings->Order Export");
-            return;
-        }
-
-        Date now = new Date();
-        //if current hour is less than next trigger time, cron job has not run yet, since its daily job
-        if (Dates.getField(now, Calendar.HOUR_OF_DAY) < Dates.getField(nextTriggerTime, Calendar.HOUR_OF_DAY)) {
-            return;
-        }
-
-        if (nextTriggerTime.getTime() - now.getTime() < systemSettings.getOrderExportAllowedRange() * 60 * 1000) {
-            return;
-        }
-
-
-
-        DBManager dbManager = ApplicationContext.getBean(DBManager.class);
-        List<CronjobLog> list = dbManager.query(CronjobLog.class,
-                Cnd.where("jobName", "=", this.getClass().getName())
-                        .and("runTime", ">", Dates.beginOfDay(new DateTime()).toDate())
-                        .desc("runTime"));
-
-        if (CollectionUtils.isEmpty(list)) {
-            LOGGER.info("{} executed at program startup.", this.getClass().getName());
-            execute();
-        }
-
-
+        //
     }
 
 
