@@ -47,7 +47,6 @@ public class OrderExporter {
     private MessagePanel messagePanel = new VirtualMessagePanel();
 
 
-
     /**
      * triggered by cronjob
      */
@@ -78,6 +77,7 @@ public class OrderExporter {
                 exportOrdersForMarketplace(marketplace, params.getFromDate(), params.getToDate());
                 messagePanel.displayMsg(String.format("Finish exporting orders from %s in %s.", marketplace, Strings.formatElapsedTime(start)), LOGGER);
             } catch (Exception e) {
+                messagePanel.displayMsg(String.format("Error exporting orders from %s - %s. ", marketplace, e.getMessage()), InformationLevel.Negative);
                 LOGGER.info("Error exporting orders from {}. ", marketplace, e);
 
                 errorAlertService.sendMessage("Error exporting orders from " + marketplace,
@@ -124,7 +124,7 @@ public class OrderExporter {
             orders = exportOrderService.listUnexportedOrders(lastExportedDate, toDate, country);
         } catch (Exception e) {
             LOGGER.error("", e);
-            messagePanel.displayMsg("Error fetch orders from amazon for " + country, InformationLevel.Negative);
+            messagePanel.displayMsg("Error fetch orders from amazon for " + country + ", " + e.getMessage(), InformationLevel.Negative);
             exportStatService.updateStat(country, lastExportedDate, 0);
             return;
         }

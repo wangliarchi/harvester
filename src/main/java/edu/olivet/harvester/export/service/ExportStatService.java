@@ -36,7 +36,7 @@ public class ExportStatService {
     @Inject
     SheetAPI sheetAPI;
 
-    @Repeat
+    @Repeat(expectedExceptions = BusinessException.class)
     public Date initExport(Country country) {
         String sid = Settings.load().getSid();
         String account = sid + country.name();
@@ -61,7 +61,7 @@ public class ExportStatService {
 
     }
 
-
+    @Repeat(expectedExceptions = BusinessException.class)
     public void updateStat(Country country, Date lastDate, int total) {
         String sid = Settings.load().getSid();
         String account = sid + country.name();

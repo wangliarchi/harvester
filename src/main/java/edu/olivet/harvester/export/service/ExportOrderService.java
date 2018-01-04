@@ -152,7 +152,7 @@ public class ExportOrderService extends OrderClient {
 
 
         //remove if it's shipped & before minDate
-        orders.removeIf(order -> order.getOrderStatus() == "Shipped" &&
+        orders.removeIf(order -> "Shipped".equalsIgnoreCase(order.getOrderStatus()) &&
                 order.getPurchaseDate().toGregorianCalendar().getTime().before(minDate));
 
         //load orders from last 7 days to check duplicates

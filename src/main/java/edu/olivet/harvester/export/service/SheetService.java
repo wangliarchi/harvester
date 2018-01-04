@@ -141,7 +141,7 @@ public class SheetService extends SheetAPI {
             orderMap.put(it.order_id, os);
         });
 
-        LOGGER.info("{} , {}", orders, orderMap);
+        //LOGGER.info("{} , {}", orders, orderMap);
 
         List<Order> missedOrders = new ArrayList<>();
         for (Order order : orders) {

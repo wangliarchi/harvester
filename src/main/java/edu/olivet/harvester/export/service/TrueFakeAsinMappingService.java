@@ -1,5 +1,6 @@
 package edu.olivet.harvester.export.service;
 
+import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils;
@@ -16,7 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 public class TrueFakeAsinMappingService {
     private static final String SERVICE_URL = "http://35.166.131.3:8080/listing-mapping/api/mapping/%s?accessKey=7c2eeed11dab9a747e7517583e6ee857";
 
-
+    @Repeat(expectedExceptions = BusinessException.class)
     public static String getISBN(String sku, String asin) {
         ElasticSearchService elasticSearchService = new ElasticSearchService();
         String isbn = null;
