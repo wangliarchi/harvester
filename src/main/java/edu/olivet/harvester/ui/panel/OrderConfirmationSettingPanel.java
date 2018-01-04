@@ -2,12 +2,16 @@ package edu.olivet.harvester.ui.panel;
 
 import com.github.lgooddatepicker.components.TimePicker;
 import com.github.lgooddatepicker.components.TimePickerSettings;
+import edu.olivet.foundations.job.TaskScheduler;
 import edu.olivet.foundations.ui.UITools;
+import edu.olivet.foundations.utils.ApplicationContext;
+import edu.olivet.harvester.job.BackgroundJob;
 import edu.olivet.harvester.model.SystemSettings;
 
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import java.util.Date;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/21/2017 2:31 PM
@@ -96,11 +100,24 @@ public class OrderConfirmationSettingPanel extends JPanel {
 
     public void collectData() {
         SystemSettings systemSettings = SystemSettings.load();
+        boolean oldData = systemSettings.isEnableOrderConfirmation();
         if("Yes".equalsIgnoreCase(enableAutoConfirmationComboBox.getSelectedItem().toString())) {
             systemSettings.setEnableOrderConfirmation(true);
         } else {
             systemSettings.setEnableOrderConfirmation(false);
         }
+
+        if (oldData != systemSettings.isEnableOrderConfirmation()) {
+            TaskScheduler taskScheduler = ApplicationContext.getBean(TaskScheduler.class);
+            taskScheduler.deleteJob(BackgroundJob.ShipmentConfirmation.getClazz());
+            if (oldData == true) {
+                ProgressLogsPanel.getInstance().displayMsg("Order auto confirmation job was disabled successfully.");
+            } else {
+                Date nextTriggerTime = taskScheduler.startJob(BackgroundJob.ShipmentConfirmation.getCron(), BackgroundJob.ShipmentConfirmation.getClazz());
+                ProgressLogsPanel.getInstance().displayMsg("Order auto confirmation job was enabled successfully. Next trigger time will be " + nextTriggerTime);
+            }
+        }
+
 
         systemSettings.setOrderConfirmationTime(confirmationTimePicker.getTime());
         systemSettings.setOrderConfirmationAllowedRange((int)allowedRangeComBox.getSelectedItem());

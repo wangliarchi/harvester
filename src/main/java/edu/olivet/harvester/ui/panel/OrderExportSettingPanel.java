@@ -2,13 +2,17 @@ package edu.olivet.harvester.ui.panel;
 
 import com.github.lgooddatepicker.components.TimePicker;
 import com.github.lgooddatepicker.components.TimePickerSettings;
+import edu.olivet.foundations.job.TaskScheduler;
 import edu.olivet.foundations.ui.UITools;
+import edu.olivet.foundations.utils.ApplicationContext;
+import edu.olivet.harvester.job.BackgroundJob;
 import edu.olivet.harvester.model.SystemSettings;
 
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import java.time.LocalTime;
+import java.util.Date;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/21/2017 2:31 PM
@@ -28,7 +32,7 @@ public class OrderExportSettingPanel extends JPanel {
         final JLabel enableAutoExportLabel = new JLabel("Enable Auto Export?");
         enableAutoExportComboBox = new JComboBox();
         enableAutoExportComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"No", "Yes"}));
-        if(systemSettings.isEnableOrderExport()) {
+        if (systemSettings.isEnableOrderExport()) {
             enableAutoExportComboBox.setSelectedItem("Yes");
         } else {
             enableAutoExportComboBox.setSelectedItem("No");
@@ -97,14 +101,26 @@ public class OrderExportSettingPanel extends JPanel {
 
     public void collectData() {
         SystemSettings systemSettings = SystemSettings.load();
-        if("Yes".equalsIgnoreCase(enableAutoExportComboBox.getSelectedItem().toString())) {
+        boolean oldData = systemSettings.isEnableOrderExport();
+        if ("Yes".equalsIgnoreCase(enableAutoExportComboBox.getSelectedItem().toString())) {
             systemSettings.setEnableOrderExport(true);
         } else {
             systemSettings.setEnableOrderExport(false);
         }
 
+        if (oldData != systemSettings.isEnableOrderExport()) {
+            TaskScheduler taskScheduler = ApplicationContext.getBean(TaskScheduler.class);
+            taskScheduler.deleteJob(BackgroundJob.OrderExporting.getClazz());
+            if (oldData == true) {
+                ProgressLogsPanel.getInstance().displayMsg("Order auto exporting job was disabled successfully.");
+            } else {
+                Date nextTriggerTime = taskScheduler.startJob(BackgroundJob.OrderExporting.getCron(), BackgroundJob.OrderExporting.getClazz());
+                ProgressLogsPanel.getInstance().displayMsg("Order auto exporting job was enabled successfully. Next trigger time will be " + nextTriggerTime);
+            }
+        }
+
         systemSettings.setOrderExportTime(exportTimePicker.getTime());
-        systemSettings.setOrderExportAllowedRange((int)allowedRangeComBox.getSelectedItem());
+        systemSettings.setOrderExportAllowedRange((int) allowedRangeComBox.getSelectedItem());
         systemSettings.save();
     }
 

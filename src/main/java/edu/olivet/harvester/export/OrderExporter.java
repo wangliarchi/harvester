@@ -52,6 +52,7 @@ public class OrderExporter {
      * triggered by cronjob
      */
     public void execute() {
+        messagePanel = new ProgressDetail(Actions.ExportOrders);
         //this method is for cronjob, keep silent.
         setMessagePanel(new ProgressDetail(Actions.ExportOrders));
         //list all marketplaces
