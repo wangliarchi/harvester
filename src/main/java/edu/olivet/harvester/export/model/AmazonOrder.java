@@ -156,7 +156,7 @@ public class AmazonOrder extends PrimaryKey {
         order.sales_chanel = amazonOrder.getSalesChannel();
 
         String cnd = item.getConditionId();
-        String condition = cnd + (!cnd.equalsIgnoreCase(ConditionUtils.Condition.New.name()) ? (SEPARATOR + item.getConditionSubtypeId()) : StringUtils.EMPTY);
+        String condition = cnd + (!cnd.equalsIgnoreCase(ConditionUtils.Condition.New.name()) ? (SEPARATOR + item.getConditionSubtypeId()) : (SEPARATOR + ConditionUtils.Condition.New.name()));
         order.original_condition = condition;
         order.shipping_service = amazonOrder.getShipmentServiceLevelCategory();
 
