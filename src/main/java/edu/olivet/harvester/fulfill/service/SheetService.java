@@ -5,9 +5,11 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.harvester.fulfill.utils.FwdAddressUtils;
 import edu.olivet.harvester.fulfill.utils.OrderStatusUtils;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums.OrderColor;
+import edu.olivet.harvester.model.OrderEnums.OrderItemType;
 import edu.olivet.harvester.model.Remark;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
@@ -116,14 +118,25 @@ public class SheetService extends SheetAPI {
             //update status cell
             String status = OrderStatusUtils.determineStatus(order);
             String randCode = RandomUtils.randomAlphaNumeric(8);
+            String url = order.url;
+            if (order.purchaseBack() && order.getType() == OrderItemType.PRODUCT) {
+                url = FwdAddressUtils.usFwdProductRecipient(order);
+            }
+
             order.last_code = randCode;
             statusToUpdate.put(order.row, status);
             ValueRange rowData = new ValueRange().setValues(Collections.singletonList(Collections.singletonList(status)))
                     .setRange(order.getSheetName() + "!A" + order.row);
             ValueRange codeRowData = new ValueRange().setValues(Collections.singletonList(Collections.singletonList(randCode)))
                     .setRange(order.getSheetName() + "!AF" + order.row);
+
+            ValueRange urlRowData = new ValueRange().setValues(Collections.singletonList(Collections.singletonList(url)))
+                    .setRange(order.getSheetName() + "!P" + order.row);
+
+
             dateToUpdate.add(rowData);
             dateToUpdate.add(codeRowData);
+            dateToUpdate.add(urlRowData);
         }
 
 
