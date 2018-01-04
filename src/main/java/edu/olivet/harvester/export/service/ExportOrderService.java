@@ -48,7 +48,6 @@ public class ExportOrderService extends OrderClient {
     Now now;
 
 
-
     public List<edu.olivet.harvester.model.Order> listUnexportedOrders(Date lastExportedDate, Date toDate, Country country) {
 
         //list orders from amazon for the specified date range. order status include shipped, unshipped, and partiallyShipped
@@ -72,12 +71,11 @@ public class ExportOrderService extends OrderClient {
         return toOrders(amazonOrders);
 
 
-
     }
 
     /**
      * <pre>
-
+     *
      *     convert AmazonOrder to Order object
      *     handle blacklist buyer and self order check
      * </pre>
@@ -144,10 +142,6 @@ public class ExportOrderService extends OrderClient {
      * </pre>
      */
     public List<Order> removeExportedOrders(List<Order> orders, Date fromDate, Country country) {
-        //load orders from last 7 days to check duplicates
-        List<String> spreadsheetIds = Settings.load().getConfigByCountry(country).listSpreadsheetIds();
-        Map<String, edu.olivet.harvester.model.Order> allOrders = new HashMap<>();
-
 
         Date minDate;
         if (fromDate.after(DateUtils.addDays(now.get(), DAYS_BACK))) {
@@ -155,6 +149,16 @@ public class ExportOrderService extends OrderClient {
         } else {
             minDate = DateUtils.addDays(fromDate, -1);
         }
+
+
+        //remove if it's shipped & before minDate
+        orders.removeIf(order -> order.getOrderStatus() == "Shipped" &&
+                order.getPurchaseDate().toGregorianCalendar().getTime().before(minDate));
+
+        //load orders from last 7 days to check duplicates
+        List<String> spreadsheetIds = Settings.load().getConfigByCountry(country).listSpreadsheetIds();
+        Map<String, edu.olivet.harvester.model.Order> allOrders = new HashMap<>();
+
 
         spreadsheetIds.forEach(it -> {
             orderService.fetchOrders(sheetAPI.getSpreadsheet(it), minDate).forEach(order -> {
