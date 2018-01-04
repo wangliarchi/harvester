@@ -11,7 +11,6 @@ import edu.olivet.harvester.model.SystemSettings;
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
-import java.time.LocalTime;
 import java.util.Date;
 
 /**
