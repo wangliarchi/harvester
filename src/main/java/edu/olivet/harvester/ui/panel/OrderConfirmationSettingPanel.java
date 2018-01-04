@@ -28,7 +28,7 @@ public class OrderConfirmationSettingPanel extends JPanel {
     private void initComponents() {
 
         SystemSettings systemSettings = SystemSettings.load();
-        final JLabel enableAutoExportLabel = new JLabel("Enable Auto Export?");
+        final JLabel enableAutoExportLabel = new JLabel("Enable Auto Confirmation?");
         enableAutoConfirmationComboBox = new JComboBox();
         enableAutoConfirmationComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"No", "Yes"}));
         if(systemSettings.isEnableOrderConfirmation()) {
@@ -37,7 +37,7 @@ public class OrderConfirmationSettingPanel extends JPanel {
             enableAutoConfirmationComboBox.setSelectedItem("No");
         }
 
-        final JLabel autoExportTimeLabel = new JLabel("Daily Export at ");
+        final JLabel autoExportTimeLabel = new JLabel("Daily Confirm at ");
         TimePickerSettings timeSettings = new TimePickerSettings();
         timeSettings.initialTime = systemSettings.getOrderConfirmationTime();
         confirmationTimePicker = new TimePicker(timeSettings);
@@ -128,7 +128,7 @@ public class OrderConfirmationSettingPanel extends JPanel {
 
         UITools.setTheme();
         JFrame frame = new JFrame();
-        frame.setTitle("Order Exporting Settings");
+        frame.setTitle("Order Confirmation Settings");
         frame.setSize(500, 180);
         frame.getContentPane().add(new OrderConfirmationSettingPanel());
         frame.setVisible(true);
