@@ -128,7 +128,7 @@ public class SellerPanel extends JPanel {
      * @param country 给定卖场
      */
     private void selectMarketplace(Country country) {
-        if (!country.europe() || this.isMarketplaceSelected(country)) {
+        if (this.isMarketplaceSelected(country)) {
             return;
         }
 
@@ -184,8 +184,12 @@ public class SellerPanel extends JPanel {
 
         //gp/account-manager/home.html
         JXBrowserHelper.loadPage(browser, country.ascBaseUrl() + "/gp/account-manager/home.html");
+        JXBrowserHelper.waitUntilVisible(browser, "#view-credentials-button");
+
         String sellerId = JXBrowserHelper.text(browser, "#merchant-id");
         String storeName = JXBrowserHelper.text(browser, ".sc-mkt-picker-switcher-txt");
+
+
         JXBrowserHelper.selectElementByCssSelector(browser, "#view-credentials-button").click();
         JXBrowserHelper.waitUntilVisible(browser, "#mws-selfauth-secret-show");
         JXBrowserHelper.selectVisibleElement(browser, "#mws-selfauth-secret-show").click();
@@ -221,5 +225,8 @@ public class SellerPanel extends JPanel {
         frame.getContentPane().add(sellerPanel);
 
         UITools.setDialogAttr(frame, true);
+
+       MarketWebServiceIdentity identity =  sellerPanel.fetchMWSInfo();
+       System.out.println(identity);
     }
 }

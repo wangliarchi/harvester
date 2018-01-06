@@ -72,37 +72,39 @@ public class ConfigurationPanel extends JPanel {
 
         loadMWSInfoButton.setText("Find Seller Id");
         loadMWSInfoButton.addActionListener(evt -> {
-            String sellerEmail = sellerEmailFld.getText();
-            if (StringUtils.isBlank(sellerEmail)) {
-                UITools.error("Please enter seller email/password first");
-                return;
-            }
+            new Thread(() -> {
+                String sellerEmail = sellerEmailFld.getText();
+                if (StringUtils.isBlank(sellerEmail)) {
+                    UITools.error("Please enter seller email/password first");
+                    return;
+                }
 
-            JFrame frame = new JFrame();
-            frame.setMinimumSize(new Dimension(1400, 900));
-            frame.setTitle("Seller Panel");
+                JFrame frame = new JFrame();
+                frame.setMinimumSize(new Dimension(1400, 900));
+                frame.setTitle("Seller Panel");
 
-            Account seller = new Account(sellerEmailFld.getText(), AccountType.Seller);
-            SellerPanel sellerPanel = new SellerPanel(1, country, seller, 1);
-            frame.getContentPane().add(sellerPanel);
-            UITools.setDialogAttr(frame, true);
+                Account seller = new Account(sellerEmailFld.getText(), AccountType.Seller);
+                SellerPanel sellerPanel = new SellerPanel(1, country, seller, 1);
+                frame.getContentPane().add(sellerPanel);
+                UITools.setDialogAttr(frame, true);
 
 
-            try {
-                MarketWebServiceIdentity marketWebServiceIdentity = sellerPanel.fetchMWSInfo();
+                try {
+                    MarketWebServiceIdentity marketWebServiceIdentity = sellerPanel.fetchMWSInfo();
 
-                frame.setVisible(false); //you can't see me!
-                frame.dispose();
+                    frame.setVisible(false); //you can't see me!
+                    frame.dispose();
 
-                String[] idName = marketWebServiceIdentity.getSellerId().split("\t");
-                sellerIdFld.setText(idName[0]);
-                storeNameFld.setText(idName[1]);
-                mwsAccessKeyFld.setText(marketWebServiceIdentity.getAccessKey());
-                mwsSecretKeyFld.setText(marketWebServiceIdentity.getSecretKey());
+                    String[] idName = marketWebServiceIdentity.getSellerId().split("\t");
+                    sellerIdFld.setText(idName[0]);
+                    storeNameFld.setText(idName[1]);
+                    mwsAccessKeyFld.setText(marketWebServiceIdentity.getAccessKey());
+                    mwsSecretKeyFld.setText(marketWebServiceIdentity.getSecretKey());
 
-            } catch (Exception e) {
-                UITools.error("Error fetching seller id - " + e.getMessage());
-            }
+                } catch (Exception e) {
+                    UITools.error("Error fetching seller id - " + e.getMessage());
+                }
+            }).start();
         });
 
         GroupLayout layout = new GroupLayout(this);
