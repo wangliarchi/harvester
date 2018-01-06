@@ -12,7 +12,6 @@ import edu.olivet.harvester.export.model.AmazonOrder;
 import edu.olivet.harvester.export.utils.SelfOrderChecker;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.service.BlacklistBuyer;
-import edu.olivet.harvester.model.Remark;
 import edu.olivet.harvester.service.OrderService;
 import edu.olivet.harvester.service.mws.OrderClient;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;

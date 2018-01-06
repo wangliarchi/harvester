@@ -106,7 +106,7 @@ public class SheetService extends SheetAPI {
         try {
             List<List<Object>> values = convertOrdersToRangeValues(orders, spreadsheetId, sheetName);
             this.spreadsheetValuesAppend(spreadsheetId, sheetName, new ValueRange().setValues(values));
-        } catch (BusinessException e) {
+        } catch (Exception e) {
             throw new BusinessException(e);
         } finally {
             unlockSheet(spreadsheetId, protectedId);

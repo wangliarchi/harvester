@@ -592,6 +592,9 @@ public class ConfirmShipments {
             //
         }
 
+        if (shipDate.before(new Date())) {
+            shipDate = DateUtils.addDays(shipDate, -1);
+        }
         return shipDate;
     }
 

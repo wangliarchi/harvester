@@ -171,6 +171,7 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
                     UITools.error(e.getMessage());
                     break;
                 } finally {
+                    PSEventListener.reset(this);
                     loadTasksToTable();
                 }
             }
