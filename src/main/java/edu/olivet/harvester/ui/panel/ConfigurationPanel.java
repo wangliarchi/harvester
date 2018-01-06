@@ -5,8 +5,10 @@ import edu.olivet.foundations.amazon.Account.AccountType;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.ui.UITools;
+import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.utils.FinderCodeUtils;
+import edu.olivet.harvester.utils.Settings;
 import edu.olivet.harvester.utils.Settings.Configuration;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
@@ -14,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
+import java.awt.*;
 
 /**
  * Configuration panel for single marketplace
@@ -67,10 +70,46 @@ public class ConfigurationPanel extends JPanel {
         userCodeFld.setToolTipText("Input user code for validation usage");
         ebatesBuyerFld.setToolTipText("Input ebay buyer account for product order fulfillment benefit");
 
+        loadMWSInfoButton.setText("Find Seller Id");
+        loadMWSInfoButton.addActionListener(evt -> {
+            String sellerEmail = sellerEmailFld.getText();
+            if (StringUtils.isBlank(sellerEmail)) {
+                UITools.error("Please enter seller email/password first");
+                return;
+            }
+
+            JFrame frame = new JFrame();
+            frame.setMinimumSize(new Dimension(1400, 900));
+            frame.setTitle("Seller Panel");
+
+            Account seller = new Account(sellerEmailFld.getText(), AccountType.Seller);
+            SellerPanel sellerPanel = new SellerPanel(1, country, seller, 1);
+            frame.getContentPane().add(sellerPanel);
+            UITools.setDialogAttr(frame, true);
+
+
+            try {
+                MarketWebServiceIdentity marketWebServiceIdentity = sellerPanel.fetchMWSInfo();
+
+                frame.setVisible(false); //you can't see me!
+                frame.dispose();
+
+                String[] idName = marketWebServiceIdentity.getSellerId().split("\t");
+                sellerIdFld.setText(idName[0]);
+                storeNameFld.setText(idName[1]);
+                mwsAccessKeyFld.setText(marketWebServiceIdentity.getAccessKey());
+                mwsSecretKeyFld.setText(marketWebServiceIdentity.getSecretKey());
+
+            } catch (Exception e) {
+                UITools.error("Error fetching seller id - " + e.getMessage());
+            }
+        });
+
         GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);
 
         final int width = 480;
+        int loadMWSButtonWidth = (int) loadMWSInfoButton.getPreferredSize().getWidth();
         layout.setHorizontalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(layout.createSequentialGroup()
@@ -97,7 +136,7 @@ public class ConfigurationPanel extends JPanel {
                                         .addGroup(layout.createSequentialGroup().addComponent(sellerEmailFld, width, width, width))
                                         .addGroup(layout.createSequentialGroup().addComponent(storeNameFld, width, width, width))
                                         .addGroup(layout.createSequentialGroup().addComponent(signatureFld, width, width, width))
-                                        .addGroup(layout.createSequentialGroup().addComponent(sellerIdFld, width, width, width))
+                                        .addGroup(layout.createSequentialGroup().addComponent(sellerIdFld, width - loadMWSButtonWidth, width - loadMWSButtonWidth, width - loadMWSButtonWidth).addComponent(loadMWSInfoButton))
                                         .addGroup(layout.createSequentialGroup().addComponent(mwsAccessKeyFld, width, width, width))
                                         .addGroup(layout.createSequentialGroup().addComponent(mwsSecretKeyFld, width, width, width))
                                         .addGroup(layout.createSequentialGroup().addComponent(bookDataSourceUrlFld, width, width, width))
@@ -129,7 +168,8 @@ public class ConfigurationPanel extends JPanel {
                                         .addComponent(signatureLbl).addComponent(signatureFld, height, height, height))
                                 .addGap(vGap)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(sellerIdLbl).addComponent(sellerIdFld, height, height, height))
+                                        .addComponent(sellerIdLbl).addComponent(sellerIdFld, height, height, height)
+                                        .addComponent(loadMWSInfoButton))
                                 .addGap(vGap)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(mwsAccessKeyLbl).addComponent(mwsAccessKeyFld, height, height, height))
@@ -180,6 +220,7 @@ public class ConfigurationPanel extends JPanel {
     private JTextField prodPrimeBuyerFld = new JTextField();
     private JTextField prodBuyerFld = new JTextField();
     private JTextField ebatesBuyerFld = new JTextField();
+    private JButton loadMWSInfoButton = new JButton();
 
     public Configuration collect() {
         Configuration cfg = new Configuration();
