@@ -19,7 +19,7 @@ public class ConfirmationFailedLogService {
         String sid = Settings.load().getSid() + country.name();
         String url = FAILED_LOG_APP_SCRIPT_URL + "?s=" + Strings.encode(sid) + "&sn=" + Strings.encode(sheetName) + "&m=" + Strings.encode(errorMsg);
         try {
-            Jsoup.connect(url).ignoreContentType(true).timeout(12000).execute().body().trim();
+            Jsoup.connect(url).ignoreContentType(true).timeout(12000).execute();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/13/17 4:15 PM
  */
+@SuppressWarnings("SameReturnValue")
 public class BlacklistBuyer {
     private static final Logger LOGGER = LoggerFactory.getLogger(BlacklistBuyer.class);
 

@@ -2,7 +2,6 @@ package edu.olivet.harvester.ui.events;
 
 import com.alibaba.fastjson.JSON;
 import com.google.inject.Inject;
-import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.fulfill.model.ItemCompareResult;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
@@ -17,7 +16,6 @@ import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.dialog.AddOrderSubmissionTaskDialog;
 import edu.olivet.harvester.ui.dialog.ItemCheckResultDialog;
 import edu.olivet.harvester.ui.panel.TasksAndProgressPanel;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

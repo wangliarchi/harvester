@@ -41,9 +41,10 @@ public class ElasticSearchService {
         int total = response.getJSONObject("hits").getInteger("total");
         if (total > 0) {
             JSONArray hits = response.getJSONObject("hits").getJSONArray("hits");
-            for (Object hit : hits) {
-                return ((JSONObject) hit).getJSONObject("_source").getString("isbn");
+            if (hits.size() > 0) {
+                return ((JSONObject) hits.get(0)).getJSONObject("_source").getString("isbn");
             }
+
         }
 
         return null;
@@ -55,7 +56,8 @@ public class ElasticSearchService {
 
         for (List<String> list : lists) {
             Map<String, Object> params = new HashMap<>();
-            params.put("q", "asin:" + StringUtils.join(list.stream().map(it -> "\"" + StringUtils.strip(it) + "\"").collect(Collectors.toList()), ","));
+            params.put("q", "asin:" + StringUtils.join(list.stream().map(it -> "\"" + StringUtils.strip(it) + "\"")
+                    .collect(Collectors.toList()), ","));
             params.put("pretty", "true");
             params.put("size", MAX_ASIN_COUNT_PER_REQUEST);
 
@@ -82,7 +84,8 @@ public class ElasticSearchService {
 
         for (List<String> list : lists) {
             Map<String, Object> params = new HashMap<>();
-            params.put("q", "asin:" + StringUtils.join(list.stream().map(it -> "\"" + StringUtils.strip(it) + "\"").collect(Collectors.toList()), ","));
+            params.put("q", "asin:" + StringUtils.join(list.stream().map(it -> "\"" + StringUtils.strip(it) + "\"")
+                    .collect(Collectors.toList()), ","));
             params.put("pretty", "true");
             params.put("size", MAX_ASIN_COUNT_PER_REQUEST);
 

@@ -29,7 +29,7 @@ public class OrderExportSettingPanel extends JPanel {
 
         SystemSettings systemSettings = SystemSettings.load();
         final JLabel enableAutoExportLabel = new JLabel("Enable Auto Export?");
-        enableAutoExportComboBox = new JComboBox();
+        enableAutoExportComboBox = new JComboBox<>();
         enableAutoExportComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"No", "Yes"}));
         if (systemSettings.isEnableOrderExport()) {
             enableAutoExportComboBox.setSelectedItem("Yes");
@@ -101,6 +101,7 @@ public class OrderExportSettingPanel extends JPanel {
     public void collectData() {
         SystemSettings systemSettings = SystemSettings.load();
         boolean oldData = systemSettings.isEnableOrderExport();
+        //noinspection ConstantConditions
         if ("Yes".equalsIgnoreCase(enableAutoExportComboBox.getSelectedItem().toString())) {
             systemSettings.setEnableOrderExport(true);
         } else {
@@ -110,7 +111,7 @@ public class OrderExportSettingPanel extends JPanel {
         if (oldData != systemSettings.isEnableOrderExport()) {
             TaskScheduler taskScheduler = ApplicationContext.getBean(TaskScheduler.class);
             taskScheduler.deleteJob(BackgroundJob.OrderExporting.getClazz());
-            if (oldData == true) {
+            if (oldData) {
                 ProgressLogsPanel.getInstance().displayMsg("Order auto exporting job was disabled successfully.");
             } else {
                 Date nextTriggerTime = taskScheduler.startJob(BackgroundJob.OrderExporting.getCron(), BackgroundJob.OrderExporting.getClazz());

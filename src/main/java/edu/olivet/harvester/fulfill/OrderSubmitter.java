@@ -247,15 +247,13 @@ public class OrderSubmitter {
                 return;
             }
 
-            order.originalRemark = new String(order.remark);
+            order.originalRemark = order.remark;
             orderFlowEngine.process(order, buyerPanel);
 
             if (StringUtils.isNotBlank(order.order_number)) {
                 messageListener.addMsg(order, "order fulfilled successfully. " + order.basicSuccessRecord() + ", took " + Strings.formatElapsedTime(start));
             }
-        } catch (OutOfBudgetException e) {
-            throw e;
-        } catch (FailedBuyerAccountAuthenticationException e) {
+        } catch (OutOfBudgetException | FailedBuyerAccountAuthenticationException e) {
             throw e;
         } catch (Exception e) {
             LOGGER.error("Error submit order {}", order.order_id, e);

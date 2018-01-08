@@ -3,20 +3,15 @@ package edu.olivet.harvester.ui.panel;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.UITools;
-import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
-import edu.olivet.harvester.fulfill.service.DailyBudgetHelper;
 import edu.olivet.harvester.fulfill.service.ProgressUpdater;
 import edu.olivet.harvester.fulfill.service.RuntimePanelObserver;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.model.OrderEnums;
-import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.spreadsheet.utils.SheetUtils;
 import edu.olivet.harvester.ui.MainPanel;
 import edu.olivet.harvester.utils.FinderCodeUtils;
-import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.Settings;
-import edu.olivet.harvester.utils.common.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
@@ -25,9 +20,6 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import java.awt.*;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -241,7 +233,6 @@ public class RuntimeSettingsPanel extends JPanel implements RuntimePanelObserver
     }
 
     private JTextField marketplaceTextField;
-    private JLabel sellerLabel;
     private JTextField sellerTextField;
     private JLabel buyerLabel;
     private JTextField buyerTextField;
@@ -278,7 +269,7 @@ public class RuntimeSettingsPanel extends JPanel implements RuntimePanelObserver
         JLabel marketplaceLabel = new JLabel();
         marketplaceTextField = new JTextField();
 
-        sellerLabel = new JLabel();
+        JLabel sellerLabel = new JLabel();
         sellerTextField = new JTextField();
 
         buyerLabel = new JLabel();
@@ -501,10 +492,6 @@ public class RuntimeSettingsPanel extends JPanel implements RuntimePanelObserver
         );
     }
 
-
-    public int getMinWidth() {
-        return 120;
-    }
 
     public static void main(String[] args) {
         UITools.setTheme();

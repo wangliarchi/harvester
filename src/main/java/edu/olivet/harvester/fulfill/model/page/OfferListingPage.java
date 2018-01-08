@@ -67,7 +67,8 @@ public class OfferListingPage extends FulfillmentPage {
 
         LOGGER.info("Found seller {} for order {}", seller.getName(), order.order_id);
         _addToCart(browser, seller.getIndex());
-        LOGGER.info("Added to shopping cart successfully, now at {} -> {}, took {}", browser.getTitle(), browser.getURL(), Strings.formatElapsedTime(start));
+        LOGGER.info("Added to shopping cart successfully, now at {} -> {}, took {}",
+                browser.getTitle(), browser.getURL(), Strings.formatElapsedTime(start));
 
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
 
@@ -88,8 +89,12 @@ public class OfferListingPage extends FulfillmentPage {
             //List<Seller> results = new ArrayList<>();
             for (Seller seller : sellers) {
                 String sellerName = seller.getName();
-                boolean sellerEq = (StringUtils.isNotBlank(seller.getUuid()) && StringUtils.isNotBlank(order.seller_id) && seller.getUuid().equalsIgnoreCase(order.seller_id) && seller.getType().abbrev().equalsIgnoreCase(order.character)) ||
-                        (StringUtils.isNotBlank(sellerName) && StringUtils.isNotBlank(order.seller) && sellerName.equalsIgnoreCase(order.seller) && seller.getType().abbrev().equalsIgnoreCase(order.character)) ||
+                boolean sellerEq = (StringUtils.isNotBlank(seller.getUuid()) && StringUtils.isNotBlank(order.seller_id) &&
+                        seller.getUuid().equalsIgnoreCase(order.seller_id) &&
+                        seller.getType().abbrev().equalsIgnoreCase(order.character)) ||
+                        (StringUtils.isNotBlank(sellerName) && StringUtils.isNotBlank(order.seller) &&
+                                sellerName.equalsIgnoreCase(order.seller) &&
+                                seller.getType().abbrev().equalsIgnoreCase(order.character)) ||
                         (seller.getType() == SellerEnums.SellerType.AP && order.sellerIsAP()) ||
                         (seller.getType() == SellerEnums.SellerType.APWareHouse && order.sellerIsAPWarehouse());
 

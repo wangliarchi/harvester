@@ -49,7 +49,8 @@ public class SheetService extends SheetAPI {
         if (order.orderTotalCost != null) {
             order.cost = order.orderTotalCost.toUSDAmount().toPlainString();
         }
-        ValueRange rowData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(order.cost, order.order_number, order.account, order.last_code)))
+        ValueRange rowData = new ValueRange()
+                .setValues(Collections.singletonList(Lists.newArrayList(order.cost, order.order_number, order.account, order.last_code)))
                 .setRange(range);
         dateToUpdate.add(rowData);
 
@@ -158,7 +159,8 @@ public class SheetService extends SheetAPI {
             if (StringUtils.equalsIgnoreCase(statusExpected, actualStatus)) {
                 success.add("Row " + order.row + " status updated to " + actualStatus + " successfully");
             } else {
-                failed.add("Row " + order.row + " failed to updated status from " + order.status + " to " + statusExpected + ", current is " + actualStatus);
+                failed.add("Row " + order.row + " failed to updated status from " +
+                        order.status + " to " + statusExpected + ", current is " + actualStatus);
             }
         }
         Map<String, List<String>> results = new HashMap<>();

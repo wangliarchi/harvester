@@ -2,7 +2,6 @@ package edu.olivet.harvester.feeds;
 
 import com.amazonservices.mws.orders._2013_09_01.model.ListOrdersResult;
 import com.google.inject.Inject;
-import com.sun.org.apache.xpath.internal.operations.Or;
 import edu.olivet.foundations.amazon.*;
 import edu.olivet.foundations.mock.MockDBModule;
 import edu.olivet.foundations.mock.MockDateModule;

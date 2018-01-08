@@ -4,9 +4,8 @@ import com.google.inject.Inject;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.fulfill.OrderSubmitter;
-import edu.olivet.harvester.fulfill.model.FulfillmentEnum;
+import edu.olivet.harvester.fulfill.model.FulfillmentEnum.Action;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
-import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.utils.validation.RuntimeSettingsValidator;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -30,7 +29,7 @@ public class SubmitOrdersEvent extends Observable implements HarvesterUIEvent {
 
     public void execute() {
         RuntimeSettings settings = RuntimeSettings.load();
-        RuntimeSettingsValidator.CheckResult result = validator.validate(settings, FulfillmentEnum.Action.UpdateStatus);
+        RuntimeSettingsValidator.CheckResult result = validator.validate(settings, Action.SubmitOrder);
 
         List<String> messages = result.getErrors();
         if (CollectionUtils.isNotEmpty(messages)) {

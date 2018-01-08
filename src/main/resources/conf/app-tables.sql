@@ -167,6 +167,6 @@ CREATE TABLE IF NOT EXISTS amazon_orders_new (
     ON CONFLICT IGNORE
 );
 
-INSERT INTO amazon_order_logs
+INSERT INTO amazon_orders_new
   SELECT *
-  FROM amazon_orders;
+  FROM amazon_order_logs;

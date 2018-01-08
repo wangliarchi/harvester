@@ -47,14 +47,14 @@ public class PreValidator {
         });
 
 
-        int job_number = 1;
+        int jobNumber = 1;
         if (ordersToCheck.size() > 10) {
-            job_number = COMPARE_JOB_NUMBER;
+            jobNumber = COMPARE_JOB_NUMBER;
         }
 
 
-        List<List<Order>> list = ThreadHelper.assign(ordersToCheck, job_number);
-        List<CompareItemNameWorker> jobs = new ArrayList<>(job_number);
+        List<List<Order>> list = ThreadHelper.assign(ordersToCheck, jobNumber);
+        List<CompareItemNameWorker> jobs = new ArrayList<>(jobNumber);
 
         for (List<Order> assignedOrders : list) {
             if (CollectionUtils.isEmpty(assignedOrders)) {

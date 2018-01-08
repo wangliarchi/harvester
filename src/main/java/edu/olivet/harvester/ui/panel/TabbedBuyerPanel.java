@@ -76,7 +76,7 @@ public class TabbedBuyerPanel extends JTabbedPane {
         LOGGER.error("JXBrowser crashed, trying to recreate buyer panel");
         BuyerPanel buyerPanel = initTabForOrder(order);
         this.removeTab(buyerPanel);
-        buyerPanel =  initTabForOrder(order);
+        buyerPanel = initTabForOrder(order);
 
         buyerPanel.toWelcomePage();
         return buyerPanel;
@@ -88,8 +88,9 @@ public class TabbedBuyerPanel extends JTabbedPane {
         Country country = OrderCountryUtils.getFulfillmentCountry(order);
         return getOrAddTab(country, buyer);
     }
+
     public BuyerPanel getOrAddTab(Country country, Account account) {
-        BuyerPanel buyerPanel =  addTab(country, account);
+        BuyerPanel buyerPanel = addTab(country, account);
         highlight(buyerPanel);
         return buyerPanel;
     }
@@ -99,7 +100,7 @@ public class TabbedBuyerPanel extends JTabbedPane {
         String tabKey = getTabKey(buyerPanel.getCountry(), buyerPanel.getBuyer());
         try {
             buyerPanel.getBrowserView().getBrowser().dispose();
-        }catch (Exception e) {
+        } catch (Exception e) {
             //
         }
         int index = buyerPanel.getId();
@@ -108,11 +109,12 @@ public class TabbedBuyerPanel extends JTabbedPane {
         buyerPanels.remove(tabKey);
         buyerPanelIndexes.remove(index);
     }
+
     public BuyerPanel addTab(Country country, Account account) {
         String tabKey = getTabKey(country, account);
         if (buyerPanels.containsKey(tabKey)) {
             LOGGER.info("Buyer account {} already initialized. ", tabKey);
-            BuyerPanel buyerPanel =  buyerPanels.get(tabKey);
+            BuyerPanel buyerPanel = buyerPanels.get(tabKey);
             buyerPanel.getBuyer().setPassword(account.getPassword());
             return buyerPanel;
         }
@@ -225,7 +227,6 @@ public class TabbedBuyerPanel extends JTabbedPane {
         //BuyerPanel buyerPanel = panel.addTab(Country.US,buyer);
         buyerPanel.toHomePage();
         WaitTime.Long.execute();
-
 
 
     }

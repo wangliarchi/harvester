@@ -13,13 +13,11 @@ import edu.olivet.harvester.model.ConfigEnums;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.spreadsheet.model.OrderRange;
 import edu.olivet.harvester.spreadsheet.utils.SheetUtils;
-import edu.olivet.harvester.ui.panel.TasksAndProgressPanel;
 import edu.olivet.harvester.utils.common.DateFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.entity.annotation.Column;
@@ -36,6 +34,7 @@ import java.util.List;
 @Table(value = "order_submission_tasks")
 @AllArgsConstructor
 @NoArgsConstructor
+@SuppressWarnings("DefaultAnnotationParam")
 @EqualsAndHashCode(callSuper = false)
 public class OrderSubmissionTask extends PrimaryKey implements ArrayConvertable {
     @Name

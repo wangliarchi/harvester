@@ -46,7 +46,8 @@ public class OrderItemTypeHelper {
             return type;
 
         } catch (Exception e) {
-            //LOGGER.warn("No product group info found by sku pattern for {}, ASIN {}, SKU {} - {}", order.order_id, order.isbn, order.sku, e);
+            //LOGGER.warn("No product group info found by sku pattern for {}, ASIN {}, SKU {} - {}",
+            // order.order_id, order.isbn, order.sku, e);
         }
 
         /*
@@ -81,7 +82,9 @@ public class OrderItemTypeHelper {
             throw new BusinessException("No valid SKU found for order " + order.order_id);
         }
 
-        String[] productKeywords = {"ART", "AUTO", "pro", "jewel", "shoe", "cloth", "watch", "BABY", "BEAU", "ELEC", "FOOD", "HARDWARE", "HEAL", "HOME", "MEASURE", "OFFICE", "PET", "SAFETY", "SPOR", "TOOL", "TOY", "access", "guowai", "bady", "kit", "out", "uban"};
+        String[] productKeywords = {"ART", "AUTO", "pro", "jewel", "shoe", "cloth", "watch", "BABY",
+                "BEAU", "ELEC", "FOOD", "HARDWARE", "HEAL", "HOME", "MEASURE", "OFFICE", "PET",
+                "SAFETY", "SPOR", "TOOL", "TOY", "access", "guowai", "bady", "kit", "out", "uban"};
 
         if (Strings.containsAnyIgnoreCase(sku, productKeywords)) {
             return OrderEnums.OrderItemType.PRODUCT;

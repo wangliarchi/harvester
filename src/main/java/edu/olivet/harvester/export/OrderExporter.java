@@ -6,7 +6,6 @@ import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.MessagePanel;
 import edu.olivet.foundations.ui.ProgressDetail;
 import edu.olivet.foundations.ui.VirtualMessagePanel;
-import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Now;
 import edu.olivet.foundations.utils.Strings;
@@ -14,10 +13,8 @@ import edu.olivet.harvester.export.model.OrderExportParams;
 import edu.olivet.harvester.export.service.ExportOrderService;
 import edu.olivet.harvester.export.service.ExportStatService;
 import edu.olivet.harvester.export.service.SheetService;
-import edu.olivet.harvester.message.EmailService;
 import edu.olivet.harvester.message.ErrorAlertService;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.ui.Actions;
 import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.collections4.CollectionUtils;
@@ -99,7 +96,7 @@ public class OrderExporter {
         //check if exporting service is running, load last updated date.
         Date lastExportedDate;
         try {
-            lastExportedDate = exportStatService.initExport(country);
+            lastExportedDate = exportStatService.getOrderExportFromDate(country);
         } catch (Exception e) {
             LOGGER.error("", e);
             messagePanel.displayMsg(e.getMessage(), LOGGER, InformationLevel.Negative);

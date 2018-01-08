@@ -36,9 +36,11 @@ public class ForbiddenSeller extends AppScript {
     private static final Map<String, List<String>> REGION_FORBIDDEN_LIST_CACHE = new HashMap<>();
 
     public boolean isForbidden(Seller seller) {
-        List<String> forbiddenSellers = REGION_FORBIDDEN_LIST_CACHE.computeIfAbsent(seller.getOfferListingCountry().name(), key -> load(seller.getOfferListingCountry()));
+        List<String> forbiddenSellers = REGION_FORBIDDEN_LIST_CACHE.computeIfAbsent(seller.getOfferListingCountry().name(),
+                key -> load(seller.getOfferListingCountry()));
 
-        return CollectionUtils.containsAny(forbiddenSellers, Lists.newArrayList(seller.getName().toLowerCase(), seller.getUuid().toLowerCase()));
+        return CollectionUtils.containsAny(forbiddenSellers,
+                Lists.newArrayList(seller.getName().toLowerCase(), seller.getUuid().toLowerCase()));
 
     }
 
@@ -58,8 +60,10 @@ public class ForbiddenSeller extends AppScript {
         for (JSONObject object : regions) {
             String countryCode = object.get("country").toString();
             if (country.name().equalsIgnoreCase(countryCode) || (country.europe() && "eu".equalsIgnoreCase(countryCode))) {
-                forbiddenSellers.addAll(object.getJSONArray("ids").stream().filter(it -> StringUtils.isNotBlank(it.toString())).map(it -> it.toString().toLowerCase()).collect(Collectors.toList()));
-                forbiddenSellers.addAll(object.getJSONArray("names").stream().filter(it -> StringUtils.isNotBlank(it.toString())).map(it -> it.toString().toLowerCase()).collect(Collectors.toList()));
+                forbiddenSellers.addAll(object.getJSONArray("ids").stream().filter(it ->
+                        StringUtils.isNotBlank(it.toString())).map(it -> it.toString().toLowerCase()).collect(Collectors.toList()));
+                forbiddenSellers.addAll(object.getJSONArray("names").stream().filter(it ->
+                        StringUtils.isNotBlank(it.toString())).map(it -> it.toString().toLowerCase()).collect(Collectors.toList()));
                 break;
             }
         }

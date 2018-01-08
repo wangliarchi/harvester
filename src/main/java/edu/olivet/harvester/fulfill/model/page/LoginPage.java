@@ -1,6 +1,5 @@
 package edu.olivet.harvester.fulfill.model.page;
 
-import com.teamdev.jxbrowser.chromium.Browser;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import com.teamdev.jxbrowser.chromium.dom.DOMFormControlElement;
 import com.teamdev.jxbrowser.chromium.dom.DOMInputElement;
@@ -108,8 +107,8 @@ public class LoginPage extends FulfillmentPage implements PageObject {
         DOMElement errorDom = JXBrowserHelper.selectElementByCssSelector(browser, "#auth-error-message-box .a-alert-content");
         if (errorDom != null) {
             String errorText = errorDom.getInnerText();
-            if(StringUtils.isNotBlank(errorText)) {
-                throw new FailedBuyerAccountAuthenticationException("Failed to log in buyer account "+buyer.getEmail()+". Error msg");
+            if (StringUtils.isNotBlank(errorText)) {
+                throw new FailedBuyerAccountAuthenticationException("Failed to log in buyer account " + buyer.getEmail() + ". Error msg");
             }
         }
 
@@ -149,7 +148,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
             }
         }
 
-         ((DOMFormControlElement) codeField).getForm().submit();
+        ((DOMFormControlElement) codeField).getForm().submit();
 
         if (JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, ".cvf-widget-input.cvf-widget-input-code") != null) {
             throw new FailedBuyerAccountAuthenticationException("Fail to enter verification code");

@@ -2,7 +2,6 @@ package edu.olivet.harvester.fulfill.service;
 
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.ui.panel.RuntimeSettingsPanel;
 
 import javax.swing.*;
 import java.util.List;
@@ -42,7 +41,8 @@ public class ProgressUpdater {
     private static void update() {
         int total = successCount + failedCount;
         progressBar.setValue(total);
-        progressTextLabel.setText(String.format("%d of %d, %d success, %d failed, took %s", total, progressBar.getMaximum(), successCount, failedCount, Strings.formatElapsedTime(start)));
+        progressTextLabel.setText(String.format("%d of %d, %d success, %d failed, took %s",
+                total, progressBar.getMaximum(), successCount, failedCount, Strings.formatElapsedTime(start)));
     }
 
 

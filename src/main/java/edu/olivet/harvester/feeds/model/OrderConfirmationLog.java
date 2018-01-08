@@ -12,6 +12,7 @@ import org.nutz.dao.entity.annotation.Table;
 
 import java.util.Date;
 
+@SuppressWarnings("DefaultAnnotationParam")
 @Table(value = "order_confirmation_record")
 @Data
 @EqualsAndHashCode(callSuper = false)

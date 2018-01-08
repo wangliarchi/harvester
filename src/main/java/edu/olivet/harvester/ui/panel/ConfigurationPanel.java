@@ -8,7 +8,6 @@ import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.utils.FinderCodeUtils;
-import edu.olivet.harvester.utils.Settings;
 import edu.olivet.harvester.utils.Settings.Configuration;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
@@ -16,7 +15,6 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
-import java.awt.*;
 
 /**
  * Configuration panel for single marketplace
@@ -27,11 +25,15 @@ public class ConfigurationPanel extends JPanel {
 
     @Getter
     private final Country country;
+    private MarketWebServiceIdentity marketWebServiceIdentity;
 
     public ConfigurationPanel(Country country) {
         this.country = country;
         this.initComponents();
     }
+
+    private JPanel mainPanel;
+    private SellerPanel sellerPanel;
 
     private void initComponents() {
         final JLabel sellerLbl = new JLabel("Seller Account:");
@@ -71,47 +73,43 @@ public class ConfigurationPanel extends JPanel {
         ebatesBuyerFld.setToolTipText("Input ebay buyer account for product order fulfillment benefit");
 
         loadMWSInfoButton.setText("Find Seller Id");
-        loadMWSInfoButton.addActionListener(evt -> {
-            new Thread(() -> {
-                String sellerEmail = sellerEmailFld.getText();
-                if (StringUtils.isBlank(sellerEmail)) {
-                    UITools.error("Please enter seller email/password first");
-                    return;
-                }
+        loadMWSInfoButton.addActionListener(evt -> new Thread(() -> {
+            String sellerEmail = sellerEmailFld.getText();
+            if (StringUtils.isBlank(sellerEmail)) {
+                UITools.error("Please enter seller email/password first");
+                return;
+            }
 
-                JFrame frame = new JFrame();
-                frame.setMinimumSize(new Dimension(1400, 900));
-                frame.setTitle("Seller Panel");
+            Account seller = new Account(sellerEmailFld.getText(), AccountType.Seller);
+            sellerPanel = new SellerPanel(0, country, seller, 1);
 
-                Account seller = new Account(sellerEmailFld.getText(), AccountType.Seller);
-                SellerPanel sellerPanel = new SellerPanel(1, country, seller, 1);
-                frame.getContentPane().add(sellerPanel);
-                UITools.setDialogAttr(frame, true);
-
-
-                try {
-                    MarketWebServiceIdentity marketWebServiceIdentity = sellerPanel.fetchMWSInfo();
-
-                    frame.setVisible(false); //you can't see me!
-                    frame.dispose();
-
+            try {
+                showSellerPanel();
+                WaitTime.Short.execute();
+                MarketWebServiceIdentity marketWebServiceIdentity = sellerPanel.fetchMWSInfo();
+                if (marketWebServiceIdentity != null) {
                     String[] idName = marketWebServiceIdentity.getSellerId().split("\t");
                     sellerIdFld.setText(idName[0]);
                     storeNameFld.setText(idName[1]);
                     mwsAccessKeyFld.setText(marketWebServiceIdentity.getAccessKey());
                     mwsSecretKeyFld.setText(marketWebServiceIdentity.getSecretKey());
-
-                } catch (Exception e) {
-                    UITools.error("Error fetching seller id - " + e.getMessage());
                 }
-            }).start();
-        });
 
-        GroupLayout layout = new GroupLayout(this);
-        this.setLayout(layout);
+            } catch (Exception e) {
+                UITools.error("Error fetching seller id - " + e.getMessage());
+            } finally {
+                showMainPanel();
+            }
+        }).start());
+
+
+        mainPanel = new JPanel();
+        GroupLayout layout = new GroupLayout(mainPanel);
+        mainPanel.setLayout(layout);
 
         final int width = 480;
-        int loadMWSButtonWidth = (int) loadMWSInfoButton.getPreferredSize().getWidth();
+        final int loadMWSButtonWidth = (int) loadMWSInfoButton.getPreferredSize().getWidth();
+        final int sellerIdFieldWidth = width - loadMWSButtonWidth;
         layout.setHorizontalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(layout.createSequentialGroup()
@@ -138,7 +136,9 @@ public class ConfigurationPanel extends JPanel {
                                         .addGroup(layout.createSequentialGroup().addComponent(sellerEmailFld, width, width, width))
                                         .addGroup(layout.createSequentialGroup().addComponent(storeNameFld, width, width, width))
                                         .addGroup(layout.createSequentialGroup().addComponent(signatureFld, width, width, width))
-                                        .addGroup(layout.createSequentialGroup().addComponent(sellerIdFld, width - loadMWSButtonWidth, width - loadMWSButtonWidth, width - loadMWSButtonWidth).addComponent(loadMWSInfoButton))
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(sellerIdFld, sellerIdFieldWidth, sellerIdFieldWidth, sellerIdFieldWidth)
+                                                .addComponent(loadMWSInfoButton))
                                         .addGroup(layout.createSequentialGroup().addComponent(mwsAccessKeyFld, width, width, width))
                                         .addGroup(layout.createSequentialGroup().addComponent(mwsSecretKeyFld, width, width, width))
                                         .addGroup(layout.createSequentialGroup().addComponent(bookDataSourceUrlFld, width, width, width))
@@ -189,7 +189,8 @@ public class ConfigurationPanel extends JPanel {
                                         .addComponent(buyerLbl).addComponent(buyerFld, height, height, height))
                                 .addGap(vGap)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(productDataSourceUrlLbl).addComponent(productDataSourceUrlFld, height, height, height))
+                                        .addComponent(productDataSourceUrlLbl)
+                                        .addComponent(productDataSourceUrlFld, height, height, height))
                                 .addGap(vGap)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(prodPrimeBuyerLbl).addComponent(prodPrimeBuyerFld, height, height, height))
@@ -204,7 +205,50 @@ public class ConfigurationPanel extends JPanel {
                                         .addComponent(userCodeLbl).addComponent(userCodeFld, height, height, height))
                                 .addGap(vGap)
                         ));
+
+
+        showMainPanel();
+
         UITools.addListener2Textfields(this);
+    }
+
+    private void showMainPanel() {
+        mainPanel.setVisible(true);
+        if (sellerPanel != null) {
+            sellerPanel.setVisible(false);
+            try {
+                sellerPanel.getBrowser().dispose();
+            } catch (Exception e) {
+                //
+            }
+        }
+        this.setLayout(null);
+        GroupLayout newLayout = new GroupLayout(this);
+        newLayout.setHorizontalGroup(
+                newLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(mainPanel));
+        newLayout.setVerticalGroup(
+                newLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(mainPanel));
+        this.setLayout(newLayout);
+        this.revalidate();
+        this.repaint();
+    }
+
+    public void showSellerPanel() {
+        mainPanel.setVisible(false);
+        sellerPanel.setVisible(true);
+        this.setLayout(null);
+        GroupLayout newLayout = new GroupLayout(this);
+        newLayout.setHorizontalGroup(
+                newLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(sellerPanel));
+        newLayout.setVerticalGroup(
+                newLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(sellerPanel));
+        this.setLayout(newLayout);
+        this.revalidate();
+        this.repaint();
     }
 
     private JTextField sellerFld = new JTextField();

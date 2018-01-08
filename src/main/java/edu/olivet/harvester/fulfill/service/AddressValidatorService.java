@@ -9,7 +9,6 @@ import edu.olivet.harvester.fulfill.service.addressvalidator.AddressValidator;
 import edu.olivet.harvester.fulfill.service.addressvalidator.GoogleAddressValidator;
 import edu.olivet.harvester.fulfill.service.addressvalidator.OrderManAddressValidator;
 import edu.olivet.harvester.fulfill.service.addressvalidator.USPSAddressValidator;
-import org.apache.commons.lang3.SystemUtils;
 import org.jsoup.Jsoup;
 
 import java.io.IOException;
@@ -42,9 +41,10 @@ public class AddressValidatorService implements AddressValidator {
     @Repeat
     public static void logFailed(String original, String entered, String uspsReturned) {
         String sid = RuntimeSettings.load().getSid() + RuntimeSettings.load().getMarketplaceName();
-        String url = FAILED_LOG_APP_SCRIPT_URL + "?s=" + Strings.encode(sid) + "&o=" + Strings.encode(original) + "&e=" + entered + "&u=" + Strings.encode(uspsReturned);
+        String url = FAILED_LOG_APP_SCRIPT_URL + "?s=" + Strings.encode(sid) + "&o=" + Strings.encode(original) +
+                "&e=" + entered + "&u=" + Strings.encode(uspsReturned);
         try {
-            Jsoup.connect(url).ignoreContentType(true).timeout(12000).execute().body().trim();
+            Jsoup.connect(url).ignoreContentType(true).timeout(12000).execute();
         } catch (IOException e) {
             e.printStackTrace();
         }

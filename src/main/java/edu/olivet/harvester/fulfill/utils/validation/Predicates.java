@@ -203,6 +203,7 @@ public class Predicates {
         public Map<String, OrderIdStatistic> getCardinalityMap() {
             Map<String, OrderIdStatistic> map = new HashMap<>();
             Map<String, Integer> countMap = new HashMap<>();
+            //noinspection MismatchedQueryAndUpdateOfCollection
             Map<String, Integer> finishedMap = new HashMap<>();
 
             for (Order order : orders) {
@@ -216,7 +217,7 @@ public class Predicates {
                 String orderId = entry.getKey();
                 int total = entry.getValue();
                 int finish = finishedMap.get(orderId) == null ? 1 : finishedMap.get(orderId);
-                // 不是多单，或者多单没有全部完成的情况不处理
+                //不是多单，或者多单没有全部完成的情况不处理
                 if (total < 2 || total > finish) {
                     continue;
                 }

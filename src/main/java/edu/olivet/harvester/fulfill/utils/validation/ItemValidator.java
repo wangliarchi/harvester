@@ -113,7 +113,11 @@ public class ItemValidator {
                 report.sameRate = (int) sameRate;
                 report.diffRate = (int) diffRate;
 
-                report.pass = CollectionUtils.isEmpty(disjunction) || sameCnt >= PASS_SAME_COUNT || sameRate >= PASS_SAME_RATE || diffCnt <= PASS_DIFF_COUNT || diffRate <= PASS_DIFF_RATE;
+                report.pass = CollectionUtils.isEmpty(disjunction) ||
+                        sameCnt >= PASS_SAME_COUNT ||
+                        sameRate >= PASS_SAME_RATE ||
+                        diffCnt <= PASS_DIFF_COUNT ||
+                        diffRate <= PASS_DIFF_RATE;
             } else {
                 report.pass = false;
             }

@@ -10,7 +10,6 @@ import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.ui.panel.ConfigurationPanel;
-import edu.olivet.harvester.ui.panel.RuntimeSettingsPanel;
 import edu.olivet.harvester.ui.panel.SimpleOrderSubmissionRuntimePanel;
 import edu.olivet.harvester.utils.Migration;
 import edu.olivet.harvester.utils.SettingValidator;

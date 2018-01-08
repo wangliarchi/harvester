@@ -189,7 +189,7 @@ public class Migration {
         }
     }
 
-    public static void migrateCreditCardSetttings() {
+    public static void migrateCreditCardSettings() {
         File file = new File(CreditCardUtils.CC_CONFIG_FILE_PATH);
         if (file.exists()) {
             return;
@@ -227,7 +227,7 @@ public class Migration {
     }
 
     public static void main(String[] args) {
-        Migration.migrateCreditCardSetttings();
+        Migration.migrateCreditCardSettings();
         //Migration.loadSettings();
     }
 

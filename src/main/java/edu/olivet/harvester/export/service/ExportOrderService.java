@@ -30,7 +30,7 @@ import java.util.*;
 public class ExportOrderService extends OrderClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExportOrderService.class);
     private final String[] STATUS_FILTERS = {"Unshipped", "PartiallyShipped", "Shipped"};
-    private final int DAYS_BACK = -7;
+    @SuppressWarnings("FieldCanBeLocal") private final int DAYS_BACK = -7;
 
     @Inject
     OrderFetcher orderFetcher;
@@ -159,11 +159,7 @@ public class ExportOrderService extends OrderClient {
         Map<String, edu.olivet.harvester.model.Order> allOrders = new HashMap<>();
 
 
-        spreadsheetIds.forEach(it -> {
-            orderService.fetchOrders(sheetAPI.getSpreadsheet(it), minDate).forEach(order -> {
-                allOrders.put(order.order_id, order);
-            });
-        });
+        spreadsheetIds.forEach(it -> orderService.fetchOrders(sheetAPI.getSpreadsheet(it), minDate).forEach(order -> allOrders.put(order.order_id, order)));
 
         orders.removeIf(order -> allOrders.containsKey(order.getAmazonOrderId()));
         return orders;

@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.google.inject.Singleton;
 import edu.olivet.foundations.utils.Directory;
 import edu.olivet.foundations.utils.Tools;
-import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.ui.Harvester;
 import lombok.Data;
 
@@ -38,9 +37,10 @@ public class SystemSettings {
 
     private static SystemSettings instance;
 
-    private SystemSettings(){
+    private SystemSettings() {
 
     }
+
     public static SystemSettings load() {
         if (instance == null) {
             File file = new File(getConfigPath());

@@ -9,7 +9,6 @@ import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
-import edu.olivet.harvester.ui.panel.RuntimeSettingsPanel;
 import edu.olivet.harvester.utils.common.NumberUtils;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;

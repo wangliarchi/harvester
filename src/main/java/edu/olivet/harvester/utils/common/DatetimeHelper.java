@@ -54,9 +54,9 @@ public class DatetimeHelper {
 
         int maxAllowed = to.get(SECOND_OF_DAY) - from.get(SECOND_OF_DAY);
 
+        //noinspection ConstantConditions
         int randSeconds = new Random().ints(1, 0, maxAllowed).findFirst().getAsInt();
-        LocalTime time = from.plusSeconds(randSeconds);
-        return time;
+        return from.plusSeconds(randSeconds);
     }
 
 

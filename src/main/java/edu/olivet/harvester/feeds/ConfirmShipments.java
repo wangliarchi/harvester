@@ -172,7 +172,8 @@ public class ConfirmShipments {
             try {
                 List<FeedSubmissionInfo> submissionInfo = getUnprocessedFeedSubmission(country);
                 if (submissionInfo.size() > 0) {
-                    messagePanel.wrapLineMsg(String.format("%s processing/unporcessed order confirmation found. Wait 5 mins to try again.", submissionInfo.size()), LOGGER, InformationLevel.Information);
+                    messagePanel.wrapLineMsg(String.format("%s processing/unporcessed order confirmation found. Wait 5 mins to try again.",
+                            submissionInfo.size()), LOGGER, InformationLevel.Information);
                     Tools.sleep(5, TimeUnit.MINUTES);
                 } else {
                     break;
@@ -218,7 +219,8 @@ public class ConfirmShipments {
             try {
                 sheetAPI.markBuyerCancelOrders(canceledOrders, worksheet);
             } catch (Exception e) {
-                LOGGER.error("Failed to mark canceled orders {} for {}", worksheet, canceledOrders.stream().map(it -> it.order_id).collect(Collectors.toList()), e);
+                LOGGER.error("Failed to mark canceled orders {} for {}",
+                        worksheet, canceledOrders.stream().map(it -> it.order_id).collect(Collectors.toList()), e);
             }
         }
 
@@ -277,7 +279,8 @@ public class ConfirmShipments {
 
             messagePanel.displayMsg("Please try to submit the feed file via Amazon Seller Center.");
             if (messagePanel instanceof VirtualMessagePanel) {
-                String subject = String.format("Error when submitting file for sheet %s, feed file %s", worksheet.toString(), feedFile.getName());
+                String subject = String.format("Error when submitting file for sheet %s, feed file %s",
+                        worksheet.toString(), feedFile.getName());
                 confirmShipmentEmailSender.sendErrorFoundEmail(subject,
                         "Error when submitting feed file. " + e.getMessage(), country);
             }
@@ -294,7 +297,8 @@ public class ConfirmShipments {
     }
 
     @Repeat
-    public void recordConfirmationLog(Country country, Worksheet worksheet, StringBuilder resultSummary, StringBuilder resultDetail, String result, File feedFile) {
+    public void recordConfirmationLog(Country country, Worksheet worksheet, StringBuilder resultSummary,
+                                      StringBuilder resultDetail, String result, File feedFile) {
         //write log to worksheet
         writeLogToWorksheet(worksheet, result, resultSummary.toString());
 
@@ -343,7 +347,8 @@ public class ConfirmShipments {
     public void writeLogToWorksheet(Worksheet worksheet, String result, String summary) {
         int[] counts = ServiceUtils.parseFeedSubmissionResult(result);
 
-        String log = String.format("auto-confirmed; %s Process summary: Total submitted %s, Succeed %s, Failed %s", summary, counts[0], counts[1], counts[2]);
+        String log = String.format("auto-confirmed; %s Process summary: Total submitted %s, Succeed %s, Failed %s",
+                summary, counts[0], counts[1], counts[2]);
         String now = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(System.currentTimeMillis());
         while (true) {
             try {
@@ -435,7 +440,10 @@ public class ConfirmShipments {
         return null;
     }
 
-    private static final String[] RECOVERABLE_ERROR_MESSAGES = {"Request is throttled", "You exceeded your quota", "Internal Error", "Failed to retrieve batch id"};
+    private static final String[] RECOVERABLE_ERROR_MESSAGES = {"Request is throttled",
+            "You exceeded your quota",
+            "Internal Error",
+            "Failed to retrieve batch id"};
 
     protected boolean isRepeatable(Exception e) {
         return Strings.containsAnyIgnoreCase(e.getMessage(), RECOVERABLE_ERROR_MESSAGES);
@@ -549,7 +557,8 @@ public class ConfirmShipments {
 
 
         //create feed file
-        return this.feedGenerator.generateConfirmShipmentFeedFromRows(ordersToBeConfirmed, worksheet.getSpreadsheet().getSpreadsheetCountry(), worksheet.getSpreadsheet().getSpreadsheetType());
+        return this.feedGenerator.generateConfirmShipmentFeedFromRows(ordersToBeConfirmed,
+                worksheet.getSpreadsheet().getSpreadsheetCountry(), worksheet.getSpreadsheet().getSpreadsheetType());
 
     }
 
@@ -557,7 +566,7 @@ public class ConfirmShipments {
 
     /**
      * <pre>
-     * 1. 如果sheet date 比latest expected shipping date 晚，使用 earliest expected shiping date
+     * 1. 如果sheet date 比latest expected shipping date 晚，使用 earliest expected shipping date
      * 原因是 有导单比较晚的情况
      * 2. 如果purchase date 比sheet date 晚， 使用purchase date
      * 3. 其他情况直接使用sheet date
@@ -627,7 +636,8 @@ public class ConfirmShipments {
             try {
 
                 LOGGER.info("Load Unshipped or PartiallyShipped orders between {} and {}", createAfter, createBefore);
-                List<com.amazonservices.mws.orders._2013_09_01.model.Order> orders = mwsOrderClient.listUnshippedOrders(country, createBefore, createAfter);
+                List<com.amazonservices.mws.orders._2013_09_01.model.Order> orders =
+                        mwsOrderClient.listUnshippedOrders(country, createBefore, createAfter);
                 //todo timezone? should be fine since there should be at lest one day between EarliestShipDate and LatestShipDate
                 orders.removeIf(order -> order.getEarliestShipDate().toGregorianCalendar().getTime().after(now));
                 LOGGER.info("{} unshipped or partiallyShipped order(s) founded  between {} and {}", createAfter, createBefore);
@@ -636,7 +646,8 @@ public class ConfirmShipments {
                 if (orders.size() > 0) {
                     //send email
                     String subject = String.format("Alert: %d %s created before %s %s not been confirmed.",
-                            orders.size(), orders.size() == 1 ? "order" : "orders", edu.olivet.harvester.utils.common.DateFormat.DATE_TIME.format(createBefore),
+                            orders.size(), orders.size() == 1 ? "order" : "orders",
+                            edu.olivet.harvester.utils.common.DateFormat.DATE_TIME.format(createBefore),
                             orders.size() == 1 ? "has" : "have");
 
                     StringBuilder content = new StringBuilder(subject).append("\n\n");

@@ -5,5 +5,6 @@ package edu.olivet.harvester.fulfill.service;
  */
 public interface RuntimePanelObserver {
     void updateSpending(String spending);
+
     void updateBudget(String budget);
 }

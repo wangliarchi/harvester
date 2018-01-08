@@ -66,7 +66,7 @@ public class OrderSubmissionTaskService {
     public void completed(OrderSubmissionTask task) {
         task.setStatus(OrderTaskStatus.Completed.name());
         task.setDateEnded(new Date());
-       saveTask(task);
+        saveTask(task);
     }
 
 }

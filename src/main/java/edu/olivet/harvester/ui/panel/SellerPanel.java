@@ -1,18 +1,12 @@
 package edu.olivet.harvester.ui.panel;
 
-/**
- * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/22/2017 9:52 AM
- */
-
 import com.teamdev.jxbrowser.chromium.Browser;
-import com.teamdev.jxbrowser.chromium.BrowserKeyEvent.KeyCode;
-import com.teamdev.jxbrowser.chromium.Cookie;
-import com.teamdev.jxbrowser.chromium.CookieStorage;
 import com.teamdev.jxbrowser.chromium.dom.*;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
+import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.exception.AuthenticationFailException;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.*;
@@ -22,7 +16,6 @@ import edu.olivet.harvester.utils.Settings;
 import edu.olivet.harvester.utils.Settings.Configuration;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.FastDateFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,17 +60,17 @@ public class SellerPanel extends JPanel {
         return this.seller.key() + Constants.HYPHEN + this.id;
     }
 
-
-    public CookieStorage loginSellerCentral(final Country country) {
+    @Repeat(expectedExceptions = RobotFoundException.class)
+    public void loginSellerCentral(final Country country) {
 
         //load seller center page
         JXBrowserHelper.loadPage(browser, country.ascBaseUrl());
-
+        WaitTime.Long.execute();
         DOMElement email = JXBrowserHelper.selectElementByCssSelector(browser, "#ap_email,input[name=email]");
         if (email == null) {
             LOGGER.warn("{} ASC可能已经登录：{} -> {}", country.name(), browser.getTitle(), browser.getURL());
             this.selectMarketplace(country);
-            return browser.getCookieStorage();
+            browser.getCookieStorage();
         } else {
             JXBrowserHelper.fillValueForFormField(browser, "#ap_email,input[name=email]", seller.getEmail());
             JXBrowserHelper.fillValueForFormField(browser, "#ap_password,input[name=password]", seller.getPassword());
@@ -103,22 +96,33 @@ public class SellerPanel extends JPanel {
                     JXBrowserHelper.selectElementByCssSelector(browser, cssSelector) != null) &&
                     JXBrowserHelper.selectElementByName(browser, "code") != null) {
                 String errorMsg = String.format("尝试登录%s ASC失败，请输入%s对应Verification Code继续", country.name(), sellerEmail);
+                WaitTime.Longest.execute();
                 throw new RobotFoundException(errorMsg);
             }
 
-            if (browser.getTitle().contains("Two-Step Verification") ||
-                    JXBrowserHelper.selectElementByCssSelector(browser, "#auth-mfa-otpcode,#auth-mfa-remember-device") != null) {
-                String errorMsg = String.format("尝试登录%s ASC失败，请输入%s对应Two-Step Verification Code继续", country.name(), sellerEmail);
-                throw new RobotFoundException(errorMsg);
+            int repeatTime = 0;
+            while (true) {
+                if (browser.getTitle().contains("Two-Step Verification") ||
+                        JXBrowserHelper.selectElementByCssSelector(browser, "#auth-mfa-otpcode,#auth-mfa-remember-device") != null) {
+                    WaitTime.Short.execute();
+                    repeatTime++;
+                    if (repeatTime > 20) {
+                        String errorMsg = String.format("尝试登录%s ASC失败，请输入%s对应Two-Step Verification Code继续", country.name(), sellerEmail);
+                        throw new RobotFoundException(errorMsg);
+                    }
+                } else {
+                    break;
+                }
             }
 
             if (JXBrowserHelper.selectElementByCssSelector(browser, "#ap_captcha_img") != null) {
+                WaitTime.Longest.execute();
                 throw new RobotFoundException(String.format("尝试登录%s ASC失败，请输入%s对应验证码继续", country.name(), sellerEmail));
             }
 
             this.selectMarketplace(country);
             // 尝试保存一份Cookie供其他窗口复用
-            return browser.getCookieStorage();
+            browser.getCookieStorage();
         }
     }
 
@@ -157,7 +161,11 @@ public class SellerPanel extends JPanel {
     private boolean isMarketplaceSelected(Country country) {
         Browser browser = browserView.getBrowser();
         JXBrowserHelper.wait(browser, By.cssSelector(OPTION_SELECTOR));
-        DOMSelectElement selection = (DOMSelectElement) JXBrowserHelper.selectElementByCssSelector(browser, "#sc-mkt-picker-switcher-select");
+        String switcherId = "#sc-mkt-picker-switcher-select";
+        DOMSelectElement selection = (DOMSelectElement) JXBrowserHelper.selectElementByCssSelector(browser, switcherId);
+        if (selection == null) {
+            return false;
+        }
         List<DOMOptionElement> options = selection.getOptions();
         for (DOMElement option : options) {
             if (!(option instanceof DOMOptionElement)) {
@@ -175,12 +183,12 @@ public class SellerPanel extends JPanel {
     }
 
 
+    @SuppressWarnings("ConstantConditions")
     public MarketWebServiceIdentity fetchMWSInfo() {
 
         loginSellerCentral(country);
+
         WaitTime.Short.execute();
-        JXBrowserHelper.waitUntilVisible(browser,".sc-mkt-picker-switcher-txt");
-        LOGGER.info("");
 
         //gp/account-manager/home.html
         JXBrowserHelper.loadPage(browser, country.ascBaseUrl() + "/gp/account-manager/home.html");
@@ -210,11 +218,6 @@ public class SellerPanel extends JPanel {
     }
 
 
-    private static final String SUBMIT_BTN_SELECTOR = ".sm-view-footer-buttons span.a-button-primary input.a-button-input";
-
-    private static final FastDateFormat DATE_FORMAT = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss.SSS");
-
-
     public static void main(String[] args) {
         JFrame frame = new JFrame();
         frame.setMinimumSize(new Dimension(1400, 900));
@@ -226,7 +229,7 @@ public class SellerPanel extends JPanel {
 
         UITools.setDialogAttr(frame, true);
 
-       MarketWebServiceIdentity identity =  sellerPanel.fetchMWSInfo();
-       System.out.println(identity);
+        MarketWebServiceIdentity identity = sellerPanel.fetchMWSInfo();
+        System.out.println(identity);
     }
 }

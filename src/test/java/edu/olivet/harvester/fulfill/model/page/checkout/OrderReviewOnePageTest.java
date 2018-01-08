@@ -62,12 +62,7 @@ public class OrderReviewOnePageTest extends BaseTest {
         orders = orderService.fetchOrders(spreadsheet, Range.between(Dates.parseDate("11/05/2017"), Dates.parseDate("11/17/2017")));
         orderMap = orders.stream().collect(Collectors.groupingBy(Order::getOrder_id));
         //
-        directories = new File(TEST_DATA_ROOT + File.separator + "pages").listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return file.isDirectory() && StringUtils.contains(file.getName(), "720US");
-            }
-        });
+        directories = new File(TEST_DATA_ROOT + File.separator + "pages").listFiles(file -> file.isDirectory() && StringUtils.contains(file.getName(), "720US"));
 
     }
 
@@ -76,12 +71,7 @@ public class OrderReviewOnePageTest extends BaseTest {
         prepareData();
 
         for (File dir : directories) {
-            File[] files = dir.listFiles(new FileFilter() {
-                @Override
-                public boolean accept(File file) {
-                    return file.isFile() && StringUtils.contains(file.getName(), "OrderReview.html");
-                }
-            });
+            File[] files = dir.listFiles(file -> file.isFile() && StringUtils.contains(file.getName(), "OrderReview.html"));
             for (File file : files) {
 
                 String orderId = RegexUtils.getMatched(file.getName(), RegexUtils.Regex.AMAZON_ORDER_NUMBER);
@@ -156,12 +146,7 @@ public class OrderReviewOnePageTest extends BaseTest {
 
 
         for (File dir : directories) {
-            File[] files = dir.listFiles(new FileFilter() {
-                @Override
-                public boolean accept(File file) {
-                    return file.isFile() && StringUtils.contains(file.getName(), "OrderReviewPage_execute.html");
-                }
-            });
+            File[] files = dir.listFiles(file -> file.isFile() && StringUtils.contains(file.getName(), "OrderReviewPage_execute.html"));
             for (File file : files) {
                 String orderId = RegexUtils.getMatched(file.getName(), RegexUtils.Regex.AMAZON_ORDER_NUMBER);
                 if (orderMap.containsKey(orderId)) {
@@ -169,7 +154,7 @@ public class OrderReviewOnePageTest extends BaseTest {
                     browser.loadHTML(Tools.readFileToString(file));
                     WaitTime.Short.execute();
                     Money grandTotal = orderReviewOnePage.parseTotal();
-                    if (order.cost.equalsIgnoreCase(grandTotal.toUSDAmount().toPlainString()) == false) {
+                    if (!order.cost.equalsIgnoreCase(grandTotal.toUSDAmount().toPlainString())) {
                         System.out.println(String.format("File %s, Actual %s, Parsed %s", dir.getName() + "/" + file.getName(), order.cost, grandTotal.toUSDAmount().toPlainString()));
                     }
 

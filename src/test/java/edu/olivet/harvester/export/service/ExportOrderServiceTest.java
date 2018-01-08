@@ -31,7 +31,6 @@ public class ExportOrderServiceTest extends BaseTest {
         List<Order> orders = exportOrderService.listOrdersFromAmazon(lastExportedDate, now.get(), Country.US);
         assertEquals(orders.size(), 6);
 
-        orders = exportOrderService.removeExportedOrders(orders, now.get(), Country.US);
 
     }
 

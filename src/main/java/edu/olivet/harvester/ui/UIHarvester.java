@@ -158,9 +158,6 @@ public class UIHarvester extends AbstractApplicationUI {
     @UIEvent
     public void systemSettings() {
         SystemSettingsDialog dialog = UITools.setDialogAttr(new SystemSettingsDialog());
-        if (dialog.isOk()) {
-            //
-        }
     }
 
     @UIEvent

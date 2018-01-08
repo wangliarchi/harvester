@@ -37,7 +37,7 @@ public class ExportStatService {
     SheetAPI sheetAPI;
 
     @Repeat(expectedExceptions = BusinessException.class)
-    public Date initExport(Country country) {
+    public Date getOrderExportFromDate(Country country) {
         String sid = Settings.load().getSid();
         String account = sid + country.name();
 
@@ -49,8 +49,7 @@ public class ExportStatService {
             }
 
             if (StringUtils.isNotBlank(result)) {
-                Date date = Dates.parseDate(result);
-                return date;
+                return Dates.parseDate(result);
             }
 
             return lastOrderDate(country);
@@ -70,7 +69,7 @@ public class ExportStatService {
             String url = APPS_URL + "?method=UpdateStats&account=" + account + "&cm=" + SystemUtils.USER_NAME +
                     "&lastRunAt=" + DateFormat.DATE_TIME_STR.format(nowDate) +
                     "&lastUpdatedAt=" + (lastDate == null ? "" : DateFormat.DATE_TIME_STR.format(lastDate)) + "&total=" + total;
-            Jsoup.connect(url).ignoreContentType(true).timeout(12000).execute().body().trim();
+            Jsoup.connect(url).ignoreContentType(true).timeout(12000).execute();
 
         } catch (Exception e) {
             LOGGER.error("Fail to update order export stats for {}", country, e);
@@ -123,6 +122,6 @@ public class ExportStatService {
     public static void main(String[] args) {
         ExportStatService exportStatService = ApplicationContext.getBean(ExportStatService.class);
 
-        exportStatService.initExport(Country.US);
+        exportStatService.getOrderExportFromDate(Country.US);
     }
 }

@@ -26,7 +26,7 @@ import java.util.*;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/19/17 6:20 PM
  */
 public class SheetService extends SheetAPI {
-    private final static String TEMPLATE_SHEET_NAME = "Template";
+    private static final String TEMPLATE_SHEET_NAME = "Template";
     private static final Logger LOGGER = LoggerFactory.getLogger(SheetService.class);
 
     @Inject
@@ -118,6 +118,7 @@ public class SheetService extends SheetAPI {
         }
     }
 
+    @SuppressWarnings("ConstantConditions")
     public int getLastRow(String spreadsheetId, String sheetName) {
         //read current orders
         List<Order> currentOrders;

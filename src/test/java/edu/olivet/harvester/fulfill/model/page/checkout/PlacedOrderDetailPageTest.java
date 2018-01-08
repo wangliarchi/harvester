@@ -12,6 +12,7 @@ import edu.olivet.harvester.ui.panel.BuyerPanel;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -46,7 +47,7 @@ public class PlacedOrderDetailPageTest extends BaseTest {
 
     @Test void testParseTotalCost() {
         prepareBrowser();
-        assertEquals(placedOrderDetailPage.parseTotalCost(),"10.94");
+        assertEquals(placedOrderDetailPage.parseTotalCost().getAmount().toPlainString(),"10.94");
     }
 
     @Test void testUKParseTotalCost() {
@@ -99,8 +100,8 @@ public class PlacedOrderDetailPageTest extends BaseTest {
     public void testParseItems() throws Exception {
         prepareBrowser();
         Map<String, String> items = placedOrderDetailPage.parseItems();
-        String key = items.keySet().stream().collect(Collectors.toList()).get(0);
+        String key = new ArrayList<>(items.keySet()).get(0);
         assertEquals(key,"1598695274");
-        assertEquals(items.get(key).toString(),"$6.95");
+        assertEquals(items.get(key),"$6.95");
     }
 }

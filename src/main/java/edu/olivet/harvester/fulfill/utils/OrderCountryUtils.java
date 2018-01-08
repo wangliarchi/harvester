@@ -34,7 +34,7 @@ public class OrderCountryUtils {
             }
             try {
                 return Country.fromCode(RuntimeSettings.load().getMarketplaceName());
-            }catch (Exception e1) {
+            } catch (Exception e1) {
                 //
                 return null;
             }
@@ -50,9 +50,9 @@ public class OrderCountryUtils {
             return Country.US;
         } else if (Remark.ukFwd(order.remark)) {
             return Country.UK;
-        } else if(order.getType() == OrderItemType.BOOK && getMarketplaceCountry(order).europe()) {
+        } else if (order.getType() == OrderItemType.BOOK && getMarketplaceCountry(order).europe()) {
             return Country.UK;
-        } else  {
+        } else {
             return getMarketplaceCountry(order);
         }
     }

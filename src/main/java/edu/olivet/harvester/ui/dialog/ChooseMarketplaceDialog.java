@@ -104,7 +104,6 @@ public class ChooseMarketplaceDialog extends BaseDialog {
         GroupLayout layout = new GroupLayout(getContentPane());
 
 
-
         layout.setHorizontalGroup(layout.createParallelGroup(Alignment.LEADING)
                 .addComponent(spreadPane, 380, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createSequentialGroup()
@@ -218,7 +217,7 @@ public class ChooseMarketplaceDialog extends BaseDialog {
                 .atZone(ZoneId.systemDefault()).toInstant();
         Date from = Date.from(instant);
 
-        if(from.after(DateUtils.addMinutes(new Date(),-5))) {
+        if (from.after(DateUtils.addMinutes(new Date(), -5))) {
             UITools.error("From time should be at least 5 minutes before current time");
             return;
         }
@@ -227,12 +226,12 @@ public class ChooseMarketplaceDialog extends BaseDialog {
                 .atZone(ZoneId.systemDefault()).toInstant();
         Date to = Date.from(toInstant);
 
-        if(to.after(DateUtils.addMinutes(new Date(),-5))) {
+        if (to.after(DateUtils.addMinutes(new Date(), -5))) {
             UITools.error("To time should be at least 5 minutes before current time");
             return;
         }
 
-        if(from.after(to)) {
+        if (from.after(to)) {
             UITools.error("From time should be before to time.");
             return;
         }

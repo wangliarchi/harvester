@@ -17,10 +17,8 @@ import edu.olivet.harvester.ui.dialog.ChooseSheetDialog;
 import edu.olivet.harvester.utils.FinderCodeUtils;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Getter;
-import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +37,7 @@ import java.util.stream.Collectors;
 public class OrderSubmissionSettingsPanel extends JPanel {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderSubmissionSettingsPanel.class);
 
-    private List<Worksheet> selectedWorksheets;
+    @SuppressWarnings("FieldCanBeLocal") private List<Worksheet> selectedWorksheets;
     private String selectedSpreadsheetId;
     private Country selectedMarketplace;
     private final Map<Integer, JComboBox<String>> sheetNameMap = new LinkedHashMap<>();
@@ -79,9 +77,7 @@ public class OrderSubmissionSettingsPanel extends JPanel {
             }
         });
 
-        selectSheetButton.addActionListener(evt -> {
-            selectGoogleSheet();
-        });
+        selectSheetButton.addActionListener(evt -> selectGoogleSheet());
 
         showHideDetailButton.addActionListener(evt -> {
             if (showHideDetailButton.getText().equalsIgnoreCase("Show More Runtime Settings")) {
@@ -129,7 +125,7 @@ public class OrderSubmissionSettingsPanel extends JPanel {
             selectedSheetName.setText(selectedWorksheets.get(0).getSpreadsheet().getTitle());
             selectedSheetName.setToolTipText(selectedWorksheets.get(0).getSpreadsheet().getTitle());
             selectedSpreadsheetId = dialog.getSelectedWorksheets().get(0).getSpreadsheet().getSpreadsheetId();
-            sheetNames = selectedWorksheets.stream().map(it -> it.getSheetName()).collect(Collectors.toList());
+            sheetNames = selectedWorksheets.stream().map(Worksheet::getSheetName).collect(Collectors.toList());
             sheetNames.add(0, "");
             updateSheetOptions();
         }
@@ -231,9 +227,14 @@ public class OrderSubmissionSettingsPanel extends JPanel {
         for (OrderRange orderRange : orderRanges) {
             OrderSubmissionTask orderSubmissionTask = new OrderSubmissionTask();
             orderSubmissionTask.setSid(Settings.load().getSid());
-            orderSubmissionTask.setMarketplaceName(((Country) marketplaceComboBox.getSelectedItem()).name());
+            if(marketplaceComboBox.getSelectedItem() !=null) {
+                orderSubmissionTask.setMarketplaceName(((Country) marketplaceComboBox.getSelectedItem()).name());
+            }
+            //noinspection ConstantConditions
             orderSubmissionTask.setLostLimit(lostLimitComboBox.getSelectedItem().toString());
+            //noinspection ConstantConditions
             orderSubmissionTask.setPriceLimit(priceLimitComboBox.getSelectedItem().toString());
+            //noinspection ConstantConditions
             orderSubmissionTask.setEddLimit(maxDaysOverEddComboBox.getSelectedItem().toString());
             orderSubmissionTask.setNoInvoiceText(noInvoiceTextField.getText());
             orderSubmissionTask.setFinderCode(finderCodeTextField.getText());
@@ -584,6 +585,7 @@ public class OrderSubmissionSettingsPanel extends JPanel {
     private JPanel detailSettingsPanel;
 
     public Window parentFrame;
+
     public static void main(String[] args) {
         UITools.setTheme();
         JFrame frame = new JFrame();
