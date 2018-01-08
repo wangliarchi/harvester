@@ -37,7 +37,7 @@ public class ExportStatService {
     SheetAPI sheetAPI;
 
     @Repeat(expectedExceptions = BusinessException.class)
-    public Date initExport(Country country) {
+    public Date getOrderExportFromDate(Country country) {
         String sid = Settings.load().getSid();
         String account = sid + country.name();
 
@@ -122,6 +122,6 @@ public class ExportStatService {
     public static void main(String[] args) {
         ExportStatService exportStatService = ApplicationContext.getBean(ExportStatService.class);
 
-        exportStatService.initExport(Country.US);
+        exportStatService.getOrderExportFromDate(Country.US);
     }
 }
