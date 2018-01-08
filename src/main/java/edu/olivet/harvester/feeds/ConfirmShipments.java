@@ -47,9 +47,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -543,8 +542,8 @@ public class ConfirmShipments {
                 carrierName = codes[1];
             }
 
-            Date shipDate = getShipDate(order, defaultShipDate);
-            String[] row = {order.order_id, carrierCode, carrierName, edu.olivet.foundations.utils.DateFormat.SHIP_DATE.format(shipDate)};
+            String shipDate = getShipDateString(order, defaultShipDate);
+            String[] row = {order.order_id, carrierCode, carrierName, shipDate};
             ordersToBeConfirmed.add(row);
         }
 
@@ -553,6 +552,8 @@ public class ConfirmShipments {
         return this.feedGenerator.generateConfirmShipmentFeedFromRows(ordersToBeConfirmed, worksheet.getSpreadsheet().getSpreadsheetCountry(), worksheet.getSpreadsheet().getSpreadsheetType());
 
     }
+
+    @Inject Now now;
 
     /**
      * <pre>
@@ -591,11 +592,23 @@ public class ConfirmShipments {
         } catch (Exception e) {
             //
         }
-
-        if (shipDate.after(new Date())) {
+        Date nowDate = DateUtils.addHours(now.get(), -1);
+        if (shipDate.after(nowDate)) {
             shipDate = DateUtils.addDays(shipDate, -1);
         }
         return shipDate;
+    }
+
+
+    public String getShipDateString(Order order, Date defaultDate) {
+        return formatShipDate(getShipDate(order, defaultDate));
+    }
+
+    public String formatShipDate(Date shipDate) {
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        df.setTimeZone(tz);
+        return df.format(shipDate);
     }
 
     @Inject
