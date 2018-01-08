@@ -20,7 +20,8 @@ import java.util.List;
  */
 @Singleton
 public class OrderSubmissionTaskService {
-    @Inject DBManager dbManager;
+    @Inject
+    DBManager dbManager;
 
     public List<OrderSubmissionTask> todayTasks() {
         return dbManager.query(OrderSubmissionTask.class,
@@ -51,6 +52,16 @@ public class OrderSubmissionTaskService {
         TasksAndProgressPanel.getInstance().loadTasksToTable();
     }
 
+    @Inject
+    OrderSubmissionBuyerTaskService orderSubmissionBuyerTaskService;
+
+    public void deleteTask(OrderSubmissionTask task) {
+        task.setStatus(OrderTaskStatus.Deleted.name());
+        saveTask(task);
+        //delete buyer tasks as well
+        orderSubmissionBuyerTaskService.deleteByTaskId(task.getId());
+    }
+
     public void startTask(OrderSubmissionTask task) {
         task.setStatus(OrderTaskStatus.Processing.name());
         task.setDateStarted(new Date());
@@ -61,12 +72,14 @@ public class OrderSubmissionTaskService {
         task.setStatus(OrderTaskStatus.Stopped.name());
         task.setDateEnded(new Date());
         saveTask(task);
+
+        orderSubmissionBuyerTaskService.stopByTaskId(task.getId());
     }
 
     public void completed(OrderSubmissionTask task) {
         task.setStatus(OrderTaskStatus.Completed.name());
         task.setDateEnded(new Date());
-       saveTask(task);
+        saveTask(task);
     }
 
 }

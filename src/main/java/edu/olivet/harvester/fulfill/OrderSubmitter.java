@@ -5,6 +5,7 @@ import com.google.api.services.sheets.v4.model.Spreadsheet;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.UIText;
@@ -20,6 +21,7 @@ import edu.olivet.harvester.fulfill.model.OrderTaskStatus;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.*;
 import edu.olivet.harvester.fulfill.service.flowcontrol.OrderFlowEngine;
+import edu.olivet.harvester.fulfill.utils.OrderBuyerUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.fulfill.utils.validation.PreValidator;
@@ -74,7 +76,8 @@ public class OrderSubmitter {
     @Inject
     OrderService orderService;
 
-    @Inject OrderSubmissionTaskService orderSubmissionTaskService;
+    @Inject
+    OrderSubmissionTaskService orderSubmissionTaskService;
 
     private static final Map<String, Boolean> DUPLICATION_CHECK_CACHE = new HashMap<>();
 
@@ -197,7 +200,9 @@ public class OrderSubmitter {
             }
 
             try {
-                BuyerPanel buyerPanel = TabbedBuyerPanel.getInstance().initTabForOrder(order);
+                Account buyer = OrderBuyerUtils.getBuyer(order, task);
+                Country country = OrderCountryUtils.getFulfillmentCountry(order);
+                BuyerPanel buyerPanel = TabbedBuyerPanel.getInstance().getOrAddTab(country, buyer);
                 submit(order, buyerPanel);
 
                 if (StringUtils.isNotBlank(order.order_number)) {
@@ -233,42 +238,11 @@ public class OrderSubmitter {
     /**
      * Submit a single order
      *
-     * @param order the order to be submitted
+     * @param order      the order to be submitted
      * @param buyerPanel the browser panel
      */
     public void submit(Order order, BuyerPanel buyerPanel) {
-        String spreadsheetId = order.spreadsheetId;
-        long start = System.currentTimeMillis();
-        try {
-            //validate again!
-            String error = orderValidator.isValid(order, FulfillmentEnum.Action.SubmitOrder);
-            if (StringUtils.isNotBlank(error)) {
-                messageListener.addMsg(order, error, InformationLevel.Negative);
-                return;
-            }
-
-            order.originalRemark = new String(order.remark);
-            orderFlowEngine.process(order, buyerPanel);
-
-            if (StringUtils.isNotBlank(order.order_number)) {
-                messageListener.addMsg(order, "order fulfilled successfully. " + order.basicSuccessRecord() + ", took " + Strings.formatElapsedTime(start));
-            }
-        } catch (OutOfBudgetException e) {
-            throw e;
-        } catch (FailedBuyerAccountAuthenticationException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.error("Error submit order {}", order.order_id, e);
-            String msg = parseErrorMsg(e.getMessage());
-            messageListener.addMsg(order, msg + " - took " + Strings.formatElapsedTime(start), InformationLevel.Negative);
-            sheetService.fillUnsuccessfulMsg(spreadsheetId, order, msg);
-        } finally {
-            if (StringUtils.isNotBlank(order.order_number)) {
-                ProgressUpdater.success();
-            } else {
-                ProgressUpdater.failed();
-            }
-        }
+        buyerPanel.submit(order);
     }
 
     public List<Order> validateOrders(List<Order> orders) {

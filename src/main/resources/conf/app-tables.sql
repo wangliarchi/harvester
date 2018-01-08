@@ -108,6 +108,64 @@ CREATE TABLE IF NOT EXISTS order_submission_tasks (
   dateEnded         DATETIME                NULL
 );
 
+/* order submission record new */
+CREATE TABLE IF NOT EXISTS order_submission_tasks_new (
+  id                VARCHAR(40) PRIMARY KEY NOT NULL,
+  sid               VARCHAR(5)              NOT NULL,
+  marketplaceName   VARCHAR(2)              NOT NULL,
+  spreadsheetId     VARCHAR(100)            NOT NULL,
+  spreadsheetName   VARCHAR(255)            NOT NULL,
+  orderRangeCol     VARCHAR(255)            NOT NULL,
+  lostLimit         VARCHAR(3)              NOT NULL,
+  priceLimit        VARCHAR(3)              NOT NULL,
+  eddLimit          VARCHAR(3)              NOT NULL,
+  noInvoiceText     VARCHAR(30)             NOT NULL,
+  skipValidationCol VARCHAR(255)            NOT NULL,
+  finderCode        VARCHAR(255)            NOT NULL,
+  buyerAccount      VARCHAR(255)            NOT NULL,
+  primeBuyerAccount VARCHAR(255)            NOT NULL,
+  status            VARCHAR(255)            NOT NULL,
+  orders            TEXT                    NULL,
+  invalidOrders     TEXT                    NULL,
+  summary           TEXT                    NULL,
+  totalOrders       INT(5)                  NULL,
+  success           INT(5)                  NULL,
+  failed            INT(5)                  NULL,
+  timeTaken         VARCHAR(255)            NULL,
+  dateCreated       DATETIME                NOT NULL,
+  dateStarted       DATETIME                NULL,
+  dateEnded         DATETIME                NULL
+);
+
+
+INSERT INTO order_submission_tasks_new (id, sid, marketplaceName, spreadsheetId, spreadsheetName, orderRangeCol, lostLimit, priceLimit,
+                                        eddLimit, noInvoiceText, skipValidationCol, finderCode, status, orders, invalidOrders, summary, totalOrders,
+                                        success, failed, timeTaken, dateCreated, dateStarted, dateEnded)
+  SELECT *
+  FROM order_submission_tasks;
+
+/* order submission record by buyer account */
+CREATE TABLE IF NOT EXISTS order_submission_tasks_by_buyer_accounts (
+  id                 VARCHAR(100) PRIMARY KEY NOT NULL,
+  taskId             VARCHAR(40)             NOT NULL,
+  fulfillmentCountry VARCHAR(2)              NOT NULL,
+  buyerAccount       VARCHAR(255)            NOT NULL,
+  marketplaceName    VARCHAR(2)              NOT NULL,
+  spreadsheetId      VARCHAR(100)            NOT NULL,
+  spreadsheetName    VARCHAR(255)            NOT NULL,
+  sheetName          VARCHAR(255)            NOT NULL,
+  status             VARCHAR(255)            NOT NULL,
+  orders             TEXT                    NULL,
+  summary            TEXT                    NULL,
+  totalOrders        INT(5)                  NULL,
+  success            INT(5)                  NULL,
+  failed             INT(5)                  NULL,
+  timeTaken          VARCHAR(255)            NULL,
+  dateCreated        DATETIME                NOT NULL,
+  dateStarted        DATETIME                NULL,
+  dateEnded          DATETIME                NULL
+);
+
 /* amazon_orders */
 CREATE TABLE IF NOT EXISTS amazon_orders (
   orderId      VARCHAR  NOT NULL,
@@ -137,7 +195,7 @@ CREATE TABLE IF NOT EXISTS amazon_order_logs (
   itemXml      VARCHAR  NOT NULL,
   isbn         VARCHAR  NOT NULL,
   name         VARCHAR  NOT NULL,
-  email         VARCHAR  NOT NULL,
+  email        VARCHAR  NOT NULL,
   exportStatus INTEGER  NOT NULL,
   lastUpdate   DATETIME NOT NULL,
   PRIMARY KEY (orderItemId)
@@ -158,11 +216,11 @@ CREATE TABLE IF NOT EXISTS amazon_orders_new (
   purchaseDate DATETIME NOT NULL,
   xml          VARCHAR  NOT NULL,
   itemXml      VARCHAR  NOT NULL,
-  isbn         VARCHAR   NULL,
-  name         VARCHAR   NULL,
-  email         VARCHAR   NULL,
-  exportStatus INTEGER   NULL,
-  lastUpdate   DATETIME  NULL,
+  isbn         VARCHAR  NULL,
+  name         VARCHAR  NULL,
+  email        VARCHAR  NULL,
+  exportStatus INTEGER  NULL,
+  lastUpdate   DATETIME NULL,
   PRIMARY KEY (orderItemId)
     ON CONFLICT IGNORE
 );

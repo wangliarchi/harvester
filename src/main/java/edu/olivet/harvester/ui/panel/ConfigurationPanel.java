@@ -5,15 +5,19 @@ import edu.olivet.foundations.amazon.Account.AccountType;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.ui.UITools;
+import edu.olivet.harvester.model.BuyerAccountSettingUtils;
+import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
+import edu.olivet.harvester.ui.dialog.BuyerAccountConfigDialog;
 import edu.olivet.harvester.utils.FinderCodeUtils;
 import edu.olivet.harvester.utils.Settings.Configuration;
 import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Configuration panel for single marketplace
@@ -67,6 +71,11 @@ public class ConfigurationPanel extends JPanel {
         userCodeFld.setToolTipText("Input user code for validation usage");
         ebatesBuyerFld.setToolTipText("Input ebay buyer account for product order fulfillment benefit");
 
+        addBuyerAccountButton.addActionListener(e -> {
+            BuyerAccountConfigDialog dialog = UITools.setDialogAttr(new BuyerAccountConfigDialog());
+            loadBuyerAccounts();
+        });
+
         GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);
 
@@ -103,11 +112,12 @@ public class ConfigurationPanel extends JPanel {
                                         .addGroup(layout.createSequentialGroup().addComponent(bookDataSourceUrlFld, width, width, width))
                                         .addGroup(layout.createSequentialGroup().addComponent(productDataSourceUrlFld, width, width, width))
                                         .addGroup(layout.createSequentialGroup().addComponent(userCodeFld, width, width, width))
-                                        .addGroup(layout.createSequentialGroup().addComponent(primeBuyerFld, width, width, width))
-                                        .addGroup(layout.createSequentialGroup().addComponent(buyerFld, width, width, width))
-                                        .addGroup(layout.createSequentialGroup().addComponent(prodPrimeBuyerFld, width, width, width))
-                                        .addGroup(layout.createSequentialGroup().addComponent(prodBuyerFld, width, width, width))
+                                        .addGroup(layout.createSequentialGroup().addComponent(bookPrimeBuyerJCombox, width - 130, width - 130, width - 130)
+                                                .addComponent(addBuyerAccountButton))
+                                        .addGroup(layout.createSequentialGroup().addComponent(bookBuyerJCombox, width, width, width))
                                         .addGroup(layout.createSequentialGroup().addComponent(ebatesBuyerFld, width, width, width))
+                                        .addGroup(layout.createSequentialGroup().addComponent(prodBuyerJCombox, width, width, width))
+                                        .addGroup(layout.createSequentialGroup().addComponent(prodPrimeBuyerJCombox, width, width, width))
                                         .addGap(20)
                                 )));
 
@@ -141,19 +151,19 @@ public class ConfigurationPanel extends JPanel {
                                         .addComponent(bookDataSourceUrlLbl).addComponent(bookDataSourceUrlFld, height, height, height))
                                 .addGap(vGap)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(primeBuyerLbl).addComponent(primeBuyerFld, height, height, height))
+                                        .addComponent(primeBuyerLbl).addComponent(bookPrimeBuyerJCombox, height, height, height).addComponent(addBuyerAccountButton))
                                 .addGap(vGap)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(buyerLbl).addComponent(buyerFld, height, height, height))
+                                        .addComponent(buyerLbl).addComponent(bookBuyerJCombox, height, height, height))
                                 .addGap(vGap)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(productDataSourceUrlLbl).addComponent(productDataSourceUrlFld, height, height, height))
                                 .addGap(vGap)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(prodPrimeBuyerLbl).addComponent(prodPrimeBuyerFld, height, height, height))
+                                        .addComponent(prodPrimeBuyerLbl).addComponent(prodPrimeBuyerJCombox, height, height, height))
                                 .addGap(vGap)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(prodBuyerLbl).addComponent(prodBuyerFld, height, height, height))
+                                        .addComponent(prodBuyerLbl).addComponent(prodBuyerJCombox, height, height, height))
                                 .addGap(vGap)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(ebatesBuyerLbl).addComponent(ebatesBuyerFld, height, height, height))
@@ -180,6 +190,11 @@ public class ConfigurationPanel extends JPanel {
     private JTextField prodPrimeBuyerFld = new JTextField();
     private JTextField prodBuyerFld = new JTextField();
     private JTextField ebatesBuyerFld = new JTextField();
+    private JComboBox<Account> bookBuyerJCombox = new JComboBox();
+    private JComboBox<Account> bookPrimeBuyerJCombox = new JComboBox();
+    private JComboBox<Account> prodBuyerJCombox = new JComboBox();
+    private JComboBox<Account> prodPrimeBuyerJCombox = new JComboBox();
+    private JButton addBuyerAccountButton = new JButton("Add/Edit Buyer");
 
     public Configuration collect() {
         Configuration cfg = new Configuration();
@@ -195,20 +210,29 @@ public class ConfigurationPanel extends JPanel {
         cfg.setMwsCredential(new MarketWebServiceIdentity(sellerIdFld.getText().trim(),
                 mwsAccessKeyFld.getText().trim(), mwsSecretKeyFld.getText().trim(), country.marketPlaceId()));
 
+
         cfg.setBookDataSourceUrl(AppScript.getSpreadId(bookDataSourceUrlFld.getText().trim()));
-        if (StringUtils.isNotBlank(primeBuyerFld.getText())) {
-            cfg.setPrimeBuyer(new Account(primeBuyerFld.getText(), AccountType.PrimeBuyer));
+        if (bookPrimeBuyerJCombox.getSelectedItem() != null) {
+            Account account = ((Account) bookPrimeBuyerJCombox.getSelectedItem());
+            account.setType(AccountType.PrimeBuyer);
+            cfg.setPrimeBuyer(account);
         }
-        if (StringUtils.isNotBlank(buyerFld.getText())) {
-            cfg.setBuyer(new Account(buyerFld.getText(), AccountType.Buyer));
+        if (bookBuyerJCombox.getSelectedItem() != null) {
+            Account account = (Account) bookBuyerJCombox.getSelectedItem();
+            account.setType(AccountType.Buyer);
+            cfg.setBuyer(account);
         }
 
         cfg.setProductDataSourceUrl(AppScript.getSpreadId(productDataSourceUrlFld.getText().trim()));
-        if (StringUtils.isNotBlank(prodPrimeBuyerFld.getText())) {
-            cfg.setProdPrimeBuyer(new Account(prodPrimeBuyerFld.getText(), AccountType.PrimeBuyer));
+        if (prodPrimeBuyerJCombox.getSelectedItem() != null) {
+            Account account = (Account) prodPrimeBuyerJCombox.getSelectedItem();
+            account.setType(AccountType.PrimeBuyer);
+            cfg.setProdPrimeBuyer(account);
         }
-        if (StringUtils.isNotBlank(prodBuyerFld.getText())) {
-            cfg.setProdBuyer(new Account(prodBuyerFld.getText(), AccountType.Buyer));
+        if (prodBuyerJCombox.getSelectedItem() != null) {
+            Account account = (Account) prodBuyerJCombox.getSelectedItem();
+            account.setType(AccountType.Buyer);
+            cfg.setProdBuyer(account);
         }
         cfg.setEbatesBuyer(new Account(ebatesBuyerFld.getText(), AccountType.Buyer));
 
@@ -217,6 +241,7 @@ public class ConfigurationPanel extends JPanel {
     }
 
     public void load(@Nullable Configuration cfg) {
+        this.cfg = cfg;
         if (cfg == null) {
             userCodeFld.setText(FinderCodeUtils.generate());
             return;
@@ -245,6 +270,39 @@ public class ConfigurationPanel extends JPanel {
 
         ebatesBuyerFld.setText(this.abbrevAccount(cfg.getEbatesBuyer()));
         userCodeFld.setText(cfg.getUserCode());
+
+        loadBuyerAccounts();
+
+    }
+
+    Configuration cfg;
+
+    public void loadBuyerAccounts() {
+        List<Account> bookBuyers = BuyerAccountSettingUtils.load().getAccounts(country, OrderEnums.OrderItemType.BOOK, false)
+                .stream().collect(Collectors.toList());
+        bookBuyerJCombox.setModel(new DefaultComboBoxModel<>(bookBuyers.toArray(new Account[bookBuyers.size()])));
+
+        List<Account> bookPrimeBuyers = BuyerAccountSettingUtils.load().getAccounts(country, OrderEnums.OrderItemType.BOOK, true)
+                .stream().collect(Collectors.toList());
+        bookPrimeBuyerJCombox.setModel(new DefaultComboBoxModel<>(bookPrimeBuyers.toArray(new Account[bookPrimeBuyers.size()])));
+
+
+        List<Account> prodBuyers = BuyerAccountSettingUtils.load().getAccounts(country, OrderEnums.OrderItemType.PRODUCT, false)
+                .stream().collect(Collectors.toList());
+        prodBuyerJCombox.setModel(new DefaultComboBoxModel<>(prodBuyers.toArray(new Account[prodBuyers.size()])));
+
+
+        List<Account> prodPrimeBuyers = BuyerAccountSettingUtils.load().getAccounts(country, OrderEnums.OrderItemType.PRODUCT, true)
+                .stream().collect(Collectors.toList());
+        prodPrimeBuyerJCombox.setModel(new DefaultComboBoxModel<>(prodPrimeBuyers.toArray(new Account[prodPrimeBuyers.size()])));
+
+
+        if (cfg != null) {
+            bookBuyerJCombox.setSelectedItem(cfg.getBuyer());
+            bookPrimeBuyerJCombox.setSelectedItem(cfg.getPrimeBuyer());
+            prodBuyerJCombox.setSelectedItem(cfg.getProdBuyer());
+            prodPrimeBuyerJCombox.setSelectedItem(cfg.getBuyer());
+        }
     }
 
     private String abbrevAccount(Account account) {

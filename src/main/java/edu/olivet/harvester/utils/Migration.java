@@ -9,6 +9,7 @@ import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.utils.Directory;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.fulfill.utils.CreditCardUtils;
+import edu.olivet.harvester.model.BuyerAccountSettingUtils;
 import edu.olivet.harvester.model.CreditCard;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import lombok.Getter;
@@ -58,8 +59,10 @@ public class Migration {
             orderManConfigFile = new File("C:\\OrderMan\\customize\\accounts.js");
         }
 
-        return loadFromOrderManConfigFile(orderManConfigFile);
+        Settings settings = loadFromOrderManConfigFile(orderManConfigFile);
+        BuyerAccountSettingUtils.load(settings).save();
 
+        return settings;
 
     }
 

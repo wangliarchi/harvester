@@ -5,22 +5,19 @@ import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.ListModel;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
-import edu.olivet.foundations.utils.Dates;
-import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.OrderSubmitter;
+import edu.olivet.harvester.fulfill.model.OrderSubmissionBuyerAccountTask;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.OrderTaskStatus;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
+import edu.olivet.harvester.fulfill.service.OrderSubmissionBuyerTaskService;
 import edu.olivet.harvester.fulfill.service.OrderSubmissionTaskService;
 import edu.olivet.harvester.fulfill.service.PSEventHandler;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
-import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.events.AddOrderSubmissionTaskEvent;
 import edu.olivet.harvester.ui.utils.ButtonColumn;
 import edu.olivet.harvester.ui.utils.OrderTaskButtonColumn;
 import org.apache.commons.collections4.CollectionUtils;
-import org.joda.time.DateTime;
-import org.nutz.dao.Cnd;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -38,6 +35,7 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
     private static TasksAndProgressPanel instance;
     private DBManager dbManager;
     private OrderSubmissionTaskService orderSubmissionTaskService;
+    private OrderSubmissionBuyerTaskService orderSubmissionBuyerTaskService;
 
     public static TasksAndProgressPanel getInstance() {
         if (instance == null) {
@@ -49,6 +47,7 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
     private TasksAndProgressPanel() {
         dbManager = ApplicationContext.getBean(DBManager.class);
         orderSubmissionTaskService = ApplicationContext.getBean(OrderSubmissionTaskService.class);
+        orderSubmissionBuyerTaskService = ApplicationContext.getBean(OrderSubmissionBuyerTaskService.class);
         initComponents();
         initEvents();
     }
@@ -84,10 +83,6 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
         });
 
 
-
-
-
-
         taskTable.addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent e) {
                 int lastIndex = taskTable.getRowCount() - 1;
@@ -112,8 +107,7 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
                     newTask.setStatus(OrderTaskStatus.Scheduled.name());
                     orderSubmissionTaskService.saveTask(newTask);
                 } else if (UITools.confirmed("Please confirm that you want to delete this task.")) {
-                    task.setStatus(OrderTaskStatus.Deleted.name());
-                    orderSubmissionTaskService.saveTask(task);
+                    orderSubmissionTaskService.deleteTask(task);
                 }
 
             }
@@ -133,6 +127,23 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
 
         ButtonColumn buttonColumn = new OrderTaskButtonColumn(taskTable, delete, 8);
         buttonColumn.setMnemonic(KeyEvent.VK_D);
+    }
+
+
+    public void loadBuyerTasksToTable() {
+
+        buyerTaskList = orderSubmissionBuyerTaskService.todayTasks();
+
+        ListModel<OrderSubmissionBuyerAccountTask> listModel = new ListModel<>("Buyer Submission Tasks", buyerTaskList, OrderSubmissionBuyerAccountTask.COLUMNS, null, OrderSubmissionBuyerAccountTask.WIDTHS);
+
+        buyerTaskTable.setModel(new DefaultTableModel(listModel.toTableData(), listModel.getColumns()));
+
+        if (listModel.getWidths() != null) {
+            for (int i = 0; i < listModel.getWidths().length; i++) {
+                buyerTaskTable.getColumnModel().getColumn(i).setPreferredWidth(listModel.getWidths()[i]);
+            }
+        }
+
     }
 
     private void addTaskButtonActionPerformed(ActionEvent evt) {
@@ -209,11 +220,19 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
     private JButton startButton;
     private JScrollPane jScrollPane1;
     private JTable taskTable;
+
+    private JScrollPane jScrollPane1Buyer;
+    private JTable buyerTaskTable;
+
+    private JTabbedPane taskTabbedPanel;
+
     private JButton pauseButton;
     private JButton stopButton;
     private Action delete;
     private RuntimeSettingsPanel runtimeSettingsPanel = RuntimeSettingsPanel.getInstance();
     private List<OrderSubmissionTask> taskList;
+    private List<OrderSubmissionBuyerAccountTask> buyerTaskList;
+
     // End of variables declaration
 
     private void initComponents() {
@@ -227,14 +246,29 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
         pauseButton = new JButton();
         stopButton = new JButton();
 
+        jScrollPane1Buyer = new JScrollPane();
+        buyerTaskTable = new JTable();
+
+
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.LEADING);
         taskTable.setFont(new Font(addTaskButton.getFont().getName(), Font.PLAIN, 11));
         taskTable.setColumnSelectionAllowed(false);
         taskTable.setRowSelectionAllowed(true);
         loadTasksToTable();
-
         jScrollPane1.setViewportView(taskTable);
+
+
+        buyerTaskTable.setFont(new Font(addTaskButton.getFont().getName(), Font.PLAIN, 11));
+        buyerTaskTable.setColumnSelectionAllowed(false);
+        buyerTaskTable.setRowSelectionAllowed(true);
+        loadBuyerTasksToTable();
+        jScrollPane1Buyer.setViewportView(buyerTaskTable);
+
+        taskTabbedPanel = new JTabbedPane();
+        taskTabbedPanel.addTab("Tasks", jScrollPane1);
+        taskTabbedPanel.addTab("By Buyer", jScrollPane1Buyer);
+
         addTaskButton.setText("Add Task");
         startButton.setText("Start");
         startButton.setIcon(UITools.getIcon("start.png"));
@@ -253,7 +287,7 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
         this.setLayout(layout);
         layout.setHorizontalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                        .addComponent(jScrollPane1, 200, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                        .addComponent(taskTabbedPanel, 200, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
                         .addComponent(runtimeSettingsPanel)
                         .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                                 .addGroup(layout.createSequentialGroup()
@@ -270,7 +304,7 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
         layout.setVerticalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(layout.createSequentialGroup()
-                                .addComponent(jScrollPane1, 150, GroupLayout.PREFERRED_SIZE, 300)
+                                .addComponent(taskTabbedPanel, 150, GroupLayout.PREFERRED_SIZE, 300)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(runtimeSettingsPanel)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)

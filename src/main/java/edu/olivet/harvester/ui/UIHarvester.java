@@ -11,6 +11,7 @@ import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.job.BackgroundJob;
 import edu.olivet.harvester.model.ConfigEnums;
 import edu.olivet.harvester.ui.dialog.BankCardConfigDialog;
+import edu.olivet.harvester.ui.dialog.BuyerAccountConfigDialog;
 import edu.olivet.harvester.ui.dialog.SystemSettingsDialog;
 import edu.olivet.harvester.ui.events.*;
 import edu.olivet.harvester.utils.LogViewer;
@@ -139,7 +140,8 @@ public class UIHarvester extends AbstractApplicationUI {
         logViewer.displayLogs(ConfigEnums.Log.Statistic);
     }
 
-    @Inject ListOrderSubmissionTasks listOrderSubmissionTasks;
+    @Inject
+    ListOrderSubmissionTasks listOrderSubmissionTasks;
 
     @UIEvent
     public void orderSubmissionTasks() {
@@ -202,11 +204,20 @@ public class UIHarvester extends AbstractApplicationUI {
         exportOrderEvent.execute();
     }
 
-    @Inject TitleCheckerEvent titleCheckerEvent;
+    @Inject
+    TitleCheckerEvent titleCheckerEvent;
 
     @UIEvent
     public void titleChecker() {
         titleCheckerEvent.execute();
+    }
+
+    @UIEvent
+    public void configBuyerAccount() {
+        BuyerAccountConfigDialog dialog = UITools.setDialogAttr(new BuyerAccountConfigDialog());
+        if (dialog.isOk()) {
+            UITools.info("Buyer account settings have been saved successfully.");
+        }
     }
 
     @Override
