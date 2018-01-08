@@ -4,7 +4,6 @@ import com.ECS.client.jax.*;
 import com.github.rchukh.amazon.paapi.AWSProps;
 import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
-import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
 import org.slf4j.Logger;
@@ -21,11 +20,10 @@ public class AmazonProductApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(AmazonProductApi.class);
 
     public static AmazonProductApi instance = null;
-    private AWSECommerceService commerceService;
+    @SuppressWarnings("FieldCanBeLocal") private AWSECommerceService commerceService;
     private AWSECommerceServicePortType portUS;
 
     private static final int MAX_ASIN_COUNT_PER_REQUEST = 10;
-    private static final int MAX_ERROR_TOLERANT_TIMES = 50;
 
 
     public static AmazonProductApi getInstance() {
@@ -60,9 +58,7 @@ public class AmazonProductApi {
                 itemLookup.getRequest().add(itemLookupRequest);
                 ItemLookupResponse itemLookupResponse = portUS.itemLookup(itemLookup);
                 List<Item> items = itemLookupResponse.getItems().get(0).getItem();
-                items.forEach(item -> {
-                    result.put(item.getASIN(), item);
-                });
+                items.forEach(item -> result.put(item.getASIN(), item));
                 LOGGER.info("Read {} items in {}.", list.size(), Strings.formatElapsedTime(start));
                 WaitTime.Shortest.execute();
                 //break;

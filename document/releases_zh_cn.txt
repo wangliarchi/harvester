@@ -431,3 +431,22 @@ b. check if order sheet data is unbroken - columns deleted etc.
 
 更新内容：
 1. bug fixes
+
+======================================================================
+版本：1.0-2018-01-04.1-GA,1.0-2018-01-06.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. bug fixes
+
+======================================================================
+版本：1.0-2018-01-06.1-GA,1.0-2018-01-06.2-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. fetch mws info from seller central
+2. bug fixes

@@ -48,7 +48,9 @@ public class ShippingAddressMultiPage extends ShippingAddressAbstract {
 
             JXBrowserHelper.insertChecker(browser);
             DOMElement btn = JXBrowserHelper.selectElementByName(browser, "useSelectedAddress");
-            btn.click();
+            if (btn != null) {
+                btn.click();
+            }
 
             WaitTime.Shortest.execute();
             JXBrowserHelper.waitUntilNewPageLoaded(browser);

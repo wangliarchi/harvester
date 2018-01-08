@@ -174,7 +174,7 @@ public class USPSAddressValidator implements AddressValidator {
     }
 
     public static void main(String[] args) {
-        USPSAddressValidator validator = ApplicationContext.getBean(USPSAddressValidator.class);
+
         Address address = new Address();
         address.setAddress1("131 East 69th Street");
         address.setAddress2("3A");
@@ -191,6 +191,7 @@ public class USPSAddressValidator implements AddressValidator {
         enteredAddress.setZip("10021-5158");
         enteredAddress.setCountry("United States");
 
+        USPSAddressValidator validator = ApplicationContext.getBean(USPSAddressValidator.class);
         System.out.println(validator.verify(address, enteredAddress));
 
     }

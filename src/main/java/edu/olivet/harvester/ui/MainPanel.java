@@ -31,7 +31,6 @@ public class MainPanel extends JPanel {
 
         rightTabPanel = RightTabPanel.getInstance();
         mainWindowPanel = TabbedBuyerPanel.getInstance();
-        ProgressLogsPanel progressLogsPanel = ProgressLogsPanel.getInstance();
 
         verticalSplitPane1 = new JSplitPane();
         horizontalSplitPane1 = new JSplitPane();
@@ -43,7 +42,7 @@ public class MainPanel extends JPanel {
         horizontalSplitPane1.setDividerSize(5);
         horizontalSplitPane1.setBorder(null);
 
-
+        ProgressLogsPanel progressLogsPanel = ProgressLogsPanel.getInstance();
         verticalSplitPane1.setTopComponent(horizontalSplitPane1);
         verticalSplitPane1.setBottomComponent(progressLogsPanel);
         horizontalSplitPane1.setLeftComponent(mainWindowPanel);
@@ -64,7 +63,7 @@ public class MainPanel extends JPanel {
         layout.setVerticalGroup(
                 layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(verticalSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
+                                .addComponent(verticalSplitPane1, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
         );
 
 

@@ -6,7 +6,10 @@ import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.MessagePanel;
-import edu.olivet.foundations.utils.*;
+import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.foundations.utils.Constants;
+import edu.olivet.foundations.utils.Now;
+import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.service.OrderItemTypeHelper;
@@ -26,7 +29,7 @@ import java.util.*;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/19/17 6:20 PM
  */
 public class SheetService extends SheetAPI {
-    private final static String TEMPLATE_SHEET_NAME = "Template";
+    private static final String TEMPLATE_SHEET_NAME = "Template";
     private static final Logger LOGGER = LoggerFactory.getLogger(SheetService.class);
 
     @Inject
@@ -106,7 +109,7 @@ public class SheetService extends SheetAPI {
         try {
             List<List<Object>> values = convertOrdersToRangeValues(orders, spreadsheetId, sheetName);
             this.spreadsheetValuesAppend(spreadsheetId, sheetName, new ValueRange().setValues(values));
-        } catch (BusinessException e) {
+        } catch (Exception e) {
             throw new BusinessException(e);
         } finally {
             unlockSheet(spreadsheetId, protectedId);
@@ -118,6 +121,7 @@ public class SheetService extends SheetAPI {
         }
     }
 
+    @SuppressWarnings("ConstantConditions")
     public int getLastRow(String spreadsheetId, String sheetName) {
         //read current orders
         List<Order> currentOrders;

@@ -53,7 +53,8 @@ public class MarkStatusService {
         long start = System.currentTimeMillis();
         List<Order> orders = appScript.readOrders(settings);
 
-        String resultSummary = String.format("Finished loading orders to update status for %s, %d orders found, took %s", settings.toString(), orders.size(), Strings.formatElapsedTime(start));
+        String resultSummary = String.format("Finished loading orders to update status for %s, %d orders found, took %s",
+                settings.toString(), orders.size(), Strings.formatElapsedTime(start));
         LOGGER.info(resultSummary);
         if (showErrorMsg) {
             messageListener.addMsg(resultSummary);

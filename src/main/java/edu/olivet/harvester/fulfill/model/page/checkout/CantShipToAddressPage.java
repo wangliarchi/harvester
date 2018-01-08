@@ -33,9 +33,9 @@ public class CantShipToAddressPage extends FulfillmentPage {
         DOMElement useThisAddressBtn = JXBrowserHelper.selectElementByCssSelector(browser, "#changeQuantityFormId .a-button.primary-action-button input");
         if (shipToOneAddressLink != null) {
             String currentAddress = JXBrowserHelper.text(browser, "#changeQuantityFormId .address-dropdown .a-dropdown-prompt").trim();
-            if (StringUtils.isNotBlank(currentAddress)
-                    && Strings.containsAnyIgnoreCase(currentAddress, OrderAddressUtils.orderShippingAddress(order).getName())
-                    && useThisAddressBtn != null) {
+            if (StringUtils.isNotBlank(currentAddress) &&
+                    Strings.containsAnyIgnoreCase(currentAddress, OrderAddressUtils.orderShippingAddress(order).getName()) &&
+                    useThisAddressBtn != null) {
                 useThisAddressBtn.click();
             } else {
                 shipToOneAddressLink.click();

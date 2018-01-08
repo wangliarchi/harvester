@@ -5,18 +5,12 @@ import edu.olivet.foundations.job.AbstractBackgroundJob;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.harvester.export.OrderExporter;
-import edu.olivet.harvester.feeds.ConfirmShipments;
 import edu.olivet.harvester.model.CronjobLog;
 import edu.olivet.harvester.model.SystemSettings;
-import org.apache.commons.collections4.CollectionUtils;
-import org.joda.time.DateTime;
-import org.nutz.dao.Cnd;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 9/20/2017 3:00 PM

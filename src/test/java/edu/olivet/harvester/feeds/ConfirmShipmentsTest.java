@@ -2,12 +2,12 @@ package edu.olivet.harvester.feeds;
 
 import com.amazonservices.mws.orders._2013_09_01.model.ListOrdersResult;
 import com.google.inject.Inject;
-import com.sun.org.apache.xpath.internal.operations.Or;
 import edu.olivet.foundations.amazon.*;
 import edu.olivet.foundations.mock.MockDBModule;
 import edu.olivet.foundations.mock.MockDateModule;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Dates;
+import edu.olivet.foundations.utils.Now;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.feeds.helper.ConfirmShipmentEmailSender;
@@ -51,18 +51,11 @@ public class ConfirmShipmentsTest extends BaseTest {
 
     @Test
     public void testGetOrdersFromWorksheet() throws Exception {
-
-
         Worksheet worksheet = new Worksheet(spreadsheet, "09/22");
-
         List<Order> orders = confirmShipments.getOrdersFromWorksheet(worksheet);
-
         assertEquals(orders.size(), 8);
-
         assertEquals(orders.get(0).sku, "JiuXMZLCustextbkAug22-2017-C726348");
         assertEquals(orders.get(7).status, "n");
-
-
     }
 
 
@@ -187,20 +180,46 @@ public class ConfirmShipmentsTest extends BaseTest {
         List<Order> orders = confirmShipments.getOrdersFromWorksheet(worksheet);
         assertEquals(confirmShipments.getOrderFinderEmail(orders),"johnnyxiang2017@gmail.com");
     }
+    @Inject Now now;
 
     @Test
-    public void testGetShipDate() {
+    public void testGetShipDateString() {
         Order order = prepareOrder();
+        now.set(new Date());
+
+        order.purchase_date = "2018-01-07T18:41:02+00:00";
+        order.expected_ship_date = "2018-01-11 2018-01-13";
+        order.sheetName = "01/08";
+        Worksheet worksheet = new Worksheet(spreadsheet, order.sheetName);
+        String defaultDate = worksheet.getOrderConfirmationDate();
+        assertEquals(confirmShipments.getShipDateString(order,Dates.parseDate(defaultDate)),"2018-01-07T15:00:00Z");
+
+    }
+    @Test
+    public void testGetShipDate() {
+
+        Order order = prepareOrder();
+        now.set(new Date());
+
+        order.purchase_date = "2018-01-07T18:41:02+00:00";
+        order.expected_ship_date = "2018-01-11 2018-01-13";
+        order.sheetName = "01/08";
+        Worksheet worksheet = new Worksheet(spreadsheet, order.sheetName);
+        String defaultDate = worksheet.getOrderConfirmationDate();
+
+        assertEquals(confirmShipments.getShipDate(order,Dates.parseDate(defaultDate)),Dates.parseDate("01/08/2018"));
+
+
 
         order.expected_ship_date = "2017-11-22 2017-11-25";
         order.purchase_date = "2017-11-20T03:47:42+00:00";
         order.sheetName = "11/21";
-        Worksheet worksheet = new Worksheet(spreadsheet, order.sheetName);
-        String defaultDate = worksheet.getOrderConfirmationDate();
+        worksheet = new Worksheet(spreadsheet, order.sheetName);
+        defaultDate = worksheet.getOrderConfirmationDate();
 
         assertEquals(confirmShipments.getShipDate(order,Dates.parseDate(defaultDate)),Dates.parseDate("11/21/2017"));
 
-        //如果sheet date 比latest expected shipping date 晚，使用 earliest expected shiping date
+        //如果sheet date 比latest expected shipping date 晚，使用 earliest expected shipping date
         order.sheetName = "11/25";
         order.expected_ship_date = "2017-11-22 2017-11-25";
         worksheet = new Worksheet(spreadsheet, order.sheetName);

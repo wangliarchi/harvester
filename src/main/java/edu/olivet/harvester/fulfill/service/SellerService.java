@@ -104,7 +104,8 @@ public class SellerService {
         if (sellerLink != null) {
             String sellerId = PageUtils.getSellerUUID(sellerLink.getAttribute(PageUtils.HREF));
             seller.setUuid(sellerId);
-            if (StringUtils.isBlank(seller.getName()) && StringUtils.isNotBlank(sellerId) && Boolean.TRUE.equals(wareHouseIdCache.get(sellerId))) {
+            if (StringUtils.isBlank(seller.getName()) && StringUtils.isNotBlank(sellerId)
+                    && Boolean.TRUE.equals(wareHouseIdCache.get(sellerId))) {
                 seller.setType(SellerEnums.SellerType.APWareHouse);
             }
         } else if (StringUtils.isBlank(seller.getName())) {
@@ -129,7 +130,7 @@ public class SellerService {
         }
 
         // two day shipping 也算是快递
-        String twodayshipping_Enabled = I18N_AMAZON.getText("shipping.twoday.enabled", country);
+        String twodayshippingEnabled = I18N_AMAZON.getText("shipping.twoday.enabled", country);
 
         String intlEnabled = "shipping.intl.enabled";
         String shipsFrom = "shipping.from";
@@ -139,7 +140,8 @@ public class SellerService {
             shipsFrom = I18N_AMAZON.getText("shipping.from", country);
         }
 
-        List<DOMElement> deliveryInfos = JXBrowserHelper.selectElementsByCssSelector(row, "div.a-column.a-span3.olpDeliveryColumn > ul.a-vertical > li > span.a-list-item");
+        List<DOMElement> deliveryInfos = JXBrowserHelper.selectElementsByCssSelector(row,
+                "div.a-column.a-span3.olpDeliveryColumn > ul.a-vertical > li > span.a-list-item");
         for (DOMElement line : deliveryInfos) {
             String txt = line.getInnerText().trim();
 
@@ -163,7 +165,7 @@ public class SellerService {
                 }
 
 
-            } else if (StringUtils.contains(txt, exEnabled) || StringUtils.contains(txt, twodayshipping_Enabled)) {
+            } else if (StringUtils.contains(txt, exEnabled) || StringUtils.contains(txt, twodayshippingEnabled)) {
                 seller.setExpeditedAvailable(true);
             } else if (StringUtils.contains(txt, intlEnabled)) {
                 seller.setIntlShippingAvailable(true);
@@ -189,7 +191,9 @@ public class SellerService {
             seller.setRatingCount(Rating.AP_COUNT);
         } else {
             try {
-                Integer rating = Integer.parseInt(JXBrowserHelper.text(row, "div.a-column.a-span2.olpSellerColumn > p:nth-child(2) > a").replaceAll(RegexUtils.Regex.NON_DIGITS.val(), StringUtils.EMPTY).trim());
+                Integer rating = Integer.parseInt(
+                        JXBrowserHelper.text(row, "div.a-column.a-span2.olpSellerColumn > p:nth-child(2) > a")
+                                .replaceAll(RegexUtils.Regex.NON_DIGITS.val(), StringUtils.EMPTY).trim());
                 seller.setRating(rating);
             } catch (Exception e) {
                 LOGGER.error("Cant get rating number for seller {}", seller.getName());
@@ -199,7 +203,8 @@ public class SellerService {
 
             if (ratingText.indexOf('(') != -1 && ratingText.indexOf(')') != -1) {
                 try {
-                    Integer ratingCount = Integer.parseInt(ratingText.substring(ratingText.indexOf('(')).replaceAll(RegexUtils.Regex.NON_DIGITS.val(), StringUtils.EMPTY));
+                    Integer ratingCount = Integer.parseInt(ratingText.substring(ratingText.indexOf('('))
+                            .replaceAll(RegexUtils.Regex.NON_DIGITS.val(), StringUtils.EMPTY));
                     seller.setRatingCount(ratingCount);
                 } catch (Exception e) {
                     //e.printStackTrace();

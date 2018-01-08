@@ -1,7 +1,5 @@
 package edu.olivet.harvester.fulfill.service;
 
-import edu.olivet.foundations.utils.WaitTime;
-
 import javax.inject.Singleton;
 
 /**

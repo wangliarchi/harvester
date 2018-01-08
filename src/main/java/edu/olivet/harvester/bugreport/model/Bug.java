@@ -109,7 +109,7 @@ public class Bug extends PrimaryKey implements ArrayConvertable {
 
     @Override
     public Object[] toArray() {
-        return new Object[]{this.id, this.orderId, this.issueCategory.toString(), this.priority.toString(),
+        return new Object[] {this.id, this.orderId, this.issueCategory.toString(), this.priority.toString(),
                 this.title, Dates.toDateTime(this.reportTime)};
     }
 

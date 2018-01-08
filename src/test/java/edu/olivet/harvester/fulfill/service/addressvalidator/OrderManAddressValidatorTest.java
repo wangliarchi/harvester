@@ -6,8 +6,6 @@ import edu.olivet.harvester.fulfill.model.Address;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
-
 public class OrderManAddressValidatorTest  extends BaseTest {
     @Inject
     OrderManAddressValidator addressValidator;

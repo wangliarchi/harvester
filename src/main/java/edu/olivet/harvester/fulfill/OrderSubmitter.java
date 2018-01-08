@@ -242,7 +242,9 @@ public class OrderSubmitter {
      * @param buyerPanel the browser panel
      */
     public void submit(Order order, BuyerPanel buyerPanel) {
+
         buyerPanel.submit(order);
+
     }
 
     public List<Order> validateOrders(List<Order> orders) {

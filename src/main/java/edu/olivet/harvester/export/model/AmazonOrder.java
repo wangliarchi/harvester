@@ -26,6 +26,7 @@ import java.util.Date;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/18/17 2:46 PM
  */
+@SuppressWarnings("DefaultAnnotationParam")
 @Table(value = "amazon_orders_new")
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -156,8 +157,7 @@ public class AmazonOrder extends PrimaryKey {
         order.sales_chanel = amazonOrder.getSalesChannel();
 
         String cnd = item.getConditionId();
-        String condition = cnd + (!cnd.equalsIgnoreCase(ConditionUtils.Condition.New.name()) ? (SEPARATOR + item.getConditionSubtypeId()) : (SEPARATOR + ConditionUtils.Condition.New.name()));
-        order.original_condition = condition;
+        order.original_condition = cnd + (!cnd.equalsIgnoreCase(ConditionUtils.Condition.New.name()) ? (SEPARATOR + item.getConditionSubtypeId()) : (SEPARATOR + ConditionUtils.Condition.New.name()));
         order.shipping_service = amazonOrder.getShipmentServiceLevelCategory();
 
         FastDateFormat ORDER_DATE_FORMAT = FastDateFormat.getInstance(DateFormat.DATE_TIME_STR.pattern(),

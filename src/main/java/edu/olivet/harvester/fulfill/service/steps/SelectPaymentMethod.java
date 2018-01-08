@@ -22,9 +22,11 @@ public class SelectPaymentMethod extends Step {
 
         FulfillmentPage page;
         if (stepHelper.detectCurrentPage(state) == CheckoutEnum.CheckoutPage.PaymentMethodOnePage) {
-            page = CheckoutStepFactory.getCheckoutStepPage(state.getBuyerPanel(), CheckoutEnum.CheckoutStep.PaymentMethod, CheckoutEnum.CheckoutPageType.OnePage);
+            page = CheckoutStepFactory.getCheckoutStepPage(
+                    state.getBuyerPanel(), CheckoutEnum.CheckoutStep.PaymentMethod, CheckoutEnum.CheckoutPageType.OnePage);
         } else {
-            page = CheckoutStepFactory.getCheckoutStepPage(state.getBuyerPanel(), CheckoutEnum.CheckoutStep.PaymentMethod, CheckoutEnum.CheckoutPageType.MultiPage);
+            page = CheckoutStepFactory.getCheckoutStepPage(
+                    state.getBuyerPanel(), CheckoutEnum.CheckoutStep.PaymentMethod, CheckoutEnum.CheckoutPageType.MultiPage);
         }
 
         page.execute(state.getOrder());

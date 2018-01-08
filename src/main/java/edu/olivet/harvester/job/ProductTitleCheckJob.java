@@ -42,13 +42,13 @@ public class ProductTitleCheckJob extends AbstractBackgroundJob {
         OrderService orderService = ApplicationContext.getBean(OrderService.class);
         SheetAPI sheetAPI = ApplicationContext.getBean(SheetAPI.class);
 
-        for(Spreadsheet spreadsheet : spreadsheets) {
+        for (Spreadsheet spreadsheet : spreadsheets) {
             com.google.api.services.sheets.v4.model.Spreadsheet spreadsheet1 = sheetAPI.getSpreadsheet(spreadsheet.getSpreadsheetId());
             List<Order> orders = orderService.fetchOrders(spreadsheet1);
             if (CollectionUtils.isNotEmpty(orders)) {
                 PreValidator.compareItemNames4Orders(orders);
             }
-         }
+        }
 
         CronjobLog log = new CronjobLog();
         log.setId(this.getClass().getName() + Dates.nowAsFileName());

@@ -1,7 +1,5 @@
 package edu.olivet.harvester.fulfill.service.flowcontrol;
 
-import edu.olivet.foundations.utils.Directory;
-import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;

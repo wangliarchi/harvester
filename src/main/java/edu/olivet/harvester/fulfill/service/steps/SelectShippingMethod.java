@@ -25,9 +25,11 @@ public class SelectShippingMethod extends Step {
         FulfillmentPage page;
         //todo add to a helper method
         if (stepHelper.detectCurrentPage(state) == CheckoutEnum.CheckoutPage.ShippingMethodOnePage) {
-            page = CheckoutStepFactory.getCheckoutStepPage(state.getBuyerPanel(), CheckoutEnum.CheckoutStep.ShippingMethod, CheckoutEnum.CheckoutPageType.OnePage);
+            page = CheckoutStepFactory.getCheckoutStepPage(
+                    state.getBuyerPanel(), CheckoutEnum.CheckoutStep.ShippingMethod, CheckoutEnum.CheckoutPageType.OnePage);
         } else {
-            page = CheckoutStepFactory.getCheckoutStepPage(state.getBuyerPanel(), CheckoutEnum.CheckoutStep.ShippingMethod, CheckoutEnum.CheckoutPageType.MultiPage);
+            page = CheckoutStepFactory.getCheckoutStepPage(
+                    state.getBuyerPanel(), CheckoutEnum.CheckoutStep.ShippingMethod, CheckoutEnum.CheckoutPageType.MultiPage);
         }
 
         page.execute(state.getOrder());

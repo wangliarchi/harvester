@@ -38,6 +38,7 @@ public class ItemCompareResult implements Comparable<ItemCompareResult> {
     }
 
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isManualCheckPass() {
         return manualCheckPass;
     }
@@ -70,20 +71,23 @@ public class ItemCompareResult implements Comparable<ItemCompareResult> {
         }
         ItemCompareResult other = (ItemCompareResult) obj;
         if (isbn == null) {
-            if (other.isbn != null)
+            if (other.isbn != null) {
                 return false;
+            }
         } else if (!isbn.equals(other.isbn)) {
             return false;
         }
         if (isbnName == null) {
-            if (other.isbnName != null)
+            if (other.isbnName != null) {
                 return false;
+            }
         } else if (!isbnName.equals(other.isbnName)) {
             return false;
         }
         if (itemName == null) {
-            if (other.itemName != null)
+            if (other.itemName != null) {
                 return false;
+            }
         } else if (!itemName.equals(other.itemName)) {
             return false;
         }
@@ -94,8 +98,9 @@ public class ItemCompareResult implements Comparable<ItemCompareResult> {
             return false;
         }
         if (preCheckReport == null) {
-            if (other.preCheckReport != null)
+            if (other.preCheckReport != null) {
                 return false;
+            }
         } else if (!preCheckReport.equals(other.preCheckReport)) {
             return false;
         }
@@ -104,8 +109,8 @@ public class ItemCompareResult implements Comparable<ItemCompareResult> {
 
     @Override
     public String toString() {
-        return "{row:" + row + ", isbn:" + isbn + ", isbnName:" + isbnName + ", itemName:" + itemName + ", preCheckPass:" + preCheckPass + ", preCheckReport:" + preCheckReport
-                + ", manualCheckPass:" + manualCheckPass + "}";
+        return "{row:" + row + ", isbn:" + isbn + ", isbnName:" + isbnName + ", itemName:" + itemName + ", preCheckPass:" + preCheckPass + ", preCheckReport:" + preCheckReport +
+                ", manualCheckPass:" + manualCheckPass + "}";
     }
 
     @Override

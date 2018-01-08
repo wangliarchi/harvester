@@ -17,7 +17,10 @@ import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import java.awt.event.*;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -102,7 +105,6 @@ public class ChooseMarketplaceDialog extends BaseDialog {
 
 
         GroupLayout layout = new GroupLayout(getContentPane());
-
 
 
         layout.setHorizontalGroup(layout.createParallelGroup(Alignment.LEADING)
@@ -218,7 +220,7 @@ public class ChooseMarketplaceDialog extends BaseDialog {
                 .atZone(ZoneId.systemDefault()).toInstant();
         Date from = Date.from(instant);
 
-        if(from.after(DateUtils.addMinutes(new Date(),-5))) {
+        if (from.after(DateUtils.addMinutes(new Date(), -5))) {
             UITools.error("From time should be at least 5 minutes before current time");
             return;
         }
@@ -227,12 +229,12 @@ public class ChooseMarketplaceDialog extends BaseDialog {
                 .atZone(ZoneId.systemDefault()).toInstant();
         Date to = Date.from(toInstant);
 
-        if(to.after(DateUtils.addMinutes(new Date(),-5))) {
+        if (to.after(DateUtils.addMinutes(new Date(), -5))) {
             UITools.error("To time should be at least 5 minutes before current time");
             return;
         }
 
-        if(from.after(to)) {
+        if (from.after(to)) {
             UITools.error("From time should be before to time.");
             return;
         }

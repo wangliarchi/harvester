@@ -1,7 +1,6 @@
 package edu.olivet.harvester.ui.panel;
 
 import com.google.inject.Singleton;
-import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.ListModel;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
@@ -23,7 +22,10 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.KeyEvent;
 import java.util.List;
 
 /**
@@ -33,7 +35,6 @@ import java.util.List;
 public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
 
     private static TasksAndProgressPanel instance;
-    private DBManager dbManager;
     private OrderSubmissionTaskService orderSubmissionTaskService;
     private OrderSubmissionBuyerTaskService orderSubmissionBuyerTaskService;
 
@@ -45,7 +46,6 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
     }
 
     private TasksAndProgressPanel() {
-        dbManager = ApplicationContext.getBean(DBManager.class);
         orderSubmissionTaskService = ApplicationContext.getBean(OrderSubmissionTaskService.class);
         orderSubmissionBuyerTaskService = ApplicationContext.getBean(OrderSubmissionBuyerTaskService.class);
         initComponents();
@@ -54,17 +54,9 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
 
 
     public void initEvents() {
-        startButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                startButtonActionPerformed(evt);
-            }
-        });
+        startButton.addActionListener(this::startButtonActionPerformed);
 
-        addTaskButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                addTaskButtonActionPerformed(evt);
-            }
-        });
+        addTaskButton.addActionListener(this::addTaskButtonActionPerformed);
 
         pauseButton.addActionListener(evt -> {
             if (PSEventListener.paused()) {
@@ -94,7 +86,7 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
 
 
     public void loadTasksToTable() {
-        delete = new AbstractAction() {
+        Action delete = new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
                 int modelRow = Integer.valueOf(e.getActionCommand());
                 OrderSubmissionTask task = taskList.get(modelRow);
@@ -182,6 +174,7 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
                     UITools.error(e.getMessage());
                     break;
                 } finally {
+                    PSEventListener.reset(this);
                     loadTasksToTable();
                 }
             }
@@ -218,7 +211,6 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
     // Variables declaration - do not modify
     private JButton addTaskButton;
     private JButton startButton;
-    private JScrollPane jScrollPane1;
     private JTable taskTable;
 
     private JScrollPane jScrollPane1Buyer;
@@ -228,7 +220,6 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
 
     private JButton pauseButton;
     private JButton stopButton;
-    private Action delete;
     private RuntimeSettingsPanel runtimeSettingsPanel = RuntimeSettingsPanel.getInstance();
     private List<OrderSubmissionTask> taskList;
     private List<OrderSubmissionBuyerAccountTask> buyerTaskList;
@@ -239,7 +230,7 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
 
         setBorder(BorderFactory.createTitledBorder("Tasks & Progress"));
 
-        jScrollPane1 = new JScrollPane();
+        JScrollPane jScrollPane1 = new JScrollPane();
         taskTable = new JTable();
         addTaskButton = new JButton();
         startButton = new JButton();

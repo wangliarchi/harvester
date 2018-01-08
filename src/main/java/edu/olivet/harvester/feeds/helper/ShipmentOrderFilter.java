@@ -27,7 +27,7 @@ public class ShipmentOrderFilter {
 
     /**
      * @param orders list of orders
-     * @return orders fitlered orders
+     * @return orders filtered orders
      */
     public List<Order> filterOrders(List<Order> orders, Worksheet worksheet, StringBuilder resultSummary, StringBuilder resultDetail) {
 

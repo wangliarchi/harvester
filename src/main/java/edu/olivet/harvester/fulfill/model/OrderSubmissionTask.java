@@ -34,6 +34,7 @@ import java.util.List;
 @Table(value = "order_submission_tasks_new")
 @AllArgsConstructor
 @NoArgsConstructor
+@SuppressWarnings("DefaultAnnotationParam")
 @EqualsAndHashCode(callSuper = false)
 public class OrderSubmissionTask extends PrimaryKey implements ArrayConvertable {
     @Name

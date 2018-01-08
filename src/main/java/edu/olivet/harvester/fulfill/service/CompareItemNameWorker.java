@@ -4,7 +4,6 @@ import com.ECS.client.jax.Item;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Constants;
-import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.harvester.fulfill.model.ItemCompareResult;
 import edu.olivet.harvester.fulfill.utils.ISBNUtils;
@@ -50,7 +49,7 @@ public class CompareItemNameWorker extends SwingWorker<List<ItemCompareResult>, 
 
         //check from elasticsearch service first
         Map<String, String> asinTitles = elasticSearchService.searchTitle(asins);
-        asins.removeIf(it -> asinTitles.containsKey(it));
+        asins.removeIf(asinTitles::containsKey);
 
         HashMap<String, Item> items = AmazonProductApi.getInstance().itemLookup(asins);
 

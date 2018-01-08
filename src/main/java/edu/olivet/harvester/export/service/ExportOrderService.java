@@ -12,7 +12,6 @@ import edu.olivet.harvester.export.model.AmazonOrder;
 import edu.olivet.harvester.export.utils.SelfOrderChecker;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.service.BlacklistBuyer;
-import edu.olivet.harvester.model.Remark;
 import edu.olivet.harvester.service.OrderService;
 import edu.olivet.harvester.service.mws.OrderClient;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
@@ -31,7 +30,7 @@ import java.util.*;
 public class ExportOrderService extends OrderClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExportOrderService.class);
     private final String[] STATUS_FILTERS = {"Unshipped", "PartiallyShipped", "Shipped"};
-    private final int DAYS_BACK = -7;
+    @SuppressWarnings("FieldCanBeLocal") private final int DAYS_BACK = -7;
 
     @Inject
     OrderFetcher orderFetcher;
@@ -127,9 +126,11 @@ public class ExportOrderService extends OrderClient {
             orders = orderFetcher.readOrders(dateMap, Settings.load().getConfigByCountry(country).getMwsCredential(), STATUS_FILTERS);
         } catch (Exception e) {
             LOGGER.error("Error fetching orders from amazon {} to {}", dateMap.get(OrderFetcher.DateRangeType.LastUpdatedAfter), dateMap.get(OrderFetcher.DateRangeType.LastUpdatedBefore), e);
-            throw new BusinessException(String.format("Error fetching orders from amazon %s to %s", dateMap.get(OrderFetcher.DateRangeType.LastUpdatedAfter), dateMap.get(OrderFetcher.DateRangeType.LastUpdatedBefore)));
+            if (StringUtils.containsIgnoreCase(e.getMessage(), "access denied")) {
+                throw new BusinessException(e.getMessage() + " Please check if the account is still ACTIVE");
+            }
+            throw new BusinessException(e);
         }
-
         return orders;
 
 
@@ -160,11 +161,7 @@ public class ExportOrderService extends OrderClient {
         Map<String, edu.olivet.harvester.model.Order> allOrders = new HashMap<>();
 
 
-        spreadsheetIds.forEach(it -> {
-            orderService.fetchOrders(sheetAPI.getSpreadsheet(it), minDate).forEach(order -> {
-                allOrders.put(order.order_id, order);
-            });
-        });
+        spreadsheetIds.forEach(it -> orderService.fetchOrders(sheetAPI.getSpreadsheet(it), minDate).forEach(order -> allOrders.put(order.order_id, order)));
 
         orders.removeIf(order -> allOrders.containsKey(order.getAmazonOrderId()));
         return orders;

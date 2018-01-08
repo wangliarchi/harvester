@@ -5,9 +5,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
-import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Constants;
-import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.model.setting.AdvancedSubmitSetting;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.*;
@@ -24,7 +22,6 @@ import edu.olivet.harvester.ui.events.SubmitOrdersEvent;
 import edu.olivet.harvester.utils.FinderCodeUtils;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.Settings;
-import edu.olivet.harvester.utils.common.NumberUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -102,12 +99,12 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         noInvoiceTextField.setText(settings.getNoInvoiceText());
 
 
-        lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"5", "7"}));
+        lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"5", "7"}));
         if (StringUtils.isNotBlank(settings.getLostLimit())) {
             lostLimitComboBox.setSelectedItem(settings.getLostLimit());
         }
 
-        priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"3", "5"}));
+        priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"3", "5"}));
         if (StringUtils.isNotBlank(settings.getPriceLimit())) {
             priceLimitComboBox.setSelectedItem(settings.getPriceLimit());
         }
@@ -120,7 +117,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
 
 
         maxDaysOverEddComboBox.setModel(new DefaultComboBoxModel<>(
-                new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}
+                new String[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}
         ));
         if (StringUtils.isNotBlank((settings.getEddLimit()))) {
             maxDaysOverEddComboBox.setSelectedItem(settings.getEddLimit());
@@ -487,7 +484,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
 
 
         Account seller = configuration.getSeller();
-        Account[] sellers = seller == null ? new Account[0] : new Account[]{seller};
+        Account[] sellers = seller == null ? new Account[0] : new Account[] {seller};
         sellerComboBox.setModel(new DefaultComboBoxModel<>(sellers));
 
         //default to book
@@ -512,10 +509,10 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
             buyer = configuration.getProdBuyer();
             primeBuyer = configuration.getProdPrimeBuyer();
         }
-        Account[] buyers = buyer == null ? new Account[0] : new Account[]{buyer};
+        Account[] buyers = buyer == null ? new Account[0] : new Account[] {buyer};
         buyerComboBox.setModel(new DefaultComboBoxModel<>(buyers));
 
-        Account[] primeBuyers = primeBuyer == null ? new Account[0] : new Account[]{primeBuyer};
+        Account[] primeBuyers = primeBuyer == null ? new Account[0] : new Account[] {primeBuyer};
         primeBuyerComboBox.setModel(new DefaultComboBoxModel<>(primeBuyers));
 
     }

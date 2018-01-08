@@ -14,14 +14,14 @@ import java.time.LocalTime;
 public enum BackgroundJob {
     /**
      * confirm shipment.
-     * run all weekdays and Saturnday. random time between 15:00-17:00pm
+     * run all weekdays and Saturday. random time between 15:00-17:00pm
      */
     ShipmentConfirmation("0 30 16 ? * MON,TUE,WED,THU,FRI,SAT *", ShipmentConfirmationJob.class),
 
     OrderExporting("0 30 7 ? * MON,TUE,WED,THU,FRI,SAT *", OrderExportingJob.class),
     /**
      * check unshipped orders, and send notification to account owner
-     * run all weekdays and Saturnday. random time between 17:00-18:00pm
+     * run all weekdays and Saturday. random time between 17:00-18:00pm
      */
     //UnshippedOrderCheck("0 30 17 ? * MON,TUE,WED,THU,FRI,SAT *",UnshippedOrderCheckJob.class),
 
@@ -48,9 +48,6 @@ public enum BackgroundJob {
     public String getCron() {
         SystemSettings systemSettings = SystemSettings.load();
         if (this == ShipmentConfirmation) {
-//            @SuppressWarnings("ConstantConditions") int hour = new Random().ints(1, 12, 14).findFirst().getAsInt();
-//            @SuppressWarnings("ConstantConditions") int min = new Random().ints(1, 0, 55).findFirst().getAsInt();
-//            return String.format("0 %d %d ? * MON,TUE,WED,THU,FRI,SAT *", min, hour);
             LocalTime orderConfirmationTime = systemSettings.getOrderConfirmationTime();
             int allowedRange = systemSettings.getOrderConfirmationAllowedRange();
             LocalTime scheduledTime = DatetimeHelper.randomTimeBetween(orderConfirmationTime, allowedRange);

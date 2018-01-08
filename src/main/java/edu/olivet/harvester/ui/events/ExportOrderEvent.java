@@ -7,10 +7,6 @@ import edu.olivet.harvester.export.OrderExporter;
 import edu.olivet.harvester.export.model.OrderExportParams;
 import edu.olivet.harvester.ui.Actions;
 import edu.olivet.harvester.ui.dialog.ChooseMarketplaceDialog;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/4/17 10:59 AM

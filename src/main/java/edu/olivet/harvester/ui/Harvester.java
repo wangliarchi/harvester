@@ -38,14 +38,16 @@ public class Harvester {
 
         if (!new File(Settings.CONFIG_FILE_PATH).exists()) {
 
-            if (Migration.hasMigrationFile() && UITools.confirmed("OrderMan configuration is found. Do you want to migrate it to Harvester?")) {
+            if (Migration.hasMigrationFile() &&
+                    UITools.confirmed("OrderMan configuration is found. Do you want to migrate it to Harvester?")) {
                 Migration.setUseMigration(true);
             } else {
                 Migration.setUseMigration(false);
                 UITools.info("Please configure fulfillment requirements for Harvester.");
             }
 
-            SettingsDialog dialog = UITools.setDialogAttr(new SettingsDialog(new SettingValidator(new AppScript(), ApplicationContext.getBean(SheetAPI.class))));
+            SettingsDialog dialog = new SettingsDialog(new SettingValidator(new AppScript(), ApplicationContext.getBean(SheetAPI.class)));
+            UITools.setDialogAttr(dialog);
             if (!dialog.isOk() || dialog.getSettings() == null) {
                 UITools.error("Harvester cannot run without necessary configurations!");
                 System.exit(4);
@@ -68,7 +70,7 @@ public class Harvester {
         messageListener.start();
         messageListener.addLongMsg("Harvester Started Successfully!", InformationLevel.Positive);
 
-        Migration.migrateCreditCardSetttings();
+        Migration.migrateCreditCardSettings();
         try {
             new AppScript().preloadAllSpreadsheets();
         } catch (Exception e) {

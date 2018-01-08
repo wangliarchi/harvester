@@ -42,6 +42,7 @@ public class JXBrowserHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(JXBrowserHelper.class);
     private static final int TIME_OUT_SECONDS = 20;
     public static final String CHANNEL_CLOSED_MESSAGE = "Failed to send message. Channel is already closed";
+
     static {
         try {
             Field e = ay.class.getDeclaredField("e");
@@ -355,7 +356,7 @@ public class JXBrowserHelper {
     public static DOMElement selectElementByCssSelector(Browser browser, String selector) {
         for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
             try {
-                if(browser.getDocument() == null) {
+                if (browser.getDocument() == null) {
                     browser.reload();
                 }
                 return selectElementByCssSelector(browser.getDocument(), selector);

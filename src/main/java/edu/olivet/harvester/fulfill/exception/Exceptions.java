@@ -25,6 +25,7 @@ public class Exceptions {
             super(cause);
         }
     }
+
     /**
      * Supplier为禁选Seller异常定义
      */

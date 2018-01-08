@@ -13,16 +13,19 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 /**
+ * <p>
  * The ButtonColumn class provides a renderer and an editor that looks like a
  * JButton. The renderer and editor will then be used for a specified column
  * in the table. The TableModel will contain the String to be displayed on
  * the button.
+ * </p>
  * <p>
  * The button can be invoked by a mouse click or by pressing the space bar
  * when the cell has focus. Optionally a mnemonic can be set to invoke the
  * button. When the button is invoked the provided Action is invoked. The
  * source of the Action will be the table. The action command will contain
  * the model row number of the button that was clicked.
+ * </p>
  */
 public class ButtonColumn extends AbstractCellEditor
         implements TableCellRenderer, TableCellEditor, ActionListener, MouseListener {
@@ -42,7 +45,7 @@ public class ButtonColumn extends AbstractCellEditor
      * renderer and editor will automatically be installed on the TableColumn
      * of the specified column.
      *
-     * @param table  the table containing the button renderer/editor
+     * @param table the table containing the button renderer/editor
      * @param action the Action to be invoked when the button is invoked
      * @param column the column to which the button renderer/editor is added
      */
@@ -100,16 +103,7 @@ public class ButtonColumn extends AbstractCellEditor
 
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-        if (value == null) {
-            editButton.setText("");
-            editButton.setIcon(null);
-        } else if (value instanceof Icon) {
-            editButton.setText("");
-            editButton.setIcon((Icon) value);
-        } else {
-            editButton.setText(value.toString());
-            editButton.setIcon(null);
-        }
+        setRenderButton(value);
 
         this.editorValue = value;
         return editButton;
@@ -136,7 +130,14 @@ public class ButtonColumn extends AbstractCellEditor
             renderButton.setBorder(originalBorder);
         }
 
-//		renderButton.setText( (value == null) ? "" : value.toString() );
+        //renderButton.setText( (value == null) ? "" : value.toString() );
+        setRenderButton(value);
+
+        return renderButton;
+
+    }
+
+    private void setRenderButton(Object value) {
         if (value == null) {
             renderButton.setText("");
             renderButton.setIcon(null);
@@ -147,14 +148,8 @@ public class ButtonColumn extends AbstractCellEditor
             renderButton.setText(value.toString());
             renderButton.setIcon(null);
         }
-
-        return renderButton;
-
     }
 
-    //
-//  Implement ActionListener interface
-//
     /*
      *	The button has been pressed. Stop editing and invoke the custom Action
 	 */
@@ -171,14 +166,12 @@ public class ButtonColumn extends AbstractCellEditor
         action.actionPerformed(event);
     }
 
-    //
-//  Implement MouseListener interface
-//
-    /*
-     *  When the mouse is pressed the editor is invoked. If you then then drag
-	 *  the mouse to another cell before releasing it, the editor is still
-	 *  active. Make sure editing is stopped when the mouse is released.
-	 */
+
+    /**
+     * When the mouse is pressed the editor is invoked. If you then then drag
+     * the mouse to another cell before releasing it, the editor is still
+     * active. Make sure editing is stopped when the mouse is released.
+     */
     public void mousePressed(MouseEvent e) {
         if (table.isEditing()
                 && table.getCellEditor() == this)

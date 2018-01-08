@@ -15,6 +15,7 @@ import java.util.Date;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 10/13/17 9:25 PM
  */
 
+@SuppressWarnings("ALL")
 @Table(value = "cronjob_record")
 @Data
 @EqualsAndHashCode(callSuper = false)

@@ -36,7 +36,8 @@ public class FeedSubmissionFetcher extends FeedUploader {
 
     }
 
-    public List<FeedSubmissionInfo> getFeedSubmissionList(MarketWebServiceIdentity credential, TypeList feedTypeList, StatusList feedProcessingStatusList) {
+    public List<FeedSubmissionInfo> getFeedSubmissionList(MarketWebServiceIdentity credential,
+                                                          TypeList feedTypeList, StatusList feedProcessingStatusList) {
         GetFeedSubmissionListRequest request = new GetFeedSubmissionListRequest();
         request.setMerchant(credential.getSellerId());
 

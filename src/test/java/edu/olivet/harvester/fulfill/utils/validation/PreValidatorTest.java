@@ -1,6 +1,5 @@
 package edu.olivet.harvester.fulfill.utils.validation;
 
-import com.alibaba.fastjson.JSON;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.fulfill.model.ItemCompareResult;

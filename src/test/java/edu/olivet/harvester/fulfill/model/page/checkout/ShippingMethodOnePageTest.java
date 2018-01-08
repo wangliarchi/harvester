@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -55,12 +54,7 @@ public class ShippingMethodOnePageTest extends BaseTest {
         orders = orderService.fetchOrders(spreadsheet, Range.between(Dates.parseDate("11/05/2017"), Dates.parseDate("11/17/2017")));
         orderMap = orders.stream().collect(Collectors.groupingBy(Order::getOrder_id));
 
-        directories = new File(TEST_DATA_ROOT + File.separator + "pages").listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return file.isDirectory() && StringUtils.contains(file.getName(), "720US");
-            }
-        });
+        directories = new File(TEST_DATA_ROOT + File.separator + "pages").listFiles(file -> file.isDirectory() && StringUtils.contains(file.getName(), "720US"));
 
     }
 
@@ -69,13 +63,8 @@ public class ShippingMethodOnePageTest extends BaseTest {
         prepareData();
 
         for (File dir : directories) {
-            File[] files = dir.listFiles(new FileFilter() {
-                @Override
-                public boolean accept(File file) {
-                    return file.isFile() && StringUtils.contains(file.getName(), "OrderReviewPage_execute.html");
-                }
-            });
-            for (File file : files) {
+            File[] files = dir.listFiles(file -> file.isFile() && StringUtils.contains(file.getName(), "OrderReviewPage_execute.html"));
+            for (File file : files != null ? files : new File[0]) {
 
                 String orderId = RegexUtils.getMatched(file.getName(), RegexUtils.Regex.AMAZON_ORDER_NUMBER);
                 if (orderMap.containsKey(orderId)) {

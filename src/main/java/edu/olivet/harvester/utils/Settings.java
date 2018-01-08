@@ -6,7 +6,6 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.MWSUtils;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.utils.BusinessException;
-import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Directory;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.model.OrderEnums;
@@ -128,7 +127,7 @@ public class Settings {
         List<String> spreadsheetIds = listAllSpreadsheets();
         List<Spreadsheet> spreadsheets = new ArrayList<>();
 
-        StringBuilder spreadsheetIdError = new StringBuilder();
+        //StringBuilder spreadsheetIdError = new StringBuilder();
         for (String spreadsheetId : spreadsheetIds) {
             try {
                 if (getSpreadsheetCountry(spreadsheetId) == country) {
@@ -137,8 +136,8 @@ public class Settings {
                 }
             } catch (Exception e) {
                 LOGGER.error("{} is invalid. {}", spreadsheetId, e.getMessage());
-                spreadsheetIdError.append(String.format("%s is not a valid spreadsheet id, or it's not shared to %s \n",
-                        spreadsheetId, Constants.RND_EMAIL));
+                //spreadsheetIdError.append(String.format("%s is not a valid spreadsheet id, or it's not shared to %s \n",
+                //        spreadsheetId, Constants.RND_EMAIL));
             }
         }
 

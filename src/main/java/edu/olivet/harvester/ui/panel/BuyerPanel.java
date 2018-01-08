@@ -56,9 +56,6 @@ public class BuyerPanel extends JPanel {
     private double zoomLevel;
     @Getter
     @Setter
-    /**
-     * current processing order
-     */
     private Order order;
     private int pid;
     public boolean processingFlag = false;
@@ -122,7 +119,7 @@ public class BuyerPanel extends JPanel {
 
     private void killProcess(int pid) {
         Runtime rt = Runtime.getRuntime();
-        if (System.getProperty("os.name").toLowerCase().indexOf("windows") > -1) {
+        if (System.getProperty("os.name").toLowerCase().contains("windows")) {
             try {
                 rt.exec("taskkill " + pid);
             } catch (IOException e) {

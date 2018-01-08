@@ -32,7 +32,8 @@ public class RuntimeSettingsValidator {
     List<String> checkSheet(RuntimeSettings settings) {
         List<String> errors = new ArrayList<>();
 
-        if (StringUtils.isBlank(settings.getSheetName()) || StringUtils.isBlank(settings.getSpreadsheetId()) || StringUtils.isBlank(settings.getSpreadsheetName())) {
+        if (StringUtils.isBlank(settings.getSheetName()) || StringUtils.isBlank(settings.getSpreadsheetId()) ||
+                StringUtils.isBlank(settings.getSpreadsheetName())) {
             errors.add(UIText.text("error.appcfg.sheet"));
         }
 

@@ -129,6 +129,15 @@ public class OrderHelper {
 
     public void setColumnValue(int col, String value, Order order) {
         OrderColumn orderColumn = OrderColumn.get(col);
+        setColumnValue(orderColumn, value, order);
+    }
+
+    public void setColumnValue(String columnName, String value, Order order) {
+        OrderColumn orderColumn = OrderColumn.valueOf(columnName.replaceAll("-", "_").toUpperCase());
+        setColumnValue(orderColumn, value, order);
+    }
+
+    public void setColumnValue(OrderColumn orderColumn, String value, Order order) {
         if (orderColumn != null) {
             String fieldName = orderColumn.name().toLowerCase();
             Field filed = ORDER_FIELDS_CACHE.computeIfAbsent(fieldName, s -> {

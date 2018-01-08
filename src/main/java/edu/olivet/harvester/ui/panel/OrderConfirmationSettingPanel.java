@@ -29,9 +29,9 @@ public class OrderConfirmationSettingPanel extends JPanel {
 
         SystemSettings systemSettings = SystemSettings.load();
         final JLabel enableAutoExportLabel = new JLabel("Enable Auto Confirmation?");
-        enableAutoConfirmationComboBox = new JComboBox();
+        enableAutoConfirmationComboBox = new JComboBox<>();
         enableAutoConfirmationComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"No", "Yes"}));
-        if(systemSettings.isEnableOrderConfirmation()) {
+        if (systemSettings.isEnableOrderConfirmation()) {
             enableAutoConfirmationComboBox.setSelectedItem("Yes");
         } else {
             enableAutoConfirmationComboBox.setSelectedItem("No");
@@ -101,7 +101,8 @@ public class OrderConfirmationSettingPanel extends JPanel {
     public void collectData() {
         SystemSettings systemSettings = SystemSettings.load();
         boolean oldData = systemSettings.isEnableOrderConfirmation();
-        if("Yes".equalsIgnoreCase(enableAutoConfirmationComboBox.getSelectedItem().toString())) {
+        //noinspection ConstantConditions
+        if ("Yes".equalsIgnoreCase(enableAutoConfirmationComboBox.getSelectedItem().toString())) {
             systemSettings.setEnableOrderConfirmation(true);
         } else {
             systemSettings.setEnableOrderConfirmation(false);
@@ -110,7 +111,7 @@ public class OrderConfirmationSettingPanel extends JPanel {
         if (oldData != systemSettings.isEnableOrderConfirmation()) {
             TaskScheduler taskScheduler = ApplicationContext.getBean(TaskScheduler.class);
             taskScheduler.deleteJob(BackgroundJob.ShipmentConfirmation.getClazz());
-            if (oldData == true) {
+            if (oldData) {
                 ProgressLogsPanel.getInstance().displayMsg("Order auto confirmation job was disabled successfully.");
             } else {
                 Date nextTriggerTime = taskScheduler.startJob(BackgroundJob.ShipmentConfirmation.getCron(), BackgroundJob.ShipmentConfirmation.getClazz());
@@ -120,7 +121,7 @@ public class OrderConfirmationSettingPanel extends JPanel {
 
 
         systemSettings.setOrderConfirmationTime(confirmationTimePicker.getTime());
-        systemSettings.setOrderConfirmationAllowedRange((int)allowedRangeComBox.getSelectedItem());
+        systemSettings.setOrderConfirmationAllowedRange((int) allowedRangeComBox.getSelectedItem());
         systemSettings.save();
     }
 

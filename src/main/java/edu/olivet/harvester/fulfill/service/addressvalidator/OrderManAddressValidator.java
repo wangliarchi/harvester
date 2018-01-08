@@ -79,7 +79,8 @@ public class OrderManAddressValidator implements AddressValidator {
                 double similarity = StringUtils.getJaroWinklerDistance(finalOrAddr, finalAddr);
                 if (similarity < MIN_SIMILARITY) {
                     AddressValidatorService.logFailed(old.toString(), entered.toString(), finalOrAddr + ", " + finalAddr);
-                    String msg = "OrderMan Address failed verification. Entered " + entered + ", original " + old + ", Addresses after rules applied " + finalOrAddr + ", " + finalAddr;
+                    String msg = "OrderMan Address failed verification. Entered " + entered + ", original " + old +
+                            ", Addresses after rules applied " + finalOrAddr + ", " + finalAddr;
                     LOGGER.error(msg);
                     return false;
                 }
@@ -96,7 +97,8 @@ public class OrderManAddressValidator implements AddressValidator {
 
     public boolean _verify(Address old, Address entered) {
         List<String> results = new ArrayList<>();
-        if (!old.getRecipient().replace(StringUtils.SPACE, StringUtils.EMPTY).equalsIgnoreCase(entered.getRecipient().replace(StringUtils.SPACE, StringUtils.EMPTY))) {
+        if (!old.getRecipient().replace(StringUtils.SPACE, StringUtils.EMPTY)
+                .equalsIgnoreCase(entered.getRecipient().replace(StringUtils.SPACE, StringUtils.EMPTY))) {
             results.add(UIText.text("error.addr.name", old.getRecipient(), entered.getRecipient()));
         }
 
@@ -123,7 +125,8 @@ public class OrderManAddressValidator implements AddressValidator {
         }
 
         if (CollectionUtils.isNotEmpty(results)) {
-            String msg = "OrderMan Address failed verification. Entered " + entered + ", original " + old + ". " + StringUtils.join(results, "; ");
+            String msg = "OrderMan Address failed verification. Entered " + entered +
+                    ", original " + old + ". " + StringUtils.join(results, "; ");
             LOGGER.error(msg);
             AddressValidatorService.logFailed(old.toString(), entered.toString(), "");
             return false;
@@ -197,12 +200,15 @@ public class OrderManAddressValidator implements AddressValidator {
      * 亚马逊有时会将地址中单词顺序按照其规则重排，为此需先比较两个长句中所有单词是否相同: 先去掉所有空白字符看是否相同，然后拆分为集合，差集为空
      */
     public boolean sameInWords(String sentence1, String sentence2) {
-        if (sentence1.replaceAll(Regex.BLANK.val(), StringUtils.EMPTY).trim().equalsIgnoreCase(sentence2.replaceAll(Regex.BLANK.val(), StringUtils.EMPTY).trim())) {
+        if (sentence1.replaceAll(Regex.BLANK.val(), StringUtils.EMPTY).trim()
+                .equalsIgnoreCase(sentence2.replaceAll(Regex.BLANK.val(), StringUtils.EMPTY).trim())) {
             return true;
         }
 
-        List<String> list1 = Arrays.asList(StringUtils.split(sentence1.replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY).toLowerCase(), StringUtils.SPACE));
-        List<String> list2 = Arrays.asList(StringUtils.split(sentence2.replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY).toLowerCase(), StringUtils.SPACE));
+        List<String> list1 = Arrays.asList(
+                StringUtils.split(sentence1.replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY).toLowerCase(), StringUtils.SPACE));
+        List<String> list2 = Arrays.asList(
+                StringUtils.split(sentence2.replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY).toLowerCase(), StringUtils.SPACE));
         return CollectionUtils.disjunction(list1, list2).size() == 0;
     }
 
@@ -234,13 +240,14 @@ public class OrderManAddressValidator implements AddressValidator {
      * @return 校验结果
      */
     public String compareZipCode(String zip1, String zip2) {
-        if (!zip1.replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY).equals(zip2.replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY)) &&
+        if (!zip1.replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY)
+                .equals(zip2.replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY)) &&
                 !zip1.contains(zip2) && !zip2.contains(zip1)) {
             String[] arr1 = StringUtils.splitPreserveAllTokens(zip1, Constants.HYPHEN);
             String[] arr2 = StringUtils.splitPreserveAllTokens(zip2, Constants.HYPHEN);
-            String _zip1 = arr1.length > 0 ? arr1[0] : StringUtils.EMPTY;
-            String _zip2 = arr2.length > 0 ? arr2[0] : StringUtils.EMPTY;
-            if (!_zip1.equalsIgnoreCase(_zip2)) {
+            String correctedZip1 = arr1.length > 0 ? arr1[0] : StringUtils.EMPTY;
+            String correctedZip2 = arr2.length > 0 ? arr2[0] : StringUtils.EMPTY;
+            if (!correctedZip1.equalsIgnoreCase(correctedZip2)) {
                 return UIText.message("error.addr.zip", zip1, zip2);
             }
         }
@@ -256,10 +263,10 @@ public class OrderManAddressValidator implements AddressValidator {
             return null;
         }
 
-        String _city1 = city1.replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY).toLowerCase();
-        String _city2 = city2.replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY).toLowerCase();
-        if (!_city1.equals(_city2)) {
-            @SuppressWarnings("deprecation") double similarity = StringUtils.getJaroWinklerDistance(_city1, _city2);
+        String correctedCity1 = city1.replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY).toLowerCase();
+        String correctedCity2 = city2.replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY).toLowerCase();
+        if (!correctedCity1.equals(correctedCity2)) {
+            @SuppressWarnings("deprecation") double similarity = StringUtils.getJaroWinklerDistance(correctedCity1, correctedCity2);
             if (similarity < MIN_SIMILARITY) {
                 return UIText.text("error.addr.city", city1, city2);
             }
@@ -291,9 +298,9 @@ public class OrderManAddressValidator implements AddressValidator {
     public String compareState(String state1, String state2, boolean inUS) {
         if (inUS) {
             try {
-                State _state1 = State.parse(state1);
-                State _state2 = State.parse(state2);
-                if (_state1 != _state2) {
+                State stateObj1 = State.parse(state1);
+                State stateObj2 = State.parse(state2);
+                if (stateObj1 != stateObj2) {
                     return UIText.text("error.addr.state", state1, state2);
                 }
                 return StringUtils.EMPTY;
@@ -384,8 +391,10 @@ public class OrderManAddressValidator implements AddressValidator {
      * </pre>
      */
     public double calcSimilarity(String addr1, String addr2) {
-        String[] arr1 = StringUtils.splitPreserveAllTokens(addr1.replaceAll(Regex.NONE_DIGITS_MINUS.val(), StringUtils.EMPTY).trim(), Constants.HYPHEN);
-        String[] arr2 = StringUtils.splitPreserveAllTokens(addr2.replaceAll(Regex.NONE_DIGITS_MINUS.val(), StringUtils.EMPTY).trim(), Constants.HYPHEN);
+        String[] arr1 = StringUtils.splitPreserveAllTokens(
+                addr1.replaceAll(Regex.NONE_DIGITS_MINUS.val(), StringUtils.EMPTY).trim(), Constants.HYPHEN);
+        String[] arr2 = StringUtils.splitPreserveAllTokens(
+                addr2.replaceAll(Regex.NONE_DIGITS_MINUS.val(), StringUtils.EMPTY).trim(), Constants.HYPHEN);
         String zipCode1 = arr1.length > 0 ? arr1[0] : null;
         String zipCode2 = arr2.length > 0 ? arr2[0] : null;
         // if zip code are exactly same, we treat the addresses as same
@@ -420,11 +429,11 @@ public class OrderManAddressValidator implements AddressValidator {
 
 
     private String removeNonKeyPart(String addr) {
-        String _addr = StringUtils.defaultString(addr);
+        String correctedAddress = StringUtils.defaultString(addr);
         for (State state : State.values()) {
-            _addr = _addr.replace(state.desc(), state.name()).replace(state.desc().toUpperCase(), state.name());
+            correctedAddress = correctedAddress.replace(state.desc(), state.name()).replace(state.desc().toUpperCase(), state.name());
         }
-        return _addr.replace("USA", StringUtils.EMPTY).replace("US", StringUtils.EMPTY)
+        return correctedAddress.replace("USA", StringUtils.EMPTY).replace("US", StringUtils.EMPTY)
                 .replaceAll(Regex.DIGITS_MINUS.val(), StringUtils.EMPTY)
                 .replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY);
     }
@@ -473,7 +482,6 @@ public class OrderManAddressValidator implements AddressValidator {
 
 
     public static void main(String[] args) {
-        OrderManAddressValidator validator = ApplicationContext.getBean(OrderManAddressValidator.class);
         Address address = new Address();
         address.setAddress1("131 East 69th Street");
         address.setAddress2("3A");
@@ -490,6 +498,7 @@ public class OrderManAddressValidator implements AddressValidator {
         enteredAddress.setZip("10021-5158");
         enteredAddress.setCountry("United States");
 
+        OrderManAddressValidator validator = ApplicationContext.getBean(OrderManAddressValidator.class);
         System.out.println(validator.verify(address, enteredAddress));
 
     }

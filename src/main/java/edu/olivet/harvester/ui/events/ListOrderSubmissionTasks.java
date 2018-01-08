@@ -1,14 +1,11 @@
 package edu.olivet.harvester.ui.events;
 
 import com.google.inject.Inject;
-import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.ListModel;
 import edu.olivet.foundations.ui.UITools;
-import edu.olivet.harvester.feeds.model.OrderConfirmationLog;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.service.OrderSubmissionTaskService;
 import edu.olivet.harvester.ui.Actions;
-import org.nutz.dao.Cnd;
 
 import java.util.List;
 

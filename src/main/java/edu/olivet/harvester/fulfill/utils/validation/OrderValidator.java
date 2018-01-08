@@ -113,6 +113,7 @@ public class OrderValidator {
 
 
     public static boolean skipCheck(RuntimeSettings settings, Order order, SkipValidation skipValidation) {
+        //noinspection SimplifiableIfStatement
         if (order != null && Remark.FORCE_FULFILL.isContainedBy(order.remark)) {
             return true;
         }
@@ -364,6 +365,7 @@ public class OrderValidator {
      * New Zealand,
      * Switzerland
      **/
+    @SuppressWarnings("SameReturnValue")
     public String validZipCode(Order order) {
         if (order.ship_zip.length() == 4 &&
 
@@ -596,7 +598,7 @@ public class OrderValidator {
                 if (orderItem.getQuantityOrdered() <= Integer.parseInt(order.quantity_purchased)) {
                     finalList = list;
                 } else {
-                    int totalFulfilled = list.stream().mapToInt(it -> it.getQuantityBought()).sum();
+                    int totalFulfilled = list.stream().mapToInt(OrderFulfillmentRecord::getQuantityBought).sum();
                     if (totalFulfilled == orderItem.getQuantityOrdered()) {
                         finalList = list;
                     }

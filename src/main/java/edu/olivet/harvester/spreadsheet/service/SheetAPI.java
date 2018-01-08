@@ -193,7 +193,8 @@ public class SheetAPI {
 
         sheetProperties.setIndex(moveTo);
         List<Request> requests = new ArrayList<>();
-        Request request = new Request().setUpdateSheetProperties(new UpdateSheetPropertiesRequest().setProperties(sheetProperties).setFields("title,index"));
+        Request request = new Request().setUpdateSheetProperties(
+                new UpdateSheetPropertiesRequest().setProperties(sheetProperties).setFields("title,index"));
         requests.add(request);
 
         BatchUpdateSpreadsheetRequest body =
@@ -202,7 +203,8 @@ public class SheetAPI {
         try {
             BatchUpdateSpreadsheetResponse response = this.batchUpdate(spreadsheetId, body);
         } catch (BusinessException e) {
-            LOGGER.error("Fail to rename sheet and move to first for {} {}. Try to delete the sheet - {}", sheetProperties.getTitle(), spreadsheetId, e);
+            LOGGER.error("Fail to rename sheet and move to first for {} {}. Try to delete the sheet - {}",
+                    sheetProperties.getTitle(), spreadsheetId, e);
             deleteSheet(sheetProperties.getSheetId(), spreadsheetId);
         }
 
@@ -241,7 +243,7 @@ public class SheetAPI {
                 new BatchUpdateSpreadsheetRequest().setRequests(requests);
 
         try {
-           BatchUpdateSpreadsheetResponse response = this.batchUpdate(spreadsheetId, body);
+            BatchUpdateSpreadsheetResponse response = this.batchUpdate(spreadsheetId, body);
         } catch (BusinessException e) {
             LOGGER.error("Fail to delete row {} from sheet {} {} - {}", row, sheetId, spreadsheetId, e);
             throw new BusinessException(e);
@@ -295,7 +297,8 @@ public class SheetAPI {
         //mark gray
         orders.forEach(order -> {
             try {
-                appScript.markColor(worksheet.getSpreadsheet().getSpreadsheetId(), worksheet.getSheetName(), order.row, OrderEnums.OrderColor.DarkGray2);
+                appScript.markColor(worksheet.getSpreadsheet().getSpreadsheetId(), worksheet.getSheetName(),
+                        order.row, OrderEnums.OrderColor.DarkGray2);
             } catch (Exception e) {
                 LOGGER.error("Failed to mark row {} of {} as gray: ", order.row, worksheet, e);
             }
@@ -316,7 +319,8 @@ public class SheetAPI {
                     remarkText.append(order.remark).append(" ");
                 }
 
-                ValueRange remarkData = new ValueRange().setValues(Collections.singletonList(Collections.singletonList(remarkText.toString())))
+                ValueRange remarkData = new ValueRange()
+                        .setValues(Collections.singletonList(Collections.singletonList(remarkText.toString())))
                         .setRange(sheetName + "!S" + order.row);
 
                 dateToUpdate.add(remarkData);
@@ -337,7 +341,8 @@ public class SheetAPI {
             throw new BusinessException(e);
         }
 
-        LOGGER.info("{} rows updated as buyer canceled on spreadsheet {}, took {}", orders.size(), worksheet.toString(), Strings.formatElapsedTime(start));
+        LOGGER.info("{} rows updated as buyer canceled on spreadsheet {}, took {}",
+                orders.size(), worksheet.toString(), Strings.formatElapsedTime(start));
 
 
     }

@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 public class OrderSubmissionSettingsPanel extends JPanel {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderSubmissionSettingsPanel.class);
 
-    private List<Worksheet> selectedWorksheets;
+    @SuppressWarnings("FieldCanBeLocal") private List<Worksheet> selectedWorksheets;
     private String selectedSpreadsheetId;
     private Country selectedMarketplace;
     private final Map<Integer, JComboBox<String>> sheetNameMap = new LinkedHashMap<>();
@@ -78,9 +78,7 @@ public class OrderSubmissionSettingsPanel extends JPanel {
             }
         });
 
-        selectSheetButton.addActionListener(evt -> {
-            selectGoogleSheet();
-        });
+        selectSheetButton.addActionListener(evt -> selectGoogleSheet());
 
         showHideDetailButton.addActionListener(evt -> {
             if (showHideDetailButton.getText().equalsIgnoreCase("Show More Runtime Settings")) {
@@ -128,7 +126,7 @@ public class OrderSubmissionSettingsPanel extends JPanel {
             selectedSheetName.setText(selectedWorksheets.get(0).getSpreadsheet().getTitle());
             selectedSheetName.setToolTipText(selectedWorksheets.get(0).getSpreadsheet().getTitle());
             selectedSpreadsheetId = dialog.getSelectedWorksheets().get(0).getSpreadsheet().getSpreadsheetId();
-            sheetNames = selectedWorksheets.stream().map(it -> it.getSheetName()).collect(Collectors.toList());
+            sheetNames = selectedWorksheets.stream().map(Worksheet::getSheetName).collect(Collectors.toList());
             sheetNames.add(0, "");
             updateSheetOptions();
         }
@@ -233,9 +231,14 @@ public class OrderSubmissionSettingsPanel extends JPanel {
         for (OrderRange orderRange : orderRanges) {
             OrderSubmissionTask orderSubmissionTask = new OrderSubmissionTask();
             orderSubmissionTask.setSid(Settings.load().getSid());
-            orderSubmissionTask.setMarketplaceName(((Country) marketplaceComboBox.getSelectedItem()).name());
+            if(marketplaceComboBox.getSelectedItem() !=null) {
+                orderSubmissionTask.setMarketplaceName(((Country) marketplaceComboBox.getSelectedItem()).name());
+            }
+            //noinspection ConstantConditions
             orderSubmissionTask.setLostLimit(lostLimitComboBox.getSelectedItem().toString());
+            //noinspection ConstantConditions
             orderSubmissionTask.setPriceLimit(priceLimitComboBox.getSelectedItem().toString());
+            //noinspection ConstantConditions
             orderSubmissionTask.setEddLimit(maxDaysOverEddComboBox.getSelectedItem().toString());
             orderSubmissionTask.setNoInvoiceText(noInvoiceTextField.getText());
             orderSubmissionTask.setFinderCode(finderCodeTextField.getText());

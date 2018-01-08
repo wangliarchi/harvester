@@ -39,7 +39,7 @@ public class CountryStateUtils {
      * @param shippingCountry 国家完整名称，比如United States
      */
     public String getCountryCode(String shippingCountry) {
-        if(StringUtils.length(shippingCountry) == 2) {
+        if (StringUtils.length(shippingCountry) == 2) {
             return shippingCountry.toUpperCase();
         }
         if (StringUtils.isBlank(shippingCountry) || Country.US.name().equals(shippingCountry)) {

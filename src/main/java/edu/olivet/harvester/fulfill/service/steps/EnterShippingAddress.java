@@ -23,9 +23,11 @@ public class EnterShippingAddress extends Step {
 
         FulfillmentPage page;
         if (stepHelper.detectCurrentPage(state) == CheckoutEnum.CheckoutPage.ShippingAddress) {
-            page = CheckoutStepFactory.getCheckoutStepPage(state.getBuyerPanel(), CheckoutEnum.CheckoutStep.ShippingAddress, CheckoutEnum.CheckoutPageType.MultiPage);
+            page = CheckoutStepFactory.getCheckoutStepPage(
+                    state.getBuyerPanel(), CheckoutEnum.CheckoutStep.ShippingAddress, CheckoutEnum.CheckoutPageType.MultiPage);
         } else {
-            page = CheckoutStepFactory.getCheckoutStepPage(state.getBuyerPanel(), CheckoutEnum.CheckoutStep.ShippingAddress, CheckoutEnum.CheckoutPageType.OnePage);
+            page = CheckoutStepFactory.getCheckoutStepPage(
+                    state.getBuyerPanel(), CheckoutEnum.CheckoutStep.ShippingAddress, CheckoutEnum.CheckoutPageType.OnePage);
         }
 
         page.execute(state.getOrder());

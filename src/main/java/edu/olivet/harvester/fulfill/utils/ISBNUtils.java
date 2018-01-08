@@ -134,7 +134,12 @@ public class ISBNUtils {
         return title;
     }
 
-    private static final String[] CONDITIONS = {ConditionUtils.Condition.New.name().toLowerCase(), ConditionUtils.Condition.Used.name().toLowerCase(), ConditionUtils.Condition.Collectible.name().toLowerCase()};
+    private static final String[] CONDITIONS = {
+            ConditionUtils.Condition.New.name().toLowerCase(),
+            ConditionUtils.Condition.Used.name().toLowerCase(),
+            ConditionUtils.Condition.Collectible.name().toLowerCase()
+    };
+
     private static final int[] INDEXES = {10, 20, 30};
 
     public static String getTitleAtOfferListPage(String baseUrl, String isbn) {
@@ -142,11 +147,12 @@ public class ISBNUtils {
         String cond = CONDITIONS[i];
         int index = INDEXES[i];
 
-        String _isbn = ISBNUtils.correct(isbn);
-        String html = HttpUtils.getHTML(baseUrl + String.format(OrderCountryUtils.OFFER_LIST_URL_PATTERN, _isbn, cond, cond, index));
+        String correctedIsbn = ISBNUtils.correct(isbn);
+        String html = HttpUtils.getHTML(baseUrl +
+                String.format(OrderCountryUtils.OFFER_LIST_URL_PATTERN, correctedIsbn, cond, cond, index));
         Document doc = Jsoup.parse(html);
         if (doc.select("#captchacharacters").size() > 0) {
-            LOGGER.warn("在{}上面基于HttpClient读取{}书名时被判定为机器人访问:{}", baseUrl, _isbn, doc.title());
+            LOGGER.warn("在{}上面基于HttpClient读取{}书名时被判定为机器人访问:{}", baseUrl, correctedIsbn, doc.title());
             return StringUtils.EMPTY;
         }
 
@@ -160,9 +166,10 @@ public class ISBNUtils {
      * "brand":"Mr. Color","type":"Toy","region":"US","manufacturer":"Mr. Hobby"}
      */
     public static String getTitleAtESWeb(String isbn) {
-        String _isbn = ISBNUtils.correct(isbn);
+        String correctedIsbn = ISBNUtils.correct(isbn);
         try {
-            String json = Jsoup.connect(String.format("http://35.188.127.209/web/product.php?asin=%s", _isbn)).timeout(WaitTime.Longer.valInMS())
+            String json = Jsoup.connect(String.format("http://35.188.127.209/web/product.php?asin=%s", correctedIsbn))
+                    .timeout(WaitTime.Longer.valInMS())
                     .ignoreContentType(true).execute().body();
             JSONObject response = JSON.parseObject(json);
             return response.getString("title");

@@ -245,12 +245,15 @@ public class OrderService {
 
         sheetNames.removeIf(it -> !isOrderSheet(it, dateRange));
         //
-        LOGGER.info("{}下面总共找到{}个{}到{}之间的Sheet, {}", spreadsheet.getProperties().getTitle(), sheetNames.size(), Dates.format(dateRange.getMinimum(), "MM/dd/yyyy"), Dates.format(dateRange.getMaximum(), "MM/dd/yyyy"), sheetNames.toString());
+        LOGGER.info("{}下面总共找到{}个{}到{}之间的Sheet, {}",
+                spreadsheet.getProperties().getTitle(), sheetNames.size(), Dates.format(dateRange.getMinimum(), "MM/dd/yyyy"),
+                Dates.format(dateRange.getMaximum(), "MM/dd/yyyy"), sheetNames.toString());
 
         //LOGGER.info("{}下面有{}个Sheet待处理, {}", spreadsheet.getProperties().getTitle(), sheetNames.size(), sheetNames.toString());
 
         if (sheetNames.size() == 0) {
-            throw new BusinessException("No worksheets between " + Dates.format(dateRange.getMinimum(), "M/d") + " and " + Dates.format(dateRange.getMaximum(), "M/d") + " found.");
+            throw new BusinessException("No worksheets between " + Dates.format(dateRange.getMinimum(), "M/d") +
+                    " and " + Dates.format(dateRange.getMaximum(), "M/d") + " found.");
         }
 
         List<String> a1Notations = sheetNames.stream().map(it -> it + "!A1:AZ").collect(Collectors.toList());
@@ -363,7 +366,8 @@ public class OrderService {
 
         map.forEach((k, v) -> {
             if (v.size() > 1) {
-                Set<String> sheetNames = v.stream().filter(it -> RegexUtils.Regex.COMMON_ORDER_SHEET_NAME.isMatched(it.sheetName)).map(Order::getSheetName).collect(Collectors.toSet());
+                Set<String> sheetNames = v.stream().filter(it -> RegexUtils.Regex.COMMON_ORDER_SHEET_NAME.isMatched(it.sheetName))
+                        .map(Order::getSheetName).collect(Collectors.toSet());
                 if (sheetNames.size() > 1) {
                     setToReturn.addAll(v);
                 }
