@@ -4,6 +4,7 @@ import com.amazonservices.mws.orders._2013_09_01.model.Order;
 import com.amazonservices.mws.orders._2013_09_01.model.OrderItem;
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.amazon.MWSUtils;
 import edu.olivet.foundations.amazon.OrderFetcher;
 import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.utils.BusinessException;
@@ -126,9 +127,11 @@ public class ExportOrderService extends OrderClient {
             orders = orderFetcher.readOrders(dateMap, Settings.load().getConfigByCountry(country).getMwsCredential(), STATUS_FILTERS);
         } catch (Exception e) {
             LOGGER.error("Error fetching orders from amazon {} to {}", dateMap.get(OrderFetcher.DateRangeType.LastUpdatedAfter), dateMap.get(OrderFetcher.DateRangeType.LastUpdatedBefore), e);
-            throw new BusinessException(String.format("Error fetching orders from amazon %s to %s", dateMap.get(OrderFetcher.DateRangeType.LastUpdatedAfter), dateMap.get(OrderFetcher.DateRangeType.LastUpdatedBefore)));
+            if (StringUtils.containsIgnoreCase(e.getMessage(), "access denied")) {
+                throw new BusinessException(e.getMessage() + " Please check if the account is still ACTIVE");
+            }
+            throw new BusinessException(e);
         }
-
         return orders;
 
 
