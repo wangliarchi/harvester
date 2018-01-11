@@ -211,12 +211,13 @@ public class OrderSubmitter {
                 messageListener.addMsg(order, e.getMessage(), InformationLevel.Negative);
                 task.setFailed(task.getFailed() + 1);
                 if (e instanceof OutOfBudgetException) {
+                    orderSubmissionTaskService.stopTask(task);
                     throw new BusinessException("No more money to spend :(");
                 } else if (e instanceof FailedBuyerAccountAuthenticationException) {
+                    orderSubmissionTaskService.stopTask(task);
                     throw new BusinessException(e);
                 }
             } finally {
-                task.setDateEnded(new Date());
                 orderSubmissionTaskService.saveTask(task);
             }
         }
