@@ -136,7 +136,7 @@ public class OrderExporter {
             return;
         }
 
-        messagePanel.displayMsg(orders.size() + " order(s) found from " + country, LOGGER);
+        messagePanel.displayMsg("Totally " + orders.size() + " row records found from " + country, LOGGER);
         messagePanel.displayMsg("Writing orders to order update sheets");
         //fill orders to order update sheets
         try {
@@ -152,8 +152,6 @@ public class OrderExporter {
             LOGGER.error("", e);
         }
     }
-
-
 
 
 }

@@ -33,7 +33,8 @@ import java.util.*;
 public class ExportOrderService extends OrderClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExportOrderService.class);
     private final String[] STATUS_FILTERS = {"Unshipped", "PartiallyShipped", "Shipped"};
-    @SuppressWarnings("FieldCanBeLocal") private final int DAYS_BACK = -7;
+    @SuppressWarnings("FieldCanBeLocal")
+    private final int DAYS_BACK = -7;
 
     @Inject
     OrderFetcher orderFetcher;
@@ -41,7 +42,8 @@ public class ExportOrderService extends OrderClient {
     SheetAPI sheetAPI;
     @Inject
     DBManager dbManager;
-    @Inject TrueFakeAsinMappingService trueFakeAsinMappingService;
+    @Inject
+    TrueFakeAsinMappingService trueFakeAsinMappingService;
     @Inject
     OrderService orderService;
 
@@ -77,6 +79,9 @@ public class ExportOrderService extends OrderClient {
         List<AmazonOrder> amazonOrders = convertToAmazonOrders(orders, country);
 
         //find isbn
+        if (messagePanel != null) {
+            messagePanel.displayMsg("Finding real ASINs for orders...");
+        }
         trueFakeAsinMappingService.getISBNs(amazonOrders);
 
         //save AmazonOrders
@@ -225,8 +230,7 @@ public class ExportOrderService extends OrderClient {
             if (messagePanel != null) {
                 if (i == orders.size()) {
                     messagePanel.displayMsg("Done");
-                }
-                if (i % 5 == 0) {
+                } else if (i % 5 == 0) {
                     messagePanel.displayMsg(String.format("Finished %d of %d", i, orders.size()));
                 }
             }
