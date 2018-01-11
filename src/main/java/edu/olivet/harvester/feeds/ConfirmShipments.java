@@ -15,10 +15,10 @@ import edu.olivet.foundations.ui.VirtualMessagePanel;
 import edu.olivet.foundations.utils.*;
 import edu.olivet.harvester.feeds.helper.ConfirmShipmentEmailSender;
 import edu.olivet.harvester.feeds.helper.FeedGenerator;
+import edu.olivet.harvester.feeds.helper.ShipDateUtils;
 import edu.olivet.harvester.feeds.helper.ShipmentOrderFilter;
 import edu.olivet.harvester.feeds.model.OrderConfirmationLog;
 import edu.olivet.harvester.feeds.service.ConfirmationFailedLogService;
-import edu.olivet.harvester.message.ErrorAlertService;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.service.Carrier;
@@ -39,15 +39,12 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.apache.commons.lang3.time.FastDateFormat;
 import org.jetbrains.annotations.Nullable;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -82,8 +79,6 @@ public class ConfirmShipments {
     @Setter
     private ConfirmShipmentEmailSender confirmShipmentEmailSender;
 
-    @Inject
-    private ErrorAlertService errorAlertService;
 
     @Inject
     private ShipmentOrderFilter shipmentOrderFilter;
@@ -94,10 +89,10 @@ public class ConfirmShipments {
     @Inject
     private DBManager dbManager;
 
+    @Inject ShipDateUtils shipDateUtils;
+
     @Setter
     private int lastOrderRowNo = 3;
-
-    //private String orderFinderEmail;
 
 
     /**
@@ -114,18 +109,12 @@ public class ConfirmShipments {
                 LOGGER.info("Error confirming shipments for spreadsheet {} . ", worksheet.toString(), e);
                 Country country = worksheet.getSpreadsheet().getSpreadsheetCountry();
                 ConfirmationFailedLogService.logFailed(country, worksheet.getSheetName(), e.getMessage());
-
             }
-
         }
-
-
     }
 
 
     private void confirmShipmentForSpreadsheetId(String spreadsheetId, String sheetName) {
-
-
         //set spreadsheet id, check if the given spreadsheet id is valid
         Spreadsheet workingSpreadsheet;
         try {
@@ -148,8 +137,6 @@ public class ConfirmShipments {
 
 
     private void confirmShipmentForWorksheet(Worksheet worksheet) {
-
-
         StringBuilder resultSummary = new StringBuilder();
         StringBuilder resultDetail = new StringBuilder();
 
@@ -550,7 +537,7 @@ public class ConfirmShipments {
                 carrierName = codes[1];
             }
 
-            String shipDate = getShipDateString(order, defaultShipDate);
+            String shipDate = shipDateUtils.getShipDateString(order, defaultShipDate);
             String[] row = {order.order_id, carrierCode, carrierName, shipDate};
             ordersToBeConfirmed.add(row);
         }
@@ -562,63 +549,6 @@ public class ConfirmShipments {
 
     }
 
-    @Inject Now now;
-
-    /**
-     * <pre>
-     * 1. 如果sheet date 比latest expected shipping date 晚，使用 earliest expected shipping date
-     * 原因是 有导单比较晚的情况
-     * 2. 如果purchase date 比sheet date 晚， 使用purchase date
-     * 3. 其他情况直接使用sheet date
-     * </pre>
-     */
-    public Date getShipDate(Order order, Date defaultDate) {
-        Date shipDate = defaultDate;
-        String[] shipDates = new String[2];
-        if (StringUtils.isNotBlank(order.expected_ship_date)) {
-            if (Strings.containsAnyIgnoreCase(order.expected_ship_date, " - ")) {
-                shipDates = order.expected_ship_date.split("\\s-\\s");
-            } else {
-                shipDates = StringUtils.split(order.expected_ship_date, " ");
-            }
-        }
-        if (shipDates.length == 2 && StringUtils.isNotBlank(shipDates[0]) && StringUtils.isNotBlank(shipDates[1])) {
-            try {
-                Date earliestShipDate = Dates.parseDate(shipDates[0]);
-                Date latestShipDate = Dates.parseDate(shipDates[1]);
-                if (shipDate.after(DateUtils.addDays(latestShipDate, -1))) {
-                    shipDate = earliestShipDate;
-                }
-            } catch (Exception e) {
-                //
-            }
-        }
-        try {
-            Date purchaseDate = order.getPurchaseDate();
-            if (purchaseDate.after(shipDate)) {
-                shipDate = Dates.beginOfDay(new DateTime(purchaseDate)).toDate();
-            }
-        } catch (Exception e) {
-            //
-        }
-        Date nowDate = DateUtils.addHours(now.get(), -1);
-        if (shipDate.after(nowDate)) {
-            shipDate = DateUtils.addDays(shipDate, -1);
-        }
-        return shipDate;
-    }
-
-
-    public String getShipDateString(Order order, Date defaultDate) {
-        return formatShipDate(getShipDate(order, defaultDate));
-    }
-
-    public String formatShipDate(Date shipDate) {
-        TimeZone tz = TimeZone.getTimeZone("UTC");
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        df.setTimeZone(tz);
-        return df.format(shipDate);
-    }
 
     @Inject
     @Setter
@@ -681,9 +611,7 @@ public class ConfirmShipments {
         return feedSubmissionFetcher.getActiveShipmentConfirmationSubmissionList(country);
     }
 
-    public String getSheetNameByDate(long millis) {
-        return FastDateFormat.getInstance("MM/dd").format(millis);
-    }
+
 
     public void execute() {
 
@@ -700,7 +628,7 @@ public class ConfirmShipments {
         }
 
         //default to select today's sheet
-        String sheetName = getSheetNameByDate(System.currentTimeMillis());
+        String sheetName = shipDateUtils.getSheetNameByDate(System.currentTimeMillis());
 
         //then confirm shipment for each spreadsheet
         for (String spreadId : spreadIds) {

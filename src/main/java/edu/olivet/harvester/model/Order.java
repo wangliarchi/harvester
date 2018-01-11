@@ -667,6 +667,44 @@ public class Order implements Keyable {
                 order_number, account, ship_country);
     }
 
+    @Override
+    public String toString() {
+        return order_id+"\t"+sheetName+"\t"+row+"\t"+
+                status+"\t"+
+                recipient_name+"\t"+
+                purchase_date+"\t"+
+                sku+"\t"+
+                sku_address+"\t"+
+                price+"\t"+
+                quantity_purchased+"\t"+
+                shipping_fee+"\t"+
+                ship_state+"\t"+
+                isbn+"\t"+
+                seller+"\t"+
+                seller_id+"\t"+
+                seller_price+"\t"+
+                url+"\t"+
+                condition+"\t"+
+                character+"\t"+
+                remark+"\t"+
+                reference+"\t"+
+                code+"\t"+
+                item_name+"\t"+
+                ship_address_1+"\t"+
+                ship_address_2+"\t"+
+                ship_city+"\t"+
+                ship_zip+"\t"+
+                ship_phone_number+"\t"+
+                ship_country+"\t"+
+                cost+"\t"+
+                order_number+"\t"+
+                account+"\t"+
+                last_code+"\t"+
+                sales_chanel+"\t"+
+                original_condition+"\t"+
+                shipping_service+"\t"+
+                cost+"\t";
+    }
 
     public static void main(String[] args) {
         //
