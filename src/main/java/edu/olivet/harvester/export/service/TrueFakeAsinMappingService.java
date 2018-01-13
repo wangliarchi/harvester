@@ -1,14 +1,20 @@
 package edu.olivet.harvester.export.service;
 
+import com.google.inject.Inject;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.foundations.utils.Strings;
+import edu.olivet.harvester.export.model.AmazonOrder;
 import edu.olivet.harvester.message.ErrorAlertService;
 import edu.olivet.harvester.service.ElasticSearchService;
 import edu.olivet.harvester.utils.common.HttpUtils;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -16,6 +22,33 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class TrueFakeAsinMappingService {
     private static final String SERVICE_URL = "http://35.166.131.3:8080/listing-mapping/api/mapping/%s?accessKey=7c2eeed11dab9a747e7517583e6ee857";
+
+    @Inject ElasticSearchService elasticSearchService;
+
+    public void getISBNs(List<AmazonOrder> orders) {
+        List<String> asins = new ArrayList<>();
+        orders.forEach(order -> {
+            if (Strings.containsAnyIgnoreCase(order.getSku(), "ZD", "zendian")) {
+                order.setIsbn(order.getAsin());
+            } else {
+                asins.add(order.getAsin());
+            }
+        });
+
+        Map<String, String> listingMapping = elasticSearchService.searchISBNs(asins);
+        orders.forEach(order -> {
+            if (listingMapping.containsKey(order.getAsin())) {
+                order.setIsbn(listingMapping.get(order.getAsin()));
+            } else if (StringUtils.isBlank(order.getIsbn())) {
+                try {
+                    String isbn = HttpUtils.getText(String.format(SERVICE_URL, order.getAsin()));
+                    order.setIsbn(isbn);
+                } catch (Exception e) {
+                    //ignore
+                }
+            }
+        });
+    }
 
     @Repeat(expectedExceptions = BusinessException.class)
     public static String getISBN(String sku, String asin) {

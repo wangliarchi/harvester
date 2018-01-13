@@ -17,6 +17,7 @@ import edu.olivet.harvester.message.ErrorAlertService;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.Actions;
 import edu.olivet.harvester.utils.Settings;
+import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
@@ -41,6 +42,7 @@ public class OrderExporter {
     @Inject
     ErrorAlertService errorAlertService;
 
+    @Setter
     private MessagePanel messagePanel = new VirtualMessagePanel();
 
 
@@ -118,6 +120,7 @@ public class OrderExporter {
         //list all unexported orders
         List<Order> orders;
         try {
+            exportOrderService.setMessagePanel(messagePanel);
             orders = exportOrderService.listUnexportedOrders(lastExportedDate, toDate, country);
         } catch (Exception e) {
             LOGGER.error("", e);
@@ -132,8 +135,8 @@ public class OrderExporter {
             return;
         }
 
-        messagePanel.displayMsg(orders.size() + " order(s) found from " + country, LOGGER);
-
+        messagePanel.displayMsg("Totally " + orders.size() + " row records found from " + country, LOGGER);
+        messagePanel.displayMsg("Writing orders to order update sheets");
         //fill orders to order update sheets
         try {
             sheetService.fillOrders(country, orders, messagePanel);
@@ -142,11 +145,11 @@ public class OrderExporter {
             errorAlertService.sendMessage("Error export orders", e.getMessage());
         }
 
-        exportStatService.updateStat(country, toDate, orders.size());
-    }
-
-    public void setMessagePanel(MessagePanel messagePanel) {
-        this.messagePanel = messagePanel;
+        try {
+            exportStatService.updateStat(country, toDate, orders.size());
+        } catch (Exception e) {
+            LOGGER.error("", e);
+        }
     }
 
 

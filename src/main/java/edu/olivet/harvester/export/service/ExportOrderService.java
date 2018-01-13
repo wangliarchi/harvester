@@ -6,8 +6,10 @@ import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.OrderFetcher;
 import edu.olivet.foundations.db.DBManager;
+import edu.olivet.foundations.ui.MessagePanel;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Now;
+import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.export.model.AmazonOrder;
 import edu.olivet.harvester.export.utils.SelfOrderChecker;
 import edu.olivet.harvester.fulfill.model.Address;
@@ -16,6 +18,7 @@ import edu.olivet.harvester.service.OrderService;
 import edu.olivet.harvester.service.mws.OrderClient;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.utils.Settings;
+import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -30,7 +33,8 @@ import java.util.*;
 public class ExportOrderService extends OrderClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExportOrderService.class);
     private final String[] STATUS_FILTERS = {"Unshipped", "PartiallyShipped", "Shipped"};
-    @SuppressWarnings("FieldCanBeLocal") private final int DAYS_BACK = -7;
+    @SuppressWarnings("FieldCanBeLocal")
+    private final int DAYS_BACK = -7;
 
     @Inject
     OrderFetcher orderFetcher;
@@ -39,6 +43,8 @@ public class ExportOrderService extends OrderClient {
     @Inject
     DBManager dbManager;
     @Inject
+    TrueFakeAsinMappingService trueFakeAsinMappingService;
+    @Inject
     OrderService orderService;
 
     @Inject
@@ -46,6 +52,8 @@ public class ExportOrderService extends OrderClient {
     @Inject
     Now now;
 
+    @Setter
+    private MessagePanel messagePanel;
 
     public List<edu.olivet.harvester.model.Order> listUnexportedOrders(Date lastExportedDate, Date toDate, Country country) {
 
@@ -63,11 +71,29 @@ public class ExportOrderService extends OrderClient {
             return null;
         }
 
+        if (messagePanel != null) {
+            messagePanel.displayMsg(String.format("%d order(s) fetched from amazon %s", orders.size(), country.name()));
+        }
 
         //save to db, read order item info, and finally convert to AmazonOrder object
-        List<AmazonOrder> amazonOrders = saveAmazonOrders(orders, country);
+        List<AmazonOrder> amazonOrders = convertToAmazonOrders(orders, country);
 
-        return toOrders(amazonOrders);
+        //find isbn
+        if (messagePanel != null) {
+            messagePanel.displayMsg("Finding real ASINs for orders...");
+        }
+        trueFakeAsinMappingService.getISBNs(amazonOrders);
+
+        //save AmazonOrders
+        amazonOrders.forEach(it -> {
+            try {
+                dbManager.insertOrUpdate(it, AmazonOrder.class);
+            } catch (Exception e) {
+                LOGGER.error("Fail to save amazonOrder to db", e);
+            }
+        });
+
+        return convertToOrders(amazonOrders);
 
 
     }
@@ -79,7 +105,7 @@ public class ExportOrderService extends OrderClient {
      *     handle blacklist buyer and self order check
      * </pre>
      */
-    public List<edu.olivet.harvester.model.Order> toOrders(List<AmazonOrder> amazonOrders) {
+    public List<edu.olivet.harvester.model.Order> convertToOrders(List<AmazonOrder> amazonOrders) {
         List<edu.olivet.harvester.model.Order> orderList = new ArrayList<>();
         for (AmazonOrder amazonOrder : amazonOrders) {
             edu.olivet.harvester.model.Order order;
@@ -167,15 +193,23 @@ public class ExportOrderService extends OrderClient {
         return orders;
     }
 
+
     /**
      * <pre>
      *     List order items from amazon
      *     save to local db for later reference
      * </pre>
      */
-    public List<AmazonOrder> saveAmazonOrders(List<Order> orders, Country country) {
+    public List<AmazonOrder> convertToAmazonOrders(List<Order> orders, Country country) {
         List<AmazonOrder> amazonOrders = new ArrayList<>();
+
+        if (messagePanel != null) {
+            messagePanel.displayMsg("Fetching order item info...");
+        }
+
+        int i = 0;
         for (Order order : orders) {
+            i++;
             AmazonOrder amazonOrder = new AmazonOrder();
             amazonOrder.setOrderId(order.getAmazonOrderId());
             amazonOrder.setOrderStatus(order.getOrderStatus());
@@ -187,23 +221,24 @@ public class ExportOrderService extends OrderClient {
                 amazonOrder.setOrderItemId(item.getOrderItemId());
                 amazonOrder.setAsin(item.getASIN());
                 amazonOrder.setSku(item.getSellerSKU());
-                try {
-                    String isbn = TrueFakeAsinMappingService.getISBN(item.getSellerSKU(), item.getASIN());
-                    amazonOrder.setIsbn(isbn);
-                } catch (BusinessException e) {
-                    LOGGER.error(e.getMessage());
-                    amazonOrder.setIsbn(StringUtils.EMPTY);
-                }
                 amazonOrder.setItemXml(item.toXML());
                 amazonOrder.setExportStatus(AmazonOrder.NOT_EXPORTED);
                 amazonOrder.setLastUpdate(new Date());
-
-                dbManager.insertOrUpdate(amazonOrder, AmazonOrder.class);
-
                 amazonOrders.add(amazonOrder);
             }
+
+            if (messagePanel != null) {
+                if (i == orders.size()) {
+                    messagePanel.displayMsg("Done");
+                } else if (i % 5 == 0) {
+                    messagePanel.displayMsg(String.format("Finished %d of %d", i, orders.size()));
+                }
+            }
+
+            WaitTime.Shortest.execute();
         }
 
+        //
         return amazonOrders;
     }
 }

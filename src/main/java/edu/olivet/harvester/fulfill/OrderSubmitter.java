@@ -105,7 +105,6 @@ public class OrderSubmitter {
         task.setOrders(JSON.toJSONString(validOrders));
         orderSubmissionTaskService.startTask(task);
 
-
         OrderDispatcher.getInstance().dispatch(validOrders, task, singleTask);
 
 

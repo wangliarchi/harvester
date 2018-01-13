@@ -148,7 +148,11 @@ public class AmazonOrder extends PrimaryKey {
         order.ship_city = StringUtils.defaultString(address.getCity());
         order.ship_state = StringUtils.defaultString(address.getStateOrRegion());
         order.ship_zip = StringUtils.defaultString(address.getPostalCode());
-        order.ship_phone_number = StringUtils.defaultString(address.getPhone().replaceAll("\\+", ""));
+        if (address.getPhone() != null) {
+            order.ship_phone_number = StringUtils.defaultString(address.getPhone().replaceAll("\\+", ""));
+        } else {
+            order.ship_phone_number = StringUtils.EMPTY;
+        }
         order.cost = order.order_number = order.account = order.last_code = StringUtils.EMPTY;
         // country或是countryCode，有时前者可能没有
         order.ship_country =

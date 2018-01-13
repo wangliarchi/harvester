@@ -40,7 +40,7 @@ public class ExportOrderServiceTest extends BaseTest {
         Date lastExportedDate = DateUtils.addDays(new Date(), -1);
         List<Order> orders = exportOrderService.listOrdersFromAmazon(lastExportedDate,now.get(), Country.US);
         orders = exportOrderService.removeExportedOrders(orders,now.get(), Country.US);
-        exportOrderService.saveAmazonOrders(orders, Country.US);
+        exportOrderService.convertToAmazonOrders(orders, Country.US);
     }
 
 }

@@ -52,7 +52,7 @@ public class AmazonOrderService {
         try {
             List<Order> orders = orderFetcher.read(Lists.newArrayList(order.order_id), credential);
             if (CollectionUtils.isNotEmpty(orders)) {
-                List<AmazonOrder> amazonOrders = exportOrderService.saveAmazonOrders(orders, country);
+                List<AmazonOrder> amazonOrders = exportOrderService.convertToAmazonOrders(orders, country);
                 for (AmazonOrder amazonOrder : amazonOrders) {
                     if (order.sku.equalsIgnoreCase(amazonOrder.getSku())) {
                         return amazonOrder;
