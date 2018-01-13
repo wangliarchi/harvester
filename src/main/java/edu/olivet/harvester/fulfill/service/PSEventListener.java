@@ -51,6 +51,12 @@ public class PSEventListener {
     }
 
     public static boolean isRunning() {
+        if (OrderDispatcher.getInstance().hasJobRunning()) {
+            if (status != Status.Running) {
+                start();
+            }
+        }
+
         return status == Status.Running;
     }
 
@@ -65,9 +71,6 @@ public class PSEventListener {
     public static boolean ended() {
         return status == Status.Ended;
     }
-
-
-
 
 
 }

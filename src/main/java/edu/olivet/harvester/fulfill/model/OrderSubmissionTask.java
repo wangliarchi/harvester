@@ -8,7 +8,7 @@ import edu.olivet.foundations.ui.ArrayConvertable;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.harvester.fulfill.model.setting.AdvancedSubmitSetting;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
-import edu.olivet.harvester.fulfill.utils.validation.OrderValidator.*;
+import edu.olivet.harvester.fulfill.utils.validation.OrderValidator.SkipValidation;
 import edu.olivet.harvester.model.ConfigEnums;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.spreadsheet.model.OrderRange;
@@ -31,7 +31,7 @@ import java.util.List;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/11/17 1:45 PM
  */
 @Data
-@Table(value = "order_submission_tasks")
+@Table(value = "order_submission_tasks_new")
 @AllArgsConstructor
 @NoArgsConstructor
 @SuppressWarnings("DefaultAnnotationParam")
@@ -90,6 +90,11 @@ public class OrderSubmissionTask extends PrimaryKey implements ArrayConvertable 
     Date dateStarted;
     @Column
     Date dateEnded;
+
+    @Column
+    String buyerAccount;
+    @Column
+    String primeBuyerAccount;
 
     @Override
     public String getPK() {
@@ -178,7 +183,7 @@ public class OrderSubmissionTask extends PrimaryKey implements ArrayConvertable 
 
     @Override
     public Object[] toArray() {
-        return new Object[] {DateFormat.DATE_TIME_SHORT.format(this.dateCreated),
+        return new Object[]{DateFormat.DATE_TIME_SHORT.format(this.dateCreated),
                 marketplaceName,
                 SheetUtils.getTypeFromSpreadsheetName(spreadsheetName),
                 getOrderRange().getSheetName() + " " + convertToRuntimeSettings().getAdvancedSubmitSetting(),
@@ -210,12 +215,13 @@ public class OrderSubmissionTask extends PrimaryKey implements ArrayConvertable 
         task.skipValidationCol = skipValidationCol;
         task.finderCode = finderCode;
         task.totalOrders = totalOrders;
+        task.buyerAccount = buyerAccount;
+        task.primeBuyerAccount = primeBuyerAccount;
         task.dateCreated = new Date();
 
         return task;
 
     }
-
 
 
     public static void main(String[] args) {

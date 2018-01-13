@@ -8,6 +8,7 @@ import com.mchange.lang.FloatUtils;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Dates;
+import edu.olivet.foundations.utils.Now;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.utils.common.NumberUtils;
 import lombok.Setter;
@@ -29,6 +30,8 @@ public class DailyBudgetHelper {
 
     @Inject
     private SheetService sheetService;
+    @Inject
+    Now now;
 
     @Setter
     private RuntimePanelObserver runtimePanelObserver;
@@ -39,6 +42,10 @@ public class DailyBudgetHelper {
     }
 
     private static final Map<String, Integer> BUDGET_ROW_CACHE = new HashMap<>();
+
+    public Float checkBudget(String spreadsheetId) {
+        return getRemainingBudget(spreadsheetId, now.get());
+    }
 
     public Float getRemainingBudget(String spreadsheetId, Date date) {
         Map<String, Float> budgetData = getData(spreadsheetId, date);

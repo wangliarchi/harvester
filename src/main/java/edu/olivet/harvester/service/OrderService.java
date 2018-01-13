@@ -1,6 +1,7 @@
 package edu.olivet.harvester.service;
 
 import com.google.api.services.sheets.v4.model.*;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Dates;
@@ -44,6 +45,10 @@ public class OrderService {
         return fetchOrders(spreadsheet, minDate);
     }
 
+
+    public List<Order> fetchOrders(String spreadsheetId, String sheetName) {
+        return fetchOrders(spreadsheetId, Lists.newArrayList(sheetName + "!A1:AZ"));
+    }
 
     public List<Order> fetchOrders(String spreadsheetId, List<String> ranges) {
 
@@ -128,7 +133,7 @@ public class OrderService {
                 Order order = new Order();
 
                 int maxCol = columns.size() >= OrderEnums.OrderColumn.TRACKING_NUMBER.number() ?
-                        OrderEnums.OrderColumn.TRACKING_NUMBER.number() : columns.size();
+                    OrderEnums.OrderColumn.TRACKING_NUMBER.number() : columns.size();
                 for (int j = OrderEnums.OrderColumn.STATUS.number(); j <= maxCol; j++) {
                     try {
                         orderHelper.setColumnValue(j, columns.get(j - 1), order);
@@ -220,12 +225,12 @@ public class OrderService {
         Date minDate = dateRange.getMinimum();
         Date maxDate = DateUtils.addDays(dateRange.getMaximum(), 1);
         return "individual orders".equals(sheetName.toLowerCase()) ||
-                "seller canceled orders".equals(sheetName.toLowerCase()) ||
-                "seller cancelled orders".equals(sheetName.toLowerCase()) ||
-                "ship to us".equals(sheetName.toLowerCase()) ||
-                (RegexUtils.Regex.COMMON_ORDER_SHEET_NAME.isMatched(sheetName) &&
-                        minDate.before(Dates.parseDateOfGoogleSheet(sheetName)) &&
-                        maxDate.after(Dates.parseDateOfGoogleSheet(sheetName)));
+            "seller canceled orders".equals(sheetName.toLowerCase()) ||
+            "seller cancelled orders".equals(sheetName.toLowerCase()) ||
+            "ship to us".equals(sheetName.toLowerCase()) ||
+            (RegexUtils.Regex.COMMON_ORDER_SHEET_NAME.isMatched(sheetName) &&
+                minDate.before(Dates.parseDateOfGoogleSheet(sheetName)) &&
+                maxDate.after(Dates.parseDateOfGoogleSheet(sheetName)));
     }
 
     public boolean isOrderSheet(String sheetName, Date minDate) {
@@ -246,14 +251,14 @@ public class OrderService {
         sheetNames.removeIf(it -> !isOrderSheet(it, dateRange));
         //
         LOGGER.info("{}下面总共找到{}个{}到{}之间的Sheet, {}",
-                spreadsheet.getProperties().getTitle(), sheetNames.size(), Dates.format(dateRange.getMinimum(), "MM/dd/yyyy"),
-                Dates.format(dateRange.getMaximum(), "MM/dd/yyyy"), sheetNames.toString());
+            spreadsheet.getProperties().getTitle(), sheetNames.size(), Dates.format(dateRange.getMinimum(), "MM/dd/yyyy"),
+            Dates.format(dateRange.getMaximum(), "MM/dd/yyyy"), sheetNames.toString());
 
         //LOGGER.info("{}下面有{}个Sheet待处理, {}", spreadsheet.getProperties().getTitle(), sheetNames.size(), sheetNames.toString());
 
         if (sheetNames.size() == 0) {
             throw new BusinessException("No worksheets between " + Dates.format(dateRange.getMinimum(), "M/d") +
-                    " and " + Dates.format(dateRange.getMaximum(), "M/d") + " found.");
+                " and " + Dates.format(dateRange.getMaximum(), "M/d") + " found.");
         }
 
         List<String> a1Notations = sheetNames.stream().map(it -> it + "!A1:AZ").collect(Collectors.toList());
@@ -262,10 +267,10 @@ public class OrderService {
 
 
         LOGGER.info("读取{}({})中位于{}-{}期间的{}个页签, 获得{}条订单信息，耗时{}", spreadTitle, spreadsheet.getSpreadsheetId(),
-                Dates.format(dateRange.getMinimum(), "MM/dd"), Dates.format(dateRange.getMaximum(), "MM/dd"),
-                sheetNames.size(),
-                orders.size(),
-                Strings.formatElapsedTime(start));
+            Dates.format(dateRange.getMinimum(), "MM/dd"), Dates.format(dateRange.getMaximum(), "MM/dd"),
+            sheetNames.size(),
+            orders.size(),
+            Strings.formatElapsedTime(start));
 
         return orders;
 
@@ -367,7 +372,7 @@ public class OrderService {
         map.forEach((k, v) -> {
             if (v.size() > 1) {
                 Set<String> sheetNames = v.stream().filter(it -> RegexUtils.Regex.COMMON_ORDER_SHEET_NAME.isMatched(it.sheetName))
-                        .map(Order::getSheetName).collect(Collectors.toSet());
+                    .map(Order::getSheetName).collect(Collectors.toSet());
                 if (sheetNames.size() > 1) {
                     setToReturn.addAll(v);
                 }

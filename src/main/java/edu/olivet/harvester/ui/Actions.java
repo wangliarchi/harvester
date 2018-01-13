@@ -29,6 +29,9 @@ public class Actions {
 
     public static final Action ConfigBankCard = new Action("ConfigBankCard", "Bank Card Configuration", null, "creditcards.png");
 
+    public static final Action BuyerAccountSettings = new Action("ConfigBuyerAccount", "Buyer Account Configuration", null, "follow.png");
+
+
     public static final Action ReportBug = new Action("ReportBug", "Report a Bug", null, "bug.png");
 
     public static final Action ExportOrders = new Action("ExportOrders", "Export Orders", null, "ordersheet.png");

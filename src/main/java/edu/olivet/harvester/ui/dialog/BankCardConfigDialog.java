@@ -5,6 +5,8 @@ import edu.olivet.foundations.ui.BaseDialog;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.fulfill.utils.CreditCardUtils;
+import edu.olivet.harvester.model.BuyerAccountSetting;
+import edu.olivet.harvester.model.BuyerAccountSettingUtils;
 import edu.olivet.harvester.model.CreditCard;
 import edu.olivet.harvester.ui.panel.BankCardPanel;
 import edu.olivet.harvester.utils.Migration;
@@ -19,6 +21,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/3/17 11:51 AM
@@ -124,6 +127,8 @@ public class BankCardConfigDialog extends BaseDialog {
         creditCards = CreditCardUtils.loadCreditCards();
     }
 
+    List<BuyerAccountSetting> buyerAccountSettings;
+
     public Set<String> loadBuyerAccountEmails() {
         Set<String> buyerAccounts = new HashSet<>();
 
@@ -141,25 +146,9 @@ public class BankCardConfigDialog extends BaseDialog {
             }
         }
 
-
-        if (settings != null && CollectionUtils.isNotEmpty(settings.getConfigs())) {
-            settings.getConfigs().forEach(config -> {
-                if (config.getBuyer() != null && StringUtils.isNotBlank(config.getBuyer().getEmail())) {
-                    buyerAccounts.add(config.getBuyer().getEmail().toLowerCase());
-                }
-
-                if (config.getPrimeBuyer() != null && StringUtils.isNotBlank(config.getPrimeBuyer().getEmail())) {
-                    buyerAccounts.add(config.getPrimeBuyer().getEmail().toLowerCase());
-                }
-
-                if (config.getProdBuyer() != null && StringUtils.isNotBlank(config.getProdBuyer().getEmail())) {
-                    buyerAccounts.add(config.getProdBuyer().getEmail().toLowerCase());
-                }
-
-                if (config.getProdPrimeBuyer() != null && StringUtils.isNotBlank(config.getProdPrimeBuyer().getEmail())) {
-                    buyerAccounts.add(config.getProdPrimeBuyer().getEmail().toLowerCase());
-                }
-            });
+        buyerAccountSettings = BuyerAccountSettingUtils.load().getAccountSettings();
+        if (buyerAccountSettings != null && CollectionUtils.isNotEmpty(buyerAccountSettings)) {
+            buyerAccounts = buyerAccountSettings.stream().map(it -> it.getBuyerAccount().getEmail()).collect(Collectors.toSet());
         }
 
         return buyerAccounts;

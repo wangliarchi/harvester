@@ -7,14 +7,13 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.Configs;
 import edu.olivet.foundations.utils.Constants;
+import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
-import edu.olivet.harvester.fulfill.utils.OrderBuyerUtils;
-import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
+import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Getter;
-import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,9 +44,9 @@ public class BuyerPanel extends JPanel {
 
     private double zoomLevel;
     @Getter
-    @Setter
     private Order order;
     private int pid;
+
 
     public BuyerPanel(int id, Country country, Account buyer, double zoomLevel) {
         super(new BorderLayout());
@@ -57,15 +56,114 @@ public class BuyerPanel extends JPanel {
         this.buyer = buyer;
         this.zoomLevel = zoomLevel;
         this.browserView = JXBrowserHelper.init(this.profilePathName(), zoomLevel);
-        this.add(browserView, BorderLayout.CENTER);
-    }
 
-    public BuyerPanel(Order order) {
-        this(0, OrderCountryUtils.getFulfillmentCountry(order), OrderBuyerUtils.getBuyer(order), 1);
+
+        initComponents();
+
     }
 
     private String profilePathName() {
         return this.buyer.key() + Constants.HYPHEN + this.id;
+    }
+
+    @Getter
+    private int taskCount = 0;
+    private int total = 0;
+    private int successCount = 0;
+    private int failedCount = 0;
+    static long start;
+
+    public void setOrder(Order order) {
+        this.order = order;
+        updateInfo();
+    }
+
+    public void initProgressBar(int total) {
+        successCount = 0;
+        failedCount = 0;
+        this.total = total;
+        progressBar.setMaximum(total);
+        progressBar.setValue(0);
+        start = System.currentTimeMillis();
+        state = PSEventListener.Status.Running;
+        updateProgressBar();
+    }
+
+    public void updateSuccess() {
+        successCount++;
+        updateProgressBar();
+    }
+
+    public void updateFailed() {
+        failedCount++;
+        updateProgressBar();
+    }
+
+
+    private void updateProgressBar() {
+        int processedTotal = failedCount + successCount;
+        progressBar.setValue(processedTotal);
+        progressTextLabel.setText(String.format("%d of %d, %d success, %d failed, took %s",
+            processedTotal, total, successCount, failedCount, Strings.formatElapsedTime(start)));
+    }
+
+    private String tasksInfo = "";
+
+    public void updateTasksInfo(String info) {
+        tasksInfo = "\n" + info;
+        updateInfo();
+    }
+
+    public void updateInfo() {
+        if (order != null) {
+            String info = String.format("#%s from %s sheet %s row %d. %s",
+                order.order_id, order.getType().name().toLowerCase(),
+                order.sheetName, order.row, tasksInfo);
+            currentRunningInfoLabel.setText(info);
+        }
+    }
+
+    public void setTaskCount(int count) {
+        taskCount = count;
+        updateInfo();
+    }
+
+    public void enablePauseButton() {
+        pauseButton.setEnabled(true);
+        stopButton.setEnabled(false);
+    }
+
+    public void disablePauseButton() {
+        stopButton.setEnabled(false);
+        pauseButton.setEnabled(false);
+    }
+
+    private PSEventListener.Status state = PSEventListener.Status.NotRunning;
+
+    public void pause() {
+        this.state = PSEventListener.Status.Paused;
+        pauseButton.setIcon(UITools.getIcon("resume.png"));
+        pauseButton.setText("Resume");
+    }
+
+    public void resume() {
+        this.state = PSEventListener.Status.Running;
+        pauseButton.setIcon(UITools.getIcon("pause.png"));
+        pauseButton.setText("Pause");
+    }
+
+    public void stop() {
+        this.state = PSEventListener.Status.Stopped;
+        disablePauseButton();
+        currentRunningInfoLabel.setText(currentRunningInfoLabel.getText() + ". process STOPPED");
+    }
+
+    public boolean paused() {
+        return state == PSEventListener.Status.Paused;
+    }
+
+    public boolean stopped() {
+        return state == PSEventListener.Status.Stopped;
     }
 
     public void recreateBrowser() {
@@ -101,15 +199,164 @@ public class BuyerPanel extends JPanel {
             try {
                 rt.exec("taskkill " + pid);
             } catch (IOException e) {
-                LOGGER.error("",e);
+                LOGGER.error("", e);
             }
         } else {
             try {
                 rt.exec("kill -9 " + pid);
             } catch (IOException e) {
-                LOGGER.error("",e);
+                LOGGER.error("", e);
             }
         }
+    }
+
+
+    private void initComponents() {
+        JPanel infoPanel = initInfoPanel();
+
+        GroupLayout layout = new GroupLayout(this);
+        this.setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                .addComponent(browserView, 200, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                //.addComponent(runtimeSettingsPanel)
+                .addComponent(infoPanel, 200, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                    .addComponent(browserView, 250, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                    .addComponent(infoPanel, 20, GroupLayout.PREFERRED_SIZE, 60)
+                )
+
+
+        );
+    }
+
+
+    private JPanel initInfoPanel() {
+        JPanel infoPanel = new JPanel();
+        //infoPanel.setBackground(Color.WHITE);
+
+        progressBar = new JProgressBar();
+        progressBar.setStringPainted(true);
+        progressLabel = new JLabel();
+        progressLabel.setText("Progress:");
+        progressTextLabel = new JLabel();
+        progressTextLabel.setText("");
+
+        pauseButton = new JButton();
+        pauseButton.setText("Pause");
+        pauseButton.setIcon(UITools.getIcon("pause.png"));
+
+        stopButton = new JButton();
+        stopButton.setIcon(UITools.getIcon("stop.png"));
+        stopButton.setText("Stop");
+        disablePauseButton();
+
+
+        currentRunningTitleLabel = new JLabel("Current Running:");
+        currentRunningInfoLabel = new JLabel("no task running yet.");
+        currentRunningTitleLabel.setForeground(Color.blue);
+        currentRunningInfoLabel.setForeground(Color.blue);
+        progressTextLabel.setForeground(Color.blue);
+
+        Font font = currentRunningTitleLabel.getFont();
+        currentRunningTitleLabel.setFont(new Font(font.getName(), Font.BOLD, font.getSize() - 1));
+        currentRunningInfoLabel.setFont(new Font(font.getName(), Font.PLAIN, font.getSize() - 1));
+        progressTextLabel.setFont(new Font(font.getName(), Font.PLAIN, font.getSize() - 1));
+
+
+        pauseButton.addActionListener(evt -> {
+            if (paused()) {
+                resume();
+            } else {
+                pause();
+            }
+        });
+
+        stopButton.addActionListener(evt -> {
+            stop();
+        });
+
+        GroupLayout layout = new GroupLayout(infoPanel);
+        infoPanel.setLayout(layout);
+
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                .addGroup(
+                    layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+
+                            .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(progressLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, 60)
+                                .addComponent(progressBar, 200, 200, 200)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(progressTextLabel)
+                                .addContainerGap()
+                            )
+
+                        )
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED,
+                            GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(stopButton)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(pauseButton)
+                                .addContainerGap()
+                            )
+                        )
+                        .addContainerGap()
+                )
+
+                .addGroup(
+                    layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(currentRunningTitleLabel)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(currentRunningInfoLabel)
+                        .addContainerGap()
+                )
+
+        );
+
+        layout.setVerticalGroup(
+            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(progressLabel, 30, 30, 30)
+                        .addComponent(progressBar, 30, 30, 30)
+                        .addComponent(progressTextLabel, 30, 30, 30)
+                        .addComponent(pauseButton)
+                        .addComponent(stopButton))
+                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(currentRunningTitleLabel)
+                        .addComponent(currentRunningInfoLabel)
+                    )
+                    .addContainerGap()
+
+                )
+        );
+
+
+        return infoPanel;
+    }
+
+    private JLabel progressLabel;
+    public JProgressBar progressBar;
+    public JLabel progressTextLabel;
+    private JButton pauseButton;
+    private JButton stopButton;
+    private JLabel currentRunningTitleLabel;
+    private JLabel currentRunningInfoLabel;
+
+    public String getKey() {
+        return this.buyer.key() + Constants.HYPHEN + this.country.name();
     }
 
     public static void main(String[] args) {
@@ -122,7 +369,7 @@ public class BuyerPanel extends JPanel {
         frame.getContentPane().add(buyerPanel);
 
         UITools.setDialogAttr(frame, true);
-        buyerPanel.toHomePage();
+        //buyerPanel.toHomePage();
 
 
         // System.exit(0);

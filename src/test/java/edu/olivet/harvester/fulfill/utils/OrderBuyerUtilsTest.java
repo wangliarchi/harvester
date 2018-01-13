@@ -2,6 +2,7 @@ package edu.olivet.harvester.fulfill.utils;
 
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.harvester.common.BaseTest;
+import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.utils.Settings;
 import org.testng.annotations.Test;
@@ -25,43 +26,43 @@ public class OrderBuyerUtilsTest extends BaseTest {
         order.condition = "New";
         order.seller = "AP";
 
+        RuntimeSettings runtimeSettings = RuntimeSettings.load();
 
         //normal order, to US
-        assertEquals(OrderBuyerUtils.getBuyer(order), settings.getConfigByCountry(Country.US).getPrimeBuyer());
+        assertEquals(OrderBuyerUtils.getBuyer(order, runtimeSettings), settings.getConfigByCountry(Country.US).getPrimeBuyer());
 
         order.seller_id = "A1KUFZLJ107W44";
         order.seller = "bargainbookstores";
         order.character = "pt";
-        assertEquals(OrderBuyerUtils.getBuyer(order), settings.getConfigByCountry(Country.US).getBuyer());
+        assertEquals(OrderBuyerUtils.getBuyer(order, runtimeSettings), settings.getConfigByCountry(Country.US).getBuyer());
 
         order.isbn = "0310445876";
         order.condition = "New";
         order.seller = "AP";
         order.ship_country = "China";
         order.remark = "";
-        assertEquals(OrderBuyerUtils.getBuyer(order), settings.getConfigByCountry(Country.US).getPrimeBuyer());
-
+        assertEquals(OrderBuyerUtils.getBuyer(order, runtimeSettings), settings.getConfigByCountry(Country.US).getPrimeBuyer());
 
 
         order.remark = "US FWD";
-        assertEquals(OrderBuyerUtils.getBuyer(order), settings.getConfigByCountry(Country.US).getPrimeBuyer());
+        assertEquals(OrderBuyerUtils.getBuyer(order, runtimeSettings), settings.getConfigByCountry(Country.US).getPrimeBuyer());
 
         order.remark = "US Shipment";
-        assertEquals(OrderBuyerUtils.getBuyer(order), settings.getConfigByCountry(Country.US).getPrimeBuyer());
+        assertEquals(OrderBuyerUtils.getBuyer(order, runtimeSettings), settings.getConfigByCountry(Country.US).getPrimeBuyer());
 
         order.remark = "UK FWD";
-        assertEquals(OrderBuyerUtils.getBuyer(order), settings.getConfigByCountry(Country.US).getPrimeBuyer());
+        assertEquals(OrderBuyerUtils.getBuyer(order, runtimeSettings), settings.getConfigByCountry(Country.US).getPrimeBuyer());
 
         order.remark = "UK Shipment";
-        assertEquals(OrderBuyerUtils.getBuyer(order), settings.getConfigByCountry(Country.US).getPrimeBuyer());
+        assertEquals(OrderBuyerUtils.getBuyer(order, runtimeSettings), settings.getConfigByCountry(Country.US).getPrimeBuyer());
 
         order.remark = "CA Shipment";
-        assertEquals(OrderBuyerUtils.getBuyer(order), settings.getConfigByCountry(Country.US).getPrimeBuyer());
+        assertEquals(OrderBuyerUtils.getBuyer(order, runtimeSettings), settings.getConfigByCountry(Country.US).getPrimeBuyer());
 
 
         order.type = OrderEnums.OrderItemType.PRODUCT;
         order.remark = "";
-        assertEquals(OrderBuyerUtils.getBuyer(order), settings.getConfigByCountry(Country.US).getProdPrimeBuyer());
+        assertEquals(OrderBuyerUtils.getBuyer(order, runtimeSettings), settings.getConfigByCountry(Country.US).getProdPrimeBuyer());
     }
 
 }

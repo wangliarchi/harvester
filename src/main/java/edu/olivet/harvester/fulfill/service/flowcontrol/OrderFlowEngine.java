@@ -42,6 +42,8 @@ public class OrderFlowEngine extends FlowParent {
     public FlowState process(Order order, BuyerPanel buyerPanel) {
 
         FlowState state = new FlowState();
+        order.originalRemark = new String(order.remark);
+
         buyerPanel.setOrder(order);
         state.setOrder(order);
         state.setBuyerPanel(buyerPanel);
@@ -61,7 +63,7 @@ public class OrderFlowEngine extends FlowParent {
             } catch (Exception e) {
                 LOGGER.error("", e);
                 if (Strings.containsAnyIgnoreCase(e.getMessage(), JXBrowserHelper.CHANNEL_CLOSED_MESSAGE)) {
-                    buyerPanel = TabbedBuyerPanel.getInstance().reInitTabForOrder(order);
+                    buyerPanel = TabbedBuyerPanel.getInstance().reInitTabForOrder(order, buyerPanel.getBuyer());
                     state.setBuyerPanel(buyerPanel);
                     WaitTime.Short.execute();
                 }
@@ -73,7 +75,6 @@ public class OrderFlowEngine extends FlowParent {
 
                 //throw
             }
-
 
 
         }

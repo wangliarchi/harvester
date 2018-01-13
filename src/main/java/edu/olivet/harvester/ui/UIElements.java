@@ -72,6 +72,7 @@ public class UIElements extends AbstractUIContainer {
 
         map.put(Menu.Settings, new Action[] {
                 Action.Settings,
+                Actions.BuyerAccountSettings,
                 Actions.SystemSettings,
                 Actions.ConfigBankCard,
                 Action.Separator,

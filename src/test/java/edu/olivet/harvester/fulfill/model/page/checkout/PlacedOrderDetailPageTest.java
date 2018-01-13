@@ -14,7 +14,6 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.testng.Assert.assertEquals;
 

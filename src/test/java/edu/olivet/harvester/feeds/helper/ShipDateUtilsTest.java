@@ -15,7 +15,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+
 
 public class ShipDateUtilsTest extends BaseTest {
     @Inject ShipDateUtils shipDateUtils;

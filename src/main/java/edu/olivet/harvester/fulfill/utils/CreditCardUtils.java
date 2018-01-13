@@ -4,9 +4,8 @@ import com.alibaba.fastjson.JSON;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.utils.Directory;
 import edu.olivet.foundations.utils.Tools;
-import edu.olivet.harvester.fulfill.exception.Exceptions.*;
+import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.model.CreditCard;
-import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.Harvester;
 
 import java.io.File;
@@ -28,11 +27,6 @@ public class CreditCardUtils {
             return creditCards.get(buyer.getEmail().toLowerCase());
         }
         throw new OrderSubmissionException("No credit card configed for buyer account " + buyer.getEmail());
-    }
-
-    public static CreditCard getCreditCard(Order order) {
-        Account buyer = OrderBuyerUtils.getBuyer(order);
-        return getCreditCard(buyer);
     }
 
     public static Map<String, CreditCard> loadCreditCards() {

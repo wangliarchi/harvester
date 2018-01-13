@@ -75,7 +75,7 @@
         <dependency>
             <groupId>com.teamdev.jxbrowser</groupId>
             <artifactId>license</artifactId>
-            <version>${jx.browser.version}</version>
+            <version>6.x</version>
         </dependency>
         <dependency>
             <groupId>edu.olivet</groupId>
@@ -115,6 +115,11 @@
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>transport</artifactId>
             <version>6.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.mifmif</groupId>
+            <artifactId>generex</artifactId>
+            <version>1.0.2</version>
         </dependency>
 
     </dependencies>

@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;

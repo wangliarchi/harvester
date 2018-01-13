@@ -25,6 +25,8 @@ import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.GroupLayout.Group;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
@@ -47,7 +49,6 @@ public class SettingsDialog extends BaseDialog {
     private JTextField sidFld;
     private JTabbedPane tabbedPane;
     private SettingValidator settingValidator;
-
 
     public SettingsDialog(SettingValidator settingValidator) {
         super(null, true);
@@ -79,10 +80,17 @@ public class SettingsDialog extends BaseDialog {
                 map.put(config.getCountry(), config);
             }
             this.sidFld.setText(settings.getSid());
+
         }
 
 
         this.tabbedPane = new JTabbedPane();
+        tabbedPane.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                ConfigurationPanel configurationPanel = (ConfigurationPanel) tabbedPane.getSelectedComponent();
+                configurationPanel.loadBuyerAccounts();
+            }
+        });
         this.initButtons();
         JButton aboutBtn = UITools.transparent(new JButton("I Need Help", UITools.getIcon("about.png")));
         aboutBtn.setToolTipText("Access official website to get information, tutorial and community help");

@@ -40,6 +40,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
 
     @Override
     public void execute(Order order) {
+
         if (isLoggedIn()) {
             LOGGER.info("{} buyer account{} already logged in.", country.name(), buyer.getEmail());
             return;
@@ -108,7 +109,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
         if (errorDom != null) {
             String errorText = errorDom.getInnerText();
             if (StringUtils.isNotBlank(errorText)) {
-                throw new FailedBuyerAccountAuthenticationException("Failed to log in buyer account " + buyer.getEmail() + ". Error msg");
+                throw new FailedBuyerAccountAuthenticationException("Failed to log in buyer account " + buyer.getEmail() + ". Error msg " + errorText);
             }
         }
 
@@ -120,6 +121,12 @@ public class LoginPage extends FulfillmentPage implements PageObject {
             WaitTime.Shortest.execute();
             enterVerificationCode();
             WaitTime.Shortest.execute();
+        }
+
+        //check if captcha exists
+        DOMElement captchaContainer = JXBrowserHelper.selectElementByCssSelector(browser, "#auth-captcha-image-container");
+        if (captchaContainer != null) {
+            throw new FailedBuyerAccountAuthenticationException("Failed to log in buyer account " + buyer.getEmail() + " - fail to pass captcha challenge.");
         }
 
         LOGGER.info("{} logged in successfully, now at {} -> {}, took {}", country.name(), browser.getTitle(), browser.getURL(), Strings.formatElapsedTime(start));

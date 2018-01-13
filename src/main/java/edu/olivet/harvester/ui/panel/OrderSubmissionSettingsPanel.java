@@ -7,6 +7,7 @@ import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
+import edu.olivet.harvester.model.BuyerAccountSettingUtils;
 import edu.olivet.harvester.model.OrderEnums.OrderItemType;
 import edu.olivet.harvester.spreadsheet.model.OrderRange;
 import edu.olivet.harvester.spreadsheet.model.Spreadsheet;
@@ -143,7 +144,7 @@ public class OrderSubmissionSettingsPanel extends JPanel {
         }
 
         Account seller = configuration.getSeller();
-        Account[] sellers = seller == null ? new Account[0] : new Account[] {seller};
+        Account[] sellers = seller == null ? new Account[0] : new Account[]{seller};
         sellerComboBox.setModel(new DefaultComboBoxModel<>(sellers));
 
         //default to book
@@ -168,11 +169,14 @@ public class OrderSubmissionSettingsPanel extends JPanel {
             buyer = configuration.getProdBuyer();
             primeBuyer = configuration.getProdPrimeBuyer();
         }
-        Account[] buyers = buyer == null ? new Account[0] : new Account[] {buyer};
-        buyerComboBox.setModel(new DefaultComboBoxModel<>(buyers));
 
-        Account[] primeBuyers = primeBuyer == null ? new Account[0] : new Account[] {primeBuyer};
-        primeBuyerComboBox.setModel(new DefaultComboBoxModel<>(primeBuyers));
+        List<Account> buyerAccounts = BuyerAccountSettingUtils.load().getAccounts(currentCountry, type, false);
+        buyerComboBox.setModel(new DefaultComboBoxModel<>(buyerAccounts.toArray(new Account[buyerAccounts.size()])));
+        buyerComboBox.setSelectedItem(buyer);
+
+        List<Account> primeBuyerAccounts = BuyerAccountSettingUtils.load().getAccounts(currentCountry, type, true);
+        primeBuyerComboBox.setModel(new DefaultComboBoxModel<>(primeBuyerAccounts.toArray(new Account[primeBuyerAccounts.size()])));
+        primeBuyerComboBox.setSelectedItem(primeBuyer);
 
     }
 
@@ -242,6 +246,8 @@ public class OrderSubmissionSettingsPanel extends JPanel {
             orderSubmissionTask.setSpreadsheetId(selectedSpreadsheetId);
             orderSubmissionTask.setSpreadsheetName(selectedSheetName.getText());
             orderSubmissionTask.setOrderRange(orderRange);
+            orderSubmissionTask.setBuyerAccount(((Account)buyerComboBox.getSelectedItem()).getEmail());
+            orderSubmissionTask.setPrimeBuyerAccount(((Account)primeBuyerComboBox.getSelectedItem()).getEmail());
             tasks.add(orderSubmissionTask);
         }
 
@@ -538,14 +544,14 @@ public class OrderSubmissionSettingsPanel extends JPanel {
 
         noInvoiceTextField.setText("{No Invoice}");
 
-        lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"5", "7"}));
+        lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"5", "7"}));
 
-        priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"3", "5"}));
+        priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"3", "5"}));
 
         setOrderFinder();
 
         maxDaysOverEddComboBox.setModel(new DefaultComboBoxModel<>(
-                new String[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}
+                new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}
         ));
 
         maxDaysOverEddComboBox.setSelectedItem("7");

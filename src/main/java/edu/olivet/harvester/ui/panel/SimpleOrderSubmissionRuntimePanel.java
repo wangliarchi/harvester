@@ -10,6 +10,7 @@ import edu.olivet.harvester.fulfill.model.setting.AdvancedSubmitSetting;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.*;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
+import edu.olivet.harvester.model.BuyerAccountSettingUtils;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.model.OrderEnums.OrderItemType;
 import edu.olivet.harvester.spreadsheet.model.Spreadsheet;
@@ -99,12 +100,12 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         noInvoiceTextField.setText(settings.getNoInvoiceText());
 
 
-        lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"5", "7"}));
+        lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"5", "7"}));
         if (StringUtils.isNotBlank(settings.getLostLimit())) {
             lostLimitComboBox.setSelectedItem(settings.getLostLimit());
         }
 
-        priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"3", "5"}));
+        priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"3", "5"}));
         if (StringUtils.isNotBlank(settings.getPriceLimit())) {
             priceLimitComboBox.setSelectedItem(settings.getPriceLimit());
         }
@@ -117,7 +118,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
 
 
         maxDaysOverEddComboBox.setModel(new DefaultComboBoxModel<>(
-                new String[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}
+                new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}
         ));
         if (StringUtils.isNotBlank((settings.getEddLimit()))) {
             maxDaysOverEddComboBox.setSelectedItem(settings.getEddLimit());
@@ -167,6 +168,19 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
                     settings.save();
                     initData();
                 }
+            }
+        });
+
+        buyerComboBox.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                settings.setBuyerEmail(((Account) e.getItem()).getEmail());
+                settings.save();
+            }
+        });
+        primeBuyerComboBox.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                settings.setPrimeBuyerEmail(((Account) e.getItem()).getEmail());
+                settings.save();
             }
         });
 
@@ -366,6 +380,8 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         finderCodeTextField.setEnabled(false);
         skipCheckComboBox.setEnabled(false);
         loadSheetTabButton.setEnabled(false);
+        buyerComboBox.setEnabled(false);
+        primeBuyerComboBox.setEnabled(false);
     }
 
     public void restAllBtns() {
@@ -382,6 +398,8 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         finderCodeTextField.setEnabled(true);
         skipCheckComboBox.setEnabled(true);
         loadSheetTabButton.setEnabled(true);
+        buyerComboBox.setEnabled(true);
+        primeBuyerComboBox.setEnabled(true);
     }
 
     public void selectGoogleSheet() {
@@ -458,6 +476,8 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
             settings.setSpreadsheetId("");
             settings.setSpreadsheetName("");
             settings.setSheetName("");
+            settings.setBuyerEmail("");
+            settings.setPrimeBuyerEmail("");
             settings.save();
 
             googleSheetTextField.setText("");
@@ -484,7 +504,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
 
 
         Account seller = configuration.getSeller();
-        Account[] sellers = seller == null ? new Account[0] : new Account[] {seller};
+        Account[] sellers = seller == null ? new Account[0] : new Account[]{seller};
         sellerComboBox.setModel(new DefaultComboBoxModel<>(sellers));
 
         //default to book
@@ -509,11 +529,30 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
             buyer = configuration.getProdBuyer();
             primeBuyer = configuration.getProdPrimeBuyer();
         }
-        Account[] buyers = buyer == null ? new Account[0] : new Account[] {buyer};
-        buyerComboBox.setModel(new DefaultComboBoxModel<>(buyers));
 
-        Account[] primeBuyers = primeBuyer == null ? new Account[0] : new Account[] {primeBuyer};
-        primeBuyerComboBox.setModel(new DefaultComboBoxModel<>(primeBuyers));
+        if (StringUtils.isNotBlank(settings.getBuyerEmail()) && settings.getCurrentCountry() == currentCountry) {
+            try {
+                buyer = BuyerAccountSettingUtils.load().getByEmail(settings.getBuyerEmail()).getBuyerAccount();
+            } catch (Exception e) {
+                //buyer from setting file may be removed from buyer settings
+            }
+        }
+
+        if (StringUtils.isNotBlank(settings.getPrimeBuyerEmail()) && settings.getCurrentCountry() == currentCountry) {
+            try {
+                primeBuyer = BuyerAccountSettingUtils.load().getByEmail(settings.getPrimeBuyerEmail()).getBuyerAccount();
+            } catch (Exception e) {
+                //buyer from setting file may be removed from buyer settings
+            }
+        }
+
+        List<Account> buyerAccounts = BuyerAccountSettingUtils.load().getAccounts(currentCountry, type, false);
+        buyerComboBox.setModel(new DefaultComboBoxModel<>(buyerAccounts.toArray(new Account[buyerAccounts.size()])));
+        buyerComboBox.setSelectedItem(buyer);
+
+        List<Account> primeBuyerAccounts = BuyerAccountSettingUtils.load().getAccounts(currentCountry, type, true);
+        primeBuyerComboBox.setModel(new DefaultComboBoxModel<>(primeBuyerAccounts.toArray(new Account[primeBuyerAccounts.size()])));
+        primeBuyerComboBox.setSelectedItem(primeBuyer);
 
     }
 

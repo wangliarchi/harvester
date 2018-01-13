@@ -7,10 +7,12 @@ import edu.olivet.foundations.job.TaskScheduler;
 import edu.olivet.foundations.ui.*;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.harvester.bugreport.service.ReportBugEvent;
+import edu.olivet.harvester.fulfill.service.OrderSubmissionTaskService;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.job.BackgroundJob;
 import edu.olivet.harvester.model.ConfigEnums;
 import edu.olivet.harvester.ui.dialog.BankCardConfigDialog;
+import edu.olivet.harvester.ui.dialog.BuyerAccountConfigDialog;
 import edu.olivet.harvester.ui.dialog.SystemSettingsDialog;
 import edu.olivet.harvester.ui.events.*;
 import edu.olivet.harvester.utils.LogViewer;
@@ -42,37 +44,13 @@ public class UIHarvester extends AbstractApplicationUI {
 
 
     private void initComponents() {
-
-        this.setResizable(true);
-        this.setMinimumSize(new Dimension(800, 600));
-        //maximized by default
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
-        try {
-            this.setTitle(String.format(APP_TITLE, Settings.load().getSid()));
-        } catch (Exception e) {
-            this.setTitle(APP_TITLE);
-        }
-        UITools.setIcon(this, "harvester.png");
-
-        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-        this.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                if (PSEventListener.isRunning()) {
-                    UITools.error("Order submission task is running. Please wait util it's finished, or stop the task first.");
-                    return;
-                }
-                if (!UITools.confirmed("Are you sure to close Harvester? \nBackground jobs may be running.")) {
-                    return;
-                }
-                System.exit(0);
-            }
-        });
+        setDefaultSizes();
+        setTitleAndIcon();
+        registerCloseEvent();
 
         final JMenuBar menuBar = UIElements.getInstance().createMenuBar();
         this.setJMenuBar(menuBar);
         final JToolBar toolbar = UIElements.getInstance().createToolBar();
-
-
         final MemoryUsageBar memoryUsageBar = new MemoryUsageBar();
         statusPane = new JTextPane();
         statusPane.setEditable(false);
@@ -81,23 +59,23 @@ public class UIHarvester extends AbstractApplicationUI {
         GroupLayout layout = new GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-                layout.createParallelGroup(Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addComponent(toolbar))
-                        .addGroup(layout.createSequentialGroup()
-                                .addComponent(mainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
-                        .addGroup(layout.createSequentialGroup()
-                                .addComponent(statusPane, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
-                                .addComponent(memoryUsageBar, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, 200))
+            layout.createParallelGroup(Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                    .addComponent(toolbar))
+                .addGroup(layout.createSequentialGroup()
+                    .addComponent(mainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createSequentialGroup()
+                    .addComponent(statusPane, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                    .addComponent(memoryUsageBar, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, 200))
         );
         layout.setVerticalGroup(
-                layout.createParallelGroup(Alignment.CENTER)
-                        .addGroup(layout.createSequentialGroup()
-                                .addComponent(toolbar, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addComponent(mainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
-                                .addGroup(layout.createParallelGroup(Alignment.BASELINE)
-                                        .addComponent(memoryUsageBar, 20, 20, 20).addComponent(statusPane, 20, 20, 20))
-                        ));
+            layout.createParallelGroup(Alignment.CENTER)
+                .addGroup(layout.createSequentialGroup()
+                    .addComponent(toolbar, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                    .addComponent(mainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createParallelGroup(Alignment.BASELINE)
+                        .addComponent(memoryUsageBar, 20, 20, 20).addComponent(statusPane, 20, 20, 20))
+                ));
         pack();
     }
 
@@ -139,7 +117,8 @@ public class UIHarvester extends AbstractApplicationUI {
         logViewer.displayLogs(ConfigEnums.Log.Statistic);
     }
 
-    @Inject ListOrderSubmissionTasks listOrderSubmissionTasks;
+    @Inject
+    ListOrderSubmissionTasks listOrderSubmissionTasks;
 
     @UIEvent
     public void orderSubmissionTasks() {
@@ -199,11 +178,54 @@ public class UIHarvester extends AbstractApplicationUI {
         exportOrderEvent.execute();
     }
 
-    @Inject TitleCheckerEvent titleCheckerEvent;
+    @Inject
+    TitleCheckerEvent titleCheckerEvent;
 
     @UIEvent
     public void titleChecker() {
         titleCheckerEvent.execute();
+    }
+
+    @UIEvent
+    public void configBuyerAccount() {
+        BuyerAccountConfigDialog dialog = UITools.setDialogAttr(new BuyerAccountConfigDialog());
+        if (dialog.isOk()) {
+            UITools.info("Buyer account settings have been saved successfully.");
+        }
+    }
+
+    private void setDefaultSizes() {
+        this.setResizable(true);
+        this.setMinimumSize(new Dimension(800, 600));
+        //maximized by default
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+    }
+
+    private void setTitleAndIcon() {
+        try {
+            this.setTitle(String.format(APP_TITLE, Settings.load().getSid()));
+        } catch (Exception e) {
+            this.setTitle(APP_TITLE);
+        }
+        UITools.setIcon(this, "harvester.png");
+    }
+
+    private void registerCloseEvent() {
+        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        this.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                if (PSEventListener.isRunning()) {
+                    UITools.error("Order submission task is running. Please wait util it's finished, or stop the task first.");
+                    return;
+                }
+                if (!UITools.confirmed("Are you sure to close Harvester? \nBackground jobs may be running.")) {
+                    return;
+                }
+
+                orderSubmissionTaskService.cleanUp();
+                System.exit(0);
+            }
+        });
     }
 
     @Override
@@ -211,9 +233,11 @@ public class UIHarvester extends AbstractApplicationUI {
         return Harvester.APP_NAME;
     }
 
+    @Inject OrderSubmissionTaskService orderSubmissionTaskService;
+
     @Override
     public void cleanUp() {
-
+        orderSubmissionTaskService.cleanUp();
     }
 
     @Inject

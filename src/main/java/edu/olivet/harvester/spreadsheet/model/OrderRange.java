@@ -4,6 +4,7 @@ package edu.olivet.harvester.spreadsheet.model;
 import com.alibaba.fastjson.JSON;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Order fulfillment range
@@ -12,6 +13,7 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class OrderRange {
 
     private String sheetName;

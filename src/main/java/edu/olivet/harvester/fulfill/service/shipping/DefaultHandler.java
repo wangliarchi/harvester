@@ -5,7 +5,7 @@ import com.google.inject.Singleton;
 import com.mchange.lang.IntegerUtils;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Strings;
-import edu.olivet.harvester.fulfill.exception.Exceptions.*;
+import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.model.ShippingEnums.ShippingSpeed;
 import edu.olivet.harvester.fulfill.model.ShippingOption;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
