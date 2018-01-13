@@ -30,6 +30,8 @@ public class RuntimeSettings {
     private String eddLimit = "7";
     private String noInvoiceText = "{No Invoice}";
     private String finderCode = "";
+    private String buyerEmail;
+    private String primeBuyerEmail;
     private OrderValidator.SkipValidation skipValidation = OrderValidator.SkipValidation.None;
 
     public static final String RUNTIME_SETTINGS_FILE_PATH = Directory.Customize.path() + "/runtime-settings.json";

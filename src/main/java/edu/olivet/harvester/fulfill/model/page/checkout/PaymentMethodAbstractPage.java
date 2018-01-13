@@ -33,7 +33,7 @@ public abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract 
     public void selectCreditCard(Order order) {
 
         //load all available cards
-        creditCard = CreditCardUtils.getCreditCard(order);
+        creditCard = CreditCardUtils.getCreditCard(buyerPanel.getBuyer());
 
         if (creditCard == null) {
             throw new OrderSubmissionException("Credit card for buyer account " + buyer.getEmail() + " not found.");
@@ -62,7 +62,7 @@ public abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract 
 
         //credit card not found
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
-        throw new BusinessException(String.format("Credit card with no %s not found.", creditCard.getCardNo()));
+        throw new OrderSubmissionException(String.format("Credit card with no %s not found.", creditCard.getCardNo()));
 
 
     }

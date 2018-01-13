@@ -25,11 +25,19 @@ public abstract class FlowParent {
             }
 
             while (PSEventListener.paused()) {
-                messageListener.addMsg("Process paused, wait for " + WaitTime.Normal.val() + " seconds...");
+                state.getBuyerPanel().disablePauseButton();
+                messageListener.addMsg("Process paused, wait for " + WaitTime.Short.val() + " seconds...");
                 WaitTime.Normal.execute();
             }
 
-            if (PSEventListener.stopped()) {
+            state.getBuyerPanel().enablePauseButton();
+
+            while (state.getBuyerPanel().paused()) {
+                WaitTime.Normal.execute();
+            }
+
+
+            if (PSEventListener.stopped() || state.getBuyerPanel().stopped()) {
                 //cant stop if order is actually placed.
                 if (AfterOrderPlaced.class.getName().equals(step.stepName)) {
                     PSEventListener.resume();
@@ -38,6 +46,7 @@ public abstract class FlowParent {
                     step = clearShoppingCart;
                 }
             }
+
 
             step = step.processStep(state);
 

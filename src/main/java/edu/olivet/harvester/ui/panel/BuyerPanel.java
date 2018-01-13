@@ -4,33 +4,22 @@ import com.teamdev.jxbrowser.chromium.Browser;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
-import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.UITools;
-import edu.olivet.foundations.utils.*;
-import edu.olivet.harvester.fulfill.exception.Exceptions;
-import edu.olivet.harvester.fulfill.model.FulfillmentEnum;
-import edu.olivet.harvester.fulfill.service.ProgressUpdater;
-import edu.olivet.harvester.fulfill.service.SheetService;
-import edu.olivet.harvester.fulfill.service.flowcontrol.OrderFlowEngine;
-import edu.olivet.harvester.fulfill.utils.OrderBuyerUtils;
-import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
-import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
+import edu.olivet.foundations.utils.Configs;
+import edu.olivet.foundations.utils.Constants;
+import edu.olivet.foundations.utils.Strings;
+import edu.olivet.foundations.utils.WaitTime;
+import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.utils.JXBrowserHelper;
-import edu.olivet.harvester.utils.MessageListener;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Getter;
-import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 10/30/17 9:16 AM
@@ -55,17 +44,9 @@ public class BuyerPanel extends JPanel {
 
     private double zoomLevel;
     @Getter
-    @Setter
     private Order order;
     private int pid;
-    public boolean processingFlag = false;
 
-    OrderValidator orderValidator;
-    MessageListener messageListener;
-    OrderFlowEngine orderFlowEngine;
-    SheetService sheetService;
-
-    public List<Order> ordersToProcess = new ArrayList<>();
 
     public BuyerPanel(int id, Country country, Account buyer, double zoomLevel) {
         super(new BorderLayout());
@@ -75,19 +56,114 @@ public class BuyerPanel extends JPanel {
         this.buyer = buyer;
         this.zoomLevel = zoomLevel;
         this.browserView = JXBrowserHelper.init(this.profilePathName(), zoomLevel);
-        this.add(browserView, BorderLayout.CENTER);
-        orderValidator = ApplicationContext.getBean(OrderValidator.class);
-        messageListener = ApplicationContext.getBean(MessageListener.class);
-        orderFlowEngine = ApplicationContext.getBean(OrderFlowEngine.class);
-        sheetService = ApplicationContext.getBean(SheetService.class);
-    }
 
-    public BuyerPanel(Order order) {
-        this(0, OrderCountryUtils.getFulfillmentCountry(order), OrderBuyerUtils.getBuyer(order), 1);
+
+        initComponents();
+
     }
 
     private String profilePathName() {
         return this.buyer.key() + Constants.HYPHEN + this.id;
+    }
+
+    @Getter
+    private int taskCount = 0;
+    private int total = 0;
+    private int successCount = 0;
+    private int failedCount = 0;
+    static long start;
+
+    public void setOrder(Order order) {
+        this.order = order;
+        updateInfo();
+    }
+
+    public void initProgressBar(int total) {
+        successCount = 0;
+        failedCount = 0;
+        this.total = total;
+        progressBar.setMaximum(total);
+        progressBar.setValue(0);
+        start = System.currentTimeMillis();
+        state = PSEventListener.Status.Running;
+        updateProgressBar();
+    }
+
+    public void updateSuccess() {
+        successCount++;
+        updateProgressBar();
+    }
+
+    public void updateFailed() {
+        failedCount++;
+        updateProgressBar();
+    }
+
+
+    private void updateProgressBar() {
+        int processedTotal = failedCount + successCount;
+        progressBar.setValue(processedTotal);
+        progressTextLabel.setText(String.format("%d of %d, %d success, %d failed, took %s",
+            processedTotal, total, successCount, failedCount, Strings.formatElapsedTime(start)));
+    }
+
+    private String tasksInfo = "";
+
+    public void updateTasksInfo(String info) {
+        tasksInfo = "\n" + info;
+        updateInfo();
+    }
+
+    public void updateInfo() {
+        if (order != null) {
+            String info = String.format("#%s from %s sheet %s row %d. %s",
+                order.order_id, order.getType().name().toLowerCase(),
+                order.sheetName, order.row, tasksInfo);
+            currentRunningInfoLabel.setText(info);
+        }
+    }
+
+    public void setTaskCount(int count) {
+        taskCount = count;
+        updateInfo();
+    }
+
+    public void enablePauseButton() {
+        pauseButton.setEnabled(true);
+        stopButton.setEnabled(false);
+    }
+
+    public void disablePauseButton() {
+        stopButton.setEnabled(false);
+        pauseButton.setEnabled(false);
+    }
+
+    private PSEventListener.Status state = PSEventListener.Status.NotRunning;
+
+    public void pause() {
+        this.state = PSEventListener.Status.Paused;
+        pauseButton.setIcon(UITools.getIcon("resume.png"));
+        pauseButton.setText("Resume");
+    }
+
+    public void resume() {
+        this.state = PSEventListener.Status.Running;
+        pauseButton.setIcon(UITools.getIcon("pause.png"));
+        pauseButton.setText("Pause");
+    }
+
+    public void stop() {
+        this.state = PSEventListener.Status.Stopped;
+        disablePauseButton();
+        currentRunningInfoLabel.setText(currentRunningInfoLabel.getText() + ". process STOPPED");
+    }
+
+    public boolean paused() {
+        return state == PSEventListener.Status.Paused;
+    }
+
+    public boolean stopped() {
+        return state == PSEventListener.Status.Stopped;
     }
 
     public void recreateBrowser() {
@@ -135,65 +211,153 @@ public class BuyerPanel extends JPanel {
     }
 
 
-    /**
-     * Submit a single order
-     *
-     * @param order the order to be submitted
-     */
+    private void initComponents() {
+        JPanel infoPanel = initInfoPanel();
+
+        GroupLayout layout = new GroupLayout(this);
+        this.setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                .addComponent(browserView, 200, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                //.addComponent(runtimeSettingsPanel)
+                .addComponent(infoPanel, 200, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                    .addComponent(browserView, 250, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                    .addComponent(infoPanel, 20, GroupLayout.PREFERRED_SIZE, 60)
+                )
 
 
-    public void submit(Order order) {
-        if (processingFlag == true) {
-            return;
-        }
+        );
+    }
 
-        processingFlag = true;
-        String spreadsheetId = order.spreadsheetId;
-        long start = System.currentTimeMillis();
-        try {
-            //validate again!
-            String error = orderValidator.isValid(order, FulfillmentEnum.Action.SubmitOrder);
-            if (StringUtils.isNotBlank(error)) {
-                messageListener.addMsg(order, error, InformationLevel.Negative);
-                return;
-            }
 
-            order.originalRemark = new String(order.remark);
-            orderFlowEngine.process(order, this);
+    private JPanel initInfoPanel() {
+        JPanel infoPanel = new JPanel();
+        //infoPanel.setBackground(Color.WHITE);
 
-            if (StringUtils.isNotBlank(order.order_number)) {
-                messageListener.addMsg(order, "order fulfilled successfully. " + order.basicSuccessRecord() + ", took " + Strings.formatElapsedTime(start));
-            }
-        } catch (Exceptions.OutOfBudgetException e) {
-            throw e;
-        } catch (Exceptions.FailedBuyerAccountAuthenticationException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.error("Error submit order {}", order.order_id, e);
-            String msg = parseErrorMsg(e.getMessage());
-            messageListener.addMsg(order, msg + " - took " + Strings.formatElapsedTime(start), InformationLevel.Negative);
-            sheetService.fillUnsuccessfulMsg(spreadsheetId, order, msg);
-        } finally {
-            if (StringUtils.isNotBlank(order.order_number)) {
-                ProgressUpdater.success();
+        progressBar = new JProgressBar();
+        progressBar.setStringPainted(true);
+        progressLabel = new JLabel();
+        progressLabel.setText("Progress:");
+        progressTextLabel = new JLabel();
+        progressTextLabel.setText("");
+
+        pauseButton = new JButton();
+        pauseButton.setText("Pause");
+        pauseButton.setIcon(UITools.getIcon("pause.png"));
+
+        stopButton = new JButton();
+        stopButton.setIcon(UITools.getIcon("stop.png"));
+        stopButton.setText("Stop");
+        disablePauseButton();
+
+
+        currentRunningTitleLabel = new JLabel("Current Running:");
+        currentRunningInfoLabel = new JLabel("no task running yet.");
+        currentRunningTitleLabel.setForeground(Color.blue);
+        currentRunningInfoLabel.setForeground(Color.blue);
+        progressTextLabel.setForeground(Color.blue);
+
+        Font font = currentRunningTitleLabel.getFont();
+        currentRunningTitleLabel.setFont(new Font(font.getName(), Font.BOLD, font.getSize() - 1));
+        currentRunningInfoLabel.setFont(new Font(font.getName(), Font.PLAIN, font.getSize() - 1));
+        progressTextLabel.setFont(new Font(font.getName(), Font.PLAIN, font.getSize() - 1));
+
+
+        pauseButton.addActionListener(evt -> {
+            if (paused()) {
+                resume();
             } else {
-                ProgressUpdater.failed();
+                pause();
             }
+        });
 
-            processingFlag = false;
-        }
+        stopButton.addActionListener(evt -> {
+            stop();
+        });
+
+        GroupLayout layout = new GroupLayout(infoPanel);
+        infoPanel.setLayout(layout);
+
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                .addGroup(
+                    layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+
+                            .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(progressLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, 60)
+                                .addComponent(progressBar, 200, 200, 200)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(progressTextLabel)
+                                .addContainerGap()
+                            )
+
+                        )
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED,
+                            GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(stopButton)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(pauseButton)
+                                .addContainerGap()
+                            )
+                        )
+                        .addContainerGap()
+                )
+
+                .addGroup(
+                    layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(currentRunningTitleLabel)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(currentRunningInfoLabel)
+                        .addContainerGap()
+                )
+
+        );
+
+        layout.setVerticalGroup(
+            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(progressLabel, 30, 30, 30)
+                        .addComponent(progressBar, 30, 30, 30)
+                        .addComponent(progressTextLabel, 30, 30, 30)
+                        .addComponent(pauseButton)
+                        .addComponent(stopButton))
+                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(currentRunningTitleLabel)
+                        .addComponent(currentRunningInfoLabel)
+                    )
+                    .addContainerGap()
+
+                )
+        );
+
+
+        return infoPanel;
     }
 
-    public String parseErrorMsg(String fullMsg) {
-        if (Strings.containsAnyIgnoreCase(fullMsg, JXBrowserHelper.CHANNEL_CLOSED_MESSAGE)) {
-            return "JXBrowser Crashed";
-        }
+    private JLabel progressLabel;
+    public JProgressBar progressBar;
+    public JLabel progressTextLabel;
+    private JButton pauseButton;
+    private JButton stopButton;
+    private JLabel currentRunningTitleLabel;
+    private JLabel currentRunningInfoLabel;
 
-        Pattern pattern = Pattern.compile(Pattern.quote("xception:"));
-        String[] parts = pattern.split(fullMsg);
-        return parts[parts.length - 1].trim();
+    public String getKey() {
+        return this.buyer.key() + Constants.HYPHEN + this.country.name();
     }
-
 
     public static void main(String[] args) {
         JFrame frame = new JFrame();
@@ -205,7 +369,7 @@ public class BuyerPanel extends JPanel {
         frame.getContentPane().add(buyerPanel);
 
         UITools.setDialogAttr(frame, true);
-        buyerPanel.toHomePage();
+        //buyerPanel.toHomePage();
 
 
         // System.exit(0);

@@ -45,18 +45,12 @@ public class ShoppingCartPage extends FulfillmentPage {
 
     public void processToCheckout() {
 
-        //Protection Plan popup
-        DOMElement popoverElement = JXBrowserHelper.selectVisibleElement(browser, ".a-popover");
-        if (popoverElement != null) {
-            DOMElement closeBtn = JXBrowserHelper.selectElementByCssSelector(popoverElement, ".a-button-close.a-declarative");
-            JXBrowserHelper.click(closeBtn);
-            WaitTime.Short.execute();
-        }
 
         DOMElement checkoutLink = JXBrowserHelper.selectElementByCssSelector(browser, "#hlb-ptc-btn-native");
         if (checkoutLink != null) {
             JXBrowserHelper.insertChecker(browser);
             checkoutLink.click();
+            checkPopovers();
             JXBrowserHelper.waitUntilNewPageLoaded(browser);
             return;
         }
@@ -73,6 +67,7 @@ public class ShoppingCartPage extends FulfillmentPage {
         }
         JXBrowserHelper.insertChecker(browser);
         checkoutBtn.click();
+        checkPopovers();
         JXBrowserHelper.waitUntilNewPageLoaded(browser);
         LOGGER.info("Current at {} - {}", browser.getTitle(), browser.getURL());
     }
@@ -121,6 +116,29 @@ public class ShoppingCartPage extends FulfillmentPage {
         LOGGER.debug("Cleared shopping cart finished in {}", Strings.formatElapsedTime(start));
     }
 
+
+    private void checkPopovers() {
+        //Protection Plan popup
+        DOMElement messageGroupElement = JXBrowserHelper.selectVisibleElement(browser, "#huc-v2-message-group");
+        if (messageGroupElement == null) {
+            return;
+        }
+
+        try {
+            JXBrowserHelper.waitUntilVisible(browser, ".a-popover");
+            WaitTime.Shortest.execute();
+            DOMElement popoverElement = JXBrowserHelper.selectVisibleElement(browser, ".a-popover");
+            if (popoverElement != null) {
+                DOMElement closeBtn = JXBrowserHelper.selectElementByCssSelector(popoverElement, ".a-button-close.a-declarative");
+                JXBrowserHelper.click(closeBtn);
+                WaitTime.Short.execute();
+            }
+        } catch (Exception e) {
+            //
+        }
+
+
+    }
 
     public void execute(Order order) {
 

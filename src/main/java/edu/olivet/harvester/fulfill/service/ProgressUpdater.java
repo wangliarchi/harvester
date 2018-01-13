@@ -1,10 +1,8 @@
 package edu.olivet.harvester.fulfill.service;
 
 import edu.olivet.foundations.utils.Strings;
-import edu.olivet.harvester.model.Order;
 
 import javax.swing.*;
-import java.util.List;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/18/17 11:00 AM
@@ -16,33 +14,56 @@ public class ProgressUpdater {
     static int failedCount = 0;
     static long start;
 
-    public static void init(List<Order> orders,JProgressBar progressBar,JLabel progressTextLabel) {
+    public static void setProgressBarComponent(JProgressBar progressBar, JLabel progressTextLabel) {
         ProgressUpdater.progressBar = progressBar;
         ProgressUpdater.progressTextLabel = progressTextLabel;
+        init(0);
+    }
+
+    public static void init(int total) {
         successCount = 0;
         failedCount = 0;
-        progressBar.setMinimum(0);
-        progressBar.setMaximum(orders.size());
-        progressBar.setValue(0);
-        progressTextLabel.setText(String.format("%d of %d completed", 0, orders.size()));
+        if (progressBar != null) {
+            progressBar.setMinimum(0);
+            progressBar.setMaximum(total);
+            progressBar.setValue(0);
+        }
+        if (progressTextLabel != null) {
+            progressTextLabel.setText(String.format("%d of %d completed", 0, total));
+        }
+
         start = System.currentTimeMillis();
     }
 
-    public static void success() {
+    public synchronized static void updateTotal(int total) {
+        if (progressBar != null) {
+            progressBar.setMaximum(progressBar.getMaximum() + total);
+        }
+        if (progressTextLabel != null) {
+            progressTextLabel.setText(String.format("%d of %d completed", progressBar.getValue(), total));
+        }
+    }
+
+    public synchronized static void success() {
         successCount++;
         update();
     }
 
-    public static void failed() {
+    public synchronized static void failed() {
         failedCount++;
         update();
     }
 
-    private static void update() {
+    private synchronized static void update() {
         int total = successCount + failedCount;
-        progressBar.setValue(total);
-        progressTextLabel.setText(String.format("%d of %d, %d success, %d failed, took %s",
+        if (progressBar != null) {
+            progressBar.setValue(total);
+        }
+
+        if (progressTextLabel != null) {
+            progressTextLabel.setText(String.format("%d of %d, %d success, %d failed, took %s",
                 total, progressBar.getMaximum(), successCount, failedCount, Strings.formatElapsedTime(start)));
+        }
     }
 
 

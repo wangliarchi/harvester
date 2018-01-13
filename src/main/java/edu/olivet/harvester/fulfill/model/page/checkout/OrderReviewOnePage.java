@@ -19,14 +19,11 @@ public class OrderReviewOnePage extends OrderReviewAbstractPage {
     }
 
 
-
-
     public boolean reviewPaymentMethod() {
-        String lastDigits = JXBrowserHelper.text(browser,"#payment-information .a-color-secondary span");
-        CreditCard creditCard = CreditCardUtils.getCreditCard(buyerPanel.getOrder());
+        String lastDigits = JXBrowserHelper.text(browser, "#payment-information .a-color-secondary span");
+        CreditCard creditCard = CreditCardUtils.getCreditCard(buyerPanel.getBuyer());
         return creditCard.getCardNo().endsWith(lastDigits);
     }
-
 
 
     @Override

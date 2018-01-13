@@ -8,6 +8,7 @@ import edu.olivet.foundations.db.Keyable;
 import edu.olivet.foundations.utils.*;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.harvester.fulfill.model.Address;
+import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.ShippingEnums;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
@@ -355,7 +356,7 @@ public class Order implements Keyable {
     @JSONField(serialize = false)
     public Date latestEdd() {
         String estimatedDeliveryDateString;
-        if(Strings.containsAnyIgnoreCase(estimated_delivery_date," - ")) {
+        if (Strings.containsAnyIgnoreCase(estimated_delivery_date, " - ")) {
             estimatedDeliveryDateString = estimated_delivery_date.split("\\s-\\s")[1];
         } else {
             estimatedDeliveryDateString = StringUtils.split(estimated_delivery_date, " ")[1];
@@ -494,7 +495,7 @@ public class Order implements Keyable {
         if (type == null) {
             try {
                 type = RuntimeSettings.load().getCurrentType();
-            }catch (Exception e) {
+            } catch (Exception e) {
                 //
             }
         }
@@ -604,6 +605,12 @@ public class Order implements Keyable {
     public String getASIN() {
         return RegexUtils.getMatched(sku_address, RegexUtils.Regex.ASIN);
     }
+
+    /*
+    做单用 - 当前task
+     */
+    @JSONField(serialize = false)
+    OrderSubmissionTask task;
 
     @Override
     public String getKey() {

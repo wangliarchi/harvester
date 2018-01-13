@@ -27,11 +27,12 @@ public class OrderTaskButtonColumn extends ButtonColumn {
         String status = table.getModel().getValueAt(row, column - 1).toString();
         if (status.equalsIgnoreCase(OrderTaskStatus.Stopped.name())) {
             value = "Resume";
-        } else if (status.equalsIgnoreCase(OrderTaskStatus.Completed.name())) {
-            value = "Retry";
         }
+//        else if (status.equalsIgnoreCase(OrderTaskStatus.Completed.name())) {
+//            value = "Retry";
+//        }
 
-        if (StringUtils.equalsAnyIgnoreCase(status, OrderTaskStatus.Scheduled.name(), OrderTaskStatus.Error.name(), OrderTaskStatus.Stopped.name(), OrderTaskStatus.Completed.name())) {
+        if (StringUtils.equalsAnyIgnoreCase(status, OrderTaskStatus.Scheduled.name(), OrderTaskStatus.Error.name(), OrderTaskStatus.Stopped.name())) {
             return super.getTableCellEditorComponent(table, value, isSelected, row, column);
         }
 
@@ -47,11 +48,9 @@ public class OrderTaskButtonColumn extends ButtonColumn {
         String status = table.getModel().getValueAt(row, column - 1).toString();
         if (status.equalsIgnoreCase(OrderTaskStatus.Stopped.name())) {
             value = "Resume";
-        } else if (status.equalsIgnoreCase(OrderTaskStatus.Completed.name())) {
-            value = "Retry";
         }
 
-        if (StringUtils.equalsAnyIgnoreCase(status, OrderTaskStatus.Scheduled.name(), OrderTaskStatus.Error.name(), OrderTaskStatus.Stopped.name(), OrderTaskStatus.Completed.name())) {
+        if (StringUtils.equalsAnyIgnoreCase(status, OrderTaskStatus.Scheduled.name(), OrderTaskStatus.Error.name(), OrderTaskStatus.Stopped.name())) {
             return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         } else {
             return getEmptyRendererComponent();

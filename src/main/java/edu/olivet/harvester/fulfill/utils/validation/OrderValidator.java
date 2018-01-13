@@ -3,13 +3,11 @@ package edu.olivet.harvester.fulfill.utils.validation;
 import com.amazonservices.mws.orders._2013_09_01.model.OrderItem;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.amazon.OrderFetcher;
 import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.UIText;
-import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.model.FulfillmentEnum;
@@ -20,7 +18,9 @@ import edu.olivet.harvester.fulfill.service.AmazonOrderService;
 import edu.olivet.harvester.fulfill.service.DailyBudgetHelper;
 import edu.olivet.harvester.fulfill.service.ForbiddenSeller;
 import edu.olivet.harvester.fulfill.service.SheetService;
-import edu.olivet.harvester.fulfill.utils.*;
+import edu.olivet.harvester.fulfill.utils.ConditionUtils;
+import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
+import edu.olivet.harvester.fulfill.utils.OrderStatusUtils;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.model.Remark;
@@ -60,7 +60,7 @@ public class OrderValidator {
         StatusMarkedCorrectForSubmit,
         NotSelfOrder,
         NotGrayOrder,
-        HasValidBuyerAccount,
+        //HasValidBuyerAccount,
         FulfillmentCountryIsValid,
         HasValidCreditCard,
         HasEnoughBudgetToFulfill,
@@ -166,7 +166,7 @@ public class OrderValidator {
                 Validator.NotSelfOrder,
                 Validator.IsNotUKForward,
                 Validator.IsSupplierHunted,
-                Validator.HasValidBuyerAccount,
+                //Validator.HasValidBuyerAccount,
                 Validator.HasValidCreditCard,
                 Validator.IsNotAddOn,
                 Validator.AddressNotChanged,
@@ -389,7 +389,8 @@ public class OrderValidator {
 
     }
 
-    @Inject AmazonOrderService amazonOrderService;
+    @Inject
+    AmazonOrderService amazonOrderService;
 
     /**
      * 判定当前订单的地址信息是否有效：收件人地址至少需要有一个，目的地国家必须明确声明
@@ -459,18 +460,18 @@ public class OrderValidator {
         return "";
     }
 
-    public String hasValidBuyerAccount(Order order) {
-        try {
-            Account buyer = OrderBuyerUtils.getBuyer(order);
-            if (!buyer.valid()) {
-                throw new BusinessException("Buyer account " + buyer + "is not valid.");
-            }
-        } catch (Exception e) {
-            LOGGER.error("", e);
-            return String.format("order buyer account not set properly. %s - %s", OrderCountryUtils.getFulfillmentCountry(order), Settings.load().getSpreadsheetType(order.getSpreadsheetId()));
-        }
-        return "";
-    }
+//    public String hasValidBuyerAccount(Order order) {
+//        try {
+//            Account buyer = OrderBuyerUtils.getBuyer(order);
+//            if (!buyer.valid()) {
+//                throw new BusinessException("Buyer account " + buyer + "is not valid.");
+//            }
+//        } catch (Exception e) {
+//            LOGGER.error("", e);
+//            return String.format("order buyer account not set properly. %s - %s", OrderCountryUtils.getFulfillmentCountry(order), Settings.load().getSpreadsheetType(order.getSpreadsheetId()));
+//        }
+//        return "";
+//    }
 
     public String fulfillmentCountryIsValid(Order order) {
         try {
@@ -482,14 +483,15 @@ public class OrderValidator {
         return "";
     }
 
+    //todo
     public String hasValidCreditCard(Order order) {
-        try {
-            CreditCardUtils.getCreditCard(order);
-            return "";
-        } catch (Exception e) {
-            return "No valid credit card found.";
-        }
-
+        return "";
+//        try {
+//            CreditCardUtils.getCreditCard(order);
+//            return "";
+//        } catch (Exception e) {
+//            return "No valid credit card found.";
+//        }
     }
 
     /**
@@ -557,7 +559,8 @@ public class OrderValidator {
     @Inject
     private DBManager dbManager;
 
-    @Inject OrderFetcher orderFetcher;
+    @Inject
+    OrderFetcher orderFetcher;
 
     @Inject
     SheetService sheetService;

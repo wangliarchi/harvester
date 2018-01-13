@@ -1,11 +1,16 @@
 package edu.olivet.harvester.fulfill.service;
 
+import com.alibaba.fastjson.JSON;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import edu.olivet.foundations.amazon.Account;
+import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionBuyerAccountTask;
+import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.OrderTaskStatus;
+import edu.olivet.harvester.model.Order;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.nutz.dao.Cnd;
@@ -20,6 +25,9 @@ import java.util.List;
 public class OrderSubmissionBuyerTaskService {
     @Inject
     DBManager dbManager;
+
+    @Inject
+    OrderSubmissionTaskService orderSubmissionTaskService;
 
     public List<OrderSubmissionBuyerAccountTask> todayTasks() {
         return dbManager.query(OrderSubmissionBuyerAccountTask.class,
@@ -40,6 +48,15 @@ public class OrderSubmissionBuyerTaskService {
                         .desc("dateCreated"));
     }
 
+    public List<OrderSubmissionBuyerAccountTask> todayScheduledTasks(Country country, Account buyer) {
+        return dbManager.query(OrderSubmissionBuyerAccountTask.class,
+                Cnd.where("dateCreated", ">=", Dates.beginOfDay(new DateTime()).toDate())
+                        .and("status", "=", OrderTaskStatus.Scheduled.name())
+                        .and("fulfillmentCountry", "=", country.name())
+                        .and("buyerAccount", "=", buyer.getEmail())
+                        .asc("dateCreated"));
+    }
+
     public void saveTask(OrderSubmissionBuyerAccountTask task) {
         if (StringUtils.isBlank(task.getId())) {
             task.setDateCreated(new Date());
@@ -47,26 +64,73 @@ public class OrderSubmissionBuyerTaskService {
             task.setStatus(OrderTaskStatus.Scheduled.name());
         }
 
+
+        if (task.getTotalOrders() > 0 && task.getSuccess() + task.getFailed() == task.getTotalOrders() &&
+                !task.getStatus().equalsIgnoreCase(OrderTaskStatus.Completed.name())) {
+            task.setStatus(OrderTaskStatus.Completed.name());
+            task.setDateEnded(new Date());
+        }
+
         dbManager.insertOrUpdate(task, OrderSubmissionBuyerAccountTask.class);
         //TasksAndProgressPanel.getInstance().loadTasksToTable();
+    }
+
+    public void saveSuccess(OrderSubmissionBuyerAccountTask task) {
+        task = get(task.getId());
+        task.setSuccess(task.getSuccess() + 1);
+        saveTask(task);
+
+        orderSubmissionTaskService.saveSuccess(task.getTaskId());
+    }
+
+    public void saveFailed(OrderSubmissionBuyerAccountTask task) {
+        task = get(task.getId());
+        task.setFailed(task.getFailed() + 1);
+        saveTask(task);
+
+        orderSubmissionTaskService.saveFailed(task.getTaskId());
+    }
+
+    public OrderSubmissionBuyerAccountTask get(String id) {
+        return dbManager.readById(id, OrderSubmissionBuyerAccountTask.class);
     }
 
     public void startTask(OrderSubmissionBuyerAccountTask task) {
         task.setStatus(OrderTaskStatus.Processing.name());
         task.setDateStarted(new Date());
         saveTask(task);
+
+        orderSubmissionTaskService.startTask(task.getTaskId());
     }
 
     public void stopTask(OrderSubmissionBuyerAccountTask task) {
         task.setStatus(OrderTaskStatus.Stopped.name());
         task.setDateEnded(new Date());
         saveTask(task);
+
+        orderSubmissionTaskService.stopTask(task.getTaskId());
     }
 
     public void completed(OrderSubmissionBuyerAccountTask task) {
         task.setStatus(OrderTaskStatus.Completed.name());
         task.setDateEnded(new Date());
         saveTask(task);
+    }
+
+    public OrderSubmissionBuyerAccountTask create(Country country, Account buyer, OrderSubmissionTask task, List<Order> orders) {
+        OrderSubmissionBuyerAccountTask orderSubmissionBuyerAccountTask = new OrderSubmissionBuyerAccountTask();
+        orderSubmissionBuyerAccountTask.setBuyerAccount(buyer.getEmail());
+        orderSubmissionBuyerAccountTask.setFulfillmentCountry(country.name());
+        orderSubmissionBuyerAccountTask.setTaskId(task.getId());
+        orderSubmissionBuyerAccountTask.setMarketplaceName(task.getMarketplaceName());
+        orderSubmissionBuyerAccountTask.setSpreadsheetId(task.getSpreadsheetId());
+        orderSubmissionBuyerAccountTask.setSpreadsheetName(task.getSpreadsheetName());
+        orderSubmissionBuyerAccountTask.setSheetName(task.getOrderRange().getSheetName());
+        orderSubmissionBuyerAccountTask.setOrders(JSON.toJSONString(orders));
+        orderSubmissionBuyerAccountTask.setTotalOrders(orders.size());
+        saveTask(orderSubmissionBuyerAccountTask);
+
+        return orderSubmissionBuyerAccountTask;
     }
 
     public List<OrderSubmissionBuyerAccountTask> getTasksById(String taskId) {

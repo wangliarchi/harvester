@@ -4,7 +4,6 @@ import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.*;
-import edu.olivet.harvester.fulfill.utils.OrderBuyerUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.utils.Settings;
@@ -72,19 +71,18 @@ public class TabbedBuyerPanel extends JTabbedPane {
         });
     }
 
-    public BuyerPanel reInitTabForOrder(Order order) {
+    public BuyerPanel reInitTabForOrder(Order order, Account buyer) {
         LOGGER.error("JXBrowser crashed, trying to recreate buyer panel");
-        BuyerPanel buyerPanel = initTabForOrder(order);
+        BuyerPanel buyerPanel = initTabForOrder(order, buyer);
         this.removeTab(buyerPanel);
-        buyerPanel = initTabForOrder(order);
+        buyerPanel = initTabForOrder(order, buyer);
 
         buyerPanel.toWelcomePage();
         return buyerPanel;
     }
 
 
-    public BuyerPanel initTabForOrder(Order order) {
-        Account buyer = OrderBuyerUtils.getBuyer(order);
+    public BuyerPanel initTabForOrder(Order order, Account buyer) {
         Country country = OrderCountryUtils.getFulfillmentCountry(order);
         return getOrAddTab(country, buyer);
     }

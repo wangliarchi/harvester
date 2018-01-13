@@ -18,6 +18,7 @@ import edu.olivet.harvester.model.ConfigEnums;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums.OrderColor;
 import edu.olivet.harvester.model.OrderEnums.OrderColumn;
+import edu.olivet.harvester.service.OrderService;
 import edu.olivet.harvester.spreadsheet.exceptions.NoOrdersFoundInWorksheetException;
 import edu.olivet.harvester.spreadsheet.exceptions.NoWorksheetFoundException;
 import edu.olivet.harvester.spreadsheet.model.Spreadsheet;
@@ -124,7 +125,7 @@ public class AppScript {
      * </pre>
      */
     private static final String URL_PREFIX =
-            "https?://(spreadsheets.google.com/feeds/(cells|spreadsheets)/|docs.google.com/spreadsheets/d/|drive.google.com/open[?]id=)";
+        "https?://(spreadsheets.google.com/feeds/(cells|spreadsheets)/|docs.google.com/spreadsheets/d/|drive.google.com/open[?]id=)";
 
     public static String getSpreadId(String url) {
         String str = StringUtils.defaultString(url).replaceFirst(URL_PREFIX, StringUtils.EMPTY);
@@ -170,7 +171,7 @@ public class AppScript {
         String result = this.processResult(this.get(params));
         if (!SUCCESS.equals(result)) {
             throw new BusinessException(String.format("Failed to commit shipping confirmation log to row %d of sheet %s: %s",
-                    row, sheetName, result));
+                row, sheetName, result));
         }
     }
 
@@ -210,19 +211,25 @@ public class AppScript {
         }
     }
 
+    @Inject SheetAPI sheetAPI;
+    @Inject OrderService orderService;
+
     @Repeat
     public List<Order> readOrders(String spreadId, String sheetName) {
-        Map<String, String> params = new HashMap<>();
-        params.put(PARAM_SPREAD_ID, getSpreadId(spreadId));
-        params.put(PARAM_SHEET_NAME, sheetName);
-        params.put(PARAM_METHOD, "READ");
-        params.put("r", DEFAULT_RANGE);
 
+//        Map<String, String> params = new HashMap<>();
+//        params.put(PARAM_SPREAD_ID, getSpreadId(spreadId));
+//        params.put(PARAM_SHEET_NAME, sheetName);
+//        params.put(PARAM_METHOD, "READ");
+//        params.put("r", DEFAULT_RANGE);
+//
         final long start = System.currentTimeMillis();
-        String json = this.processResult(this.get(params));
+//        String json = this.processResult(this.get(params));
+//
+//        //LOGGER.info("request {}, response{}",params,json);
+//        List<Order> orders = this.parse(json);
 
-        //LOGGER.info("request {}, response{}",params,json);
-        List<Order> orders = this.parse(json);
+        List<Order> orders = orderService.fetchOrders(spreadId, sheetName);
         orders.forEach(it -> {
             it.setSheetName(sheetName);
             it.setSpreadsheetId(spreadId);
