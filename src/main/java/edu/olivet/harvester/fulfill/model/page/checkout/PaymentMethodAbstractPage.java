@@ -47,8 +47,8 @@ public abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract 
         }
 
         for (DOMElement paymentRow : cards) {
-            String lastDigits = JXBrowserHelper.selectElementByCssSelector(paymentRow, ".card-info").getInnerText().replaceAll(RegexUtils.Regex.NON_DIGITS.val(), "");
-            if (creditCard.getCardNo().endsWith(lastDigits)) {
+            String cardInfoText = JXBrowserHelper.selectElementByCssSelector(paymentRow, ".card-info").getInnerText();
+            if (cardInfoText.contains(creditCard.lastDigits())) {
                 paymentRow.click();
                 WaitTime.Shortest.execute();
                 //sometime amazon requires reenter cc number

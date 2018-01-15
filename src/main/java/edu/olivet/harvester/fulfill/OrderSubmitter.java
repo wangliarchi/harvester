@@ -150,7 +150,7 @@ public class OrderSubmitter {
                 messageListener.addMsg(order, e.getMessage(), InformationLevel.Negative);
 
                 if (e instanceof OutOfBudgetException) {
-                    UITools.error("No more money to spend :(");
+                    //UITools.error("No more money to spend :(");
                     break;
                 } else if (e instanceof FailedBuyerAccountAuthenticationException) {
                     UITools.error(e.getMessage());

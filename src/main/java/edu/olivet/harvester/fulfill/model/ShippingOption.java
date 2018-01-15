@@ -117,65 +117,69 @@ public class ShippingOption {
         String[] eddParts = StringUtils.split(eddText, ",");
         ArrayUtils.reverse(eddParts);
         for (String part : eddParts) {
-            String[] parts = StringUtils.split(part, "-");
+            try {
+                String[] parts = StringUtils.split(part, "-");
 
-            String dateString = parts[parts.length - 1].trim();
+                String dateString = parts[parts.length - 1].trim();
 
-            if (dateString.length() <= 2) {
-                dateString = parts[parts.length - 2].trim();
+                if (dateString.length() <= 2) {
+                    dateString = parts[parts.length - 2].trim();
+                    String[] dateStringParts = dateString.split(" ");
+                    dateString = StringUtils.join(Arrays.copyOf(dateStringParts, dateStringParts.length - 1), " ") + " " + parts[parts.length - 1].trim();
+                }
+
+                dateString = dateString.replaceAll("[^\\p{L}\\p{Nd} ]+", "").trim();
+                dateString = dateString.replace(" de ", " ");
+
                 String[] dateStringParts = dateString.split(" ");
-                dateString = StringUtils.join(Arrays.copyOf(dateStringParts, dateStringParts.length - 1), " ") + " " + parts[parts.length - 1].trim();
-            }
+                List<String> list = Lists.newArrayList(dateStringParts);
+                list.removeIf(StringUtils::isBlank);
 
-            dateString = dateString.replaceAll("[^\\p{L}\\p{Nd} ]+", "").trim();
-            dateString = dateString.replace(" de ", " ");
-
-            String[] dateStringParts = dateString.split(" ");
-            List<String> list = Lists.newArrayList(dateStringParts);
-            list.removeIf(StringUtils::isBlank);
-
-            dateString = list.get(list.size() - 2) + " " + list.get(list.size() - 1);
-            index = 3;
-            while (!RegexUtils.match(dateString, ".*\\d+.*") && list.size() >= index) {
-                dateString = list.get(list.size() - index) + " " + dateString;
-                index++;
-            }
+                dateString = list.get(list.size() - 2) + " " + list.get(list.size() - 1);
+                index = 3;
+                while (!RegexUtils.match(dateString, ".*\\d+.*") && list.size() >= index) {
+                    dateString = list.get(list.size() - index) + " " + dateString;
+                    index++;
+                }
 
 
-            for (String pattern : formatPatterns) {
-                SimpleDateFormat dateFormat = new SimpleDateFormat(pattern, country.locale());
-                try {
-                    Date date = dateFormat.parse(dateString);
-                    int years = Dates.getYear(now) - 1970;
-                    if (Dates.getField(date, Calendar.MONTH) < Dates.getField(now, Calendar.MONTH)) {
-                        years += 1;
+                for (String pattern : formatPatterns) {
+                    SimpleDateFormat dateFormat = new SimpleDateFormat(pattern, country.locale());
+                    try {
+                        Date date = dateFormat.parse(dateString);
+                        int years = Dates.getYear(now) - 1970;
+                        if (Dates.getField(date, Calendar.MONTH) < Dates.getField(now, Calendar.MONTH)) {
+                            years += 1;
+                        }
+
+                        Calendar c = Calendar.getInstance();
+                        c.setTime(date);
+                        c.add(Calendar.YEAR, years);
+                        date = c.getTime();
+                        return date;
+                    } catch (ParseException e) {
+                        //LOGGER.error("", e);
+                        //ignore
+                        //throw new BusinessException(e);
                     }
-
-                    Calendar c = Calendar.getInstance();
-                    c.setTime(date);
-                    c.add(Calendar.YEAR, years);
-                    date = c.getTime();
-                    return date;
-                } catch (ParseException e) {
-                    //LOGGER.error("", e);
-                    //ignore
-                    //throw new BusinessException(e);
                 }
-            }
 
-            if (Strings.containsAnyIgnoreCase(part.toLowerCase(), "days", "Werktage", "lavorativi", "ouvrés", "días", "jours", "Tage", "dias", "giorni")) {
-                try {
-                    String[] dayParts = StringUtils.split(part, "-");
-                    String daysString = dayParts[dayParts.length - 1].trim();
+                if (Strings.containsAnyIgnoreCase(part.toLowerCase(), "days", "Werktage", "lavorativi", "ouvrés", "días", "jours", "Tage", "dias", "giorni")) {
+                    try {
+                        String[] dayParts = StringUtils.split(part, "-");
+                        String daysString = dayParts[dayParts.length - 1].trim();
 
-                    daysString = daysString.replaceAll(RegexUtils.Regex.NON_DIGITS.val(), "");
-                    int days = IntegerUtils.parseInt(daysString, 1);
+                        daysString = daysString.replaceAll(RegexUtils.Regex.NON_DIGITS.val(), "");
+                        int days = IntegerUtils.parseInt(daysString, 1);
 
-                    return afterWorkDays(days);
+                        return afterWorkDays(days);
 
-                } catch (Exception e) {
-                    //
+                    } catch (Exception e) {
+                        //
+                    }
                 }
+            }catch (Exception e) {
+                //
             }
         }
 

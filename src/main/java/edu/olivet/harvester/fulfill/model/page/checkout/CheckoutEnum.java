@@ -2,6 +2,7 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 
 import com.teamdev.jxbrowser.chromium.Browser;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
+import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.utils.pagehelper.GiftOptionHelper;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import lombok.Getter;
@@ -46,6 +47,16 @@ public class CheckoutEnum {
             JXBrowserHelper.waitUntilNotFound(browser, ".section-overwrap");
             JXBrowserHelper.waitUntilNotFound(browser, "#spinner-anchor");
             JXBrowserHelper.waitUntilNotFound(browser, ".loading-img-text");
+
+
+            DOMElement primeAd = JXBrowserHelper.selectVisibleElement(browser, "#prime-acquisition-spc-popover-no-thanks");
+             if (primeAd != null) {
+
+                primeAd.click();
+                WaitTime.Shorter.execute();
+                //JXBrowserHelper.waitUntilVisible(browser, "#prime-acquisition-spc-popover-no-thanks");
+                return detectPage(browser);
+            }
 
             for (CheckoutPage page : CheckoutPage.values()) {
                 for (String selector : StringUtils.split(page.getIdSelector(), ",")) {

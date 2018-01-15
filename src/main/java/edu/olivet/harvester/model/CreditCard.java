@@ -35,4 +35,8 @@ public class CreditCard {
 
         return  errors;
     }
+
+    public String lastDigits() {
+        return cardNo.substring(cardNo.length() - 4);
+    }
 }
