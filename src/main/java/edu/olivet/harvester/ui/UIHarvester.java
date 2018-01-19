@@ -10,7 +10,7 @@ import edu.olivet.harvester.bugreport.service.ReportBugEvent;
 import edu.olivet.harvester.fulfill.service.OrderSubmissionTaskService;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.job.BackgroundJob;
-import edu.olivet.harvester.model.ConfigEnums;
+import edu.olivet.harvester.common.model.ConfigEnums;
 import edu.olivet.harvester.ui.dialog.BankCardConfigDialog;
 import edu.olivet.harvester.ui.dialog.BuyerAccountConfigDialog;
 import edu.olivet.harvester.ui.dialog.SystemSettingsDialog;
