@@ -8,8 +8,6 @@ import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTaskHandler;
 import edu.olivet.harvester.ui.panel.OrderSubmissionSettingsPanel;
 import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.LayoutStyle.ComponentPlacement;
@@ -22,7 +20,7 @@ import java.util.List;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/11/17 10:50 AM
  */
 public class AddOrderSubmissionTaskDialog extends BaseDialog {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AddOrderSubmissionTaskDialog.class);
+    //private static final Logger LOGGER = LoggerFactory.getLogger(AddOrderSubmissionTaskDialog.class);
     private OrderSubmissionTaskHandler orderSubmissionTaskHandler;
 
     public AddOrderSubmissionTaskDialog(OrderSubmissionTaskHandler orderSubmissionTaskHandler) {
@@ -31,7 +29,7 @@ public class AddOrderSubmissionTaskDialog extends BaseDialog {
         initComponents();
     }
 
-    OrderSubmissionSettingsPanel orderSubmissionSettingsPanel;
+    private OrderSubmissionSettingsPanel orderSubmissionSettingsPanel;
 
     private void initComponents() {
         String title = "Add order submission task";

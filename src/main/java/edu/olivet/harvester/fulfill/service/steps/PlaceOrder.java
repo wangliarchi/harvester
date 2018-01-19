@@ -35,7 +35,7 @@ public class PlaceOrder extends Step {
         //
     }
 
-    @Inject
+    @Inject private
     StepHelper stepHelper;
 
     public Step createDynamicInstance(FlowState state) {

@@ -8,7 +8,6 @@ import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.model.ShippingEnums.ShippingSpeed;
 import edu.olivet.harvester.fulfill.model.ShippingOption;
-import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.Remark;
@@ -31,7 +30,7 @@ public class DefaultHandler implements ShippingHandler {
 
     private static final DefaultHandler instance = new DefaultHandler();
 
-    protected DefaultHandler() {
+    DefaultHandler() {
     }
 
     public static DefaultHandler getInstance() {
@@ -62,7 +61,7 @@ public class DefaultHandler implements ShippingHandler {
     public List<ShippingOption> getValidateOptions(Order order, List<ShippingOption> shippingOptions) {
 
         Date orderEdd = order.latestEdd();
-        int maxDays = IntegerUtils.parseInt(RuntimeSettings.load().getEddLimit(), 7);
+        int maxDays = IntegerUtils.parseInt(order.getTask().getEddLimit(), 7);
 
         DateTime start = new DateTime(orderEdd.getTime());
 

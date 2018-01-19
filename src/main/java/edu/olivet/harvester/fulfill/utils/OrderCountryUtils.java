@@ -1,8 +1,8 @@
 package edu.olivet.harvester.fulfill.utils;
 
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
-import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums.OrderItemType;
 import edu.olivet.harvester.model.Remark;
@@ -33,12 +33,13 @@ public class OrderCountryUtils {
                 return Settings.load().getSpreadsheetCountry(order.spreadsheetId);
             }
             try {
-                return Country.fromCode(RuntimeSettings.load().getMarketplaceName());
+                return Country.fromCode(order.getTask().getMarketplaceName());
             } catch (Exception e1) {
                 //
-                return null;
             }
         }
+
+        throw new BusinessException("Fail to read marketplace country, please check if order data is integrated");
     }
 
     public static Country getFulfillmentCountry(Order order) {
@@ -59,9 +60,10 @@ public class OrderCountryUtils {
 
 
     public static final String OFFER_LIST_URL_PATTERN = "/gp/offer-listing/%s/ref=olp_tab_%s?ie=UTF8&condition=%s&startIndex=%s&sr=8-1";
-    public static final String PRIME_URL_PATTERN = "/gp/offer-listing/${ISBN}/ref=olp_prime_${CONDITION}?ie=UTF8&condition=${CONDITION}&shipPromoFilter=1";
-    public static final String PT_URL_PATTERN = "/gp/offer-listing/${ISBN}/ref=olp_tab_${CONDITION}?ie=UTF8&condition=${CONDITION}";
-    public static final int MIN_SELLERID_LENGTH = 10;
+    private static final String PRIME_URL_PATTERN =
+            "/gp/offer-listing/${ISBN}/ref=olp_prime_${CONDITION}?ie=UTF8&condition=${CONDITION}&shipPromoFilter=1";
+    private static final String PT_URL_PATTERN = "/gp/offer-listing/${ISBN}/ref=olp_tab_${CONDITION}?ie=UTF8&condition=${CONDITION}";
+    private static final int MIN_SELLERID_LENGTH = 10;
 
     public static String getOfferListingUrl(Order order) {
         String condition = ConditionUtils.getMasterCondition(order.condition);

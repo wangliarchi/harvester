@@ -23,7 +23,7 @@ public class ShipDateUtils {
         return FastDateFormat.getInstance("MM/dd").format(millis);
     }
 
-    @Inject Now now;
+    @Inject private Now now;
 
     /**
      * <pre>

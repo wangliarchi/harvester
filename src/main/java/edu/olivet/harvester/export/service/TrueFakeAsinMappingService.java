@@ -23,10 +23,12 @@ import java.util.Map;
 public class TrueFakeAsinMappingService {
     private static final String SERVICE_URL = "http://35.166.131.3:8080/listing-mapping/api/mapping/%s?accessKey=7c2eeed11dab9a747e7517583e6ee857";
 
-    @Inject ElasticSearchService elasticSearchService;
+    @Inject private ElasticSearchService elasticSearchService;
 
     public void getISBNs(List<AmazonOrder> orders) {
         List<String> asins = new ArrayList<>();
+
+        //filter out zhendian
         orders.forEach(order -> {
             if (Strings.containsAnyIgnoreCase(order.getSku(), "ZD", "zendian")) {
                 order.setIsbn(order.getAsin());
@@ -42,7 +44,9 @@ public class TrueFakeAsinMappingService {
             } else if (StringUtils.isBlank(order.getIsbn())) {
                 try {
                     String isbn = HttpUtils.getText(String.format(SERVICE_URL, order.getAsin()));
-                    order.setIsbn(isbn);
+                    if (!"No source ASIN/ISBN found.".equalsIgnoreCase(isbn)) {
+                        order.setIsbn(isbn);
+                    }
                 } catch (Exception e) {
                     //ignore
                 }

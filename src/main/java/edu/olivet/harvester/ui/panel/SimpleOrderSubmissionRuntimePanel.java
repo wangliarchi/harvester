@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.GroupLayout.Alignment;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
@@ -44,7 +45,7 @@ import java.util.Map;
  */
 public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEventHandler, RuntimePanelObserver {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RuntimeSettingsPanel.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleOrderSubmissionRuntimePanel.class);
 
     private Worksheet selectedWorksheet;
     private RuntimeSettings settings;
@@ -66,7 +67,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
     }
 
 
-    public void initData() {
+    private void initData() {
 
         //RuntimeSettings
         settings = RuntimeSettings.load();
@@ -100,12 +101,12 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         noInvoiceTextField.setText(settings.getNoInvoiceText());
 
 
-        lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"5", "7"}));
+        lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"5", "7"}));
         if (StringUtils.isNotBlank(settings.getLostLimit())) {
             lostLimitComboBox.setSelectedItem(settings.getLostLimit());
         }
 
-        priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"3", "5"}));
+        priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"3", "5"}));
         if (StringUtils.isNotBlank(settings.getPriceLimit())) {
             priceLimitComboBox.setSelectedItem(settings.getPriceLimit());
         }
@@ -118,7 +119,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
 
 
         maxDaysOverEddComboBox.setModel(new DefaultComboBoxModel<>(
-                new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}
+                new String[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}
         ));
         if (StringUtils.isNotBlank((settings.getEddLimit()))) {
             maxDaysOverEddComboBox.setSelectedItem(settings.getEddLimit());
@@ -157,7 +158,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
 
     }
 
-    public void initEvents() {
+    private void initEvents() {
         marketplaceComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 if (e.getItem() != Country.valueOf(settings.getMarketplaceName())) {
@@ -260,10 +261,8 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         pauseButton.addActionListener(evt -> {
             if (PSEventListener.paused()) {
                 PSEventListener.resume();
-                resetPauseBtn();
             } else {
                 PSEventListener.pause();
-                paused();
             }
         });
 
@@ -288,13 +287,13 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
 
     }
 
-    public void resetSkipSetting() {
+    private void resetSkipSetting() {
         skipCheckComboBox.setSelectedIndex(0);
         settings.setSkipValidation(OrderValidator.SkipValidation.None);
         settings.save();
     }
 
-    public void markStatus() {
+    private void markStatus() {
         new Thread(() -> {
             try {
                 disableAllBtns();
@@ -308,7 +307,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         }).start();
     }
 
-    public void submitOrders() {
+    private void submitOrders() {
         new Thread(() -> {
             if (PSEventListener.isRunning()) {
                 UITools.error("Other task is running!");
@@ -316,13 +315,13 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
             }
             try {
                 disableAllBtns();
+                saveRuntimeSettings();
                 PSEventListener.reset(this);
                 ApplicationContext.getBean(SubmitOrdersEvent.class).execute();
             } catch (Exception e) {
                 UITools.error(UIText.message("message.submit.exception", e.getMessage()), UIText.title("title.code_error"));
                 LOGGER.error("做单过程中出现异常:", e);
             } finally {
-                restAllBtns();
                 resetSkipSetting();
             }
         }).start();
@@ -352,8 +351,16 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         huntSupplierButton.setVisible(true);
         markStatusButton.setVisible(true);
         submitButton.setVisible(true);
+    }
 
+    @Override
+    public void disableStartButton() {
+        disableAllBtns();
+    }
 
+    @Override
+    public void enableStartButton() {
+        restAllBtns();
     }
 
     public void paused() {
@@ -366,7 +373,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         pauseButton.setText("Pause");
     }
 
-    public void disableAllBtns() {
+    private void disableAllBtns() {
         marketplaceComboBox.setEnabled(false);
         googleSheetTextField.setEnabled(false);
         lostLimitComboBox.setEnabled(false);
@@ -382,9 +389,10 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         loadSheetTabButton.setEnabled(false);
         buyerComboBox.setEnabled(false);
         primeBuyerComboBox.setEnabled(false);
+        buyerComboBox.setEnabled(false);
     }
 
-    public void restAllBtns() {
+    private void restAllBtns() {
         marketplaceComboBox.setEnabled(true);
         googleSheetTextField.setEnabled(true);
         maxDaysOverEddComboBox.setEnabled(true);
@@ -400,9 +408,10 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         loadSheetTabButton.setEnabled(true);
         buyerComboBox.setEnabled(true);
         primeBuyerComboBox.setEnabled(true);
+        buyerComboBox.setEnabled(true);
     }
 
-    public void selectGoogleSheet() {
+    private void selectGoogleSheet() {
 
         AppScript appScript = new AppScript();
         Country selectedCountry = (Country) marketplaceComboBox.getSelectedItem();
@@ -448,7 +457,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         }
     }
 
-    public void selectRange() {
+    private void selectRange() {
         //spreadsheet should be selected first.
         if (StringUtils.isBlank(settings.getSheetName())) {
             return;
@@ -488,7 +497,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         setAccounts4Country();
     }
 
-    public void setAccounts4Country() {
+    private void setAccounts4Country() {
         Country currentCountry = (Country) marketplaceComboBox.getSelectedItem();
         Settings.Configuration configuration;
         try {
@@ -504,7 +513,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
 
 
         Account seller = configuration.getSeller();
-        Account[] sellers = seller == null ? new Account[0] : new Account[]{seller};
+        Account[] sellers = seller == null ? new Account[0] : new Account[] {seller};
         sellerComboBox.setModel(new DefaultComboBoxModel<>(sellers));
 
         //default to book
@@ -554,9 +563,10 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         primeBuyerComboBox.setModel(new DefaultComboBoxModel<>(primeBuyerAccounts.toArray(new Account[primeBuyerAccounts.size()])));
         primeBuyerComboBox.setSelectedItem(primeBuyer);
 
+
     }
 
-    public void setOrderFinder() {
+    private void setOrderFinder() {
         Country currentCountry = (Country) marketplaceComboBox.getSelectedItem();
         Settings.Configuration configuration = Settings.load().getConfigByCountry(currentCountry);
         if (FinderCodeUtils.validate(configuration.getUserCode())) {
@@ -564,6 +574,29 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         } else {
             finderCodeTextField.setText(FinderCodeUtils.generate());
         }
+    }
+
+    private void saveRuntimeSettings() {
+        assert (buyerComboBox.getSelectedItem()) != null;
+        settings.setBuyerEmail(((Account) buyerComboBox.getSelectedItem()).getEmail());
+        assert (primeBuyerComboBox.getSelectedItem()) != null;
+        settings.setPrimeBuyerEmail(((Account) primeBuyerComboBox.getSelectedItem()).getEmail());
+        settings.setFinderCode(finderCodeTextField.getText());
+        settings.setNoInvoiceText(noInvoiceTextField.getText());
+        assert (marketplaceComboBox.getSelectedItem()) != null;
+        settings.setMarketplaceName(((Country) marketplaceComboBox.getSelectedItem()).name());
+
+        if (selectedWorksheet != null) {
+            settings.setSheetName(selectedWorksheet.getSheetName());
+            settings.setSpreadsheetId(selectedWorksheet.getSpreadsheet().getSpreadsheetId());
+            settings.setSpreadsheetName(selectedWorksheet.getSpreadsheet().getTitle());
+        }
+
+        settings.setSkipValidation((OrderValidator.SkipValidation) skipCheckComboBox.getSelectedItem());
+        settings.setEddLimit((String) maxDaysOverEddComboBox.getSelectedItem());
+        settings.setLostLimit((String) lostLimitComboBox.getSelectedItem());
+        settings.setPriceLimit((String) priceLimitComboBox.getSelectedItem());
+        settings.save();
     }
 
     private void clearGoogleSheet() {
@@ -629,82 +662,62 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
     public JLabel progressTextLabel;
 
     private JTextField todayBudgetTextField;
-    public JTextField todayUsedTextField;
+    private JTextField todayUsedTextField;
 
     private JButton loadSheetTabButton;
 
     private void initComponents() {
         setBorder(BorderFactory.createTitledBorder(BorderFactory.createTitledBorder("Runtime Settings")));
 
-        JLabel marketplaceLabel = new JLabel();
+        JLabel marketplaceLabel = new JLabel("Marketplace");
         marketplaceComboBox = new JComboBox<>();
 
-        JLabel sellerLabel = new JLabel();
+        JLabel sellerLabel = new JLabel("Seller");
         sellerComboBox = new JComboBox<>();
 
-        JLabel buyerLabel = new JLabel();
+        JLabel buyerLabel = new JLabel("Buyer");
         buyerComboBox = new JComboBox<>();
-        JLabel primeBuyerLabel = new JLabel();
+        JLabel primeBuyerLabel = new JLabel("Prime Buyer");
         primeBuyerComboBox = new JComboBox<>();
 
-        JLabel googleSheetLabel = new JLabel();
+        JLabel googleSheetLabel = new JLabel("Google Sheet");
         googleSheetTextField = new JTextField();
-        JLabel selectRangeLabel = new JLabel();
+        JLabel selectRangeLabel = new JLabel("Select Range");
         selectRangeButton = new JButton();
-        JLabel lostLimitLabel = new JLabel();
+        JLabel lostLimitLabel = new JLabel("Lost Limit");
         lostLimitComboBox = new JComboBox<>();
-        JLabel priceLimitLabel = new JLabel();
+        JLabel priceLimitLabel = new JLabel("Price Limit");
         priceLimitComboBox = new JComboBox<>();
-        JLabel noInvoiceLabel = new JLabel();
+        JLabel noInvoiceLabel = new JLabel("No Invoice");
         noInvoiceTextField = new JTextField();
-        JLabel codeFinderLabel = new JLabel();
+        JLabel codeFinderLabel = new JLabel("Finder Code");
         finderCodeTextField = new JTextField();
         selectedRangeLabel = new JLabel();
         selectedRangeLabel.setForeground(Color.BLUE);
 
-        JLabel maxEddLabel = new JLabel();
+        JLabel maxEddLabel = new JLabel("EDD Limit");
         maxDaysOverEddComboBox = new JComboBox<>();
 
-        huntSupplierButton = new JButton();
-        huntSupplierButton.setText("Hunt Supplier");
+        huntSupplierButton = new JButton("Hunt Supplier");
         huntSupplierButton.setIcon(UITools.getIcon("find.png"));
-        markStatusButton = new JButton();
-        markStatusButton.setText("Mark Status");
+        markStatusButton = new JButton("Mark Status");
         markStatusButton.setIcon(UITools.getIcon("status.png"));
-        submitButton = new JButton();
-        submitButton.setText("Submit");
+        submitButton = new JButton("Submit");
         submitButton.setIcon(UITools.getIcon("start.png"));
 
-        pauseButton = new JButton();
-        pauseButton.setText("Pause");
+        pauseButton = new JButton("Pause");
         pauseButton.setIcon(UITools.getIcon("pause.png"));
         pauseButton.setVisible(false);
         pauseButton.setEnabled(false);
-        stopButton = new JButton();
+        stopButton = new JButton("Stop");
         stopButton.setIcon(UITools.getIcon("stop.png"));
-        stopButton.setText("Stop");
         stopButton.setVisible(false);
         stopButton.setEnabled(false);
 
-        loadSheetTabButton = new JButton();
-        loadSheetTabButton.setText("Load Sheet");
+        loadSheetTabButton = new JButton("Load Sheet");
         loadSheetTabButton.setEnabled(false);
 
-        marketplaceLabel.setText("Marketplace");
-        sellerLabel.setText("Seller");
-        buyerLabel.setText("Buyer");
-        primeBuyerLabel.setText("Prime Buyer");
-        googleSheetLabel.setText("Google Sheet");
-        selectRangeLabel.setText("Select Range");
-        lostLimitLabel.setText("Lost Limit");
-        priceLimitLabel.setText("Price Limit");
-        noInvoiceLabel.setText("No Invoice");
-        codeFinderLabel.setText("Finder Code");
-        maxEddLabel.setText("EDD Limit");
-
-
-        JLabel skipCheckLabel = new JLabel();
-        skipCheckLabel.setText("Skip Check");
+        JLabel skipCheckLabel = new JLabel("Skip Check");
         skipCheckLabel.setForeground(Color.RED);
 
 
@@ -714,14 +727,11 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
             skipCheckComboBox.setFont(new Font(font.getName(), Font.BOLD, font.getSize() - 1));
         }
 
-
         progressBar = new JProgressBar();
         progressBar.setStringPainted(true);
-        progressLabel = new JLabel();
-        progressLabel.setText("Progress");
+        progressLabel = new JLabel("Progress");
 
-        progressTextLabel = new JLabel();
-        progressTextLabel.setText("progress text placeholder");
+        progressTextLabel = new JLabel("progress text placeholder");
         progressTextLabel.setForeground(Color.BLUE);
         progressTextLabel.setFont(new Font(font.getName(), Font.PLAIN, font.getSize() - 2));
 
@@ -730,10 +740,8 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         progressBar.setVisible(false);
 
 
-        JLabel todayBudgetLabel = new JLabel();
-        todayBudgetLabel.setText("Today's Budget");
-        JLabel todayUsedLabel = new JLabel();
-        todayUsedLabel.setText("Used");
+        JLabel todayBudgetLabel = new JLabel("Today's Budget");
+        JLabel todayUsedLabel = new JLabel("Used");
         todayBudgetTextField = new JTextField();
         todayUsedTextField = new JTextField();
         todayUsedTextField.setEnabled(false);
@@ -750,20 +758,34 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                                         .addGroup(layout.createSequentialGroup()
                                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                                        .addComponent(marketplaceLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(sellerLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(buyerLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(primeBuyerLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(googleSheetLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(selectRangeLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(lostLimitLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(priceLimitLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(maxEddLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(noInvoiceLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(codeFinderLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(skipCheckLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(todayBudgetLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(progressLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(marketplaceLabel,
+                                                                labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(sellerLabel,
+                                                                labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(buyerLabel,
+                                                                labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(primeBuyerLabel,
+                                                                labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(googleSheetLabel,
+                                                                labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(selectRangeLabel,
+                                                                labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(lostLimitLabel,
+                                                                labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(priceLimitLabel,
+                                                                labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(maxEddLabel,
+                                                                labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(noInvoiceLabel,
+                                                                labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(codeFinderLabel,
+                                                                labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(skipCheckLabel,
+                                                                labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(todayBudgetLabel,
+                                                                labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(progressLabel,
+                                                                labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 
                                                 )
                                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
@@ -778,10 +800,12 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
 
                                                         )
                                                         .addGroup(layout.createSequentialGroup()
-                                                                .addComponent(selectRangeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addComponent(selectRangeButton,
+                                                                        GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                                                 .addComponent(selectedRangeLabel)
-                                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                        )
                                                         .addComponent(lostLimitComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(priceLimitComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(maxDaysOverEddComboBox, labelMinWidth, fieldWidth, fieldWidth)
@@ -799,7 +823,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
 
                                                 )
                                         )
-                                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                                        .addGroup(layout.createParallelGroup(Alignment.LEADING)
 
                                                 .addGroup(layout.createSequentialGroup()
                                                         .addContainerGap()
@@ -834,55 +858,55 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
                                 .addGap(12, 12, 12)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(marketplaceLabel)
-                                        .addComponent(marketplaceComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(marketplaceComboBox))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(sellerLabel)
-                                        .addComponent(sellerComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(sellerComboBox))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
 
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(buyerLabel)
-                                        .addComponent(buyerComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(buyerComboBox))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(primeBuyerLabel)
-                                        .addComponent(primeBuyerComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(primeBuyerComboBox))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(googleSheetLabel)
-                                        .addComponent(googleSheetTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(googleSheetTextField)
                                         .addComponent(loadSheetTabButton)
                                 )
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(selectRangeLabel)
                                         .addComponent(selectRangeButton)
-                                        .addComponent(selectedRangeLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(selectedRangeLabel))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(lostLimitLabel)
-                                        .addComponent(lostLimitComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(lostLimitComboBox))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(priceLimitLabel)
-                                        .addComponent(priceLimitComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(priceLimitComboBox))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(maxEddLabel)
-                                        .addComponent(maxDaysOverEddComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(maxDaysOverEddComboBox))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(noInvoiceLabel)
-                                        .addComponent(noInvoiceTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(noInvoiceTextField))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(codeFinderLabel)
-                                        .addComponent(finderCodeTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(finderCodeTextField))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(skipCheckLabel)
-                                        .addComponent(skipCheckComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(skipCheckComboBox))
 
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
@@ -891,7 +915,6 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
                                         .addComponent(todayUsedLabel)
                                         .addComponent(todayUsedTextField)
                                 )
-
                                 .addGap(10, 10, 10)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                         .addComponent(huntSupplierButton)
@@ -900,11 +923,11 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(progressLabel)
-                                        .addComponent(progressBar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(progressBar))
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(progressTextLabel))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(pauseButton)
                                         .addComponent(stopButton))
                                 .addContainerGap()
@@ -915,10 +938,6 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
 
     }
 
-
-    public int getMinWidth() {
-        return huntSupplierButton.getWidth() + markStatusButton.getWidth() + submitButton.getWidth() + 2 * 15;
-    }
 
     public static void main(String[] args) {
         UITools.setTheme();

@@ -33,7 +33,7 @@ public class ReadOrderDetails extends Step {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReadOrderDetails.class);
     @Inject
     SheetService sheetService;
-    @Inject
+    @Inject private
     DailyBudgetHelper dailyBudgetHelper;
 
     @Override
@@ -73,7 +73,7 @@ public class ReadOrderDetails extends Step {
 
     }
 
-    @Inject
+    @Inject private
     StepHelper stepHelper;
 
     @Repeat(expectedExceptions = BusinessException.class)

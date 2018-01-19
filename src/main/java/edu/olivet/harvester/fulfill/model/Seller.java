@@ -36,7 +36,7 @@ public class Seller {
         return StringUtils.isNotBlank(this.uuid) ? String.format("%s(ID:%s)", sellerName, this.uuid) : sellerName;
     }
 
-    /* Seller所属亚马逊国家，比如是英国Seller还是美国Seller */
+    /*Seller所属亚马逊国家，比如是英国Seller还是美国Seller */
     /**
      * Seller 有两个国家属性，第一个是seller所在offerlisting国家，第二个是seller描述里面的实际发货国家。
      * 这个country是offerlisting所在国家。
@@ -188,7 +188,7 @@ public class Seller {
         if (shipFromCountryString.contains("United States")) {
             this.shipFromCountry = Country.US;
         } else if (shipFromCountryString.contains("United Kingdom") || shipFromCountryString.contains("Vereinigtes Königreich")) {
-            // Vereinigtes Königreich 是德语
+            //Vereinigtes Königreich 是德语
             this.shipFromCountry = Country.UK;
         } else if (shipFromCountryString.contains("France")) {
             this.shipFromCountry = Country.FR;
@@ -209,7 +209,7 @@ public class Seller {
         } else if (shipFromCountryString.length() > 1) {
             this.shipFromCountry = null;
         } else {
-            // 如果没有任何发货国家描述，那应该是发货国家就是seller所在amazon
+            //如果没有任何发货国家描述，那应该是发货国家就是seller所在amazon
             this.shipFromCountry = this.offerListingCountry;
         }
     }
@@ -220,7 +220,7 @@ public class Seller {
             return;
         }
 
-        // 德语， Currently not on stock
+        //德语Currently not on stock
         if (deliveryStr.contains("Derzeit nicht auf Lager.")) {
             this.instock = false;
         }
@@ -236,7 +236,7 @@ public class Seller {
         this.conditionDetail = StringUtils.defaultString(this.conditionDetail);
     }
 
-    //	@Override
+    //@Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;

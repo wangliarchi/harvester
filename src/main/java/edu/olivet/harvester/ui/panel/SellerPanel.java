@@ -61,7 +61,7 @@ public class SellerPanel extends JPanel {
     }
 
     @Repeat(expectedExceptions = RobotFoundException.class)
-    public void loginSellerCentral(final Country country) {
+    private void loginSellerCentral(final Country country) {
 
         //load seller center page
         JXBrowserHelper.loadPage(browser, country.ascBaseUrl());
@@ -217,6 +217,11 @@ public class SellerPanel extends JPanel {
         //
     }
 
+
+    public void toHomePage() {
+        //load seller center page
+        JXBrowserHelper.loadPage(browser, country.ascBaseUrl());
+    }
 
     public static void main(String[] args) {
         JFrame frame = new JFrame();

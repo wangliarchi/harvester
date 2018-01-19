@@ -15,10 +15,10 @@ import java.io.File;
 
 public class CantShipToAddressPageTest extends BaseTest {
 
-    CantShipToAddressPage cantShipToAddressPage;
-    BuyerPanel buyerPanel;
+    private CantShipToAddressPage cantShipToAddressPage;
+    private BuyerPanel buyerPanel;
 
-    public void prepareBrowser() {
+    private void prepareBrowser() {
 
         Account buyer = new Account("jxiang@olivetuniversity.edu/q1w2e3AA", Account.AccountType.Buyer);
         buyerPanel = new BuyerPanel(0, Country.US, buyer, 1);

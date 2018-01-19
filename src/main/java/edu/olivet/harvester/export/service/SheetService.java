@@ -34,10 +34,10 @@ public class SheetService extends SheetAPI {
 
     @Inject
     private OrderItemTypeHelper orderItemTypeHelper;
-    @Inject
+    @Inject private
     Now now;
 
-    @Inject AppScript appScript;
+    @Inject private AppScript appScript;
 
 
     public void fillOrders(Country country, List<Order> orders, MessagePanel messagePanel) {
@@ -115,10 +115,11 @@ public class SheetService extends SheetAPI {
             unlockSheet(spreadsheetId, protectedId);
         }
 
-        List<Order> missedOrders = checkMissedOrders(orders, lastRow, spreadsheetId, sheetProperties);
-        if (CollectionUtils.isNotEmpty(missedOrders)) {
-            fillOrders(spreadsheetId, missedOrders, repeatTime + 1);
-        }
+        //trouble maker...
+        //List<Order> missedOrders = checkMissedOrders(orders, lastRow, spreadsheetId, sheetProperties);
+        //if (CollectionUtils.isNotEmpty(missedOrders)) {
+        //    fillOrders(spreadsheetId, missedOrders, repeatTime + 1);
+        //}
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -239,7 +240,7 @@ public class SheetService extends SheetAPI {
     }
 
     //todo check if template sheet has correct format
-    public SheetProperties createNewSheetIfNotExisted(String spreadsheetId, String sheetName, String templateSheetName) {
+    private SheetProperties createNewSheetIfNotExisted(String spreadsheetId, String sheetName, String templateSheetName) {
         long start = System.currentTimeMillis();
 
         //check if existed

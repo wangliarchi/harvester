@@ -123,7 +123,7 @@ public class OfferListingPage extends FulfillmentPage {
     }
 
     @Repeat(expectedExceptions = BusinessException.class)
-    public void _addToCart(Browser browser, int sellerIndex) {
+    private void _addToCart(Browser browser, int sellerIndex) {
         List<DOMElement> rows = JXBrowserHelper.selectElementsByCssSelector(browser, "div.a-row.olpOffer");
         DOMElement sellerRow = rows.get(sellerIndex);
 

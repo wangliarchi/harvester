@@ -31,7 +31,7 @@ public class OrderManAddressValidator implements AddressValidator {
     /**
      * 对数字类型文本做容错处理时，需补上缺少的字符内容:{@value}
      */
-    public static final char DIGIT_ZERO = '0';
+    private static final char DIGIT_ZERO = '0';
     /**
      * 一屏式模式下，地址信息的连接字符
      */
@@ -95,7 +95,7 @@ public class OrderManAddressValidator implements AddressValidator {
     }
 
 
-    public boolean _verify(Address old, Address entered) {
+    private boolean _verify(Address old, Address entered) {
         List<String> results = new ArrayList<>();
         if (!old.getRecipient().replace(StringUtils.SPACE, StringUtils.EMPTY)
                 .equalsIgnoreCase(entered.getRecipient().replace(StringUtils.SPACE, StringUtils.EMPTY))) {
@@ -143,7 +143,7 @@ public class OrderManAddressValidator implements AddressValidator {
      * @param addr 输入的地址信息
      * @return 转换后的地址信息
      */
-    public String applyRule2Addr(String addr) {
+    private String applyRule2Addr(String addr) {
         if (StringUtils.isBlank(addr)) {
             return StringUtils.EMPTY;
         }
@@ -174,7 +174,7 @@ public class OrderManAddressValidator implements AddressValidator {
      * @param address02 Order本身的ship_address1+ship_address2
      * @return 校验结果
      */
-    public String compareAddress(String address01, String address02) {
+    private String compareAddress(String address01, String address02) {
         if (this.sameInWords(address01, address02)) {
             return null;
         }
@@ -199,7 +199,7 @@ public class OrderManAddressValidator implements AddressValidator {
     /**
      * 亚马逊有时会将地址中单词顺序按照其规则重排，为此需先比较两个长句中所有单词是否相同: 先去掉所有空白字符看是否相同，然后拆分为集合，差集为空
      */
-    public boolean sameInWords(String sentence1, String sentence2) {
+    private boolean sameInWords(String sentence1, String sentence2) {
         if (sentence1.replaceAll(Regex.BLANK.val(), StringUtils.EMPTY).trim()
                 .equalsIgnoreCase(sentence2.replaceAll(Regex.BLANK.val(), StringUtils.EMPTY).trim())) {
             return true;
@@ -220,7 +220,7 @@ public class OrderManAddressValidator implements AddressValidator {
      * @param country2 Order本身的ship_country列
      * @return 校验结果
      */
-    public String compareCountry(String country1, String country2) {
+    private String compareCountry(String country1, String country2) {
         if (!country1.equalsIgnoreCase(country2)) {
             String code1 = CountryStateUtils.getInstance().getCountryCode(country1);
             String code2 = CountryStateUtils.getInstance().getCountryCode(country2);
@@ -239,7 +239,7 @@ public class OrderManAddressValidator implements AddressValidator {
      * @param zip2 Order本身ship_zipcode列，可能为空白，但不能为null
      * @return 校验结果
      */
-    public String compareZipCode(String zip1, String zip2) {
+    private String compareZipCode(String zip1, String zip2) {
         if (!zip1.replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY)
                 .equals(zip2.replaceAll(Regex.PUNCTUATION.val(), StringUtils.EMPTY)) &&
                 !zip1.contains(zip2) && !zip2.contains(zip1)) {
@@ -258,7 +258,7 @@ public class OrderManAddressValidator implements AddressValidator {
     /**
      * 比较两个城市名称是否一致: 去掉标点符号、转换为小写，结果完全一致或相似度大于可接受值，予以通过
      */
-    public String compareCity(String city1, String city2) {
+    private String compareCity(String city1, String city2) {
         if (city1.equalsIgnoreCase(city2)) {
             return null;
         }
@@ -274,7 +274,7 @@ public class OrderManAddressValidator implements AddressValidator {
         return null;
     }
 
-    public List<String> compareStateZip(Address old, Address entered) {
+    private List<String> compareStateZip(Address old, Address entered) {
         List<String> results = new ArrayList<>();
 
         String orStateZip = (old.getFullStateName() + old.getZip()).replace(StringUtils.SPACE, StringUtils.EMPTY).toLowerCase();
@@ -295,7 +295,7 @@ public class OrderManAddressValidator implements AddressValidator {
         return results;
     }
 
-    public String compareState(String state1, String state2, boolean inUS) {
+    private String compareState(String state1, String state2, boolean inUS) {
         if (inUS) {
             try {
                 State stateObj1 = State.parse(state1);
@@ -364,7 +364,7 @@ public class OrderManAddressValidator implements AddressValidator {
     /**
      * Get the first word of a sentence
      */
-    public static String getFirstWord(String sentence) {
+    private static String getFirstWord(String sentence) {
         if (StringUtils.isBlank(sentence)) {
             return StringUtils.EMPTY;
         }
@@ -390,7 +390,7 @@ public class OrderManAddressValidator implements AddressValidator {
      * <strong>NOT</strong> for common usage!
      * </pre>
      */
-    public double calcSimilarity(String addr1, String addr2) {
+    private double calcSimilarity(String addr1, String addr2) {
         String[] arr1 = StringUtils.splitPreserveAllTokens(
                 addr1.replaceAll(Regex.NONE_DIGITS_MINUS.val(), StringUtils.EMPTY).trim(), Constants.HYPHEN);
         String[] arr2 = StringUtils.splitPreserveAllTokens(

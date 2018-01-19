@@ -9,6 +9,7 @@ import edu.olivet.harvester.fulfill.service.addressvalidator.AddressValidator;
 import edu.olivet.harvester.fulfill.service.addressvalidator.GoogleAddressValidator;
 import edu.olivet.harvester.fulfill.service.addressvalidator.OrderManAddressValidator;
 import edu.olivet.harvester.fulfill.service.addressvalidator.USPSAddressValidator;
+import edu.olivet.harvester.utils.Settings;
 import org.jsoup.Jsoup;
 
 import java.io.IOException;
@@ -17,9 +18,9 @@ import java.io.IOException;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/25/2017 8:54 AM
  */
 public class AddressValidatorService implements AddressValidator {
-    @Inject GoogleAddressValidator googleAddressValidator;
-    @Inject USPSAddressValidator uspsAddressValidator;
-    @Inject OrderManAddressValidator orderManAddressValidator;
+    @Inject private GoogleAddressValidator googleAddressValidator;
+    @Inject private USPSAddressValidator uspsAddressValidator;
+    @Inject private OrderManAddressValidator orderManAddressValidator;
 
     private static final String FAILED_LOG_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbytuV7WRhq5aWNf0vQ4PIf1iCE4rkdgchlC23GvojlDxJVLZNk/exec";
 
@@ -40,7 +41,8 @@ public class AddressValidatorService implements AddressValidator {
 
     @Repeat
     public static void logFailed(String original, String entered, String uspsReturned) {
-        String sid = RuntimeSettings.load().getSid() + RuntimeSettings.load().getMarketplaceName();
+        //todo remove runtime settings
+        String sid = Settings.load().getSid() + RuntimeSettings.load().getMarketplaceName();
         String url = FAILED_LOG_APP_SCRIPT_URL + "?s=" + Strings.encode(sid) + "&o=" + Strings.encode(original) +
                 "&e=" + entered + "&u=" + Strings.encode(uspsReturned);
         try {

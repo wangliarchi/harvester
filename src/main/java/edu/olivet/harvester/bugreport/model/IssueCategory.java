@@ -16,11 +16,11 @@ public enum IssueCategory {
         this.desc = desc;
     }
 
-    public String desc() {
+    private String desc() {
         return this.desc;
     }
 
-    public String label() {
+    private String label() {
         return this.desc();
     }
 

@@ -21,7 +21,7 @@ public class ProcessToCheckout extends Step {
 
     }
 
-    @Inject Checkout checkout;
+    @Inject private Checkout checkout;
 
     public Step createDynamicInstance(FlowState state) {
         return checkout;

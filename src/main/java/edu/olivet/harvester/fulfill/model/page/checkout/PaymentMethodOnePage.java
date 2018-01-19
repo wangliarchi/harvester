@@ -48,11 +48,17 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
     public void click(Order order) {
         //continue;
         //JXBrowserHelper.insertChecker(browser);
-        JXBrowserHelper.selectElementByCssSelector(browser, CONTINUE_BTN_SELECTOR).click();
+        DOMElement continueBtn = JXBrowserHelper.selectElementByCssSelector(browser, CONTINUE_BTN_SELECTOR);
+        if (continueBtn != null) {
+            continueBtn.click();
+            JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
+            //JXBrowserHelper.waitUntilNewPageLoaded(browser);
+            JXBrowserHelper.waitUntilNotFound(browser, CONTINUE_BTN_SELECTOR);
+        } else {
+            LOGGER.error("Continue Btn not found on PaymentMethodOnePage");
+        }
 
-        JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
-        //JXBrowserHelper.waitUntilNewPageLoaded(browser);
-        JXBrowserHelper.waitUntilNotFound(browser, CONTINUE_BTN_SELECTOR);
+
     }
 
 

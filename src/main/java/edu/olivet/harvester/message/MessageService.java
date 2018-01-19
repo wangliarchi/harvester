@@ -5,7 +5,7 @@ import edu.olivet.foundations.google.EmailContentType;
 
 import java.io.File;
 
-public interface MessageService {
+interface MessageService {
 
     void sendMessage(String subject, String content, Destination destination);
 

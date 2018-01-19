@@ -52,11 +52,7 @@ public class Predicates {
 
     public static OrderNoPredicate AMAZON_ORDER_NO = new OrderNoPredicate();
 
-    /**
-     * Predicate to filter invalid order number according to Amazon Order Number Pattern
-     *
-     * @author <a href="mailto:nathanael4ever@gmail.com">Nathanael Yang</a> Mar 18, 2015 2:10:30 PM
-     */
+
     public static class OrderNoPredicate implements Predicate {
         @Override
         public boolean evaluate(Object object) {
@@ -70,11 +66,6 @@ public class Predicates {
         }
     }
 
-    /**
-     * Predicate to filter blank or empty string
-     *
-     * @author <a href="mailto:nathanael4ever@gmail.com">Nathanael Yang</a> Mar 18, 2015 2:10:30 PM
-     */
     public static class NotBlankPredicate implements Predicate {
         @Override
         public boolean evaluate(Object object) {
@@ -84,11 +75,7 @@ public class Predicates {
 
     public static NotBlankPredicate NOT_BLANK = new NotBlankPredicate();
 
-    /**
-     * 按照订单状态类型进行过滤
-     *
-     * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Jan 6, 2015 9:11:52 AM
-     */
+
     public static class CategoryPredicate implements Predicate {
         public CategoryPredicate(OrderEnums.Status status) {
             this.status = status;
@@ -103,11 +90,7 @@ public class Predicates {
         }
     }
 
-    /**
-     * 按照多行行号进行过滤
-     *
-     * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Jan 6, 2015 9:12:04 AM
-     */
+
     public static class MultiRowPredicate implements Predicate {
         private Map<Integer, Boolean> rowMap = new HashMap<>();
 
@@ -125,11 +108,7 @@ public class Predicates {
         }
     }
 
-    /**
-     * 按照行号范围进行过滤
-     *
-     * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Jan 6, 2015 9:12:17 AM
-     */
+
     public static class ScopePredicate implements Predicate {
         private final int startRowNo;
         private final int endRowNo;
@@ -146,11 +125,7 @@ public class Predicates {
         }
     }
 
-    /**
-     * 按照单行行号进行过滤
-     *
-     * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Jan 6, 2015 9:12:04 AM
-     */
+
     public static class SingleRowPredicate implements Predicate {
         public SingleRowPredicate(int rowNo) {
             this.rowNo = rowNo;
@@ -165,14 +140,8 @@ public class Predicates {
         }
     }
 
-
-    /**
-     * 按满足多单客服例信发送前提条件进行筛选过滤
-     *
-     * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Dec 15, 2014 2:46:05 PM
-     */
     public static class MultiOrderLetterPredicate implements Predicate {
-        //	private static final Logger logger = LoggerFactory.getLogger(MultiOrderLetterPredicate.class);
+        //private static final Logger logger = LoggerFactory.getLogger(MultiOrderLetterPredicate.class);
 
         public MultiOrderLetterPredicate(List<Order> orders) {
             super();
@@ -203,7 +172,6 @@ public class Predicates {
         public Map<String, OrderIdStatistic> getCardinalityMap() {
             Map<String, OrderIdStatistic> map = new HashMap<>();
             Map<String, Integer> countMap = new HashMap<>();
-            //noinspection MismatchedQueryAndUpdateOfCollection
             Map<String, Integer> finishedMap = new HashMap<>();
 
             for (Order order : orders) {
@@ -217,7 +185,6 @@ public class Predicates {
                 String orderId = entry.getKey();
                 int total = entry.getValue();
                 int finish = finishedMap.get(orderId) == null ? 1 : finishedMap.get(orderId);
-                //不是多单，或者多单没有全部完成的情况不处理
                 if (total < 2 || total > finish) {
                     continue;
                 }

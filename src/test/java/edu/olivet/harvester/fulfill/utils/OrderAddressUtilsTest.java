@@ -27,7 +27,7 @@ public class OrderAddressUtilsTest extends BaseTest {
 
         order.remark = "US FWD";
 
-        Address address = Address.USFwdAddress();
+        Address address = FwdAddressUtils.getUSFwdAddress();
         address.setName("zhuanyun/700/1397838");
         assertEquals(OrderAddressUtils.orderShippingAddress(order), address);
 

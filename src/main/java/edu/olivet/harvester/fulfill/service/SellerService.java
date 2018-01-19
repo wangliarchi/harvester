@@ -30,7 +30,7 @@ import java.util.Map;
 public class SellerService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SellerService.class);
 
-    public static final I18N I18N_AMAZON = new I18N("i18n/Amazon");
+    private static final I18N I18N_AMAZON = new I18N("i18n/Amazon");
     private Map<String, Boolean> wareHouseIdCache = new HashMap<>();
 
     @Inject
@@ -104,8 +104,8 @@ public class SellerService {
         if (sellerLink != null) {
             String sellerId = PageUtils.getSellerUUID(sellerLink.getAttribute(PageUtils.HREF));
             seller.setUuid(sellerId);
-            if (StringUtils.isBlank(seller.getName()) && StringUtils.isNotBlank(sellerId)
-                    && Boolean.TRUE.equals(wareHouseIdCache.get(sellerId))) {
+            if (StringUtils.isBlank(seller.getName()) && StringUtils.isNotBlank(sellerId) &&
+                    Boolean.TRUE.equals(wareHouseIdCache.get(sellerId))) {
                 seller.setType(SellerEnums.SellerType.APWareHouse);
             }
         } else if (StringUtils.isBlank(seller.getName())) {

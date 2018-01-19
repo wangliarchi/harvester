@@ -3,13 +3,12 @@ package edu.olivet.harvester.ui.events;
 import com.google.inject.Inject;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
+import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.OrderSubmitter;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.service.OrderDispatcher;
 import edu.olivet.harvester.fulfill.service.OrderSubmissionTaskService;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
-import edu.olivet.harvester.fulfill.service.ProgressUpdater;
-import edu.olivet.harvester.ui.panel.ProgressBarPanel;
 import edu.olivet.harvester.ui.panel.TasksAndProgressPanel;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -22,8 +21,8 @@ import java.util.List;
  */
 public class StartOrderSubmissionTasksEvent implements HarvesterUIEvent {
     private static final Logger LOGGER = LoggerFactory.getLogger(StartOrderSubmissionTasksEvent.class);
-    @Inject OrderSubmissionTaskService orderSubmissionTaskService;
-
+    @Inject private OrderSubmissionTaskService orderSubmissionTaskService;
+    @Inject private OrderDispatcher orderDispatcher;
     @Override
     public void execute() {
         TasksAndProgressPanel tasksAndProgressPanel = TasksAndProgressPanel.getInstance();
@@ -33,24 +32,22 @@ public class StartOrderSubmissionTasksEvent implements HarvesterUIEvent {
                 return;
             }
 
-            tasksAndProgressPanel.disableStartButton();
             PSEventListener.reset(tasksAndProgressPanel);
             PSEventListener.start();
-            ProgressUpdater.setProgressBarComponent(ProgressBarPanel.getInstance().progressBar,
-                ProgressBarPanel.getInstance().progressTextLabel);
-
+            //stay listening until it's stopped by user
             while (!PSEventListener.stopped()) {
                 try {
                     List<OrderSubmissionTask> scheduledTasks = orderSubmissionTaskService.todayScheduledTasks();
-                    if (CollectionUtils.isEmpty(scheduledTasks) && !OrderDispatcher.getInstance().hasJobRunning()) {
-                        //WaitTime.Short.execute();
-                        break;
-                    }
 
                     if (CollectionUtils.isNotEmpty(scheduledTasks)) {
                         OrderSubmissionTask task = scheduledTasks.get(0);
                         ApplicationContext.getBean(OrderSubmitter.class).execute(task);
+                    } else if (!orderDispatcher.hasJobRunning()) {
+                        //WaitTime.Short.execute();
+                        break;
                     }
+
+                    WaitTime.Normal.execute();
                 } catch (Exception e) {
                     LOGGER.error("", e);
                     UITools.error(e.getMessage());
@@ -58,10 +55,12 @@ public class StartOrderSubmissionTasksEvent implements HarvesterUIEvent {
                 }
             }
 
-            tasksAndProgressPanel.enableStartButton();
-            if (!PSEventListener.stopped()) {
+            if (PSEventListener.stopped()) {
+                orderSubmissionTaskService.cleanUp();
+            } else {
                 PSEventListener.end();
             }
+
         }).start();
     }
 

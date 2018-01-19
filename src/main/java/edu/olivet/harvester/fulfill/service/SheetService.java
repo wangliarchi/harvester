@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/8/17 2:03 PM
@@ -27,10 +28,10 @@ import java.util.*;
 public class SheetService extends SheetAPI {
     private static final Logger LOGGER = LoggerFactory.getLogger(SheetService.class);
 
-    @Inject
+    @Inject private
     AppScript appScript;
 
-    @Repeat
+    @Repeat(times = 5, expectedExceptions = BusinessException.class)
     public void fillFulfillmentOrderInfo(String spreadsheetId, Order order) {
         //need to relocate order row on google sheet, as it may be arranged during order fulfillment process.
         int row = locateOrder(order);
@@ -71,13 +72,16 @@ public class SheetService extends SheetAPI {
             throw new BusinessException(e);
         }
 
-        updateFulfilledOrderBackgroundColor(spreadsheetId, order, row);
-
+        try {
+            updateFulfilledOrderBackgroundColor(spreadsheetId, order, row);
+        } catch (Exception e) {
+            LOGGER.error("Fail to update row background {} {} {}", order.order_id, order.sheetName, row);
+        }
 
     }
 
 
-    public void updateFulfilledOrderBackgroundColor(String spreadsheetId, Order order, int row) {
+    private void updateFulfilledOrderBackgroundColor(String spreadsheetId, Order order, int row) {
         if (Remark.quantityDiffered(order.remark)) {
             appScript.markColor(spreadsheetId, order.sheetName, row, OrderColor.InvalidByCode);
         } else {
@@ -207,6 +211,7 @@ public class SheetService extends SheetAPI {
         });
 
         List<Order> reloadedOrders = new ArrayList<>();
+
         for (Order order : orders) {
             if (!orderMap.containsKey(order.order_id)) {
                 LOGGER.info("Cant find order " + order.order_id + "on sheet" + order.sheetName);
@@ -219,9 +224,11 @@ public class SheetService extends SheetAPI {
                     if (StringUtils.equalsAnyIgnoreCase(o.remark, order.remark, order.originalRemark)) {
                         o.setContext(order.getContext());
                         reloadedOrders.add(o);
+                        break;
                     } else if (o.row == order.row || StringUtils.isBlank(order.remark)) {
                         o.setContext(order.getContext());
                         reloadedOrders.add(o);
+                        break;
                     }
                 }
             }
@@ -229,47 +236,49 @@ public class SheetService extends SheetAPI {
 
         }
 
-        return reloadedOrders;
+        return reloadedOrders.stream().distinct().collect(Collectors.toList());
 
     }
 
     public Order reloadOrder(Order order) {
+        Order reloadedOrder = _reloadOrder(order);
+        reloadedOrder.setContext(order.getContext());
+        reloadedOrder.setTask(order.getTask());
+        return reloadedOrder;
+    }
+
+    @Repeat(expectedExceptions = BusinessException.class)
+    private Order _reloadOrder(Order order) {
         //id, sku, seller, price, remark
         List<Order> orders = appScript.readOrders(order.spreadsheetId, order.sheetName);
-
-        orders.removeIf(it -> !it.equalsLite(order));
-        if (CollectionUtils.isEmpty(orders)) {
+        List<Order> validOrders = orders.stream().filter(it -> it.equalsLite(order)).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(validOrders)) {
+            LOGGER.error("Cant reload order {} from {} - all orders {} - valid {}", order, order.sheetName, orders, validOrders);
             throw new BusinessException("Cant find order " + order + "on order sheet");
         }
 
-        if (orders.size() == 1) {
-            Order o = orders.get(0);
-            o.setContext(order.getContext());
-            return o;
+        if (validOrders.size() == 1) {
+            return validOrders.get(0);
         }
 
 
-        for (Order o : orders) {
+        for (Order o : validOrders) {
             if (o.equalsLite(order)) {
                 if (StringUtils.length(order.last_code) == 8 && StringUtils.equalsIgnoreCase(order.last_code, o.last_code)) {
-                    o.setContext(order.getContext());
                     return o;
                 }
                 if (o.row == order.row && StringUtils.equalsAnyIgnoreCase(o.remark, order.remark, order.originalRemark)) {
-                    o.setContext(order.getContext());
                     return o;
                 }
 
             }
         }
 
-        for (Order o : orders) {
+        for (Order o : validOrders) {
             if (o.equalsLite(order)) {
                 if (StringUtils.equalsAnyIgnoreCase(o.remark, order.remark, order.originalRemark)) {
-                    o.setContext(order.getContext());
                     return o;
                 } else if (o.row == order.row || StringUtils.isBlank(order.remark)) {
-                    o.setContext(order.getContext());
                     return o;
                 }
             }

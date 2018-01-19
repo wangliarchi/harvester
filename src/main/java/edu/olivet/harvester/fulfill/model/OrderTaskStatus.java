@@ -5,9 +5,11 @@ package edu.olivet.harvester.fulfill.model;
  */
 public enum OrderTaskStatus {
     Scheduled,
+    Queued,
     Processing,
     Completed,
     Error,
     Stopped,
-    Deleted
+    Deleted,
+    Retried
 }

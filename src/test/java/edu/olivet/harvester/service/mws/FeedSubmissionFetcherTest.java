@@ -21,7 +21,7 @@ import java.util.List;
 @Guice(modules = {MockDateModule.class, MockDBModule.class, GmailModule.class})
 public class FeedSubmissionFetcherTest {
 
-    @Inject
+    @Inject private
     FeedSubmissionFetcher feedSubmissionFetcher;
 
     @Test

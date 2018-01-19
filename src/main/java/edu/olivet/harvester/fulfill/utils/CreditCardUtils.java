@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public class CreditCardUtils {
     public static final String CC_CONFIG_FILE_PATH = Directory.Customize.path() + "/creditcard-config.json";
-    public static final String TEST_CC_CONFIG_FILE_PATH = "src/test/resources/conf/creditcard-config.json";
+    private static final String TEST_CC_CONFIG_FILE_PATH = "src/test/resources/conf/creditcard-config.json";
 
 
     public static CreditCard getCreditCard(Account buyer) {
@@ -36,14 +36,15 @@ public class CreditCardUtils {
 
 
         if (file.exists() && file.isFile()) {
-            JSON.parseArray(Tools.readFileToString(file), CreditCard.class).forEach(creditCard -> creditCards.put(creditCard.getAccountEmail().toLowerCase(), creditCard));
+            JSON.parseArray(Tools.readFileToString(file), CreditCard.class)
+                    .forEach(creditCard -> creditCards.put(creditCard.getAccountEmail().toLowerCase(), creditCard));
         }
 
         return creditCards;
 
     }
 
-    public static String getConfigFilePath() {
+    private static String getConfigFilePath() {
         if (Harvester.debugFlag) {
             return TEST_CC_CONFIG_FILE_PATH;
         } else {

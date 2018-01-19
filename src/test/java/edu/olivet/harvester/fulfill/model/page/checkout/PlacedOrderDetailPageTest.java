@@ -23,10 +23,10 @@ import static org.testng.Assert.assertEquals;
 public class PlacedOrderDetailPageTest extends BaseTest {
 
 
-    PlacedOrderDetailPage placedOrderDetailPage;
+    private PlacedOrderDetailPage placedOrderDetailPage;
 
 
-    public void prepareBrowser() {
+    private void prepareBrowser() {
         String orderDetailPage = "OrderDetails.html";
         Account buyer = new Account("jxiang@olivetuniversity.edu/q1w2e3AA", Account.AccountType.Buyer);
         BuyerPanel buyerPanel = new BuyerPanel(0, Country.US, buyer, 1);

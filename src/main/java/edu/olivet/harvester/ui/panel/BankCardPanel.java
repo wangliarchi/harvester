@@ -53,11 +53,11 @@ public class BankCardPanel extends JPanel {
                                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(buyerAccountLabel)
-                                        .addComponent(buyerAccountField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(buyerAccountField)
                                         .addComponent(bankCardNoLabel)
-                                        .addComponent(bankCardNoField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(bankCardNoField)
                                         .addComponent(cvvLabel)
-                                        .addComponent(cvvField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(cvvField)
                                 )
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)));
         UITools.addListener2Textfields(this);

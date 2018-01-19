@@ -46,7 +46,7 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
     }
 
 
-    public void initEvents() {
+    private void initEvents() {
         startButton.addActionListener(this::startButtonActionPerformed);
 
         addTaskButton.addActionListener(this::addTaskButtonActionPerformed);
@@ -54,10 +54,8 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
         pauseButton.addActionListener(evt -> {
             if (PSEventListener.paused()) {
                 PSEventListener.resume();
-                resetPauseBtn();
             } else {
                 PSEventListener.pause();
-                paused();
             }
         });
 
@@ -114,12 +112,6 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
     private JButton addTaskButton;
     private JButton startButton;
     private JTable taskTable;
-
-    private JScrollPane jScrollPane1Buyer;
-    private JTable buyerTaskTable;
-
-    private JTabbedPane taskTabbedPanel;
-
     private JButton pauseButton;
     private JButton stopButton;
     private ProgressBarPanel runtimeSettingsPanel = ProgressBarPanel.getInstance();
@@ -132,30 +124,19 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
 
         setBorder(BorderFactory.createTitledBorder("Tasks & Progress"));
 
-        JScrollPane jScrollPane1 = new JScrollPane();
+        JScrollPane tableScrollPane1 = new JScrollPane();
         taskTable = new JTable();
         addTaskButton = new JButton();
         startButton = new JButton();
         pauseButton = new JButton();
         stopButton = new JButton();
 
-        jScrollPane1Buyer = new JScrollPane();
-        buyerTaskTable = new JTable();
-
-
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.LEADING);
         taskTable.setFont(new Font(addTaskButton.getFont().getName(), Font.PLAIN, 11));
         taskTable.setColumnSelectionAllowed(false);
         taskTable.setRowSelectionAllowed(true);
-        jScrollPane1.setViewportView(taskTable);
-
-
-        buyerTaskTable.setFont(new Font(addTaskButton.getFont().getName(), Font.PLAIN, 11));
-        buyerTaskTable.setColumnSelectionAllowed(false);
-        buyerTaskTable.setRowSelectionAllowed(true);
-
-        jScrollPane1Buyer.setViewportView(buyerTaskTable);
+        tableScrollPane1.setViewportView(taskTable);
 
 
         addTaskButton.setText("Add Task");
@@ -172,80 +153,108 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
         stopButton.setVisible(false);
         stopButton.setEnabled(false);
 
+        runtimeSettingsPanel.setVisible(false);
         loadTasksToTable();
 
         GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                .addComponent(jScrollPane1, 200, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
-                .addComponent(runtimeSettingsPanel)
-                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(pauseButton)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(stopButton)
-                        .addComponent(startButton)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(addTaskButton)
-                        .addContainerGap()))
+                layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                        .addComponent(tableScrollPane1, 200, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                        .addComponent(runtimeSettingsPanel)
+                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                                .addGroup(layout.createSequentialGroup()
+                                        .addContainerGap()
+                                        .addComponent(pauseButton)
+                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(stopButton)
+                                        .addComponent(startButton)
+                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(addTaskButton)
+                                        .addContainerGap()))
 
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup()
-                    .addComponent(jScrollPane1, 150, GroupLayout.PREFERRED_SIZE, 300)
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                    .addComponent(runtimeSettingsPanel)
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(pauseButton)
-                        .addComponent(stopButton)
-                        .addComponent(addTaskButton)
-                        .addComponent(startButton))
-                    .addContainerGap()
-                )
+                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(tableScrollPane1, 150, GroupLayout.PREFERRED_SIZE, 300)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(runtimeSettingsPanel)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(pauseButton)
+                                        .addComponent(stopButton)
+                                        .addComponent(addTaskButton)
+                                        .addComponent(startButton))
+                                .addContainerGap()
+                        )
 
 
         );
     }
 
 
-    public void loadTasksToTable() {
-        Action delete = new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                int modelRow = Integer.valueOf(e.getActionCommand());
-                OrderSubmissionTask task = taskList.get(modelRow);
-
-                if (task.getStatus().equalsIgnoreCase(OrderTaskStatus.Stopped.name())) {
-                    task.setStatus(OrderTaskStatus.Scheduled.name());
+    private final Action delete = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+            int modelRow = Integer.valueOf(e.getActionCommand());
+            OrderSubmissionTask task = taskList.get(modelRow);
+            OrderTaskStatus taskStatus = task.taskStatus();
+            switch (taskStatus) {
+                case Stopped:
+                    task.setTaskStatus(OrderTaskStatus.Scheduled);
+                    task.setFailed(0);
+                    task.setSuccess(0);
                     orderSubmissionTaskService.saveTask(task);
-                } else if (task.getStatus().equalsIgnoreCase(OrderTaskStatus.Completed.name())) {
+                    break;
+                case Completed:
+                    task.setTaskStatus(OrderTaskStatus.Retried);
+                    orderSubmissionTaskService.saveTask(task);
+
                     OrderSubmissionTask newTask = task.copy();
-                    newTask.setStatus(OrderTaskStatus.Scheduled.name());
                     orderSubmissionTaskService.saveTask(newTask);
-                } else if (UITools.confirmed("Please confirm that you want to delete this task.")) {
-                    orderSubmissionTaskService.deleteTask(task);
+                    break;
+                case Scheduled:
+                    if (UITools.confirmed("Please confirm that you want to delete this task.")) {
+                        orderSubmissionTaskService.deleteTask(task);
+                    }
+                    break;
+                case Processing:
+                case Queued:
+                    task.setTaskStatus(OrderTaskStatus.Stopped);
+                    orderSubmissionTaskService.saveTask(task);
+                    break;
+                default:
+                    break;
+            }
+
+            loadTasksToTable();
+
+
+        }
+    };
+
+    public synchronized void loadTasksToTable() {
+
+        try {
+            taskList = orderSubmissionTaskService.todayTasks();
+            ListModel<OrderSubmissionTask> listModel =
+                    new ListModel<>("Order Submission Tasks", taskList, OrderSubmissionTask.COLUMNS, null, OrderSubmissionTask.WIDTHS);
+            taskTable.setModel(new DefaultTableModel(listModel.toTableData(), listModel.getColumns()));
+
+            if (listModel.getWidths() != null && listModel.getWidths().length > 0) {
+                for (int i = 0; i < listModel.getWidths().length; i++) {
+                    taskTable.getColumnModel().getColumn(i).setPreferredWidth(listModel.getWidths()[i]);
                 }
-
             }
-        };
 
-        taskList = orderSubmissionTaskService.todayTasks();
+            ButtonColumn buttonColumn = new OrderTaskButtonColumn(taskTable, delete, listModel.getColumns().length - 1);
+            buttonColumn.setMnemonic(KeyEvent.VK_D);
 
-        ListModel<OrderSubmissionTask> listModel = new ListModel<>("Order Submission Tasks", taskList, OrderSubmissionTask.COLUMNS, null, OrderSubmissionTask.WIDTHS);
-
-        taskTable.setModel(new DefaultTableModel(listModel.toTableData(), listModel.getColumns()));
-
-        if (listModel.getWidths() != null) {
-            for (int i = 0; i < listModel.getWidths().length; i++) {
-                taskTable.getColumnModel().getColumn(i).setPreferredWidth(listModel.getWidths()[i]);
-            }
+            taskTable.changeSelection(taskTable.getRowCount() - 1, 0, false, false);
+        } catch (Exception e) {
+            //
         }
 
-        ButtonColumn buttonColumn = new OrderTaskButtonColumn(taskTable, delete, 8);
-        buttonColumn.setMnemonic(KeyEvent.VK_D);
     }
 
     public static void main(String[] args) {

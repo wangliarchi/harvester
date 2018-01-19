@@ -35,7 +35,7 @@ public class EnterShippingAddress extends Step {
         WaitTime.Short.execute();
     }
 
-    @Inject
+    @Inject private
     StepHelper stepHelper;
 
     public Step createDynamicInstance(FlowState state) {

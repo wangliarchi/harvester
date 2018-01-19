@@ -90,7 +90,7 @@ public class OrderSubmissionBuyerAccountTask extends PrimaryKey implements Array
 
     @Override
     public Object[] toArray() {
-        return new Object[]{DateFormat.DATE_TIME_SHORT.format(this.dateCreated),
+        return new Object[] {DateFormat.DATE_TIME_SHORT.format(this.dateCreated),
                 marketplaceName,
                 SheetUtils.getTypeFromSpreadsheetName(spreadsheetName),
                 buyerAccount,
@@ -100,12 +100,19 @@ public class OrderSubmissionBuyerAccountTask extends PrimaryKey implements Array
     }
 
 
+    public void setTaskStatus(OrderTaskStatus taskStatus) {
+        status = taskStatus.name();
+    }
+
+    public OrderTaskStatus taskStatus() {
+        return OrderTaskStatus.valueOf(status);
+    }
+
+
     public String getSummary() {
         if (totalOrders == 0) {
             return "No valid orders found";
         }
-
-
         return "";
     }
 

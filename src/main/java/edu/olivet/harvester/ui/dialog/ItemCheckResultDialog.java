@@ -89,7 +89,8 @@ public class ItemCheckResultDialog extends javax.swing.JDialog {
             } else {
                 fail++;
             }
-            data[i++] = new Object[] {icr.getRow(), icr.getIsbn(), icr.getIsbnName(), icr.getItemName(), icr.isPreCheckPass(), icr.getPreCheckReport(), false};
+            data[i++] = new Object[] {icr.getRow(), icr.getIsbn(), icr.getIsbnName(),
+                    icr.getItemName(), icr.isPreCheckPass(), icr.getPreCheckReport(), false};
         }
         return data;
     }
@@ -148,7 +149,8 @@ public class ItemCheckResultDialog extends javax.swing.JDialog {
         });
 
         JScrollPane rulePanel = new JScrollPane();
-        rulePanel.setBorder(new TitledBorder(null, UIText.title("title.compare.rules"), TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        rulePanel.setBorder(
+                new TitledBorder(null, UIText.title("title.compare.rules"), TitledBorder.LEADING, TitledBorder.TOP, null, null));
 
         JLabel summaryTxtFld = new JLabel();
         summaryTxtFld.setForeground(Color.BLUE);
@@ -160,7 +162,7 @@ public class ItemCheckResultDialog extends javax.swing.JDialog {
                         .addGroup(layout.createSequentialGroup()
                                 .addContainerGap()
                                 .addGap(10)
-                                .addComponent(summaryTxtFld, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(summaryTxtFld)
                                 .addPreferredGap(ComponentPlacement.UNRELATED)
                                 .addGap(10)
                                 .addComponent(filterCheckbox)
@@ -185,7 +187,7 @@ public class ItemCheckResultDialog extends javax.swing.JDialog {
                                                 .addComponent(cancelBtn))
                                         .addGroup(layout.createParallelGroup(Alignment.BASELINE)
                                                 .addComponent(filterCheckbox)
-                                                .addComponent(summaryTxtFld, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(summaryTxtFld)
                                                 .addComponent(passAllBtn)))
                                 .addContainerGap())
 
@@ -284,7 +286,7 @@ public class ItemCheckResultDialog extends javax.swing.JDialog {
         return validReturn;
     }
 
-    public void setValidReturn(boolean validReturn) {
+    private void setValidReturn(boolean validReturn) {
         this.validReturn = validReturn;
     }
 

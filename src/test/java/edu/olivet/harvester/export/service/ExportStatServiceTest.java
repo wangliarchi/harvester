@@ -11,7 +11,7 @@ import java.util.Date;
  */
 public class ExportStatServiceTest extends BaseTest {
 
-    @Inject ExportStatService exportStatService;
+    @Inject private ExportStatService exportStatService;
     @Test
     public void testLastOrderDate() throws Exception {
         String spreadsheetId = "1t1iEDNrokcqjE7cTEuYW07Egm6By2CNsMuog9TK1LhI";

@@ -14,7 +14,8 @@ public class OrderStatusUtils {
      * 根据当前订单数据决定需要标识的状态，注意：分支判断的顺序<strong>不能颠倒!</strong>
      */
     public static String determineStatus(Order order) {
-        if (OrderEnums.Status.Finish.value().equalsIgnoreCase(order.status) || OrderEnums.Status.Skip.value().equalsIgnoreCase(order.status) || order.toBeChecked()) {
+        if (OrderEnums.Status.Finish.value().equalsIgnoreCase(order.status) ||
+                OrderEnums.Status.Skip.value().equalsIgnoreCase(order.status) || order.toBeChecked()) {
             return null;
         }
 

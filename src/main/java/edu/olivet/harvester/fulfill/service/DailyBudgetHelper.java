@@ -11,7 +11,6 @@ import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Now;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.utils.common.NumberUtils;
-import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -30,15 +29,23 @@ public class DailyBudgetHelper {
 
     @Inject
     private SheetService sheetService;
-    @Inject
+    @Inject private
     Now now;
 
-    @Setter
-    private RuntimePanelObserver runtimePanelObserver;
+    private Map<String, Float> budgetMap = new HashMap<>();
+    private Map<String, Float> spendingMap = new HashMap<>();
 
-    public Float getRemainingBudget(String spreadsheetId, String dateString) {
-        Date date = Dates.parseDate(dateString);
-        return getRemainingBudget(spreadsheetId, date);
+    private Map<String, List<RuntimePanelObserver>> runtimePanelObservers = new HashMap<>();
+
+
+    public void addRuntimePanelObserver(String spreadsheetId, RuntimePanelObserver runtimePanelObserver) {
+        List<RuntimePanelObserver> observers = runtimePanelObservers.getOrDefault(spreadsheetId, new ArrayList<>());
+        observers.add(runtimePanelObserver);
+        runtimePanelObservers.put(spreadsheetId, observers);
+
+        runtimePanelObserver.updateBudget(Float.toString(NumberUtils.round(budgetMap.getOrDefault(spreadsheetId, 0.0f), 2)));
+        runtimePanelObserver.updateSpending(Float.toString(NumberUtils.round(spendingMap.getOrDefault(spreadsheetId, 0.0f), 2)));
+
     }
 
     private static final Map<String, Integer> BUDGET_ROW_CACHE = new HashMap<>();
@@ -58,6 +65,7 @@ public class DailyBudgetHelper {
         if (remaining <= 0) {
             throw new OrderSubmissionException("You have exceed today's budget limit. ");
         }
+
 
         return remaining;
     }
@@ -92,10 +100,19 @@ public class DailyBudgetHelper {
                                 budgetData.put("budget", budget);
                                 budgetData.put("cost", totalCost);
 
-                                if (runtimePanelObserver != null) {
-                                    runtimePanelObserver.updateSpending(Float.toString(NumberUtils.round(totalCost, 2)));
-                                    runtimePanelObserver.updateBudget(Float.toString(NumberUtils.round(budget, 2)));
+                                if (runtimePanelObservers.containsKey(spreadsheetId)) {
+                                    runtimePanelObservers.get(spreadsheetId).forEach(runtimePanelObserver -> {
+                                        if (runtimePanelObserver != null) {
+                                            runtimePanelObserver.updateSpending(Float.toString(NumberUtils.round(totalCost, 2)));
+                                            runtimePanelObserver.updateBudget(Float.toString(NumberUtils.round(budget, 2)));
+                                        }
+                                    });
                                 }
+
+
+                                budgetMap.put(spreadsheetId, budgetData.get("budget"));
+                                spendingMap.put(spreadsheetId, budgetData.get("cost"));
+
                                 return budgetData;
                             }
                         } catch (Exception e) {
@@ -116,7 +133,7 @@ public class DailyBudgetHelper {
         return budgetData;
     }
 
-    public float totalSpent = 0f;
+    private float totalSpent = 0f;
 
     public Float getCost(String spreadsheetId, String date) {
         return getCost(spreadsheetId, Dates.parseDate(date));
@@ -181,9 +198,15 @@ public class DailyBudgetHelper {
         DecimalFormat df = new DecimalFormat("#.##");
         df.setRoundingMode(RoundingMode.CEILING);
 
-        if (runtimePanelObserver != null) {
-            runtimePanelObserver.updateSpending(df.format(cost));
+        if (runtimePanelObservers.containsKey(spreadsheetId)) {
+            float finalCost = cost;
+            runtimePanelObservers.get(spreadsheetId).forEach(runtimePanelObserver -> {
+                if (runtimePanelObserver != null) {
+                    runtimePanelObserver.updateSpending(df.format(finalCost));
+                }
+            });
         }
+
 
         totalSpent = cost;
         int row = BUDGET_ROW_CACHE.getOrDefault(spreadsheetId + dateToGoogleSheetName(date), 2);
@@ -237,10 +260,10 @@ public class DailyBudgetHelper {
     public static void main(String[] args) {
         String spreadsheetId = "1Kn8PgppidUuOwYfayR5lc2lPtQihB1a-If_YaKU1Ofs";
         DailyBudgetHelper dailyBudgetHelper = ApplicationContext.getBean(DailyBudgetHelper.class);
-        float remainingBudget = dailyBudgetHelper.getRemainingBudget(spreadsheetId, "08/10/2017");
+        float remainingBudget = dailyBudgetHelper.getRemainingBudget(spreadsheetId, Dates.parseDate("08/10/2017"));
         System.out.println(remainingBudget);
 
-        remainingBudget = dailyBudgetHelper.getRemainingBudget(spreadsheetId, "11/10");
+        remainingBudget = dailyBudgetHelper.getRemainingBudget(spreadsheetId, Dates.parseDate("11/10"));
         System.out.println(remainingBudget);
 
         float cost = dailyBudgetHelper.getCost(spreadsheetId, "11/10");

@@ -1,7 +1,6 @@
 package edu.olivet.harvester.ui.utils;
 
 import edu.olivet.harvester.fulfill.model.OrderTaskStatus;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,18 +24,8 @@ public class OrderTaskButtonColumn extends ButtonColumn {
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
         String status = table.getModel().getValueAt(row, column - 1).toString();
-        if (status.equalsIgnoreCase(OrderTaskStatus.Stopped.name())) {
-            value = "Resume";
-        }
-//        else if (status.equalsIgnoreCase(OrderTaskStatus.Completed.name())) {
-//            value = "Retry";
-//        }
-
-        if (StringUtils.equalsAnyIgnoreCase(status, OrderTaskStatus.Scheduled.name(), OrderTaskStatus.Error.name(), OrderTaskStatus.Stopped.name())) {
-            return super.getTableCellEditorComponent(table, value, isSelected, row, column);
-        }
-
-        return getEmptyRendererComponent();
+        value = getValue(status);
+        return super.getTableCellEditorComponent(table, value, isSelected, row, column);
     }
 
     @Override
@@ -44,27 +33,37 @@ public class OrderTaskButtonColumn extends ButtonColumn {
         return editorValue;
     }
 
+
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         String status = table.getModel().getValueAt(row, column - 1).toString();
-        if (status.equalsIgnoreCase(OrderTaskStatus.Stopped.name())) {
-            value = "Resume";
-        }
+        value = getValue(status);
 
-        if (StringUtils.equalsAnyIgnoreCase(status, OrderTaskStatus.Scheduled.name(), OrderTaskStatus.Error.name(), OrderTaskStatus.Stopped.name())) {
-            return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        } else {
-            return getEmptyRendererComponent();
-        }
+        return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
     }
 
-    public Component getEmptyRendererComponent() {
 
-        renderButton.setText("");
-        renderButton.setVisible(false);
-        renderButton.setBorder(null);
-        renderButton.setForeground(null);
-        return renderButton;
+    public Object getValue(String status) {
+        Object value;
+        OrderTaskStatus taskStatus = OrderTaskStatus.valueOf(status);
+        switch (taskStatus) {
+            case Stopped:
+                value = "Resume";
+                break;
+            case Processing:
+            case Queued:
+                value = "Stop";
+                break;
+            case Scheduled:
+                value = "Delete";
+                break;
+            case Completed:
+                value = "Retry";
+                break;
+            default:
+                value = "";
+        }
 
+        return value;
     }
 
 

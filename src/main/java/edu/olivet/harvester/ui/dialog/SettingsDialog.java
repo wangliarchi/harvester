@@ -25,8 +25,6 @@ import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.GroupLayout.Group;
 import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
@@ -43,7 +41,8 @@ public class SettingsDialog extends BaseDialog {
     @Getter
     private Settings settings;
 
-    private final List<Country> marketplaces = Arrays.asList(Country.US, Country.CA, Country.UK, Country.JP, Country.IN, Country.MX, Country.AU);
+    private final List<Country> marketplaces =
+            Arrays.asList(Country.US, Country.CA, Country.UK, Country.JP, Country.IN, Country.MX, Country.AU);
     private Map<Country, JCheckBox> checkBoxes = new HashMap<>();
 
     private JTextField sidFld;
@@ -85,11 +84,9 @@ public class SettingsDialog extends BaseDialog {
 
 
         this.tabbedPane = new JTabbedPane();
-        tabbedPane.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                ConfigurationPanel configurationPanel = (ConfigurationPanel) tabbedPane.getSelectedComponent();
-                configurationPanel.loadBuyerAccounts();
-            }
+        tabbedPane.addChangeListener(e -> {
+            ConfigurationPanel configurationPanel = (ConfigurationPanel) tabbedPane.getSelectedComponent();
+            configurationPanel.loadBuyerAccounts();
         });
         this.initButtons();
         JButton aboutBtn = UITools.transparent(new JButton("I Need Help", UITools.getIcon("about.png")));

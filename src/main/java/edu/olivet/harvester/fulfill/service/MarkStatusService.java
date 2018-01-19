@@ -29,14 +29,14 @@ public class MarkStatusService {
 
     @Inject
     RuntimeSettingsValidator validator;
-    @Inject
+    @Inject private
     AppScript appScript;
-    @Inject
+    @Inject private
     SheetService sheetService;
-    @Inject
+    @Inject private
     OrderValidator orderValidator;
 
-    @Inject
+    @Inject private
     MessageListener messageListener;
 
     public void execute() {

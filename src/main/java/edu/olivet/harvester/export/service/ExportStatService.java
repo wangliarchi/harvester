@@ -27,13 +27,13 @@ import java.util.List;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/15/17 2:42 PM
  */
 public class ExportStatService {
-    protected final Logger LOGGER = LoggerFactory.getLogger(ExportStatService.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(ExportStatService.class);
 
     private static final String APPS_URL = "https://script.google.com/macros/s/AKfycbzyMGXmIJESIts92UZONd_kgsUO7srxp4e9e5lL0C8hk-DCRtQ/exec";
 
-    @Inject
+    @Inject private
     AppScript appScript;
-    @Inject
+    @Inject private
     SheetAPI sheetAPI;
 
     @Repeat(expectedExceptions = BusinessException.class)

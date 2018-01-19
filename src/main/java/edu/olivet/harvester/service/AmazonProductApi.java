@@ -19,7 +19,7 @@ import java.util.List;
 public class AmazonProductApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(AmazonProductApi.class);
 
-    public static AmazonProductApi instance = null;
+    private static AmazonProductApi instance = null;
     @SuppressWarnings("FieldCanBeLocal") private AWSECommerceService commerceService;
     private AWSECommerceServicePortType portUS;
 

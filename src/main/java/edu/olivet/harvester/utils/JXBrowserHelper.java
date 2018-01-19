@@ -71,11 +71,11 @@ public class JXBrowserHelper {
             Tools.createFileIfNotExist(file);
             ImageIO.write((RenderedImage) image, "PNG", file);
         } catch (Exception e) {
-            LOGGER.error("尝试保存截图文件到{}失败：", filePath, e);
+            //LOGGER.error("尝试保存截图文件到{}失败：", filePath, e);
         }
     }
 
-    public static void saveHTMLSourceFile(Browser browser) {
+    private static void saveHTMLSourceFile(Browser browser) {
         String title = browser.getTitle().replaceAll(" ", "");
         title = title.replaceAll(RegexUtils.Regex.NON_ALPHA_LETTER_DIGIT.val(), "");
         String filePath = Directory.WebPage.path() + "/specials/" + System.currentTimeMillis() + title + ".html";
@@ -87,7 +87,7 @@ public class JXBrowserHelper {
             File file = new File(filePath);
             Tools.writeStringToFile(file, browser.getHTML());
         } catch (Exception e) {
-            LOGGER.error("尝试保存HTML文件到{}失败：", filePath, e);
+            //LOGGER.error("尝试保存HTML文件到{}失败：", filePath, e);
         }
     }
 
@@ -105,7 +105,7 @@ public class JXBrowserHelper {
             String htmlFilePath = filePath.replaceAll(".png", ".html").replaceAll("/images/", "/html/");
             saveHTMLSourceFile(htmlFilePath, buyerPanel.getBrowserView().getBrowser());
         } catch (Exception e) {
-            LOGGER.error("尝试保存HTML文件失败：", e);
+            //LOGGER.error("尝试保存HTML文件失败：", e);
         }
 
     }
@@ -153,7 +153,7 @@ public class JXBrowserHelper {
         return new BrowserView(browser);
     }
 
-    public static BrowserView init(String profileDirName) {
+    private static BrowserView init(String profileDirName) {
         return init(profileDirName, DEFAULT_ZOOM_OUT_LEVEL);
     }
 

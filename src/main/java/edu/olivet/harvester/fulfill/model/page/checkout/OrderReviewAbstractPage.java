@@ -11,7 +11,6 @@ import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionExceptio
 import edu.olivet.harvester.fulfill.exception.Exceptions.OutOfBudgetException;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.model.page.FulfillmentPage;
-import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.DailyBudgetHelper;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.service.ProfitLostControl;
@@ -36,7 +35,8 @@ import java.util.List;
 public abstract class OrderReviewAbstractPage extends FulfillmentPage {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderReviewAbstractPage.class);
-    private static final List<String> SHIPPING_KEYWORDS = Lists.newArrayList("Shipping", "packing", "Verpackung", "Livraison", "Envío", "spedizione");
+    private static final List<String> SHIPPING_KEYWORDS =
+            Lists.newArrayList("Shipping", "packing", "Verpackung", "Livraison", "Envío", "spedizione");
 
     OrderReviewAbstractPage(BuyerPanel buyerPanel) {
         super(buyerPanel);
@@ -51,9 +51,11 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
             throw new OrderSubmissionException("Order cost " + grandTotal.usdText() + " exceed maximum limit");
         }
 
-        float remainingBudget = ApplicationContext.getBean(DailyBudgetHelper.class).getRemainingBudget(order.getSpreadsheetId(), new Date());
+        float remainingBudget = ApplicationContext.getBean(DailyBudgetHelper.class)
+                .getRemainingBudget(order.getSpreadsheetId(), new Date());
         if (remainingBudget < grandTotal.toUSDAmount().floatValue()) {
-            throw new OutOfBudgetException("You don't have enough fund to process this order. Need $" + grandTotal.toUSDAmount() + ", only have $" + String.format("%.2f", remainingBudget));
+            throw new OutOfBudgetException("You don't have enough fund to process this order. Need $" +
+                    grandTotal.toUSDAmount() + ", only have $" + String.format("%.2f", remainingBudget));
         }
 
         order.orderTotalCost = grandTotal;
@@ -77,7 +79,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
     }
 
 
-    public Money parseShippingFee() {
+    private Money parseShippingFee() {
         List<DOMElement> trs = JXBrowserHelper.selectElementsByCssSelector(browser, "#subtotals-marketplace-table tr");
         Money shippingCost = null;
         for (DOMElement tr : trs) {
@@ -100,7 +102,9 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
 
     public Money parseTotal() {
 
-        DOMElement transactionalTablePriceElement = JXBrowserHelper.selectElementByCssSelector(browser, "#subtotals-transactional-table .order-summary-tfx-grand-total-stressed .a-color-price.a-text-right,#subtotals-transactional-table .grand-total-price");
+        DOMElement transactionalTablePriceElement = JXBrowserHelper.selectElementByCssSelector(browser,
+                "#subtotals-transactional-table .order-summary-tfx-grand-total-stressed .a-color-price.a-text-right," +
+                        "#subtotals-transactional-table .grand-total-price");
 
         if (transactionalTablePriceElement != null) {
             String grandTotalText = transactionalTablePriceElement.getInnerText().trim();
@@ -141,12 +145,13 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
             String state = StringUtils.join(Arrays.copyOf(regionZip, regionZip.length - 1), " ");
 
             Address enteredAddress = new Address();
-            enteredAddress.setName(name.replace(RuntimeSettings.load().getNoInvoiceText(), ""));
+            enteredAddress.setName(name.replace(buyerPanel.getOrder().getTask().getNoInvoiceText(), ""));
             enteredAddress.setAddress1(addressLine1);
             enteredAddress.setAddress2(addressLine2);
             enteredAddress.setCity(city);
             enteredAddress.setState(state);
             enteredAddress.setZip(zip);
+            enteredAddress.setNoInvoiceText(buyerPanel.getOrder().getTask().getNoInvoiceText());
 
             if (StringUtils.isNotBlank(country)) {
                 enteredAddress.setCountry(country);
@@ -167,7 +172,9 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         Address enteredAddress = parseEnteredAddress();
 
         if (!addressValidator.verify(OrderAddressUtils.orderShippingAddress(buyerPanel.getOrder()), enteredAddress)) {
-            throw new OrderSubmissionException(String.format("Address failed review. Entered %s, origin %s", enteredAddress, OrderAddressUtils.orderShippingAddress(buyerPanel.getOrder())));
+            throw new OrderSubmissionException(String.format(
+                    "Address failed review. Entered %s, origin %s",
+                    enteredAddress, OrderAddressUtils.orderShippingAddress(buyerPanel.getOrder())));
         }
 
     }
@@ -180,7 +187,8 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         }
 
 
-        DOMElement placeOrderBtn = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, "#submitOrderButtonId .a-button-input, .place-your-order-button");
+        DOMElement placeOrderBtn = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser,
+                "#submitOrderButtonId .a-button-input, .place-your-order-button");
 
         JXBrowserHelper.insertChecker(browser);
         placeOrderBtn.click();

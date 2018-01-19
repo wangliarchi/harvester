@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
-public @interface InvokedExternally {
+@interface InvokedExternally {
 
     String desc() default "";
 

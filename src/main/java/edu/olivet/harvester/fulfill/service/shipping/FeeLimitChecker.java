@@ -23,9 +23,9 @@ import java.util.HashMap;
 public class FeeLimitChecker {
     private static final Logger LOGGER = LoggerFactory.getLogger(FeeLimitChecker.class);
 
-    public static final HashMap<Country, HashMap<ShippingType, HashMap<ShippingSpeed, Float>>> LIMIT_MAP = new HashMap<>();
+    private static final HashMap<Country, HashMap<ShippingType, HashMap<ShippingSpeed, Float>>> LIMIT_MAP = new HashMap<>();
 
-    public static FeeLimitChecker instance = null;
+    private static FeeLimitChecker instance = null;
 
     public static FeeLimitChecker getInstance() {
         if (instance == null) {

@@ -26,7 +26,7 @@ class SelectOrderRangeDialog extends BaseDialog {
     private final Map<Integer, JTextField> endRowMap = new HashMap<>();
     private static final int MAX_COUNT = 7;
 
-    SelectOrderRangeDialog(String[] sheetNames) {
+    public SelectOrderRangeDialog(String[] sheetNames) {
         super(null, true);
 
         JPanel panel = new JPanel();

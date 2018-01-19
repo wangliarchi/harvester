@@ -61,11 +61,11 @@ public class LogViewDialog extends JDialog {
             this.sortNo = sortNo;
         }
 
-        public String getLabel() {
+        String getLabel() {
             return label;
         }
 
-        public Class<?> getType() {
+        Class<?> getType() {
             return type;
         }
 
@@ -73,7 +73,7 @@ public class LogViewDialog extends JDialog {
             return sortNo;
         }
 
-        public static String[] columnNames() {
+        static String[] columnNames() {
             SuccessLogColumn[] values = SuccessLogColumn.values();
             String[] result = new String[values.length];
             for (int i = 0; i < values.length; i++) {
@@ -82,7 +82,7 @@ public class LogViewDialog extends JDialog {
             return result;
         }
 
-        public static Class<?>[] columnTypes() {
+        static Class<?>[] columnTypes() {
             SuccessLogColumn[] values = SuccessLogColumn.values();
             Class<?>[] result = new Class<?>[values.length];
             for (int i = 0; i < values.length; i++) {
@@ -116,11 +116,11 @@ public class LogViewDialog extends JDialog {
             this.sortNo = sortNo;
         }
 
-        public String getLabel() {
+        String getLabel() {
             return label;
         }
 
-        public Class<?> getType() {
+        Class<?> getType() {
             return type;
         }
 
@@ -128,7 +128,7 @@ public class LogViewDialog extends JDialog {
             return sortNo;
         }
 
-        public static String[] columnNames() {
+        static String[] columnNames() {
             StatisticLogColumn[] values = StatisticLogColumn.values();
             String[] result = new String[values.length];
             for (int i = 0; i < values.length; i++) {
@@ -137,7 +137,7 @@ public class LogViewDialog extends JDialog {
             return result;
         }
 
-        public static Class<?>[] columnTypes() {
+        static Class<?>[] columnTypes() {
             StatisticLogColumn[] values = StatisticLogColumn.values();
             Class<?>[] result = new Class<?>[values.length];
             for (int i = 0; i < values.length; i++) {
@@ -164,7 +164,8 @@ public class LogViewDialog extends JDialog {
         TableCellRenderer tableCellRenderer = new DefaultTableCellRenderer() {
             private static final long serialVersionUID = -3019658361622151644L;
 
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                                                           boolean isSelected, boolean hasFocus, int row, int column) {
                 if (value instanceof Date) {
                     value = Dates.format((Date) value, DateFormat.DATE_TIME.pattern());
                 }
@@ -284,7 +285,8 @@ public class LogViewDialog extends JDialog {
                 return new Object[0][STAT_COLUMN_NAMES.length];
             }
         } catch (IOException e) {
-            UITools.error(UIText.message("message.error.read", ConfigEnums.Log.Statistic.desc(), e.getMessage()), UIText.title("title.code_error"));
+            UITools.error(UIText.message("message.error.read",
+                    ConfigEnums.Log.Statistic.desc(), e.getMessage()), UIText.title("title.code_error"));
             return new Object[0][STAT_COLUMN_NAMES.length];
         }
 
@@ -365,7 +367,8 @@ public class LogViewDialog extends JDialog {
                 return new Object[0][SUCCESS_COLUMN_NAMES.length];
             }
         } catch (IOException e) {
-            UITools.error(UIText.message("message.error.read", ConfigEnums.Log.Success.desc(), e.getMessage()), UIText.title("title.code_error"));
+            UITools.error(UIText.message("message.error.read",
+                    ConfigEnums.Log.Success.desc(), e.getMessage()), UIText.title("title.code_error"));
             return new Object[0][SUCCESS_COLUMN_NAMES.length];
         }
 
@@ -404,18 +407,18 @@ public class LogViewDialog extends JDialog {
     }
 
     private void initComponents() {
-        JTabbedPane logPane = new JTabbedPane();
-        JPanel successLogPanel = new JPanel();
-        JScrollPane successScroll = new JScrollPane();
-        JPanel statDataPanel = new JPanel();
-        JScrollPane statScroll = new JScrollPane();
-
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent evt) {
                 setVisible(false);
                 dispose();
             }
         });
+
+        JTabbedPane logPane = new JTabbedPane();
+        JPanel successLogPanel = new JPanel();
+        JScrollPane successScroll = new JScrollPane();
+        JPanel statDataPanel = new JPanel();
+        JScrollPane statScroll = new JScrollPane();
 
         logPane.setBorder(BorderFactory.createTitledBorder("查看日志"));
 

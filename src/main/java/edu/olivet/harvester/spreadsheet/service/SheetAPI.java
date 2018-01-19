@@ -35,16 +35,13 @@ import java.util.stream.Stream;
 public class SheetAPI {
     private static final Logger LOGGER = LoggerFactory.getLogger(SheetAPI.class);
 
-    @Inject
-    protected GoogleServiceProvider googleServiceProvider;
+    @Inject private GoogleServiceProvider googleServiceProvider;
 
-    @Inject
-    protected SpreadService spreadService;
+    @Inject private SpreadService spreadService;
 
-    @Inject
-    protected GoogleAPIHelper googleAPIHelper;
+    @Inject private GoogleAPIHelper googleAPIHelper;
 
-    protected Sheets sheetService;
+    private Sheets sheetService;
 
     @Inject
     public void init() {

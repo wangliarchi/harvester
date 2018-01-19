@@ -55,6 +55,11 @@ public class AppScriptTest extends BaseTest {
         assertEquals(orders.get(1).status, "fi09月/13日已移表");
     }
 
+    @Test void testReadOrders() {
+        List<Order> orders = appScript.readOrders("1ldgHfCCkmfYtUnLpzDQGSRg-44mjnIW01Q7Ij6eOHfM","01/17");
+        assertEquals(orders.size(), 3);
+    }
+
 
 
 

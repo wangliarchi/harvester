@@ -19,16 +19,16 @@ import static org.testng.Assert.assertEquals;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/19/17 8:45 PM
  */
 public class SheetServiceTest extends BaseTest {
-    @Inject
+    @Inject private
     SheetService sheetService;
 
-    @Inject
+    @Inject private
     ExportOrderService exportOrderService;
 
-    @Inject
+    @Inject private
     Now now;
 
-    String spreadsheetId = "1t1iEDNrokcqjE7cTEuYW07Egm6By2CNsMuog9TK1LhI";
+    private String spreadsheetId = "1t1iEDNrokcqjE7cTEuYW07Egm6By2CNsMuog9TK1LhI";
 
 
     @Test

@@ -16,7 +16,7 @@ import static org.testng.Assert.*;
  */
 @Guice(modules = {MockDateModule.class})
 public class ShippingOptionTest {
-    @Inject
+    @Inject private
     Now now;
 
     @Test

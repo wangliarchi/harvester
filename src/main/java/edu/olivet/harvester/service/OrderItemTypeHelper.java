@@ -50,26 +50,6 @@ public class OrderItemTypeHelper {
             // order.order_id, order.isbn, order.sku, e);
         }
 
-        /*
-         Disable now. API quote has been used up by repricing programs.
-         try {
-
-         type = this.getItemTypeByMWSAPI(order);
-         LOGGER.info("Order item type for {} found as {} from MWS product API. ASIN {}, SKU {}",
-         order.order_id,
-         type.name(), order.isbn, order.sku);
-
-         return type;
-
-         } catch (Exception e) {
-         LOGGER.warn(
-         "No product group info found by product api for {}, ASIN {}, SKU {} - {}, will set default to BOOK", order.order_id, order.isbn, order.sku, e
-         );
-         }
-         */
-
-        //TODO: default to BOOK?
-
         return OrderEnums.OrderItemType.BOOK;
 
     }

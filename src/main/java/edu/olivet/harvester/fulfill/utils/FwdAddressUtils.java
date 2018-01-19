@@ -1,11 +1,14 @@
 package edu.olivet.harvester.fulfill.utils;
 
+import com.alibaba.fastjson.JSON;
 import com.mchange.lang.IntegerUtils;
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.utils.Configs;
 import edu.olivet.foundations.utils.Strings;
-import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
+import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums.OrderItemType;
+import edu.olivet.harvester.utils.Config;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -15,7 +18,7 @@ import java.util.List;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/4/17 4:39 PM
  */
 public class FwdAddressUtils {
-    public static final HashMap<String, Integer> FWD_LAST_INDEX = new HashMap<>();
+    private static final HashMap<String, Integer> FWD_LAST_INDEX = new HashMap<>();
 
     public static String getFwdRecipient(Order order) {
         Country fulfillmentCountry = OrderCountryUtils.getFulfillmentCountry(order);
@@ -27,10 +30,11 @@ public class FwdAddressUtils {
                 }
 
                 return usFwdProductRecipient(order);
-
+            default:
+                return order.url;
         }
 
-        return order.url;
+
     }
 
     public static int getLastFWDIndex(String spreadsheetId, String sheetName, List<Order> orders) {
@@ -63,7 +67,8 @@ public class FwdAddressUtils {
     }
 
     public static String usFwdBookRecipient(Order order) {
-        return String.format("zhuanyun/%s/%s", order.getContext().substring(0, order.getContext().length() - 2), order.order_id.substring(order.order_id.lastIndexOf('-') + 1));
+        return String.format("zhuanyun/%s/%s", order.getContext().substring(0, order.getContext().length() - 2),
+                order.order_id.substring(order.order_id.lastIndexOf('-') + 1));
     }
 
     public static String usFwdProductRecipient(Order order) {
@@ -102,9 +107,17 @@ public class FwdAddressUtils {
 
     public static String generateUrl(Order order) {
         int lastIndex = getLastFWDIndex(order);
-        String prefix = String.format("%s/%s/%s", RuntimeSettings.load().getFinderCode(), order.sheetName, order.getContext());
+        String prefix = String.format("%s/%s/%s", order.getTask().getFinderCode(), order.sheetName, order.getContext());
 
         return prefix + String.format("%03d", lastIndex + 1);
+    }
+
+    public static Address getUSFwdAddress() {
+        return JSON.parseObject(Configs.read(Config.USForwardAddress.fileName()), Address.class);
+    }
+
+    public static Address getUKFwdAddress() {
+        return JSON.parseObject(Configs.read(Config.UKForwardAddress.fileName()), Address.class);
     }
 
 }

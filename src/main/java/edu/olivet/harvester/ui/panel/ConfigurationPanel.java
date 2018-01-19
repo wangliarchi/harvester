@@ -5,11 +5,11 @@ import edu.olivet.foundations.amazon.Account.AccountType;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.ui.UITools;
-import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.model.BuyerAccountSettingUtils;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.dialog.BuyerAccountConfigDialog;
+import edu.olivet.harvester.ui.dialog.SellerPanelDialog;
 import edu.olivet.harvester.utils.FinderCodeUtils;
 import edu.olivet.harvester.utils.Settings.Configuration;
 import lombok.Getter;
@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,15 +31,11 @@ public class ConfigurationPanel extends JPanel {
 
     @Getter
     private final Country country;
-    private MarketWebServiceIdentity marketWebServiceIdentity;
 
     public ConfigurationPanel(Country country) {
         this.country = country;
         this.initComponents();
     }
-
-    private JPanel mainPanel;
-    private SellerPanel sellerPanel;
 
     private void initComponents() {
         final JLabel sellerLbl = new JLabel("Seller Account:");
@@ -79,7 +76,7 @@ public class ConfigurationPanel extends JPanel {
 
 
         addBuyerAccountButton.addActionListener(e -> {
-            BuyerAccountConfigDialog dialog = UITools.setDialogAttr(new BuyerAccountConfigDialog());
+            UITools.setDialogAttr(new BuyerAccountConfigDialog());
             loadBuyerAccounts();
         });
 
@@ -91,13 +88,10 @@ public class ConfigurationPanel extends JPanel {
                 return;
             }
 
-            Account seller = new Account(sellerEmailFld.getText(), AccountType.Seller);
-            sellerPanel = new SellerPanel(0, country, seller, 1);
-
-            try {
-                showSellerPanel();
-                WaitTime.Short.execute();
-                MarketWebServiceIdentity marketWebServiceIdentity = sellerPanel.fetchMWSInfo();
+            Account seller = new Account(sellerFld.getText(), AccountType.Seller);
+            SellerPanelDialog dialog = UITools.setDialogAttr(new SellerPanelDialog(country, seller));
+            if (dialog.isOk()) {
+                MarketWebServiceIdentity marketWebServiceIdentity = dialog.marketWebServiceIdentity;
                 if (marketWebServiceIdentity != null) {
                     String[] idName = marketWebServiceIdentity.getSellerId().split("\t");
                     sellerIdFld.setText(idName[0]);
@@ -105,18 +99,13 @@ public class ConfigurationPanel extends JPanel {
                     mwsAccessKeyFld.setText(marketWebServiceIdentity.getAccessKey());
                     mwsSecretKeyFld.setText(marketWebServiceIdentity.getSecretKey());
                 }
-
-            } catch (Exception e) {
-                UITools.error("Error fetching seller id - " + e.getMessage());
-            } finally {
-                showMainPanel();
             }
         }).start());
 
 
-        mainPanel = new JPanel();
-        GroupLayout layout = new GroupLayout(mainPanel);
-        mainPanel.setLayout(layout);
+
+        GroupLayout layout = new GroupLayout(this);
+        this.setLayout(layout);
 
         final int width = 480;
         final int loadMWSButtonWidth = (int) loadMWSInfoButton.getPreferredSize().getWidth();
@@ -155,7 +144,8 @@ public class ConfigurationPanel extends JPanel {
                                         .addGroup(layout.createSequentialGroup().addComponent(bookDataSourceUrlFld, width, width, width))
                                         .addGroup(layout.createSequentialGroup().addComponent(productDataSourceUrlFld, width, width, width))
                                         .addGroup(layout.createSequentialGroup().addComponent(userCodeFld, width, width, width))
-                                        .addGroup(layout.createSequentialGroup().addComponent(bookPrimeBuyerJCombox, width - 130, width - 130, width - 130)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(bookPrimeBuyerJCombox, width - 130, width - 130, width - 130)
                                                 .addComponent(addBuyerAccountButton))
                                         .addGroup(layout.createSequentialGroup().addComponent(bookBuyerJCombox, width, width, width))
                                         .addGroup(layout.createSequentialGroup().addComponent(ebatesBuyerFld, width, width, width))
@@ -195,7 +185,8 @@ public class ConfigurationPanel extends JPanel {
                                         .addComponent(bookDataSourceUrlLbl).addComponent(bookDataSourceUrlFld, height, height, height))
                                 .addGap(vGap)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(primeBuyerLbl).addComponent(bookPrimeBuyerJCombox, height, height, height).addComponent(addBuyerAccountButton))
+                                        .addComponent(primeBuyerLbl).addComponent(bookPrimeBuyerJCombox, height, height, height)
+                                        .addComponent(addBuyerAccountButton))
                                 .addGap(vGap)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(buyerLbl).addComponent(bookBuyerJCombox, height, height, height))
@@ -219,49 +210,12 @@ public class ConfigurationPanel extends JPanel {
                         ));
 
 
-        showMainPanel();
-
         UITools.addListener2Textfields(this);
     }
 
-    private void showMainPanel() {
-        mainPanel.setVisible(true);
-        if (sellerPanel != null) {
-            sellerPanel.setVisible(false);
-            try {
-                sellerPanel.getBrowser().dispose();
-            } catch (Exception e) {
-                //
-            }
-        }
-        this.setLayout(null);
-        GroupLayout newLayout = new GroupLayout(this);
-        newLayout.setHorizontalGroup(
-                newLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(mainPanel));
-        newLayout.setVerticalGroup(
-                newLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(mainPanel));
-        this.setLayout(newLayout);
-        this.revalidate();
-        this.repaint();
-    }
 
-    public void showSellerPanel() {
-        mainPanel.setVisible(false);
-        sellerPanel.setVisible(true);
-        this.setLayout(null);
-        GroupLayout newLayout = new GroupLayout(this);
-        newLayout.setHorizontalGroup(
-                newLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(sellerPanel));
-        newLayout.setVerticalGroup(
-                newLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(sellerPanel));
-        this.setLayout(newLayout);
-        this.revalidate();
-        this.repaint();
-    }
+
+
 
     private JTextField sellerFld = new JTextField();
     private JTextField sellerEmailFld = new JTextField();
@@ -278,10 +232,10 @@ public class ConfigurationPanel extends JPanel {
     private JTextField prodPrimeBuyerFld = new JTextField();
     private JTextField prodBuyerFld = new JTextField();
     private JTextField ebatesBuyerFld = new JTextField();
-    private JComboBox<Account> bookBuyerJCombox = new JComboBox();
-    private JComboBox<Account> bookPrimeBuyerJCombox = new JComboBox();
-    private JComboBox<Account> prodBuyerJCombox = new JComboBox();
-    private JComboBox<Account> prodPrimeBuyerJCombox = new JComboBox();
+    private JComboBox<Account> bookBuyerJCombox = new JComboBox<>();
+    private JComboBox<Account> bookPrimeBuyerJCombox = new JComboBox<>();
+    private JComboBox<Account> prodBuyerJCombox = new JComboBox<>();
+    private JComboBox<Account> prodPrimeBuyerJCombox = new JComboBox<>();
     private JButton addBuyerAccountButton = new JButton("Add/Edit Buyer");
     private JButton loadMWSInfoButton = new JButton();
 
@@ -364,25 +318,21 @@ public class ConfigurationPanel extends JPanel {
 
     }
 
-    Configuration cfg;
+    private Configuration cfg;
 
     public void loadBuyerAccounts() {
-        List<Account> bookBuyers = BuyerAccountSettingUtils.load().getAccounts(country, OrderEnums.OrderItemType.BOOK, false)
-                .stream().collect(Collectors.toList());
+        List<Account> bookBuyers = new ArrayList<>(BuyerAccountSettingUtils.load().getAccounts(country, OrderEnums.OrderItemType.BOOK, false));
         bookBuyerJCombox.setModel(new DefaultComboBoxModel<>(bookBuyers.toArray(new Account[bookBuyers.size()])));
 
-        List<Account> bookPrimeBuyers = BuyerAccountSettingUtils.load().getAccounts(country, OrderEnums.OrderItemType.BOOK, true)
-                .stream().collect(Collectors.toList());
+        List<Account> bookPrimeBuyers = new ArrayList<>(BuyerAccountSettingUtils.load().getAccounts(country, OrderEnums.OrderItemType.BOOK, true));
         bookPrimeBuyerJCombox.setModel(new DefaultComboBoxModel<>(bookPrimeBuyers.toArray(new Account[bookPrimeBuyers.size()])));
 
 
-        List<Account> prodBuyers = BuyerAccountSettingUtils.load().getAccounts(country, OrderEnums.OrderItemType.PRODUCT, false)
-                .stream().collect(Collectors.toList());
+        List<Account> prodBuyers = new ArrayList<>(BuyerAccountSettingUtils.load().getAccounts(country, OrderEnums.OrderItemType.PRODUCT, false));
         prodBuyerJCombox.setModel(new DefaultComboBoxModel<>(prodBuyers.toArray(new Account[prodBuyers.size()])));
 
 
-        List<Account> prodPrimeBuyers = BuyerAccountSettingUtils.load().getAccounts(country, OrderEnums.OrderItemType.PRODUCT, true)
-                .stream().collect(Collectors.toList());
+        List<Account> prodPrimeBuyers = new ArrayList<>(BuyerAccountSettingUtils.load().getAccounts(country, OrderEnums.OrderItemType.PRODUCT, true));
         prodPrimeBuyerJCombox.setModel(new DefaultComboBoxModel<>(prodPrimeBuyers.toArray(new Account[prodPrimeBuyers.size()])));
 
 

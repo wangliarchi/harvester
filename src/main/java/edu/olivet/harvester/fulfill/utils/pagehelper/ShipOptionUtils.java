@@ -7,7 +7,6 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.model.ShippingOption;
-import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator.SkipValidation;
 import edu.olivet.harvester.model.Order;
@@ -42,18 +41,12 @@ public class ShipOptionUtils {
 
         DOMElement option = options.get(validShippingOptions.get(0).getIndex());
 
-        LOGGER.debug("{} shipping options - {}, \n{} valid - {}\n,{} is chosen.",shippingOptions.size(),shippingOptions,validShippingOptions.size(),validShippingOptions,validShippingOptions.get(0));
+        LOGGER.debug("{} shipping options - {}, \n{} valid - {}\n,{} is chosen.",
+                shippingOptions.size(), shippingOptions, validShippingOptions.size(), validShippingOptions, validShippingOptions.get(0));
         option.click();
-//        for (DOMElement option : options) {
-//            String eddText = JXBrowserHelper.selectElementByCssSelector(option, ".a-color-success").getInnerText().trim();
-//            if (eddText.equals(validShippingOptions.get(0).getEstimatedDeliveryDate())) {
-//                option.click();
-//                return;
-//            }
-//        }
     }
 
-    public static List<ShippingOption> listAllOptions(Browser browser, Country country) {
+    private static List<ShippingOption> listAllOptions(Browser browser, Country country) {
         List<DOMElement> options = JXBrowserHelper.selectElementsByCssSelector(browser, ".shipping-speed.ship-option");
 
         List<ShippingOption> shippingOptions = new ArrayList<>();
@@ -88,7 +81,7 @@ public class ShipOptionUtils {
     public static List<ShippingOption> getValidateOptions(Order order, List<ShippingOption> shippingOptions) {
 
         Date orderEdd = order.latestEdd();
-        int maxDays = IntegerUtils.parseInt(RuntimeSettings.load().getEddLimit(), 7);
+        int maxDays = IntegerUtils.parseInt(order.getTask().getEddLimit(), 7);
 
         DateTime start = new DateTime(orderEdd.getTime());
 
@@ -102,7 +95,10 @@ public class ShipOptionUtils {
             if (Remark.fastShipping(order.remark) && !it.isExpedited()) {
                 return false;
             }
-            return OrderValidator.skipCheck(order, SkipValidation.EDD) || Remark.isDN(order.remark) || latestDate.before(orderEdd) || daysExceedOrderEdd <= maxDays;
+            return OrderValidator.skipCheck(order, SkipValidation.EDD) ||
+                    Remark.isDN(order.remark) ||
+                    latestDate.before(orderEdd) ||
+                    daysExceedOrderEdd <= maxDays;
 
         }).collect(Collectors.toList());
 
@@ -110,7 +106,9 @@ public class ShipOptionUtils {
         if (CollectionUtils.isEmpty(validShippingOptions)) {
             Date latestDate = shippingOptions.get(0).getLatestDeliveryDate();
             int days = Math.abs(Dates.daysBetween(latestDate, orderEdd));
-            throw new OrderSubmissionException("No shipping option available. Earliest EDD is " + Dates.format(latestDate, DateFormat.US_FEEDBACK_DATE.pattern()) + ", order EDD is " + Dates.format(order.latestEdd(), DateFormat.US_FEEDBACK_DATE.pattern()) + ", exceed order EDD " + days + " days");
+            throw new OrderSubmissionException("No shipping option available. Earliest EDD is " +
+                    Dates.format(latestDate, DateFormat.US_FEEDBACK_DATE.pattern()) + ", order EDD is " +
+                    Dates.format(order.latestEdd(), DateFormat.US_FEEDBACK_DATE.pattern()) + ", exceed order EDD " + days + " days");
         }
 
         validShippingOptions.sort(Comparator.comparing(ShippingOption::getPriceAmount));

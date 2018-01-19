@@ -25,9 +25,9 @@ import java.util.List;
 public class AmazonOrderService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AmazonOrderService.class);
 
-    @Inject OrderFetcher orderFetcher;
-    @Inject ExportOrderService exportOrderService;
-    @Inject DBManager dbManager;
+    @Inject private OrderFetcher orderFetcher;
+    @Inject private ExportOrderService exportOrderService;
+    @Inject private DBManager dbManager;
 
     public edu.olivet.harvester.model.Order reloadOrder(edu.olivet.harvester.model.Order order) {
         //check local first
@@ -66,7 +66,7 @@ public class AmazonOrderService {
         throw new BusinessException("fail to load order " + order.order_id + " from  " + country);
     }
 
-    public AmazonOrder loadFromLocal(String amazonOrderId, String sku) {
+    private AmazonOrder loadFromLocal(String amazonOrderId, String sku) {
         List<AmazonOrder> orders = dbManager.query(AmazonOrder.class, Cnd.where("orderId", "=", amazonOrderId)
                 .and("sku", "=", sku));
         if (CollectionUtils.isEmpty(orders)) {

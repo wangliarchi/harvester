@@ -6,13 +6,11 @@ import com.google.inject.Singleton;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.db.DBManager;
-import edu.olivet.foundations.utils.Dates;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionBuyerAccountTask;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.OrderTaskStatus;
 import edu.olivet.harvester.model.Order;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.nutz.dao.Cnd;
 
 import java.util.Date;
@@ -23,53 +21,27 @@ import java.util.List;
  */
 @Singleton
 public class OrderSubmissionBuyerTaskService {
-    @Inject
+    @Inject private
     DBManager dbManager;
 
-    @Inject
+    @Inject private
     OrderSubmissionTaskService orderSubmissionTaskService;
 
-    public List<OrderSubmissionBuyerAccountTask> todayTasks() {
-        return dbManager.query(OrderSubmissionBuyerAccountTask.class,
-                Cnd.where("dateCreated", ">=", Dates.beginOfDay(new DateTime()).toDate())
-                        .asc("dateCreated"));
-    }
-
-    public List<OrderSubmissionBuyerAccountTask> todayScheduledTasks() {
-        return dbManager.query(OrderSubmissionBuyerAccountTask.class,
-                Cnd.where("dateCreated", ">=", Dates.beginOfDay(new DateTime()).toDate())
-                        .and("status", "=", OrderTaskStatus.Scheduled.name())
-                        .asc("dateCreated"));
-    }
-
-    public List<OrderSubmissionBuyerAccountTask> listAllTasks() {
-        return dbManager.query(OrderSubmissionBuyerAccountTask.class,
-                Cnd.where("dateCreated", "NOT IS", null)
-                        .desc("dateCreated"));
-    }
-
-    public List<OrderSubmissionBuyerAccountTask> todayScheduledTasks(Country country, Account buyer) {
-        return dbManager.query(OrderSubmissionBuyerAccountTask.class,
-                Cnd.where("dateCreated", ">=", Dates.beginOfDay(new DateTime()).toDate())
-                        .and("status", "=", OrderTaskStatus.Scheduled.name())
-                        .and("fulfillmentCountry", "=", country.name())
-                        .and("buyerAccount", "=", buyer.getEmail())
-                        .asc("dateCreated"));
-    }
 
     public void saveTask(OrderSubmissionBuyerAccountTask task) {
         if (StringUtils.isBlank(task.getId())) {
             task.setDateCreated(new Date());
             task.setId(task.getTaskId() + "-" + task.getFulfillmentCountry() + "-" + task.getBuyerAccount());
-            task.setStatus(OrderTaskStatus.Scheduled.name());
+            task.setTaskStatus(OrderTaskStatus.Scheduled);
         }
 
 
         if (task.getTotalOrders() > 0 && task.getSuccess() + task.getFailed() == task.getTotalOrders() &&
-                !task.getStatus().equalsIgnoreCase(OrderTaskStatus.Completed.name())) {
-            task.setStatus(OrderTaskStatus.Completed.name());
+                task.taskStatus() != OrderTaskStatus.Completed) {
+            task.setTaskStatus(OrderTaskStatus.Completed);
             task.setDateEnded(new Date());
         }
+
 
         dbManager.insertOrUpdate(task, OrderSubmissionBuyerAccountTask.class);
         //TasksAndProgressPanel.getInstance().loadTasksToTable();
@@ -96,7 +68,7 @@ public class OrderSubmissionBuyerTaskService {
     }
 
     public void startTask(OrderSubmissionBuyerAccountTask task) {
-        task.setStatus(OrderTaskStatus.Processing.name());
+        task.setTaskStatus(OrderTaskStatus.Processing);
         task.setDateStarted(new Date());
         saveTask(task);
 
@@ -104,7 +76,7 @@ public class OrderSubmissionBuyerTaskService {
     }
 
     public void stopTask(OrderSubmissionBuyerAccountTask task) {
-        task.setStatus(OrderTaskStatus.Stopped.name());
+        task.setTaskStatus(OrderTaskStatus.Stopped);
         task.setDateEnded(new Date());
         saveTask(task);
 
@@ -112,7 +84,7 @@ public class OrderSubmissionBuyerTaskService {
     }
 
     public void completed(OrderSubmissionBuyerAccountTask task) {
-        task.setStatus(OrderTaskStatus.Completed.name());
+        task.setTaskStatus(OrderTaskStatus.Completed);
         task.setDateEnded(new Date());
         saveTask(task);
     }
@@ -141,14 +113,14 @@ public class OrderSubmissionBuyerTaskService {
 
     public void deleteByTaskId(String taskId) {
         getTasksById(taskId).forEach(task -> {
-            task.setStatus(OrderTaskStatus.Deleted.name());
+            task.setTaskStatus(OrderTaskStatus.Deleted);
             dbManager.insertOrUpdate(task, OrderSubmissionBuyerAccountTask.class);
         });
     }
 
     public void stopByTaskId(String taskId) {
         getTasksById(taskId).forEach(task -> {
-            task.setStatus(OrderTaskStatus.Stopped.name());
+            task.setTaskStatus(OrderTaskStatus.Stopped);
             dbManager.insertOrUpdate(task, OrderSubmissionBuyerAccountTask.class);
         });
     }

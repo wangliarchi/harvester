@@ -34,9 +34,8 @@ public class ProgressBarPanel extends JPanel implements RuntimePanelObserver {
     }
 
 
-    private JLabel progressLabel;
-    public JProgressBar progressBar;
-    public JLabel progressTextLabel;
+    private JProgressBar progressBar;
+    private JLabel progressTextLabel;
 
 
     private void initComponents() {
@@ -44,7 +43,7 @@ public class ProgressBarPanel extends JPanel implements RuntimePanelObserver {
 
         progressBar = new JProgressBar();
         progressBar.setStringPainted(true);
-        progressLabel = new JLabel();
+        JLabel progressLabel = new JLabel();
         progressLabel.setText("Progress");
 
         progressTextLabel = new JLabel();

@@ -23,7 +23,8 @@ public class CheckoutEnum {
     public enum CheckoutPage {
         ShippingAddress(".checkout.checkout-as"),
         ShippingAddressOnePage(".a-container.page-container #shipaddress #add-new-address-popover-link"),
-        CantShipToAddressPage("#changeQuantityFormId .alertMessage,#changeQuantityFormId .lineitem-error-message,#changeQuantityFormId  a.pipeline-link"),
+        CantShipToAddressPage(
+                "#changeQuantityFormId .alertMessage,#changeQuantityFormId .lineitem-error-message,#changeQuantityFormId  a.pipeline-link"),
         PaymentMethod(".checkout.pay"),
         PaymentMethodOnePage(".a-container.page-container #payment #cc-popover-link"),
         ShippingMethod("#shippingOptionFormId"),
@@ -50,11 +51,9 @@ public class CheckoutEnum {
 
 
             DOMElement primeAd = JXBrowserHelper.selectVisibleElement(browser, "#prime-acquisition-spc-popover-no-thanks");
-             if (primeAd != null) {
-
+            if (primeAd != null) {
                 primeAd.click();
                 WaitTime.Shorter.execute();
-                //JXBrowserHelper.waitUntilVisible(browser, "#prime-acquisition-spc-popover-no-thanks");
                 return detectPage(browser);
             }
 

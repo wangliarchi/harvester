@@ -34,7 +34,7 @@ public class SelectPaymentMethod extends Step {
 
     }
 
-    @Inject
+    @Inject private
     StepHelper stepHelper;
 
     public Step createDynamicInstance(FlowState state) {

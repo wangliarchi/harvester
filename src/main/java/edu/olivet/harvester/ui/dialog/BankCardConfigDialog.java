@@ -9,8 +9,6 @@ import edu.olivet.harvester.model.BuyerAccountSetting;
 import edu.olivet.harvester.model.BuyerAccountSettingUtils;
 import edu.olivet.harvester.model.CreditCard;
 import edu.olivet.harvester.ui.panel.BankCardPanel;
-import edu.olivet.harvester.utils.Migration;
-import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -30,7 +28,6 @@ public class BankCardConfigDialog extends BaseDialog {
     private static final Logger LOGGER = LoggerFactory.getLogger(BankCardConfigDialog.class);
     private static final long serialVersionUID = 4799410915878809682L;
 
-    private Settings settings;
     private Map<String, CreditCard> creditCards = new HashMap<>();
     private Set<String> buyerAccountEmails;
     private Set<BankCardPanel> bankCardPanels = new HashSet<>();
@@ -56,7 +53,8 @@ public class BankCardConfigDialog extends BaseDialog {
         GroupLayout innerLayout = new GroupLayout(innerPanel);
         innerPanel.setLayout(innerLayout);
 
-        innerPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, title, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.TOP));
+        innerPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
+                null, title, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.TOP));
 
         GroupLayout.ParallelGroup hParallelGroup = innerLayout.createParallelGroup(GroupLayout.Alignment.LEADING);
         GroupLayout.ParallelGroup vParallelGroup = innerLayout.createParallelGroup(GroupLayout.Alignment.LEADING);
@@ -123,29 +121,14 @@ public class BankCardConfigDialog extends BaseDialog {
 
     }
 
-    public void loadCreditCards() {
+    private void loadCreditCards() {
         creditCards = CreditCardUtils.loadCreditCards();
     }
 
-    List<BuyerAccountSetting> buyerAccountSettings;
+    private List<BuyerAccountSetting> buyerAccountSettings;
 
-    public Set<String> loadBuyerAccountEmails() {
+    private Set<String> loadBuyerAccountEmails() {
         Set<String> buyerAccounts = new HashSet<>();
-
-        try {
-            settings = Settings.load();
-        } catch (IllegalStateException e) {
-            if (Migration.hasMigrationFile() && Migration.isUseMigration()) {
-                try {
-                    //load setting migrated from orderman
-                    settings = Migration.loadSettings();
-                } catch (Exception e1) {
-                    LOGGER.error("Error loading migration configuration file.");
-                    // -> Ignore
-                }
-            }
-        }
-
         buyerAccountSettings = BuyerAccountSettingUtils.load().getAccountSettings();
         if (buyerAccountSettings != null && CollectionUtils.isNotEmpty(buyerAccountSettings)) {
             buyerAccounts = buyerAccountSettings.stream().map(it -> it.getBuyerAccount().getEmail()).collect(Collectors.toSet());

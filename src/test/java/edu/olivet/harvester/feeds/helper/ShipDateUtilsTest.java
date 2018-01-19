@@ -19,7 +19,7 @@ import static org.testng.Assert.assertEquals;
 
 
 public class ShipDateUtilsTest extends BaseTest {
-    @Inject ShipDateUtils shipDateUtils;
+    @Inject private ShipDateUtils shipDateUtils;
 
     private Spreadsheet spreadsheet;
 
@@ -48,7 +48,7 @@ public class ShipDateUtilsTest extends BaseTest {
         assertEquals(shipDateUtils.getSheetNameByDate(date), "10/08");
     }
 
-    @Inject Now now;
+    @Inject private Now now;
 
     @Test
     public void testGetShipDateString() {

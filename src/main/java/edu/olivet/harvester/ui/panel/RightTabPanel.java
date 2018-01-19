@@ -4,8 +4,6 @@ import com.google.inject.Singleton;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.Configs;
 import edu.olivet.foundations.utils.Tools;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 
@@ -14,7 +12,7 @@ import javax.swing.*;
  */
 @Singleton
 public class RightTabPanel extends JTabbedPane {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RightTabPanel.class);
+    //private static final Logger LOGGER = LoggerFactory.getLogger(RightTabPanel.class);
 
     private static RightTabPanel instance;
 

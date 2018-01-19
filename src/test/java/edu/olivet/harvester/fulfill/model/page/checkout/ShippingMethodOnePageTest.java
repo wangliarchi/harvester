@@ -33,18 +33,18 @@ import java.util.stream.Collectors;
  */
 public class ShippingMethodOnePageTest extends BaseTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShippingMethodOnePageTest.class);
-    Browser browser;
+    private Browser browser;
 
-    @Inject
+    @Inject private
     SheetAPI sheetAPI;
-    @Inject
+    @Inject private
     OrderService orderService;
-    List<Order> orders;
-    Map<String, List<Order>> orderMap;
-    BuyerPanel buyerPanel;
-    File[] directories;
+    private List<Order> orders;
+    private Map<String, List<Order>> orderMap;
+    private BuyerPanel buyerPanel;
+    private File[] directories;
 
-    public void prepareData() {
+    private void prepareData() {
         Account buyer = new Account("jxiang@olivetuniversity.edu/q1w2e3AA", Account.AccountType.Buyer);
         buyerPanel = new BuyerPanel(0, Country.US, buyer, 1);
         browser = buyerPanel.getBrowserView().getBrowser();

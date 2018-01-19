@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 public class ReviewOrder extends Step {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReviewOrder.class);
 
-    @Inject
+    @Inject private
     AddressValidatorService addressValidatorService;
 
     //dispatcher method
@@ -95,7 +95,7 @@ public class ReviewOrder extends Step {
         throw new BusinessException("Payment did not pass review");
     }
 
-    @Inject
+    @Inject private
     PlaceOrder placeOrder;
 
     public Step createDynamicInstance(FlowState state) {

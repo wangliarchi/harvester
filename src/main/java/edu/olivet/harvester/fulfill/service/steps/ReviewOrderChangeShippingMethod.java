@@ -21,7 +21,7 @@ public class ReviewOrderChangeShippingMethod extends Step {
         orderReviewMultiPage.changeShippingMethod();
     }
 
-    @Inject
+    @Inject private
     StepHelper stepHelper;
 
     public Step createDynamicInstance(FlowState state) {

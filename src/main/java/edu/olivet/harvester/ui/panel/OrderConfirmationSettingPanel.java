@@ -21,9 +21,9 @@ public class OrderConfirmationSettingPanel extends JPanel {
         initComponents();
     }
 
-    JComboBox<String> enableAutoConfirmationComboBox;
-    TimePicker confirmationTimePicker;
-    JComboBox<Integer> allowedRangeComBox;
+    private JComboBox<String> enableAutoConfirmationComboBox;
+    private TimePicker confirmationTimePicker;
+    private JComboBox<Integer> allowedRangeComBox;
 
     private void initComponents() {
 
@@ -57,7 +57,7 @@ public class OrderConfirmationSettingPanel extends JPanel {
                                 .addContainerGap()
                                 .addComponent(enableAutoExportLabel, labelWidth, labelWidth, labelWidth)
                                 .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(enableAutoConfirmationComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(enableAutoConfirmationComboBox)
                                 .addContainerGap()
 
                         )
@@ -65,11 +65,11 @@ public class OrderConfirmationSettingPanel extends JPanel {
                                 .addContainerGap()
                                 .addComponent(autoExportTimeLabel, labelWidth, labelWidth, labelWidth)
                                 .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(confirmationTimePicker, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(confirmationTimePicker)
                                 .addPreferredGap(ComponentPlacement.RELATED)
                                 .addComponent(rangeLabel)
                                 .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(allowedRangeComBox, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(allowedRangeComBox)
                                 .addPreferredGap(ComponentPlacement.RELATED)
                                 .addComponent(unitLabel)
                                 .addContainerGap()
@@ -82,12 +82,12 @@ public class OrderConfirmationSettingPanel extends JPanel {
                                 .addContainerGap()
                                 .addGroup(layout.createParallelGroup(Alignment.BASELINE)
                                         .addComponent(enableAutoExportLabel)
-                                        .addComponent(enableAutoConfirmationComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(enableAutoConfirmationComboBox)
                                 )
                                 .addPreferredGap(ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(Alignment.BASELINE)
                                         .addComponent(autoExportTimeLabel)
-                                        .addComponent(confirmationTimePicker, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(confirmationTimePicker)
                                         .addComponent(rangeLabel)
                                         .addComponent(allowedRangeComBox)
                                         .addComponent(unitLabel)
@@ -114,8 +114,10 @@ public class OrderConfirmationSettingPanel extends JPanel {
             if (oldData) {
                 ProgressLogsPanel.getInstance().displayMsg("Order auto confirmation job was disabled successfully.");
             } else {
-                Date nextTriggerTime = taskScheduler.startJob(BackgroundJob.ShipmentConfirmation.getCron(), BackgroundJob.ShipmentConfirmation.getClazz());
-                ProgressLogsPanel.getInstance().displayMsg("Order auto confirmation job was enabled successfully. Next trigger time will be " + nextTriggerTime);
+                Date nextTriggerTime = taskScheduler.startJob(BackgroundJob.ShipmentConfirmation.getCron(),
+                        BackgroundJob.ShipmentConfirmation.getClazz());
+                ProgressLogsPanel.getInstance().displayMsg(
+                        "Order auto confirmation job was enabled successfully. Next trigger time will be " + nextTriggerTime);
             }
         }
 

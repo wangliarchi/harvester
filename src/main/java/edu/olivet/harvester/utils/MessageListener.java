@@ -2,6 +2,7 @@ package edu.olivet.harvester.utils;
 
 
 import com.google.inject.Singleton;
+import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.MessagePanel;
 import edu.olivet.foundations.ui.ProgressDetail;
@@ -10,6 +11,7 @@ import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.foundations.utils.WaitTime;
+import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.panel.DualMessagePanel;
 import org.apache.commons.lang3.RandomUtils;
@@ -44,22 +46,22 @@ public class MessageListener implements MessageQueue {
      *
      * @author <a href="mailto:nathanael4ever@gmail.com">Nathanael Yang</a> 2015年9月11日 下午6:10:08
      */
-    public static class Message {
-        public Message(String content, Position position, InformationLevel... infoLevels) {
+    static class Message {
+        Message(String content, Position position, InformationLevel... infoLevels) {
             this(content, position, false, infoLevels);
         }
 
-        public Message(String content, Position position, boolean wrapLine, InformationLevel... infoLevels) {
+        Message(String content, Position position, boolean wrapLine, InformationLevel... infoLevels) {
             this.content = content;
             this.position = position;
             this.wrapLine = wrapLine;
             this.infoLevels = infoLevels;
         }
 
-        public final String content;
+        final String content;
         final Position position;
         final boolean wrapLine;
-        public final InformationLevel[] infoLevels;
+        final InformationLevel[] infoLevels;
 
         @Override
         public String toString() {
@@ -80,7 +82,7 @@ public class MessageListener implements MessageQueue {
     /**
      * 获取当前消息队列的概况
      */
-    public String status() {
+    private String status() {
         return String.format("Messages: %s(%s)", messages.size(), messages);
     }
 
@@ -135,7 +137,10 @@ public class MessageListener implements MessageQueue {
     }
 
     public void addMsg(Order order, String msg, InformationLevel... infoLevels) {
-        this.addLongMsg(String.format("Sheet %s row %d %s %s", order.sheetName, order.row, order.order_id, msg), infoLevels);
+        Country country = OrderCountryUtils.getMarketplaceCountry(order);
+        this.addLongMsg(String.format("%s %s - %s - row %d - %s - %s",
+                country != null ? country.name() : order.getSpreadsheetId(), order.type().name(),
+                order.sheetName, order.row, order.order_id, msg), infoLevels);
     }
 
     @Override

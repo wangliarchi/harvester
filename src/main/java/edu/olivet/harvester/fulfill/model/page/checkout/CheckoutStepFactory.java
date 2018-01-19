@@ -10,7 +10,8 @@ import java.lang.reflect.Constructor;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/2/17 3:39 PM
  */
 public class CheckoutStepFactory {
-    public static FulfillmentPage getCheckoutStepPage(BuyerPanel buyerPanel, CheckoutEnum.CheckoutStep step, CheckoutEnum.CheckoutPageType type) {
+    public static FulfillmentPage getCheckoutStepPage(BuyerPanel buyerPanel,
+                                                      CheckoutEnum.CheckoutStep step, CheckoutEnum.CheckoutPageType type) {
         String className = CheckoutStepFactory.class.getPackage().getName() + "." + step.name() + type.name();
         try {
             Class<?> clazz = Class.forName(className);

@@ -131,7 +131,7 @@ public class SellerEnums {
         /**
          * 获取目前所有seller类型的缩写连接字符串结果
          */
-        public static String abbrevs() {
+        static String abbrevs() {
             List<String> list = new ArrayList<>(SellerType.values().length);
             for (SellerType sellerType : SellerType.values()) {
                 list.add(sellerType.abbrev);

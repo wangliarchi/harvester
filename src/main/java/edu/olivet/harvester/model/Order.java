@@ -10,10 +10,10 @@ import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.ShippingEnums;
-import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.model.OrderEnums.OrderColor;
+import edu.olivet.harvester.spreadsheet.utils.SheetUtils;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Data;
 import lombok.Getter;
@@ -313,7 +313,7 @@ public class Order implements Keyable {
     }
 
     @JSONField(serialize = false)
-    public boolean statusIndicatePurchaseBack() {
+    private boolean statusIndicatePurchaseBack() {
         return OrderEnums.Status.BuyAndTransfer.value().equalsIgnoreCase(status) ||
                 OrderEnums.Status.PrimeBuyAndTransfer.value().equalsIgnoreCase(status);
     }
@@ -494,7 +494,7 @@ public class Order implements Keyable {
 
         if (type == null) {
             try {
-                type = RuntimeSettings.load().getCurrentType();
+                type = SheetUtils.getTypeFromSpreadsheetName(task.getSpreadsheetName());
             } catch (Exception e) {
                 //
             }
@@ -559,7 +559,7 @@ public class Order implements Keyable {
     private Money orderPrice;
 
     @JSONField(serialize = false)
-    public Money getOrderPrice() {
+    private Money getOrderPrice() {
         if (orderPrice == null) {
             float priceFloat = 0;
             if (StringUtils.isNotBlank(price)) {
@@ -628,10 +628,12 @@ public class Order implements Keyable {
         Order order = (Order) o;
         return Objects.equal(order_id, order.order_id) &&
                 Objects.equal(sku, order.sku) &&
+                Objects.equal(recipient_name, order.recipient_name) &&
                 Objects.equal(quantity_purchased, order.quantity_purchased) &&
-                Objects.equal(isbn, order.isbn) &&
+                //Objects.equal(isbn, order.isbn) &&
+                Objects.equal(StringUtils.stripStart(isbn, "0"), StringUtils.stripStart(order.isbn, "0")) &&
                 Objects.equal(seller, order.seller) &&
-                Objects.equal(seller_id, order.seller_id) &&
+                //Objects.equal(seller_id, order.seller_id) &&
                 Objects.equal(condition, order.condition) &&
                 Objects.equal(character, order.character);
     }
@@ -649,7 +651,8 @@ public class Order implements Keyable {
                 Objects.equal(recipient_name, order.recipient_name) &&
                 Objects.equal(sku, order.sku) &&
                 Objects.equal(quantity_purchased, order.quantity_purchased) &&
-                Objects.equal(isbn, order.isbn) &&
+                //Objects.equal(isbn, order.isbn) &&
+                Objects.equal(StringUtils.stripStart(isbn, "0"), StringUtils.stripStart(order.isbn, "0")) &&
                 Objects.equal(seller, order.seller) &&
                 Objects.equal(seller_id, order.seller_id) &&
                 Objects.equal(condition, order.condition) &&
@@ -676,41 +679,41 @@ public class Order implements Keyable {
 
     @Override
     public String toString() {
-        return order_id+"\t"+sheetName+"\t"+row+"\t"+
-                status+"\t"+
-                recipient_name+"\t"+
-                purchase_date+"\t"+
-                sku+"\t"+
-                sku_address+"\t"+
-                price+"\t"+
-                quantity_purchased+"\t"+
-                shipping_fee+"\t"+
-                ship_state+"\t"+
-                isbn+"\t"+
-                seller+"\t"+
-                seller_id+"\t"+
-                seller_price+"\t"+
-                url+"\t"+
-                condition+"\t"+
-                character+"\t"+
-                remark+"\t"+
-                reference+"\t"+
-                code+"\t"+
-                item_name+"\t"+
-                ship_address_1+"\t"+
-                ship_address_2+"\t"+
-                ship_city+"\t"+
-                ship_zip+"\t"+
-                ship_phone_number+"\t"+
-                ship_country+"\t"+
-                cost+"\t"+
-                order_number+"\t"+
-                account+"\t"+
-                last_code+"\t"+
-                sales_chanel+"\t"+
-                original_condition+"\t"+
-                shipping_service+"\t"+
-                cost+"\t";
+        return order_id + "\t" + sheetName + "\t" + row + "\t" +
+                status + "\t" +
+                recipient_name + "\t" +
+                purchase_date + "\t" +
+                sku + "\t" +
+                sku_address + "\t" +
+                price + "\t" +
+                quantity_purchased + "\t" +
+                shipping_fee + "\t" +
+                ship_state + "\t" +
+                isbn + "\t" +
+                seller + "\t" +
+                seller_id + "\t" +
+                seller_price + "\t" +
+                url + "\t" +
+                condition + "\t" +
+                character + "\t" +
+                remark + "\t" +
+                reference + "\t" +
+                code + "\t" +
+                item_name + "\t" +
+                ship_address_1 + "\t" +
+                ship_address_2 + "\t" +
+                ship_city + "\t" +
+                ship_zip + "\t" +
+                ship_phone_number + "\t" +
+                ship_country + "\t" +
+                cost + "\t" +
+                order_number + "\t" +
+                account + "\t" +
+                last_code + "\t" +
+                sales_chanel + "\t" +
+                original_condition + "\t" +
+                shipping_service + "\t" +
+                cost + "\t";
     }
 
     public static void main(String[] args) {

@@ -24,25 +24,23 @@ public class OrderFlowEngine extends FlowParent {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderFlowEngine.class);
 
-    @Inject
+    @Inject private
     Login login;
 
-    @Inject
+    @Inject private
     ClearShoppingCart clearShoppingCart;
 
-    @Inject
+    @Inject private
     MessageListener messageListener;
 
-    @Inject
+    @Inject private
     SheetService sheetService;
-    private BuyerPanel buyerPanel;
-    private Exception exception;
 
     @SuppressWarnings("UnusedReturnValue")
     public FlowState process(Order order, BuyerPanel buyerPanel) {
 
         FlowState state = new FlowState();
-        order.originalRemark = new String(order.remark);
+        order.originalRemark = order.remark;
 
         buyerPanel.setOrder(order);
         state.setOrder(order);

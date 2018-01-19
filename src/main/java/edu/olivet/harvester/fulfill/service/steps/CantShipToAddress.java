@@ -20,7 +20,7 @@ public class CantShipToAddress extends Step {
         cantShipToAddressPage.execute(state.getOrder());
     }
 
-    @Inject StepHelper stepHelper;
+    @Inject private StepHelper stepHelper;
 
     @Override
     public Step createDynamicInstance(FlowState state) {

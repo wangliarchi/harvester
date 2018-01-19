@@ -117,6 +117,8 @@ public class AdvancedSubmitSetting {
             case MULTIPLE:
                 sb.append(ConfigEnums.SubmitRange.MULTIPLE.format(this.multiRows));
                 break;
+            default:
+                break;
         }
 
         if (this.statusFilterValue != null) {
@@ -188,6 +190,7 @@ public class AdvancedSubmitSetting {
         } else if (!multiRows.equals(other.multiRows)) {
             return false;
         }
-        return singleRowNo == other.singleRowNo && startRowNo == other.startRowNo && statusFilterValue == other.statusFilterValue && submitRange == other.submitRange;
+        return singleRowNo == other.singleRowNo && startRowNo == other.startRowNo &&
+                statusFilterValue == other.statusFilterValue && submitRange == other.submitRange;
     }
 }

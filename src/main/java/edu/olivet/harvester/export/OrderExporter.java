@@ -23,7 +23,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Singleton;
 import java.util.Date;
 import java.util.List;
 
@@ -34,13 +33,13 @@ public class OrderExporter {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderExporter.class);
     @Inject
     private ExportStatService exportStatService;
-    @Inject
+    @Inject private
     ExportOrderService exportOrderService;
-    @Inject
+    @Inject private
     SheetService sheetService;
-    @Inject
+    @Inject private
     Now now;
-    @Inject
+    @Inject private
     ErrorAlertService errorAlertService;
 
     @Setter
@@ -71,13 +70,16 @@ public class OrderExporter {
         for (Country marketplace : params.getMarketplaces()) {
             long start = System.currentTimeMillis();
 
-            messagePanel.wrapLineMsg(String.format("Starting exporting orders from %s at %s.", marketplace, Dates.toDateTime(start)), LOGGER);
+            messagePanel.wrapLineMsg(String.format("Starting exporting orders from %s at %s.",
+                    marketplace, Dates.toDateTime(start)), LOGGER);
 
             try {
                 exportOrdersForMarketplace(marketplace, params.getFromDate(), params.getToDate());
-                messagePanel.displayMsg(String.format("Finish exporting orders from %s in %s.", marketplace, Strings.formatElapsedTime(start)), LOGGER);
+                messagePanel.displayMsg(String.format("Finish exporting orders from %s in %s.",
+                        marketplace, Strings.formatElapsedTime(start)), LOGGER);
             } catch (Exception e) {
-                messagePanel.displayMsg(String.format("Error exporting orders from %s - %s. ", marketplace, e.getMessage()), InformationLevel.Negative);
+                messagePanel.displayMsg(String.format("Error exporting orders from %s - %s. ",
+                        marketplace, e.getMessage()), InformationLevel.Negative);
                 LOGGER.info("Error exporting orders from {}. ", marketplace, e);
 
                 errorAlertService.sendMessage("Error exporting orders from " + marketplace,

@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 public class ReviewOrderMultiPage extends Step {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReviewOrderMultiPage.class);
 
-    @Inject
+    @Inject private
     AddressValidatorService addressValidator;
 
     //dispatcher method
@@ -96,7 +96,7 @@ public class ReviewOrderMultiPage extends Step {
         throw new BusinessException("Payment did not pass review");
     }
 
-    @Inject
+    @Inject private
     PlaceOrder placeOrder;
 
     public Step createDynamicInstance(FlowState state) {

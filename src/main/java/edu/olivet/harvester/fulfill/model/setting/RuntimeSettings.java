@@ -60,7 +60,7 @@ public class RuntimeSettings {
         return instance;
     }
 
-    public static String getConfigPath() {
+    private static String getConfigPath() {
         if (Harvester.debugFlag) {
             return TEST_RUNTIME_SETTINGS_FILE_PATH;
         }

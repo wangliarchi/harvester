@@ -21,9 +21,9 @@ public class OrderExportSettingPanel extends JPanel {
         initComponents();
     }
 
-    JComboBox<String> enableAutoExportComboBox;
-    TimePicker exportTimePicker;
-    JComboBox<Integer> allowedRangeComBox;
+    private JComboBox<String> enableAutoExportComboBox;
+    private TimePicker exportTimePicker;
+    private JComboBox<Integer> allowedRangeComBox;
 
     private void initComponents() {
 
@@ -57,7 +57,7 @@ public class OrderExportSettingPanel extends JPanel {
                                 .addContainerGap()
                                 .addComponent(enableAutoExportLabel, labelWidth, labelWidth, labelWidth)
                                 .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(enableAutoExportComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(enableAutoExportComboBox)
                                 .addContainerGap()
 
                         )
@@ -65,11 +65,11 @@ public class OrderExportSettingPanel extends JPanel {
                                 .addContainerGap()
                                 .addComponent(autoExportTimeLabel, labelWidth, labelWidth, labelWidth)
                                 .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(exportTimePicker, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(exportTimePicker)
                                 .addPreferredGap(ComponentPlacement.RELATED)
                                 .addComponent(rangeLabel)
                                 .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(allowedRangeComBox, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(allowedRangeComBox)
                                 .addPreferredGap(ComponentPlacement.RELATED)
                                 .addComponent(unitLabel)
                                 .addContainerGap()
@@ -82,12 +82,12 @@ public class OrderExportSettingPanel extends JPanel {
                                 .addContainerGap()
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(enableAutoExportLabel)
-                                        .addComponent(enableAutoExportComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(enableAutoExportComboBox)
                                 )
                                 .addPreferredGap(ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(autoExportTimeLabel)
-                                        .addComponent(exportTimePicker, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(exportTimePicker)
                                         .addComponent(rangeLabel)
                                         .addComponent(allowedRangeComBox)
                                         .addComponent(unitLabel)
@@ -114,8 +114,10 @@ public class OrderExportSettingPanel extends JPanel {
             if (oldData) {
                 ProgressLogsPanel.getInstance().displayMsg("Order auto exporting job was disabled successfully.");
             } else {
-                Date nextTriggerTime = taskScheduler.startJob(BackgroundJob.OrderExporting.getCron(), BackgroundJob.OrderExporting.getClazz());
-                ProgressLogsPanel.getInstance().displayMsg("Order auto exporting job was enabled successfully. Next trigger time will be " + nextTriggerTime);
+                Date nextTriggerTime = taskScheduler.startJob(BackgroundJob.OrderExporting.getCron(),
+                        BackgroundJob.OrderExporting.getClazz());
+                ProgressLogsPanel.getInstance().displayMsg(
+                        "Order auto exporting job was enabled successfully. Next trigger time will be " + nextTriggerTime);
             }
         }
 

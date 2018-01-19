@@ -7,4 +7,12 @@ public interface PSEventHandler {
     void showPauseBtn();
 
     void hidePauseBtn();
+
+    void paused();
+
+    void resetPauseBtn();
+
+    void disableStartButton();
+
+    void enableStartButton();
 }

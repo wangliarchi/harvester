@@ -12,7 +12,7 @@ import static org.testng.Assert.*;
 
 @Guice(modules = {MockDateModule.class})
 public class WorksheetTest {
-    @Inject Now now;
+    @Inject private Now now;
 
     @Test
     public void getOrderConfirmationDate() {

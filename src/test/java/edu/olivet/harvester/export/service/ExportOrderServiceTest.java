@@ -18,9 +18,9 @@ import static org.testng.Assert.assertEquals;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/23/17 12:03 PM
  */
 public class ExportOrderServiceTest extends BaseTest {
-    @Inject
+    @Inject private
     ExportOrderService exportOrderService;
-    @Inject
+    @Inject private
     Now now;
 
     @Test

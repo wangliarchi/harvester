@@ -17,10 +17,10 @@ import java.io.File;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/10/17 4:11 PM
  */
 public class OrderReviewMultiPageTest extends BaseTest {
-    OrderReviewMultiPage orderReviewMultiPage;
-    Browser browser;
+    private OrderReviewMultiPage orderReviewMultiPage;
+    private Browser browser;
 
-    public void prepareBrowser() {
+    private void prepareBrowser() {
 
         Account buyer = new Account("abc@test.com/q1w2e3AA", Account.AccountType.Buyer);
         BuyerPanel buyerPanel = new BuyerPanel(0, Country.US, buyer, 1);

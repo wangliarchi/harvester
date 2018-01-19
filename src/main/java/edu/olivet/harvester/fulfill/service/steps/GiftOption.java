@@ -17,7 +17,7 @@ public class GiftOption extends Step {
         GiftOptionHelper.giftOption(state.getBuyerPanel().getBrowserView().getBrowser(),state.getOrder());
     }
 
-    @Inject StepHelper stepHelper;
+    @Inject private StepHelper stepHelper;
     @Override
     public Step createDynamicInstance(FlowState state) {
         return stepHelper.detectStep(state);

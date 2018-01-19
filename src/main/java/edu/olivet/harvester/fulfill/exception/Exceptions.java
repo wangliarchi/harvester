@@ -15,13 +15,13 @@ public class Exceptions {
         }
     }
 
-    public static class FailedBuyerAccountAuthenticationException extends OrderSubmissionException {
+    public static class BuyerAccountAuthenticationException extends OrderSubmissionException {
 
-        public FailedBuyerAccountAuthenticationException(String errorMsg) {
+        public BuyerAccountAuthenticationException(String errorMsg) {
             super(errorMsg);
         }
 
-        public FailedBuyerAccountAuthenticationException(Throwable cause) {
+        public BuyerAccountAuthenticationException(Throwable cause) {
             super(cause);
         }
     }

@@ -20,7 +20,7 @@ public class Checkout extends Step {
     }
 
 
-    @Inject
+    @Inject private
     StepHelper stepHelper;
 
     public Step createDynamicInstance(FlowState state) {

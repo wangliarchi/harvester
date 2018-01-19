@@ -3,7 +3,6 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
-import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.utils.CreditCardUtils;
@@ -20,7 +19,7 @@ import java.util.List;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/2/17 3:44 PM
  */
-public abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract {
+abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentMethodAbstractPage.class);
     private CreditCard creditCard;

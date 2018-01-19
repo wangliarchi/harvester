@@ -35,37 +35,38 @@ import java.util.stream.Collectors;
 @Singleton
 public class OrderSubmissionTaskService {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderSubmissionTaskService.class);
-    @Inject
+    @Inject private
     DBManager dbManager;
 
     public List<OrderSubmissionTask> todayTasks() {
         return dbManager.query(OrderSubmissionTask.class,
-            Cnd.where("dateCreated", ">=", Dates.beginOfDay(new DateTime()).toDate())
-                .asc("dateCreated"));
+                Cnd.where("dateCreated", ">=", Dates.beginOfDay(new DateTime()).toDate())
+                        .asc("dateCreated"));
     }
 
     public List<OrderSubmissionTask> todayScheduledTasks() {
         return dbManager.query(OrderSubmissionTask.class,
-            Cnd.where("dateCreated", ">=", Dates.beginOfDay(new DateTime()).toDate())
-                .and("status", "=", OrderTaskStatus.Scheduled.name())
-                .asc("dateCreated"));
+                Cnd.where("dateCreated", ">=", Dates.beginOfDay(new DateTime()).toDate())
+                        .and("status", "=", OrderTaskStatus.Scheduled.name())
+                        .and("totalOrders", ">", 0)
+                        .asc("dateCreated"));
     }
 
     public List<OrderSubmissionTask> listAllTasks() {
         return dbManager.query(OrderSubmissionTask.class,
-            Cnd.where("dateCreated", "NOT IS", null)
-                .desc("dateCreated"));
+                Cnd.where("dateCreated", "NOT IS", null)
+                        .desc("dateCreated"));
     }
 
     public void cleanUp() {
         List<OrderSubmissionTask> tasks = dbManager.query(OrderSubmissionTask.class,
-            Cnd.where("dateCreated", ">=", Dates.beginOfDay(new DateTime()).toDate())
-                .and("status", "=", OrderTaskStatus.Processing.name())
-                .asc("dateCreated"));
-        tasks.forEach(task -> {
-            stopTask(task);
-        });
+                Cnd.where("dateCreated", ">=", Dates.beginOfDay(new DateTime()).toDate())
+                        .and("status", "=", OrderTaskStatus.Processing.name())
+                        .or("status", "=", OrderTaskStatus.Queued.name())
+                        .asc("dateCreated"));
+        tasks.forEach(this::stopTask);
     }
+
 
     public OrderSubmissionTask get(String id) {
         return dbManager.readById(id, OrderSubmissionTask.class);
@@ -138,35 +139,44 @@ public class OrderSubmissionTaskService {
         saveTask(task);
     }
 
+    public OrderSubmissionTask saveTask(OrderSubmissionTask task, boolean reloadTable) {
+        saveTask(task);
+        if (reloadTable) {
+            TasksAndProgressPanel.getInstance().loadTasksToTable();
+        }
+        return task;
+    }
+
     public OrderSubmissionTask saveTask(OrderSubmissionTask task) {
+        //if new, generate id
         if (StringUtils.isBlank(task.getId())) {
             task.setDateCreated(new Date());
             task.setId(DigestUtils.sha256Hex(task.toString()));
-            task.setStatus(OrderTaskStatus.Scheduled.name());
+            task.setTaskStatus(OrderTaskStatus.Scheduled);
         }
 
+        //check if completed
         if (task.getTotalOrders() > 0 && task.getSuccess() + task.getFailed() == task.getTotalOrders() &&
-            !task.getStatus().equalsIgnoreCase(OrderTaskStatus.Completed.name())) {
-            task.setStatus(OrderTaskStatus.Completed.name());
+                task.taskStatus() != OrderTaskStatus.Completed &&
+                task.taskStatus() != OrderTaskStatus.Retried) {
+            task.setTaskStatus(OrderTaskStatus.Completed);
             task.setDateEnded(new Date());
         }
 
         task.setOrderRangeCol(task.getOrderRange().toString());
         task.setSkipValidationCol(task.getSkipValidation().toString());
 
-
         dbManager.insertOrUpdate(task, OrderSubmissionTask.class);
-        TasksAndProgressPanel.getInstance().loadTasksToTable();
 
         return task;
 
     }
 
-    @Inject
+    @Inject private
     OrderSubmissionBuyerTaskService orderSubmissionBuyerTaskService;
 
     public void deleteTask(OrderSubmissionTask task) {
-        task.setStatus(OrderTaskStatus.Deleted.name());
+        task.setTaskStatus(OrderTaskStatus.Deleted);
         saveTask(task);
         //delete buyer tasks as well
         orderSubmissionBuyerTaskService.deleteByTaskId(task.getId());
@@ -178,7 +188,7 @@ public class OrderSubmissionTaskService {
     }
 
     public void startTask(OrderSubmissionTask task) {
-        task.setStatus(OrderTaskStatus.Processing.name());
+        task.setTaskStatus(OrderTaskStatus.Processing);
         task.setDateStarted(new Date());
         saveTask(task);
     }
@@ -189,7 +199,7 @@ public class OrderSubmissionTaskService {
     }
 
     public void stopTask(OrderSubmissionTask task) {
-        task.setStatus(OrderTaskStatus.Stopped.name());
+        task.setTaskStatus(OrderTaskStatus.Stopped);
         task.setDateEnded(new Date());
         saveTask(task);
 
@@ -197,15 +207,15 @@ public class OrderSubmissionTaskService {
     }
 
     public void completed(OrderSubmissionTask task) {
-        task.setStatus(OrderTaskStatus.Completed.name());
+        task.setTaskStatus(OrderTaskStatus.Completed);
         task.setDateEnded(new Date());
         saveTask(task);
     }
 
 
-    @Inject
+    @Inject private
     AppScript appScript;
-    @Inject
+    @Inject private
     OrderValidator orderValidator;
 
     public void checkTitle(List<OrderSubmissionTask> tasks) {
@@ -215,13 +225,11 @@ public class OrderSubmissionTaskService {
         Map<OrderSubmissionTask, List<Order>> skippedValidationOrderMap = new HashMap<>();
 
         tasks.forEach(task -> {
-            RuntimeSettings settings = task.convertToRuntimeSettings();
-            List<Order> sheetOrders = appScript.readOrders(settings);
-            sheetOrders.forEach(order -> {
-                order.setTask(task);
-            });
 
-            if (OrderValidator.needCheck(settings, null, OrderValidator.SkipValidation.ItemName)) {
+            List<Order> sheetOrders = appScript.readOrders(task);
+            sheetOrders.forEach(order -> order.setTask(task));
+
+            if (OrderValidator.needCheck(task, OrderValidator.SkipValidation.ItemName)) {
                 orders.addAll(sheetOrders);
             } else {
                 skippedValidationOrderMap.put(task, sheetOrders);
@@ -255,9 +263,11 @@ public class OrderSubmissionTaskService {
         for (OrderSubmissionTask task : tasks) {
             List<Order> sheetValidOrders = validOrderMap.getOrDefault(task, new ArrayList<>());
             List<String> sheetInvalidOrders = invalidOrders.getOrDefault(task.getId(), new ArrayList<>());
+
+
             task.setTotalOrders(sheetValidOrders.size());
-            task.setOrders(JSON.toJSONString(sheetValidOrders));
-            task.setInvalidOrders(StringUtils.join(sheetInvalidOrders, "\n"));
+            task.setOrders(JSON.toJSONString(sheetValidOrders.stream().distinct().collect(Collectors.toList())));
+            task.setInvalidOrders(StringUtils.join(sheetInvalidOrders.stream().distinct().collect(Collectors.toList()), "\n"));
             saveTask(task);
         }
 

@@ -102,7 +102,7 @@ public class OrderReportService {
     }
 
 
-    public Order fixOrder(Order order) {
+    private Order fixOrder(Order order) {
 
         Country salesChanelCountry = Country.fromSalesChanel(order.sales_chanel);
 
@@ -127,7 +127,7 @@ public class OrderReportService {
         return order;
     }
 
-    @Inject OrderHelper orderHelper;
+    @Inject private OrderHelper orderHelper;
 
 
     private String getReportDirectory() {

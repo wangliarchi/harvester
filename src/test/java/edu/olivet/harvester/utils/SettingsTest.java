@@ -20,7 +20,7 @@ import static org.testng.Assert.assertTrue;
 @Guice(modules = {MockDateModule.class, MockDBModule.class})
 public class SettingsTest extends BaseTest {
 
-    Settings settings;
+    private Settings settings;
 
     @BeforeClass
     public void initialize() {

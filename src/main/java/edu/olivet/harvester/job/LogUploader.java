@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 public class LogUploader extends AbstractBackgroundJob {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LogUploader.class);
-    public static final long ZERO_BYTES = 0L;
+    private static final long ZERO_BYTES = 0L;
 
     @Override
     public void execute() {
@@ -41,7 +41,7 @@ public class LogUploader extends AbstractBackgroundJob {
     }
 
     @Repeat
-    public void executeWithoutWait() throws IOException, DbxException {
+    private void executeWithoutWait() throws IOException, DbxException {
         File log = new File(Directory.Log.path(), "harvester." + Dates.today() + ".log");
         if (log.exists() && log.length() > ZERO_BYTES) {
             //noinspection CheckStyle

@@ -22,7 +22,7 @@ public class ReviewOrderChangeShippingAddress extends Step {
         orderReviewMultiPage.changeShippingAddress();
     }
 
-    @Inject EnterShippingAddress enterShippingAddress;
+    @Inject private EnterShippingAddress enterShippingAddress;
     public Step createDynamicInstance(FlowState state) {
         return enterShippingAddress;
     }

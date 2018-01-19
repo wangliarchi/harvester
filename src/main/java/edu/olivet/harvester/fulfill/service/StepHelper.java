@@ -18,47 +18,47 @@ import static edu.olivet.harvester.fulfill.model.page.checkout.CheckoutEnum.Chec
 public class StepHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(StepHelper.class);
 
-    @Inject
+    @Inject private
     ReviewOrderChangeShippingAddress reviewOrderChangeShippingAddress;
-    @Inject
+    @Inject private
     ReviewOrderChangePaymentMethod reviewOrderChangePaymentMethod;
-    @Inject
+    @Inject private
     ReviewOrderUpdateQty reviewOrderUpdateQty;
-    @Inject
+    @Inject private
     ReviewOrderChangeShippingMethod reviewOrderChangeShippingMethod;
 
-    @Inject
+    @Inject private
     EnterShippingAddress enterShippingAddress;
-    @Inject
+    @Inject private
     SelectPaymentMethod selectPaymentMethod;
-    @Inject
+    @Inject private
     SelectShippingMethod selectShippingMethod;
 
-    @Inject
+    @Inject private
     UpdateQty updateQty;
 
-    @Inject
+    @Inject private
     ReviewOrder reviewOrder;
 
-    @Inject
+    @Inject private
     ReviewOrderMultiPage reviewOrderMultiPage;
     @Inject
     PlaceOrder placeOrder;
 
-    @Inject
+    @Inject private
     CantShipToAddress cantShipToAddress;
-    @Inject
+    @Inject private
     AmazonPrimeAd amazonPrimeAd;
-    @Inject
+    @Inject private
     AfterOrderPlaced afterOrderPlaced;
 
-    @Inject
+    @Inject private
     Login login;
 
-    @Inject
+    @Inject private
     ReadOrderDetails readOrderDetails;
 
-    @Inject GiftOption giftOption;
+    @Inject private GiftOption giftOption;
 
 
     public Step detectStep(FlowState state) {

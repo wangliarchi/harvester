@@ -10,6 +10,7 @@ import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
+import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.setting.AdvancedSubmitSetting;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.utils.FwdAddressUtils;
@@ -125,13 +126,14 @@ public class AppScript {
      * </pre>
      */
     private static final String URL_PREFIX =
-        "https?://(spreadsheets.google.com/feeds/(cells|spreadsheets)/|docs.google.com/spreadsheets/d/|drive.google.com/open[?]id=)";
+            "https?://(spreadsheets.google.com/feeds/(cells|spreadsheets)/|docs.google.com/spreadsheets/d/|drive.google.com/open[?]id=)";
 
     public static String getSpreadId(String url) {
         String str = StringUtils.defaultString(url).replaceFirst(URL_PREFIX, StringUtils.EMPTY);
         return str.contains("/") ? str.substring(0, str.indexOf("/")) : str;
     }
 
+    @Repeat(expectedExceptions = {BusinessException.class, JSONException.class})
     private boolean markColor(String sheetUrl, String sheetName, int row, String notation, OrderColor color) {
         Map<String, String> params = new HashMap<>();
         String spreadId = getSpreadId(sheetUrl);
@@ -160,7 +162,7 @@ public class AppScript {
         return this.markColor(sheetUrl, sheetName, row, String.format("A%d:AO%d", row, row), color);
     }
 
-
+    @Repeat(expectedExceptions = {BusinessException.class, JSONException.class})
     public void commitShippingConfirmationLog(String spreadId, String sheetName, int row, String log) {
         Map<String, String> params = new HashMap<>();
         params.put(PARAM_SPREAD_ID, spreadId);
@@ -171,7 +173,7 @@ public class AppScript {
         String result = this.processResult(this.get(params));
         if (!SUCCESS.equals(result)) {
             throw new BusinessException(String.format("Failed to commit shipping confirmation log to row %d of sheet %s: %s",
-                row, sheetName, result));
+                    row, sheetName, result));
         }
     }
 
@@ -186,6 +188,12 @@ public class AppScript {
     @Inject
     private OrderHelper orderHelper;
     private static final String DEFAULT_RANGE = "A-AO";
+
+    public List<Order> readOrders(OrderSubmissionTask task) {
+        List<Order> orders = readOrders(task.convertToRuntimeSettings());
+        orders.forEach(order -> order.setTask(task));
+        return orders;
+    }
 
     public List<Order> readOrders(RuntimeSettings settings) {
         try {
@@ -211,25 +219,30 @@ public class AppScript {
         }
     }
 
-    @Inject SheetAPI sheetAPI;
-    @Inject OrderService orderService;
+    @Inject private OrderService orderService;
 
-    @Repeat
+    @Repeat(expectedExceptions = BusinessException.class)
     public List<Order> readOrders(String spreadId, String sheetName) {
 
-//        Map<String, String> params = new HashMap<>();
-//        params.put(PARAM_SPREAD_ID, getSpreadId(spreadId));
-//        params.put(PARAM_SHEET_NAME, sheetName);
-//        params.put(PARAM_METHOD, "READ");
-//        params.put("r", DEFAULT_RANGE);
-//
         final long start = System.currentTimeMillis();
-//        String json = this.processResult(this.get(params));
-//
-//        //LOGGER.info("request {}, response{}",params,json);
-//        List<Order> orders = this.parse(json);
+        List<Order> orders;
+        try {
+            orders = orderService.fetchOrders(spreadId, sheetName);
+            LOGGER.info("Read {} orders from sheet {} via sheet api in {}", orders.size(), sheetName, Strings.formatElapsedTime(start));
+        } catch (Exception e) {
+            LOGGER.error("Fail to read orders via sheet api for {} {}", spreadId, sheetName, e);
 
-        List<Order> orders = orderService.fetchOrders(spreadId, sheetName);
+            Map<String, String> params = new HashMap<>();
+            params.put(PARAM_SPREAD_ID, getSpreadId(spreadId));
+            params.put(PARAM_SHEET_NAME, sheetName);
+            params.put(PARAM_METHOD, "READ");
+            params.put("r", DEFAULT_RANGE);
+            String json = this.processResult(this.get(params));
+            orders = this.parse(json);
+            LOGGER.info("Read {} orders from sheet {} via app script in {}", orders.size(), sheetName, Strings.formatElapsedTime(start));
+        }
+
+
         orders.forEach(it -> {
             it.setSheetName(sheetName);
             it.setSpreadsheetId(spreadId);
@@ -242,13 +255,13 @@ public class AppScript {
             LOGGER.error("", e);
         }
 
-        LOGGER.info("Read {} orders from sheet {} via in {}", orders.size(), sheetName, Strings.formatElapsedTime(start));
+
         return orders;
     }
 
     @Data
     public static class ReadResult {
-        public boolean valid() {
+        boolean valid() {
             return ArrayUtils.isNotEmpty(orders) && ArrayUtils.isNotEmpty(colors);
         }
 
@@ -301,7 +314,7 @@ public class AppScript {
                 orderHelper.autoCorrect(order);
             } catch (RuntimeException e) {
                 LOGGER.warn("Failed to correct attributes of order {}: {}", order.order_id, Strings.getExceptionMsg(e));
-                continue;
+                //continue;
             }
             orders.add(order);
         }

@@ -10,6 +10,7 @@ import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
+import edu.olivet.harvester.fulfill.service.RuntimePanelObserver;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.Settings;
@@ -24,7 +25,7 @@ import java.io.IOException;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 10/30/17 9:16 AM
  */
-public class BuyerPanel extends JPanel {
+public class BuyerPanel extends JPanel implements RuntimePanelObserver {
     private static final Logger LOGGER = LoggerFactory.getLogger(BuyerPanel.class);
 
     /**
@@ -71,7 +72,7 @@ public class BuyerPanel extends JPanel {
     private int total = 0;
     private int successCount = 0;
     private int failedCount = 0;
-    static long start;
+    private static long start;
 
     public void setOrder(Order order) {
         this.order = order;
@@ -104,7 +105,7 @@ public class BuyerPanel extends JPanel {
         int processedTotal = failedCount + successCount;
         progressBar.setValue(processedTotal);
         progressTextLabel.setText(String.format("%d of %d, %d success, %d failed, took %s",
-            processedTotal, total, successCount, failedCount, Strings.formatElapsedTime(start)));
+                processedTotal, total, successCount, failedCount, Strings.formatElapsedTime(start)));
     }
 
     private String tasksInfo = "";
@@ -114,19 +115,16 @@ public class BuyerPanel extends JPanel {
         updateInfo();
     }
 
-    public void updateInfo() {
+    private void updateInfo() {
         if (order != null) {
-            String info = String.format("#%s from %s sheet %s row %d. %s",
-                order.order_id, order.getType().name().toLowerCase(),
-                order.sheetName, order.row, tasksInfo);
+            String info = String.format("#%s from %s sheet %s row %d. Tasks in queue: %s %s",
+                    order.order_id, order.getType().name().toLowerCase(),
+                    order.sheetName, order.row, tasksInfo,
+                    stopped() ? " - task STOPPED" : "");
             currentRunningInfoLabel.setText(info);
         }
     }
 
-    public void setTaskCount(int count) {
-        taskCount = count;
-        updateInfo();
-    }
 
     public void enablePauseButton() {
         pauseButton.setEnabled(true);
@@ -140,7 +138,7 @@ public class BuyerPanel extends JPanel {
 
     private PSEventListener.Status state = PSEventListener.Status.NotRunning;
 
-    public void pause() {
+    private void pause() {
         this.state = PSEventListener.Status.Paused;
         pauseButton.setIcon(UITools.getIcon("resume.png"));
         pauseButton.setText("Resume");
@@ -155,7 +153,11 @@ public class BuyerPanel extends JPanel {
     public void stop() {
         this.state = PSEventListener.Status.Stopped;
         disablePauseButton();
-        currentRunningInfoLabel.setText(currentRunningInfoLabel.getText() + ". process STOPPED");
+        currentRunningInfoLabel.setText(currentRunningInfoLabel.getText() + " process STOPPED");
+    }
+
+    public void taskStopped() {
+        currentRunningInfoLabel.setText(currentRunningInfoLabel.getText() + " Task STOPPED");
     }
 
     public boolean paused() {
@@ -217,31 +219,45 @@ public class BuyerPanel extends JPanel {
         GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                .addComponent(browserView, 200, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
-                //.addComponent(runtimeSettingsPanel)
-                .addComponent(infoPanel, 200, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                        .addComponent(browserView, 200, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                        //.addComponent(runtimeSettingsPanel)
+                        .addComponent(infoPanel, 200, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
 
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup()
-                    .addComponent(browserView, 250, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
-                    .addComponent(infoPanel, 20, GroupLayout.PREFERRED_SIZE, 60)
-                )
+                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(browserView, 250, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                                .addComponent(infoPanel, 20, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                        )
 
 
         );
     }
 
 
-    private JPanel initInfoPanel() {
-        JPanel infoPanel = new JPanel();
-        //infoPanel.setBackground(Color.WHITE);
+    private String spending = "0";
+    private String budget = "0";
 
+    public void updateSpending(String spending) {
+        this.spending = spending;
+        updateBudgetInfo();
+    }
+
+    public void updateBudget(String budget) {
+        this.budget = budget;
+        updateBudgetInfo();
+    }
+
+    private void updateBudgetInfo() {
+        budgetInfoLabel.setText(String.format("%s / %s", spending, budget));
+    }
+
+    private JPanel initInfoPanel() {
         progressBar = new JProgressBar();
         progressBar.setStringPainted(true);
-        progressLabel = new JLabel();
+        JLabel progressLabel = new JLabel();
         progressLabel.setText("Progress:");
         progressTextLabel = new JLabel();
         progressTextLabel.setText("");
@@ -256,7 +272,7 @@ public class BuyerPanel extends JPanel {
         disablePauseButton();
 
 
-        currentRunningTitleLabel = new JLabel("Current Running:");
+        JLabel currentRunningTitleLabel = new JLabel("Current Running:");
         currentRunningInfoLabel = new JLabel("no task running yet.");
         currentRunningTitleLabel.setForeground(Color.blue);
         currentRunningInfoLabel.setForeground(Color.blue);
@@ -267,6 +283,10 @@ public class BuyerPanel extends JPanel {
         currentRunningInfoLabel.setFont(new Font(font.getName(), Font.PLAIN, font.getSize() - 1));
         progressTextLabel.setFont(new Font(font.getName(), Font.PLAIN, font.getSize() - 1));
 
+        JLabel budgetLabel = new JLabel("Budget: ");
+        budgetInfoLabel = new JLabel("N/A");
+        budgetLabel.setFont(new Font(font.getName(), Font.BOLD, font.getSize() - 1));
+        budgetInfoLabel.setFont(new Font(font.getName(), Font.PLAIN, font.getSize() - 1));
 
         pauseButton.addActionListener(evt -> {
             if (paused()) {
@@ -276,84 +296,82 @@ public class BuyerPanel extends JPanel {
             }
         });
 
-        stopButton.addActionListener(evt -> {
-            stop();
-        });
+        stopButton.addActionListener(evt -> stop());
 
+        JPanel infoPanel = new JPanel();
         GroupLayout layout = new GroupLayout(infoPanel);
         infoPanel.setLayout(layout);
 
         layout.setHorizontalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(
-                    layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(
+                                layout.createSequentialGroup()
+                                        .addContainerGap()
+                                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                .addGroup(layout.createSequentialGroup()
+                                                        .addContainerGap()
+                                                        .addComponent(progressLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, 60)
+                                                        .addComponent(progressBar, 200, 200, 200)
+                                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                        .addComponent(progressTextLabel)
+                                                        .addContainerGap()
+                                                )
 
-                            .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(progressLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, 60)
-                                .addComponent(progressBar, 200, 200, 200)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(progressTextLabel)
-                                .addContainerGap()
-                            )
-
-                        )
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED,
-                            GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(stopButton)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(pauseButton)
-                                .addContainerGap()
-                            )
-                        )
-                        .addContainerGap()
-                )
-
-                .addGroup(
-                    layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(currentRunningTitleLabel)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(currentRunningInfoLabel)
-                        .addContainerGap()
-                )
-
+                                        )
+                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED,
+                                                GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                                                .addGroup(layout.createSequentialGroup()
+                                                        .addContainerGap()
+                                                        .addComponent(stopButton)
+                                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                        .addComponent(pauseButton)
+                                                        .addContainerGap()
+                                                )
+                                        )
+                                        .addContainerGap())
+                        .addGroup(
+                                layout.createSequentialGroup()
+                                        .addContainerGap()
+                                        .addComponent(currentRunningTitleLabel)
+                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(currentRunningInfoLabel)
+                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(budgetLabel)
+                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(budgetInfoLabel)
+                                        .addContainerGap())
         );
 
         layout.setVerticalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup()
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(progressLabel, 30, 30, 30)
-                        .addComponent(progressBar, 30, 30, 30)
-                        .addComponent(progressTextLabel, 30, 30, 30)
-                        .addComponent(pauseButton)
-                        .addComponent(stopButton))
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(currentRunningTitleLabel)
-                        .addComponent(currentRunningInfoLabel)
-                    )
-                    .addContainerGap()
+                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(progressLabel, 30, 30, 30)
+                                        .addComponent(progressBar, 15, 15, 15)
+                                        .addComponent(progressTextLabel, 30, 30, 30)
+                                        .addComponent(pauseButton)
+                                        .addComponent(stopButton))
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(currentRunningTitleLabel)
+                                        .addComponent(currentRunningInfoLabel)
+                                        .addComponent(budgetLabel)
+                                        .addComponent(budgetInfoLabel)
+                                )
+                                .addContainerGap()
 
-                )
+                        )
         );
-
 
         return infoPanel;
     }
 
-    private JLabel progressLabel;
-    public JProgressBar progressBar;
-    public JLabel progressTextLabel;
+    private JProgressBar progressBar;
+    private JLabel progressTextLabel;
     private JButton pauseButton;
     private JButton stopButton;
-    private JLabel currentRunningTitleLabel;
     private JLabel currentRunningInfoLabel;
+    private JLabel budgetInfoLabel;
 
     public String getKey() {
         return this.buyer.key() + Constants.HYPHEN + this.country.name();

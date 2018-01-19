@@ -197,7 +197,7 @@ public class BugReportDialog extends BaseDialog {
     private JTextField subject;
     private JTextField teamviewer;
 
-    public void load(Bug bug) {
+    private void load(Bug bug) {
         if (bug == null) {
             return;
         }

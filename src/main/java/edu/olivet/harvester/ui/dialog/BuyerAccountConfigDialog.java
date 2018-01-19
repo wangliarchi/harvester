@@ -70,8 +70,8 @@ public class BuyerAccountConfigDialog extends BaseDialog {
             for (BuyerAccountSetting buyerAccountSetting : buyerAccountSettingUtils.getAccountSettings()) {
                 BuyerAccountPanel buyerAccountPanel = new BuyerAccountPanel(buyerAccountSetting);
                 buyerAccountPanels.add(buyerAccountPanel);
-                hParallelGroup.addGroup(GroupLayout.Alignment.TRAILING, innerLayout.createSequentialGroup().addComponent(buyerAccountPanel));
-
+                hParallelGroup.addGroup(GroupLayout.Alignment.TRAILING,
+                        innerLayout.createSequentialGroup().addComponent(buyerAccountPanel));
                 vSequentialGroup.addGroup(innerLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(buyerAccountPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
                         .addGap(5);
@@ -97,7 +97,7 @@ public class BuyerAccountConfigDialog extends BaseDialog {
         final int buttonHeight = 30;
 
         //add new Buyer account
-        addBuyerAccountButton = new JButton("Add New Buyer Account");
+        JButton addBuyerAccountButton = new JButton("Add New Buyer Account");
         addBuyerAccountButton.addActionListener(e -> {
             BuyerAccountPanel buyerAccountPanel = new BuyerAccountPanel(null);
             buyerAccountPanels.add(buyerAccountPanel);
@@ -140,8 +140,6 @@ public class BuyerAccountConfigDialog extends BaseDialog {
         pack();
 
     }
-
-    private JButton addBuyerAccountButton;
 
     private JPanel initHeaderPanel() {
 
@@ -188,15 +186,8 @@ public class BuyerAccountConfigDialog extends BaseDialog {
         return headerPanel;
     }
 
-    public void loadBuyerAccountSettings() {
+    private void loadBuyerAccountSettings() {
         buyerAccountSettingUtils = BuyerAccountSettingUtils.load();
-    }
-
-    public Set<String> loadBuyerAccountEmails() {
-        Set<String> buyerAccounts = new HashSet<>();
-
-
-        return buyerAccounts;
     }
 
 

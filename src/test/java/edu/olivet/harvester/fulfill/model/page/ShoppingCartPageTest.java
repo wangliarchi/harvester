@@ -15,10 +15,10 @@ import java.io.File;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 1/9/18 2:02 PM
  */
 public class ShoppingCartPageTest extends BaseTest {
-    ShoppingCartPage shoppingCartPage;
-    BuyerPanel buyerPanel;
+    private ShoppingCartPage shoppingCartPage;
+    private BuyerPanel buyerPanel;
 
-    public void prepareBrowser() {
+    private void prepareBrowser() {
 
         Account buyer = new Account("jxiang@olivetuniversity.edu/q1w2e3AA", Account.AccountType.Buyer);
         buyerPanel = new BuyerPanel(0, Country.US, buyer, 1);

@@ -6,6 +6,7 @@ import edu.olivet.harvester.fulfill.service.SheetService;
 import edu.olivet.harvester.fulfill.service.StepHelper;
 import edu.olivet.harvester.fulfill.service.flowcontrol.FlowState;
 import edu.olivet.harvester.fulfill.service.flowcontrol.Step;
+import edu.olivet.harvester.message.ErrorAlertService;
 import edu.olivet.harvester.model.Order;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,8 @@ import org.slf4j.LoggerFactory;
  */
 public class AfterOrderPlaced extends Step {
     private static final Logger LOGGER = LoggerFactory.getLogger(AfterOrderPlaced.class);
+
+    @Inject private ErrorAlertService errorAlertService;
 
     @Override
     protected void process(FlowState state) {
@@ -32,12 +35,13 @@ public class AfterOrderPlaced extends Step {
                 updateInfoToOrderSheet(state.getOrder().getSpreadsheetId(), state.getOrder());
             } catch (Exception e) {
                 LOGGER.error("Failed to update order fulfillment info to order update sheet", e);
+                errorAlertService.sendMessage("Failed to update order fulfillment info to order update sheet", state.getOrder().toString());
             }
         }).start();
 
     }
 
-    @Inject
+    @Inject private
     StepHelper stepHelper;
 
     @Override
@@ -46,7 +50,7 @@ public class AfterOrderPlaced extends Step {
         return stepHelper.detectStep(state);
     }
 
-    @Inject
+    @Inject private
     SheetService sheetService;
 
     private void updateInfoToOrderSheet(String spreadsheetId, Order order) {

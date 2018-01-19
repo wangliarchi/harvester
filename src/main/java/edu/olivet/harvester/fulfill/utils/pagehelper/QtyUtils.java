@@ -2,6 +2,8 @@ package edu.olivet.harvester.fulfill.utils.pagehelper;
 
 import com.teamdev.jxbrowser.chromium.Browser;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
+import edu.olivet.foundations.aop.Repeat;
+import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.model.Order;
@@ -21,12 +23,24 @@ import java.util.stream.Collectors;
 public class QtyUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(QtyUtils.class);
 
+    @Repeat(expectedExceptions = BusinessException.class)
     public static void updateQty(BuyerPanel buyerPanel, Order order) {
         Browser browser = buyerPanel.getBrowserView().getBrowser();
         if (StringUtils.isNotBlank(JXBrowserHelper.text(browser, ".quantity-display"))) {
-            _updateQtyTextField(buyerPanel, order);
+            try {
+                _updateQtyTextField(buyerPanel, order);
+            } catch (Exception e) {
+                LOGGER.error("Error update qty");
+                throw new BusinessException(e);
+            }
         } else {
-            _updateQtySelect(buyerPanel, order);
+            try {
+                _updateQtySelect(buyerPanel, order);
+            } catch (Exception e) {
+                LOGGER.error("Error update qty");
+                throw new BusinessException(e);
+            }
+
         }
 
     }
@@ -59,7 +73,8 @@ public class QtyUtils {
                 JXBrowserHelper.waitUntilVisible(browser, ".a-declarative.change-quantity-button");
 
                 //check errors
-                List<DOMElement> errors = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-row.update-quantity-error .error-message");
+                List<DOMElement> errors = JXBrowserHelper.selectElementsByCssSelector(browser,
+                        ".a-row.update-quantity-error .error-message");
                 errors.removeIf(JXBrowserHelper::isHidden);
                 if (CollectionUtils.isNotEmpty(errors)) {
                     LOGGER.error("Error updating qty - {}", errors.stream().map(DOMElement::getInnerText).collect(Collectors.toSet()));
@@ -83,10 +98,16 @@ public class QtyUtils {
 
             JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
 
-            JXBrowserHelper.selectElementByCssSelector(browser, ".quantity-dropdown .a-button-text").click();
+            DOMElement dropdownBtn = JXBrowserHelper.selectElementByCssSelector(browser, ".quantity-dropdown .a-button-text");
+            if (dropdownBtn == null) {
+                continue;
+            }
+
+            dropdownBtn.click();
             JXBrowserHelper.waitUntilVisible(browser, "div.a-popover-wrapper ul.a-list-link");
 
-            List<DOMElement> anchors = JXBrowserHelper.selectElementsByCssSelector(browser, "div.a-popover-wrapper ul.a-list-link > li > a");
+            List<DOMElement> anchors = JXBrowserHelper.selectElementsByCssSelector(browser,
+                    "div.a-popover-wrapper ul.a-list-link > li > a");
             for (DOMElement we : anchors) {
                 if (order.quantity_purchased.equals(we.getInnerText().trim())) {
                     we.click();
@@ -94,11 +115,6 @@ public class QtyUtils {
                     break;
                 }
             }
-
-
-            //DOMElement select = JXBrowserHelper.selectElementByCssSelector(browser, "select.a-native-dropdown.quantity-dropdown-select.js-select");
-            //LOGGER.info(select.getInnerHTML());
-
 
             //get the qty now
             order.quantity_fulfilled = JXBrowserHelper.text(browser, ".quantity-dropdown .a-dropdown-prompt");
@@ -108,7 +124,8 @@ public class QtyUtils {
             DOMElement errorContainer = JXBrowserHelper.selectElementByCssSelector(browser, ".a-row.update-quantity-error");
 
             if (JXBrowserHelper.isVisible(errorContainer)) {
-                List<DOMElement> errors = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-row.update-quantity-error .error-message");
+                List<DOMElement> errors = JXBrowserHelper.selectElementsByCssSelector(browser,
+                        ".a-row.update-quantity-error .error-message");
                 errors.removeIf(JXBrowserHelper::isHidden);
                 if (CollectionUtils.isNotEmpty(errors)) {
                     LOGGER.error("Error updating qty - {}", errors.stream().map(DOMElement::getInnerText).collect(Collectors.toSet()));

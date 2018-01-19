@@ -7,7 +7,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class OrderManAddressValidatorTest  extends BaseTest {
-    @Inject
+    @Inject private
     OrderManAddressValidator addressValidator;
 
     @Test

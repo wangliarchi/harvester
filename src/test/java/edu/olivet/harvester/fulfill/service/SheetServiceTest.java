@@ -16,8 +16,8 @@ import static org.testng.Assert.assertEquals;
 
 public class SheetServiceTest extends BaseTest {
 
-    @Inject SheetService sheetService;
-    @Inject AppScript appScript;
+    @Inject private SheetService sheetService;
+    @Inject private AppScript appScript;
 
     @Test
     public void testLocateOrder() throws Exception {
@@ -43,6 +43,15 @@ public class SheetServiceTest extends BaseTest {
     @Test
     public void testLocateOrders() throws Exception {
         List<Order> orders = appScript.readOrders("1t1iEDNrokcqjE7cTEuYW07Egm6By2CNsMuog9TK1LhI", "test");
+        for (Order order : orders) {
+            assertEquals(order.row, sheetService.reloadOrder(order).row);
+        }
+    }
+
+
+    @Test
+    public void testReloadOrder() throws Exception {
+        List<Order> orders = appScript.readOrders("1LjbM8Uc7bOpPPZOSzFARUzO7HH96KQ_1BVrjPldYGxI", "12/16");
         for (Order order : orders) {
             assertEquals(order.row, sheetService.reloadOrder(order).row);
         }

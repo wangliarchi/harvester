@@ -91,7 +91,7 @@ public class ConfirmShipments {
     @Inject
     private DBManager dbManager;
 
-    @Inject ShipDateUtils shipDateUtils;
+    @Inject private ShipDateUtils shipDateUtils;
 
     @Setter
     private int lastOrderRowNo = 3;
@@ -287,7 +287,7 @@ public class ConfirmShipments {
 
     @Repeat
     public void recordConfirmationLog(Country country, Worksheet worksheet, StringBuilder resultSummary,
-                                      StringBuilder resultDetail, String result, File feedFile) {
+                                       StringBuilder resultDetail, String result, File feedFile) {
         //write log to worksheet
         writeLogToWorksheet(worksheet, result, resultSummary.toString());
 
@@ -401,7 +401,7 @@ public class ConfirmShipments {
     }
 
 
-    public String _submitFeed(File feedFile, Country country) {
+    private String _submitFeed(File feedFile, Country country) {
 
         for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
             MarketWebServiceIdentity credential;
@@ -434,14 +434,14 @@ public class ConfirmShipments {
         "Internal Error",
         "Failed to retrieve batch id"};
 
-    protected boolean isRepeatable(Exception e) {
+    private boolean isRepeatable(Exception e) {
         return Strings.containsAnyIgnoreCase(e.getMessage(), RECOVERABLE_ERROR_MESSAGES);
     }
 
     /**
      * get orders from given worksheet. .
      */
-    protected List<Order> getOrdersFromWorksheet(Worksheet worksheet) {
+    List<Order> getOrdersFromWorksheet(Worksheet worksheet) {
         Country country;
         try {
             country = worksheet.getSpreadsheet().getSpreadsheetCountry();
@@ -456,7 +456,7 @@ public class ConfirmShipments {
     /**
      * get orders from given worksheet. .
      */
-    protected List<Order> getOrdersFromWorksheet(Worksheet worksheet, Country country) {
+    public List<Order> getOrdersFromWorksheet(Worksheet worksheet, Country country) {
 
         List<Order> orders = new ArrayList<>();
 
@@ -506,7 +506,7 @@ public class ConfirmShipments {
     }
 
 
-    public File generateFeedFile(Worksheet worksheet, List<Order> orders) {
+    private File generateFeedFile(Worksheet worksheet, List<Order> orders) {
 
         Date defaultShipDate;
         try {
@@ -605,7 +605,7 @@ public class ConfirmShipments {
     }
 
 
-    @Inject
+    @Inject private
     FeedSubmissionFetcher feedSubmissionFetcher;
 
     public List<FeedSubmissionInfo> getUnprocessedFeedSubmission(Country country) {

@@ -30,7 +30,8 @@ public class DisplayContentDialog extends JDialog {
 
             Language lang = Language.current();
             String postfix = lang == Language.ZH_CN ? StringUtils.EMPTY : ("_" + lang.locale().toString());
-            content = IOUtils.toString(DisplayContentDialog.class.getResourceAsStream("/" + action.name().toLowerCase() + postfix + ".txt"), Constants.UTF8);
+            content = IOUtils.toString(
+                    DisplayContentDialog.class.getResourceAsStream("/" + action.name().toLowerCase() + postfix + ".txt"), Constants.UTF8);
 
             textArea.setText(content);
         } catch (Exception e) {
@@ -38,7 +39,7 @@ public class DisplayContentDialog extends JDialog {
         }
     }
 
-    public DisplayContentDialog(Frame parent, boolean modal) {
+    private DisplayContentDialog(Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
     }
@@ -101,5 +102,5 @@ public class DisplayContentDialog extends JDialog {
         dispose();
     }
 
-    protected JTextArea textArea;
+    private JTextArea textArea;
 }

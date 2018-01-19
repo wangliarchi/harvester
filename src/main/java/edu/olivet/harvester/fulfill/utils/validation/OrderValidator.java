@@ -3,30 +3,31 @@ package edu.olivet.harvester.fulfill.utils.validation;
 import com.amazonservices.mws.orders._2013_09_01.model.OrderItem;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
+import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.amazon.OrderFetcher;
 import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.UIText;
+import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.model.FulfillmentEnum;
 import edu.olivet.harvester.fulfill.model.OrderFulfillmentRecord;
+import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.Seller;
-import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.AmazonOrderService;
 import edu.olivet.harvester.fulfill.service.DailyBudgetHelper;
 import edu.olivet.harvester.fulfill.service.ForbiddenSeller;
 import edu.olivet.harvester.fulfill.service.SheetService;
-import edu.olivet.harvester.fulfill.utils.ConditionUtils;
-import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
-import edu.olivet.harvester.fulfill.utils.OrderStatusUtils;
+import edu.olivet.harvester.fulfill.utils.*;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.model.OrderEnums;
 import edu.olivet.harvester.model.Remark;
 import edu.olivet.harvester.utils.Settings;
 import edu.olivet.harvester.utils.common.DateFormat;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.nutz.dao.Cnd;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,26 +103,27 @@ public class OrderValidator {
         }
     }
 
-    public static boolean skipCheck(Order order, SkipValidation skipValidation) {
-        RuntimeSettings settings = RuntimeSettings.load();
-        return skipCheck(settings, order, skipValidation);
+    public static boolean skipCheck(@NotNull Order order, SkipValidation skipValidation) {
+        //noinspection SimplifiableIfStatement
+        if (Remark.FORCE_FULFILL.isContainedBy(order.remark)) {
+            return true;
+        }
+
+        return skipCheck(order.getTask(), skipValidation);
     }
 
-    public static boolean needCheck(Order order, SkipValidation skipValidation) {
+    public static boolean skipCheck(@NotNull OrderSubmissionTask task, SkipValidation skipValidation) {
+        return task.getSkipValidation() != null &&
+                (task.getSkipValidation() == skipValidation || task.getSkipValidation() == SkipValidation.All);
+
+    }
+
+    public static boolean needCheck(@NotNull Order order, SkipValidation skipValidation) {
         return !skipCheck(order, skipValidation);
     }
 
-
-    public static boolean skipCheck(RuntimeSettings settings, Order order, SkipValidation skipValidation) {
-        //noinspection SimplifiableIfStatement
-        if (order != null && Remark.FORCE_FULFILL.isContainedBy(order.remark)) {
-            return true;
-        }
-        return settings != null && settings.getSkipValidation() != null && (settings.getSkipValidation() == skipValidation || settings.getSkipValidation() == SkipValidation.All);
-    }
-
-    public static boolean needCheck(RuntimeSettings settings, Order order, SkipValidation skipValidation) {
-        return !skipCheck(settings, order, skipValidation);
+    public static boolean needCheck(@NotNull OrderSubmissionTask task, SkipValidation skipValidation) {
+        return !skipCheck(task, skipValidation);
     }
 
 
@@ -131,9 +133,9 @@ public class OrderValidator {
                 return canMarkStatus(order);
             case SubmitOrder:
                 return canSubmit(order);
+            default:
+                return null;
         }
-
-        return null;
     }
 
 
@@ -148,7 +150,6 @@ public class OrderValidator {
                 Validator.NotSelfOrder,
                 Validator.IsSupplierHunted,
                 Validator.IsNotUKForward
-                //Validator.StatusIsInitial
         );
 
     }
@@ -167,7 +168,7 @@ public class OrderValidator {
                 Validator.IsNotUKForward,
                 Validator.IsSupplierHunted,
                 //Validator.HasValidBuyerAccount,
-                Validator.HasValidCreditCard,
+                //Validator.HasValidCreditCard,
                 Validator.IsNotAddOn,
                 Validator.AddressNotChanged,
                 //Validator.StatusMarkedCorrectForSubmit,
@@ -389,8 +390,7 @@ public class OrderValidator {
 
     }
 
-    @Inject
-    AmazonOrderService amazonOrderService;
+    @Inject private AmazonOrderService amazonOrderService;
 
     /**
      * 判定当前订单的地址信息是否有效：收件人地址至少需要有一个，目的地国家必须明确声明
@@ -409,15 +409,26 @@ public class OrderValidator {
         }
 
         try {
+            CountryStateUtils.getInstance().getCountryCode(order.ship_country);
+        } catch (Exception e) {
+            return Strings.getExceptionMsg(e);
+        }
+
+        try {
             Order reloadedOrder = amazonOrderService.reloadOrder(order);
             if (reloadedOrder != null) {
 
-                if (!StringUtils.equalsAnyIgnoreCase(order.recipient_name.replaceAll("^\"|\"$", ""), reloadedOrder.recipient_name.replaceAll("^\"|\"$", ""))) {
+                if (!StringUtils.equalsAnyIgnoreCase(order.recipient_name.replaceAll("^\"|\"$", ""),
+                        reloadedOrder.recipient_name.replaceAll("^\"|\"$", ""))) {
                     return "Order recipient name is not the same from amazon. please check in seller center";
                 }
 
-                if (!StringUtils.equalsAnyIgnoreCase(order.ship_address_1.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""), reloadedOrder.ship_address_1.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""), reloadedOrder.ship_address_2.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), "")) ||
-                        !StringUtils.equalsAnyIgnoreCase(order.ship_address_2.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""), reloadedOrder.ship_address_1.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""), reloadedOrder.ship_address_2.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""))) {
+                if (!StringUtils.equalsAnyIgnoreCase(order.ship_address_1.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""),
+                        reloadedOrder.ship_address_1.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""),
+                        reloadedOrder.ship_address_2.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), "")) ||
+                        !StringUtils.equalsAnyIgnoreCase(order.ship_address_2.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""),
+                                reloadedOrder.ship_address_1.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""),
+                                reloadedOrder.ship_address_2.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""))) {
                     return "Order shipping address is not the same from amazon. please check in seller center";
                 }
                 if (!StringUtils.equalsAnyIgnoreCase(order.ship_country, reloadedOrder.ship_country)) {
@@ -446,6 +457,12 @@ public class OrderValidator {
             return "Order edd field is not valid, please check Estimated Delivery Date column. It should be column AM on google sheet.";
         }
 
+        try {
+            OrderCountryUtils.getMarketplaceCountry(order);
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+
         if (!result) {
             return "Order information is not valid, please check ISBN, item name, quantity purchased and shipping fee columns.";
         }
@@ -460,18 +477,19 @@ public class OrderValidator {
         return "";
     }
 
-//    public String hasValidBuyerAccount(Order order) {
-//        try {
-//            Account buyer = OrderBuyerUtils.getBuyer(order);
-//            if (!buyer.valid()) {
-//                throw new BusinessException("Buyer account " + buyer + "is not valid.");
-//            }
-//        } catch (Exception e) {
-//            LOGGER.error("", e);
-//            return String.format("order buyer account not set properly. %s - %s", OrderCountryUtils.getFulfillmentCountry(order), Settings.load().getSpreadsheetType(order.getSpreadsheetId()));
-//        }
-//        return "";
-//    }
+    public String hasValidBuyerAccount(Order order) {
+        try {
+            Account buyer = OrderBuyerUtils.getBuyer(order);
+            if (!buyer.valid()) {
+                throw new BusinessException("Buyer account " + buyer + "is not valid.");
+            }
+        } catch (Exception e) {
+            LOGGER.error("", e);
+            return String.format("order buyer account not set properly. %s - %s",
+                    OrderCountryUtils.getFulfillmentCountry(order), Settings.load().getSpreadsheetType(order.getSpreadsheetId()));
+        }
+        return "";
+    }
 
     public String fulfillmentCountryIsValid(Order order) {
         try {
@@ -483,15 +501,14 @@ public class OrderValidator {
         return "";
     }
 
-    //todo
     public String hasValidCreditCard(Order order) {
-        return "";
-//        try {
-//            CreditCardUtils.getCreditCard(order);
-//            return "";
-//        } catch (Exception e) {
-//            return "No valid credit card found.";
-//        }
+        try {
+            Account buyer = OrderBuyerUtils.getBuyer(order);
+            CreditCardUtils.getCreditCard(buyer);
+            return "";
+        } catch (Exception e) {
+            return "No valid credit card found.";
+        }
     }
 
     /**
@@ -529,7 +546,7 @@ public class OrderValidator {
         return "";
     }
 
-    @Inject
+    @Inject private
     DailyBudgetHelper dailyBudgetHelper;
 
     public String hasEnoughBudgetToFulfill(Order order) {
@@ -556,14 +573,11 @@ public class OrderValidator {
      *     如果remark有所改变的话，只是检查remark 就 不足了
      * </pre>
      */
-    @Inject
-    private DBManager dbManager;
+    @Inject private DBManager dbManager;
 
-    @Inject
-    OrderFetcher orderFetcher;
+    @Inject private OrderFetcher orderFetcher;
 
-    @Inject
-    SheetService sheetService;
+    @Inject private SheetService sheetService;
 
     //todo need more careful check!!!
     public String notDuplicatedOrder(Order order) {
@@ -620,7 +634,8 @@ public class OrderValidator {
             order.last_code = record.getLastCode();
 
             sheetService.fillFulfillmentOrderInfo(order.getSpreadsheetId(), order);
-            return String.format("Order fulfilled at %s with order number %s by buyer account %s. Please check if this order is a duplicated record. If not, please update remark.",
+            return String.format("Order fulfilled at %s with order number %s by buyer account %s." +
+                            " Please check if this order is a duplicated record. If not, please update remark.",
                     DateFormat.DATE_TIME.format(record.getFulfillDate()), record.getOrderNumber(), record.getBuyerAccount()
             );
         }
@@ -629,8 +644,7 @@ public class OrderValidator {
     }
 
 
-    @Inject
-    ForbiddenSeller forbiddenSeller;
+    @Inject private ForbiddenSeller forbiddenSeller;
 
     public String isNotForbiddenSeller(Order order) {
         if (OrderValidator.skipCheck(order, SkipValidation.ForbiddenSupplier)) {
@@ -649,8 +663,8 @@ public class OrderValidator {
 
 
     public static String sellerPriceChangeNotExceedConfiguration(Order order, Seller seller) {
-        RuntimeSettings settings = RuntimeSettings.load();
-        float maxAllowed = Float.parseFloat(settings.getPriceLimit());
+
+        float maxAllowed = Float.parseFloat(order.getTask().getPriceLimit());
         float priceRaised = seller.getPrice().toUSDAmount().floatValue() - order.getSellerPrice().toUSDAmount().floatValue();
         if (maxAllowed < priceRaised) {
             return "Seller price raised " + String.format("%.2f", priceRaised) + " to " + seller.getPrice().usdText();
@@ -676,7 +690,7 @@ public class OrderValidator {
         if (StringUtils.isBlank(order.url) || order.url.length() <= 3) {
             return "";
         }
-        String prefix = String.format("%s/%s", order.sheetName, RuntimeSettings.load().getSid());
+        String prefix = String.format("%s/%s", order.sheetName, order.getTask().getSid());
         if (!order.url.contains(prefix)) {
             return "Order url is invalid. current is '" + order.url + "', should be '" + prefix + "xxx'";
         }

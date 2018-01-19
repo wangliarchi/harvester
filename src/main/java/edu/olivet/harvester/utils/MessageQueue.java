@@ -7,7 +7,7 @@ import edu.olivet.foundations.ui.InformationLevel;
  * 消息队列处理接口
  * @author <a href="mailto:nathanael4ever@gmail.com">Nathanael Yang</a> 1/21/2016 7:53 PM
  */
-public interface MessageQueue {
+interface MessageQueue {
     /**
      * 添加、显示一条短文本消息
      */

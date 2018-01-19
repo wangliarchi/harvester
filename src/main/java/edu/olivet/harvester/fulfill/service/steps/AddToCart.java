@@ -16,13 +16,13 @@ public class AddToCart extends Step {
 
 
 
-    @Inject SellerService sellerService;
+    @Inject private SellerService sellerService;
     protected void process(FlowState state) {
         OfferListingPage offerListingPage = new OfferListingPage(state.getBuyerPanel(), sellerService);
         offerListingPage.addToCart(state.getOrder());
     }
 
-    @Inject ProcessToCheckout processToCheckout;
+    @Inject private ProcessToCheckout processToCheckout;
     public Step createDynamicInstance(FlowState state) {
         state.setPrevStep(this);
         return processToCheckout;

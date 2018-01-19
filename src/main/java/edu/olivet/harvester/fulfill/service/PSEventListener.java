@@ -28,35 +28,34 @@ public class PSEventListener {
     public static void start() {
         status = Status.Running;
         eventHandler.showPauseBtn();
+        eventHandler.disableStartButton();
     }
 
     public static void pause() {
         status = Status.Paused;
-        eventHandler.showPauseBtn();
+        eventHandler.paused();
+    }
+
+    public static void resume() {
+        status = Status.Running;
+        eventHandler.resetPauseBtn();
     }
 
     public static void stop() {
         status = Status.Stopped;
         eventHandler.hidePauseBtn();
+        eventHandler.enableStartButton();
     }
 
-    public static void resume() {
-        status = Status.Running;
-        eventHandler.showPauseBtn();
-    }
+
 
     public static void end() {
         status = Status.Ended;
         eventHandler.hidePauseBtn();
+        eventHandler.enableStartButton();
     }
 
     public static boolean isRunning() {
-        if (OrderDispatcher.getInstance().hasJobRunning()) {
-            if (status != Status.Running) {
-                start();
-            }
-        }
-
         return status == Status.Running;
     }
 
@@ -68,9 +67,6 @@ public class PSEventListener {
         return status == Status.Paused;
     }
 
-    public static boolean ended() {
-        return status == Status.Ended;
-    }
 
 
 }

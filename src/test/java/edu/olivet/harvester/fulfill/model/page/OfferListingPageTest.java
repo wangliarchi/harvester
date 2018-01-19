@@ -16,7 +16,7 @@ import static org.testng.Assert.assertEquals;
 
 public class OfferListingPageTest extends BaseTest {
 
-    @Inject SellerService sellerService;
+    @Inject private SellerService sellerService;
     @Test
     public void findSeller() {
         order = prepareOrder();

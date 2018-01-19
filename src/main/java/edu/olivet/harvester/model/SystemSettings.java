@@ -54,7 +54,7 @@ public class SystemSettings {
         return instance;
     }
 
-    public static String getConfigPath() {
+    private static String getConfigPath() {
         if (Harvester.debugFlag) {
             return TEST_SYSTEM_SETTINGS_FILE_PATH;
         }

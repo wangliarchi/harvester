@@ -184,8 +184,8 @@ public class ISBNUtils {
         } catch (Exception e) {
             //
         }
-        String _isbn = ISBNUtils.correct(isbn);
-        Connection conn = Jsoup.connect(String.format(PRODUCT_PAGE_URL, baseUrl, _isbn));
+        String correctedIsbn = ISBNUtils.correct(isbn);
+        Connection conn = Jsoup.connect(String.format(PRODUCT_PAGE_URL, baseUrl, correctedIsbn));
         conn.userAgent("Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36");
         conn.header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
         conn.header("Accept-Encoding", "gzip, deflate, sdch");
@@ -205,7 +205,7 @@ public class ISBNUtils {
         }
 
         if (doc.select("#captchacharacters").size() > 0) {
-            LOGGER.warn("在{}上面基于JSOUP读取{}书名时被判定为机器人访问:{}", baseUrl, _isbn, doc.title());
+            LOGGER.warn("在{}上面基于JSOUP读取{}书名时被判定为机器人访问:{}", baseUrl, correctedIsbn, doc.title());
             return StringUtils.EMPTY;
         }
 

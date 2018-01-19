@@ -9,52 +9,52 @@ public class Rating {
     /**
      * 必选Seller的年度Rating数基准
      */
-    public static final int BEST_SELLER_YEAR_RATING_COUNT = 1000;
+    private static final int BEST_SELLER_YEAR_RATING_COUNT = 1000;
     /**
      * 可选Seller的年度Rating数基准
      */
-    public static final int GOOD_SELLER_YEAR_RATING_COUNT = 60;
+    private static final int GOOD_SELLER_YEAR_RATING_COUNT = 60;
     /**
      * 必选、可选Seller的月Rating数基准
      */
-    public static final int BEST_GOOD_MONTH_RATING_COUNT = 2;
+    private static final int BEST_GOOD_MONTH_RATING_COUNT = 2;
 
     /**
      * 欧洲Seller的月Rating数基准
      */
-    public static final int EUACC_GOOD_MONTH_RATING_COUNT = 10;
+    private static final int EUACC_GOOD_MONTH_RATING_COUNT = 10;
 
     /**
      * 必选Seller的年度Rating基准
      */
-    public static final int BEST_SELLER_YEAR_RATING = 98;
+    private static final int BEST_SELLER_YEAR_RATING = 98;
     /**
      * 必选Seller的月Rating基准
      */
-    public static final int BEST_SELLER_MONTH_RATING = 98;
+    private static final int BEST_SELLER_MONTH_RATING = 98;
 
     /**
      * 欧洲Seller的月Rating数基准
      */
-    public static final int EUACC_SELLER_MONTH_RATING = 97;
+    private static final int EUACC_SELLER_MONTH_RATING = 97;
 
     /**
      * 可选Seller的年度Rating基准
      */
-    public static final int GOOD_SELLER_YEAR_RATING = 95;
+    private static final int GOOD_SELLER_YEAR_RATING = 95;
     /**
      * 可选Seller的月Rating基准
      */
-    public static final int GOOD_SELLER_MONTH_RATING = 95;
+    private static final int GOOD_SELLER_MONTH_RATING = 95;
 
     /**
      * 可选产品Seller的年度Rating基准
      */
-    public static final int GOOD_PRODUCT_SELLER_YEAR_RATING = 90;
+    private static final int GOOD_PRODUCT_SELLER_YEAR_RATING = 90;
     /**
      * 可选产品Seller的年度Rating基准
      */
-    public static final int GOOD_PRODUCT_SELLER_MONTH_RATING = 90;
+    private static final int GOOD_PRODUCT_SELLER_MONTH_RATING = 90;
 
     /**
      * 必选Seller的月Rating底线：即便其在Seller库中是必选Seller，其Rating也不能低于底限
@@ -70,36 +70,42 @@ public class Rating {
         /**
          * 必选书类/CD及产品Seller标准
          */
-        public static final Standard BEST = new Standard(BEST_SELLER_YEAR_RATING_COUNT, BEST_SELLER_YEAR_RATING, BEST_GOOD_MONTH_RATING_COUNT, BEST_SELLER_MONTH_RATING);
+        public static final Standard BEST =
+                new Standard(BEST_SELLER_YEAR_RATING_COUNT, BEST_SELLER_YEAR_RATING, BEST_GOOD_MONTH_RATING_COUNT, BEST_SELLER_MONTH_RATING);
         /**
-         * 可选新书/CD Seller标准
+         *可选新书/CD Seller标准
          */
-        public static final Standard GOOD = new Standard(GOOD_SELLER_YEAR_RATING_COUNT, GOOD_SELLER_YEAR_RATING, BEST_GOOD_MONTH_RATING_COUNT, GOOD_SELLER_MONTH_RATING);
+        public static final Standard GOOD =
+                new Standard(GOOD_SELLER_YEAR_RATING_COUNT, GOOD_SELLER_YEAR_RATING, BEST_GOOD_MONTH_RATING_COUNT, GOOD_SELLER_MONTH_RATING);
         /**
-         * 可选旧书/CD Seller标准
+         *可选旧书/CD Seller标准
          */
-        public static final Standard GOOD_USED = new Standard(GOOD_SELLER_YEAR_RATING_COUNT, GOOD_SELLER_YEAR_RATING - 2, BEST_GOOD_MONTH_RATING_COUNT, GOOD_SELLER_MONTH_RATING - 2);
+        public static final Standard GOOD_USED =
+                new Standard(GOOD_SELLER_YEAR_RATING_COUNT, GOOD_SELLER_YEAR_RATING - 2, BEST_GOOD_MONTH_RATING_COUNT, GOOD_SELLER_MONTH_RATING - 2);
         /**
-         * 可选产品Seller标准
+         *可选产品Seller标准
          */
-        public static final Standard GOOD_PRODUCT = new Standard(GOOD_SELLER_YEAR_RATING_COUNT, GOOD_PRODUCT_SELLER_YEAR_RATING, BEST_GOOD_MONTH_RATING_COUNT, GOOD_PRODUCT_SELLER_MONTH_RATING);
+        public static final Standard GOOD_PRODUCT =
+                new Standard(GOOD_SELLER_YEAR_RATING_COUNT, GOOD_PRODUCT_SELLER_YEAR_RATING, BEST_GOOD_MONTH_RATING_COUNT, GOOD_PRODUCT_SELLER_MONTH_RATING);
         /**
-         * AP或者WareHouse的Dummy Standard(通常无视Standard)
+         *AP或者WareHouse的Dummy Standard(通常无视Standard)
          */
-        public static final Standard AP_OR_WAREHOUSE = new Standard(Rating.AP_COUNT, Rating.AP_POSITIVE, Rating.AP_COUNT, Rating.AP_POSITIVE);
+        public static final Standard AP_OR_WAREHOUSE =
+                new Standard(Rating.AP_COUNT, Rating.AP_POSITIVE, Rating.AP_COUNT, Rating.AP_POSITIVE);
 
         /**
-         * 欧洲acceptable Seller标准
+         *欧洲acceptable Seller标准
          */
-        public static final Standard EU_ACC = new Standard(BEST_SELLER_YEAR_RATING_COUNT, BEST_SELLER_YEAR_RATING, EUACC_GOOD_MONTH_RATING_COUNT, EUACC_SELLER_MONTH_RATING);
+        public static final Standard EU_ACC =
+                new Standard(BEST_SELLER_YEAR_RATING_COUNT, BEST_SELLER_YEAR_RATING, EUACC_GOOD_MONTH_RATING_COUNT, EUACC_SELLER_MONTH_RATING);
 
         public Standard() {
         }
 
         /**
-         * 是否高于某一指定标准线
+         *是否高于某一指定标准线
          *
-         * @param std 待比较标准线
+         *@param std 待比较标准线
          */
         public boolean pass(Standard std) {
             return this.yearCount >= std.yearCount && this.yearRating >= std.yearRating &&
@@ -114,23 +120,23 @@ public class Rating {
         }
 
         /**
-         * 年度Rating数标准
+         *年度Rating数标准
          */
-        public int yearCount;
+        int yearCount;
         /**
-         * 年度Rating标准
+         *年度Rating标准
          */
-        public int yearRating;
+        int yearRating;
         /**
-         * 当月Rating数标准
+         *当月Rating数标准
          */
-        public int monthCount;
+        int monthCount;
         /**
-         * 当月Rating标准
+         *当月Rating标准
          */
-        public int monthRating;
+        int monthRating;
 
-        //		@Override
+        //@Override
         public String toString() {
             return UIText.text("supplier.rating.standard", yearRating, yearCount, monthRating, monthCount);
         }
@@ -164,7 +170,7 @@ public class Rating {
     }
 
     public static void main(String[] args) {
-        System.out.println(new Rating(new int[]{91, 192}, new int[]{1, 3}, new int[]{7, 15}, 210));
+        System.out.println(new Rating(new int[] {91, 192}, new int[] {1, 3}, new int[] {7, 15}, 210));
     }
 
     public Rating() {

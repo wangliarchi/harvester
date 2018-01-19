@@ -22,7 +22,7 @@ public class UpdateQty extends Step {
         selectShippingMethod.updateQty(state.getOrder());
     }
 
-    @Inject
+    @Inject private
     StepHelper stepHelper;
 
     public Step createDynamicInstance(FlowState state) {

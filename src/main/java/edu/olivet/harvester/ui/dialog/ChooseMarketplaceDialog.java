@@ -45,8 +45,8 @@ public class ChooseMarketplaceDialog extends BaseDialog {
     }
 
 
-    DateTimePicker fromDateTimePicker;
-    DateTimePicker toDateTimePicker;
+    private DateTimePicker fromDateTimePicker;
+    private DateTimePicker toDateTimePicker;
 
     private void initComponents() {
 

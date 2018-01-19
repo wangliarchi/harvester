@@ -36,15 +36,15 @@ public class ForbiddenSeller extends AppScript {
     private static final Map<String, List<String>> REGION_FORBIDDEN_LIST_CACHE = new HashMap<>();
 
     public boolean isForbidden(Seller seller) {
-        List<String> forbiddenSellers = REGION_FORBIDDEN_LIST_CACHE.computeIfAbsent(seller.getOfferListingCountry().name(),
-                key -> load(seller.getOfferListingCountry()));
+        List<String> forbiddenSellers = REGION_FORBIDDEN_LIST_CACHE
+                .computeIfAbsent(seller.getOfferListingCountry().name(), key -> load(seller.getOfferListingCountry()));
 
         return CollectionUtils.containsAny(forbiddenSellers,
                 Lists.newArrayList(seller.getName().toLowerCase(), seller.getUuid().toLowerCase()));
 
     }
 
-    public List<String> load(Country country) {
+    private List<String> load(Country country) {
         List<String> forbiddenSellers = new ArrayList<>();
         File localFile = new File(Directory.Customize.path() + File.separator + Config.ForbiddenSellers.fileName());
         String json;
@@ -71,7 +71,7 @@ public class ForbiddenSeller extends AppScript {
         return forbiddenSellers;
     }
 
-    public String get() {
+    private String get() {
         try {
             return Jsoup.connect(APP_SCRIPT_URL).timeout(WaitTime.Longer.valInMS()).ignoreContentType(true).execute().body();
         } catch (IOException e) {

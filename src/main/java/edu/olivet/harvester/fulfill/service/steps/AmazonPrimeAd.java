@@ -20,7 +20,7 @@ public class AmazonPrimeAd extends Step {
         amazonPrimeAdPage.execute(state.getOrder());
     }
 
-    @Inject
+    @Inject private
     StepHelper stepHelper;
 
     @Override

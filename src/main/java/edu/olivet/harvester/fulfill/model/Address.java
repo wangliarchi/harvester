@@ -1,13 +1,9 @@
 package edu.olivet.harvester.fulfill.model;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.base.Objects;
-import edu.olivet.foundations.utils.Configs;
 import edu.olivet.foundations.utils.RegexUtils;
-import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.utils.Config;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -34,6 +30,7 @@ public class Address {
     private String zip5 = "";
     private String zip4 = "";
     private String phoneNumber = "";
+    private String noInvoiceText = "{No Invoice}";
 
 
     public void setZip(String zip) {
@@ -63,7 +60,12 @@ public class Address {
         address.setAddress2(order.ship_address_2);
         address.setZip(order.ship_zip);
         address.setName(order.recipient_name.replaceAll("\"", "").replaceAll("&#34;", ""));
-        if ("unlisted".equalsIgnoreCase(order.ship_phone_number)) {
+
+        if (order.getTask() != null) {
+            address.setNoInvoiceText(order.getTask().getNoInvoiceText());
+        }
+
+        if (StringUtils.isBlank(order.ship_phone_number) || "unlisted".equalsIgnoreCase(order.ship_phone_number)) {
             address.setPhoneNumber("321-123-456");
         } else {
             address.setPhoneNumber(order.ship_phone_number);
@@ -82,13 +84,10 @@ public class Address {
         address.setCountry(country);
         address.setZip(getZip());
         address.setPhoneNumber(phoneNumber);
-
+        address.setNoInvoiceText(noInvoiceText);
         return address;
     }
 
-    public static Address USFwdAddress() {
-        return JSON.parseObject(Configs.read(Config.USForwardAddress.fileName()), Address.class);
-    }
 
     public String getCountryCode() {
         if (StringUtils.isBlank(country)) {
@@ -122,7 +121,7 @@ public class Address {
         return "US".equalsIgnoreCase(getCountryCode());
     }
 
-    public boolean isCAAddress() {
+    private boolean isCAAddress() {
         return "CA".equalsIgnoreCase(getCountryCode());
     }
 
@@ -190,19 +189,19 @@ public class Address {
 
     public String getRecipient() {
 
-        return name.replace(RuntimeSettings.load().getNoInvoiceText(), "")
+        return name.replace(noInvoiceText, "")
                 .replaceAll(RegexUtils.Regex.PUNCTUATION.val(), "")
                 .replaceAll(" ", "");
     }
 
-    public Set<String> addressSet() {
+    private Set<String> addressSet() {
         String a1 = cleanAddress(address1);
         String a2 = cleanAddress(address2);
         return new HashSet<>(Arrays.asList(a1 + "" + a2, a2 + "" + a1));
     }
 
 
-    public String cleanAddress(String addr) {
+    private String cleanAddress(String addr) {
         String a1 = addr.replaceAll(RegexUtils.Regex.PUNCTUATION.val(), StringUtils.EMPTY);
         a1 = a1.replaceAll(" ", "");
         return a1.toUpperCase();
@@ -215,11 +214,13 @@ public class Address {
 
     @Override
     public String toString() {
-        return getRecipient() + (StringUtils.isNotBlank(address1) ? ", " + address1 : "") + (StringUtils.isNotBlank(address2) ? ", " + address2 : "") + ", " + city + ", " + state + " " + getZip() + ", " + country;
+        return getRecipient() + (StringUtils.isNotBlank(address1) ? ", " + address1 : "") +
+                (StringUtils.isNotBlank(address2) ? ", " + address2 : "") + ", " + city + ", " + state + " " + getZip() + ", " + country;
     }
 
     public String withoutName() {
-        return (StringUtils.isNotBlank(address1) ? ", " + address1 : "") + (StringUtils.isNotBlank(address2) ? ", " + address2 : "") + ", " + city + ", " + getFullStateName() + " " + getZip() + ", " + country;
+        return (StringUtils.isNotBlank(address1) ? ", " + address1 : "") + (StringUtils.isNotBlank(address2) ? ", " + address2 : "") +
+                ", " + city + ", " + getFullStateName() + " " + getZip() + ", " + country;
     }
 
 }

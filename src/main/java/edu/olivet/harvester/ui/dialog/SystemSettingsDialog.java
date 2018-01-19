@@ -76,8 +76,8 @@ public class SystemSettingsDialog  extends BaseDialog {
 
     }
 
-    OrderExportSettingPanel orderExportSettingPanel;
-    OrderConfirmationSettingPanel orderConfirmationSettingPanel;
+    private OrderExportSettingPanel orderExportSettingPanel;
+    private OrderConfirmationSettingPanel orderConfirmationSettingPanel;
     @Override
     public void ok() {
         orderExportSettingPanel.collectData();

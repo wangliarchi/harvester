@@ -31,7 +31,7 @@ public class TitleCheckerEvent implements HarvesterUIEvent {
 
     @Inject
     private AppScript appScript;
-    @Inject OrderService orderService;
+    @Inject private OrderService orderService;
 
     public void execute() {
 

@@ -32,7 +32,7 @@ public class DatetimeHelper {
      * @param cost 消耗时间
      * @return 格式化好的消耗时间
      */
-    public static String formatTime(long cost) {
+    private static String formatTime(long cost) {
         for (int i = 0; i < TIME_RANGES.length; i++) {
             if (cost >= TIME_RANGES[i]) {
                 double result = (double) cost / TIME_RANGES[i];

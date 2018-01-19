@@ -22,14 +22,14 @@ public class Login extends Step {
     }
 
 
-    @Inject
+    @Inject private
     ClearShoppingCart clearShoppingCart;
-    @Inject
+    @Inject private
     AddToCart addToCart;
-    @Inject
+    @Inject private
     ProcessToCheckout processToCheckout;
 
-    @Inject
+    @Inject private
     StepHelper stepHelper;
 
     public Step createDynamicInstance(FlowState state) {

@@ -29,7 +29,7 @@ public class RuntimeSettingsValidator {
     }
 
 
-    List<String> checkSheet(RuntimeSettings settings) {
+    public List<String> checkSheet(RuntimeSettings settings) {
         List<String> errors = new ArrayList<>();
 
         if (StringUtils.isBlank(settings.getSheetName()) || StringUtils.isBlank(settings.getSpreadsheetId()) ||
@@ -40,7 +40,7 @@ public class RuntimeSettingsValidator {
         return errors;
     }
 
-    List<String> checkSheetAndRange(RuntimeSettings settings) {
+    public List<String> checkSheetAndRange(RuntimeSettings settings) {
         List<String> errors = this.checkSheet(settings);
         String error = settings.getAdvancedSubmitSetting().validate();
         if (StringUtils.isNotBlank(error)) {

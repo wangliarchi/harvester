@@ -23,14 +23,16 @@ public class CantShipToAddressPage extends FulfillmentPage {
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
 
 
-        String errorMsg = JXBrowserHelper.text(browser, "#changeQuantityFormId .alertMessage,#changeQuantityFormId .lineitem-error-message");
+        String errorMsg = JXBrowserHelper.text(browser,
+                "#changeQuantityFormId .alertMessage,#changeQuantityFormId .lineitem-error-message");
         if (StringUtils.isNotBlank(errorMsg)) {
             throw new OrderSubmissionException(errorMsg);
         }
 
         //if no error message, try to change to one address mode
         DOMElement shipToOneAddressLink = JXBrowserHelper.selectElementByCssSelector(browser, "#changeQuantityFormId a.pipeline-link");
-        DOMElement useThisAddressBtn = JXBrowserHelper.selectElementByCssSelector(browser, "#changeQuantityFormId .a-button.primary-action-button input");
+        DOMElement useThisAddressBtn = JXBrowserHelper.selectElementByCssSelector(browser,
+                "#changeQuantityFormId .a-button.primary-action-button input");
         if (shipToOneAddressLink != null) {
             String currentAddress = JXBrowserHelper.text(browser, "#changeQuantityFormId .address-dropdown .a-dropdown-prompt").trim();
             if (StringUtils.isNotBlank(currentAddress) &&

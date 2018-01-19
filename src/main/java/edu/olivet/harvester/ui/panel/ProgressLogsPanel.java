@@ -25,11 +25,11 @@ import java.awt.event.ComponentListener;
 @Singleton
 public class ProgressLogsPanel extends JPanel implements MessagePanel {
 
-    public JSplitPane progressSplitPane1;
-    public JTextPane successRecordsTextPanel;
-    public JTextPane failedRecordsTextPanel;
+    private JSplitPane progressSplitPane1;
+    private JTextPane successRecordsTextPanel;
+    private JTextPane failedRecordsTextPanel;
 
-    public static ProgressLogsPanel instance = new ProgressLogsPanel();
+    private static ProgressLogsPanel instance = new ProgressLogsPanel();
 
     public static ProgressLogsPanel getInstance() {
         return instance;
@@ -85,17 +85,17 @@ public class ProgressLogsPanel extends JPanel implements MessagePanel {
         this.setLayout(layout);
         layout.setHorizontalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(progressSplitPane1, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                        .addComponent(progressSplitPane1)
         );
         layout.setVerticalGroup(
                 layout.createParallelGroup(Alignment.BASELINE)
-                        .addComponent(progressSplitPane1, GroupLayout.Alignment.TRAILING, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                        .addComponent(progressSplitPane1)
         );
 
 
     }
 
-    public void initEventListeners() {
+    private void initEventListeners() {
         this.addComponentListener(new ComponentListener() {
             public void componentResized(ComponentEvent e) {
                 progressSplitPane1.setDividerLocation(0.5);

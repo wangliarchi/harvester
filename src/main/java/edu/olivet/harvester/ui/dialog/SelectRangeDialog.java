@@ -35,7 +35,7 @@ public class SelectRangeDialog extends BaseDialog {
      *
      * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Nov 15, 2014 11:01:46 AM
      */
-    public static class FocusTextField extends FocusAdapter {
+    static class FocusTextField extends FocusAdapter {
         @Override
         public void focusGained(FocusEvent e) {
             if (e.getSource() instanceof JTextField) {
@@ -337,8 +337,8 @@ public class SelectRangeDialog extends BaseDialog {
                         .addGroup(layout.createSequentialGroup()
                                 .addContainerGap()
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-                                                .addComponent(scopePanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(typePanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(scopePanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(typePanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 )
                                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -374,7 +374,7 @@ public class SelectRangeDialog extends BaseDialog {
 
     }
 
-    public void initScopePane() {
+    private void initScopePane() {
         scopePanel = new JPanel();
         ButtonGroup scopeBtnGroup = new ButtonGroup();
         allBtn = new JRadioButton();

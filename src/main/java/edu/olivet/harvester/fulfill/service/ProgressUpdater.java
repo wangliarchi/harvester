@@ -8,11 +8,11 @@ import javax.swing.*;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/18/17 11:00 AM
  */
 public class ProgressUpdater {
-    static JProgressBar progressBar;
-    static JLabel progressTextLabel;
-    static int successCount = 0;
-    static int failedCount = 0;
-    static long start;
+    private static JProgressBar progressBar;
+    private static JLabel progressTextLabel;
+    private static int successCount = 0;
+    private static int failedCount = 0;
+    private static long start;
 
     public static void setProgressBarComponent(JProgressBar progressBar, JLabel progressTextLabel) {
         ProgressUpdater.progressBar = progressBar;
@@ -20,7 +20,7 @@ public class ProgressUpdater {
         init(0);
     }
 
-    public static void init(int total) {
+    private static void init(int total) {
         successCount = 0;
         failedCount = 0;
         if (progressBar != null) {
@@ -35,35 +35,36 @@ public class ProgressUpdater {
         start = System.currentTimeMillis();
     }
 
-    public synchronized static void updateTotal(int total) {
+    public static synchronized void updateTotal(int total) {
         if (progressBar != null) {
             progressBar.setMaximum(progressBar.getMaximum() + total);
         }
-        if (progressTextLabel != null) {
-            progressTextLabel.setText(String.format("%d of %d completed", progressBar.getValue(), total));
-        }
+
+        update();
     }
 
-    public synchronized static void success() {
+    public static synchronized void success() {
         successCount++;
         update();
     }
 
-    public synchronized static void failed() {
+    public static synchronized void failed() {
         failedCount++;
         update();
     }
 
-    private synchronized static void update() {
+    private static synchronized void update() {
         int total = successCount + failedCount;
         if (progressBar != null) {
             progressBar.setValue(total);
+
+            if (progressTextLabel != null) {
+                progressTextLabel.setText(String.format("%d of %d, %d success, %d failed, took %s",
+                        total, progressBar.getMaximum(), successCount, failedCount, Strings.formatElapsedTime(start)));
+            }
         }
 
-        if (progressTextLabel != null) {
-            progressTextLabel.setText(String.format("%d of %d, %d success, %d failed, took %s",
-                total, progressBar.getMaximum(), successCount, failedCount, Strings.formatElapsedTime(start)));
-        }
+
     }
 
 

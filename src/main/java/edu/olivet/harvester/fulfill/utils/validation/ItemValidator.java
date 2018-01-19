@@ -43,14 +43,14 @@ public class ItemValidator {
      */
     public static class ValidateReport {
         public boolean pass;
-        public boolean exactlySame;
-        public boolean contain;
-        public int wordsOfISBN;
-        public int wordsOfForm;
-        public int sameWords;
-        public int diffWords;
-        public int sameRate;
-        public int diffRate;
+        boolean exactlySame;
+        boolean contain;
+        int wordsOfISBN;
+        int wordsOfForm;
+        int sameWords;
+        int diffWords;
+        int sameRate;
+        int diffRate;
 
         @Override
         public String toString() {
@@ -166,7 +166,7 @@ public class ItemValidator {
      *
      * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a> Feb 10, 2015 4:27:08 PM
      */
-    public static class CheckResult {
+    static class CheckResult {
         private List<String> errors;
         private boolean popupSheetRange;
         private boolean popupSystemConfig;

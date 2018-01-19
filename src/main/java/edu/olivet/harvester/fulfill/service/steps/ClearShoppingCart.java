@@ -20,7 +20,7 @@ public class ClearShoppingCart extends Step {
         shoppingCartPage.clearShoppingCart();
     }
 
-    @Inject
+    @Inject private
     AddToCart addToCart;
 
     public Step createDynamicInstance(FlowState state) {

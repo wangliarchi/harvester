@@ -110,7 +110,7 @@ public class BaseTest {
     }
 
 
-    static class MockOrderFetcher extends OrderFetcher {
+    private static class MockOrderFetcher extends OrderFetcher {
         @Override
         public List<OrderItem> readItems(String orderId, MarketWebServiceIdentity credential) {
             try {
@@ -125,7 +125,7 @@ public class BaseTest {
 
     }
 
-    static class TestMockModule extends AbstractModule {
+    public static class TestMockModule extends AbstractModule {
 
         @Override
         protected void configure() {

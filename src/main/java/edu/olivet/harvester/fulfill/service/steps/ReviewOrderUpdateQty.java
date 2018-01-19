@@ -21,7 +21,7 @@ public class ReviewOrderUpdateQty extends Step {
         orderReviewMultiPage.updateQty(state.getOrder());
     }
 
-    @Inject
+    @Inject private
     StepHelper stepHelper;
 
     public Step createDynamicInstance(FlowState state) {

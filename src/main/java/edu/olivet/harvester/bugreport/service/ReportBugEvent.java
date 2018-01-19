@@ -32,10 +32,10 @@ public class ReportBugEvent implements HarvesterUIEvent {
 
     @Inject
     private DBManager dbManager;
-    @Inject
+    @Inject private
     VersionManager versionManager;
 
-    @Inject
+    @Inject private
     ErrorAlertService errorAlertService;
 
     @Inject
@@ -43,7 +43,7 @@ public class ReportBugEvent implements HarvesterUIEvent {
 
     private static final String REPORT_BUG_EMAIL_TEMPLATE = "BugReport";
 
-    @Inject
+    @Inject private
     TeamViewerFetcher teamViewerFetcher;
 
     @Override

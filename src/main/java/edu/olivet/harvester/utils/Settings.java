@@ -46,11 +46,6 @@ public class Settings {
         return instance;
     }
 
-    public static void reload() {
-        File file = new File(getConfigPath());
-        instance = Settings.load(file);
-    }
-
     public static Settings load(String filePath) {
         File file = new File(filePath);
         return Settings.load(file);
@@ -64,7 +59,12 @@ public class Settings {
         }
     }
 
-    public static String getConfigPath() {
+    public static void reload() {
+        File file = new File(getConfigPath());
+        instance = Settings.load(file);
+    }
+
+    private static String getConfigPath() {
 
         if (Harvester.debugFlag) {
             return TEST_CONFIG_FILE_PATH;

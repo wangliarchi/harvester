@@ -36,20 +36,20 @@ public class ExportOrderService extends OrderClient {
     @SuppressWarnings("FieldCanBeLocal")
     private final int DAYS_BACK = -7;
 
-    @Inject
+    @Inject private
     OrderFetcher orderFetcher;
-    @Inject
+    @Inject private
     SheetAPI sheetAPI;
-    @Inject
+    @Inject private
     DBManager dbManager;
-    @Inject
+    @Inject private
     TrueFakeAsinMappingService trueFakeAsinMappingService;
-    @Inject
+    @Inject private
     OrderService orderService;
 
-    @Inject
+    @Inject private
     BlacklistBuyer blacklistBuyer;
-    @Inject
+    @Inject private
     Now now;
 
     @Setter

@@ -318,7 +318,7 @@ public enum Remark {
      *
      * @param target 目标文本
      */
-    public String removeFrom(String target) {
+    private String removeFrom(String target) {
         String result = StringUtils.defaultString(target);
         boolean removeAmt = ArrayUtils.contains(NEED_REMOVE_AMOUNT, this);
         for (String s : this.texts()) {
@@ -346,7 +346,7 @@ public enum Remark {
      * @param text    目标原始文本
      * @param remarks 批注类型，可能有多个
      */
-    public static boolean matchAny(String text, Remark... remarks) {
+    private static boolean matchAny(String text, Remark... remarks) {
         for (Remark remark : remarks) {
             if (remark.isContainedBy(text)) {
                 return true;
@@ -400,7 +400,7 @@ public enum Remark {
     /**
      * 移除多单做单场景下，实际提交产品数量少于期待数量时添加的批注
      */
-    public static String removePurchasedQuantityNotEnough(String text) {
+    private static String removePurchasedQuantityNotEnough(String text) {
         if (StringUtils.isBlank(text)) {
             return StringUtils.EMPTY;
         }
@@ -428,7 +428,7 @@ public enum Remark {
      * @param target  目标文本
      * @param remarks 待移除的批注
      */
-    public static String removeAll(String target, Remark... remarks) {
+    private static String removeAll(String target, Remark... remarks) {
         if (StringUtils.isBlank(target)) {
             return StringUtils.EMPTY;
         }
@@ -463,7 +463,7 @@ public enum Remark {
     /**
      * 获取需要加入下拉框、供用户选择的批注集合, 旨在减少用户的输入错误几率从而降低程序的判定错误几率
      */
-    public static List<String> getDropdownOptions(Language lang) {
+    private static List<String> getDropdownOptions(Language lang) {
         List<String> list = new ArrayList<>();
         for (Remark remark : Remark.values()) {
             if (!remark.inDropdown) {
@@ -608,7 +608,7 @@ public enum Remark {
      *
      * @param remark 订单批注
      */
-    public static boolean isGrey(String remark, Language lang) {
+    private static boolean isGrey(String remark, Language lang) {
         if (StringUtils.isBlank(remark)) {
             return false;
         }

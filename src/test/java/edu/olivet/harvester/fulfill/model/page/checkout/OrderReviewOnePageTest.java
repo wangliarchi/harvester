@@ -35,21 +35,21 @@ import static org.testng.Assert.assertEquals;
  */
 public class OrderReviewOnePageTest extends BaseTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderReviewOnePageTest.class);
-    OrderReviewOnePage orderReviewOnePage;
-    Browser browser;
+    private OrderReviewOnePage orderReviewOnePage;
+    private Browser browser;
 
-    @Inject
+    @Inject private
     AddressValidatorService addressValidatorService;
-    @Inject
+    @Inject private
     SheetAPI sheetAPI;
-    @Inject
+    @Inject private
     OrderService orderService;
-    List<Order> orders;
-    Map<String, List<Order>> orderMap;
-    BuyerPanel buyerPanel;
-    File[] directories;
+    private List<Order> orders;
+    private Map<String, List<Order>> orderMap;
+    private BuyerPanel buyerPanel;
+    private File[] directories;
 
-    public void prepareData() {
+    private void prepareData() {
         Account buyer = new Account("jxiang@olivetuniversity.edu/q1w2e3AA", Account.AccountType.Buyer);
         buyerPanel = new BuyerPanel(0, Country.US, buyer, 1);
         orderReviewOnePage = new OrderReviewOnePage(buyerPanel);
@@ -71,6 +71,7 @@ public class OrderReviewOnePageTest extends BaseTest {
 
         for (File dir : directories) {
             File[] files = dir.listFiles(file -> file.isFile() && StringUtils.contains(file.getName(), "OrderReview.html"));
+            assert files != null;
             for (File file : files) {
 
                 String orderId = RegexUtils.getMatched(file.getName(), RegexUtils.Regex.AMAZON_ORDER_NUMBER);
@@ -146,6 +147,7 @@ public class OrderReviewOnePageTest extends BaseTest {
 
         for (File dir : directories) {
             File[] files = dir.listFiles(file -> file.isFile() && StringUtils.contains(file.getName(), "OrderReviewPage_execute.html"));
+            assert files != null;
             for (File file : files) {
                 String orderId = RegexUtils.getMatched(file.getName(), RegexUtils.Regex.AMAZON_ORDER_NUMBER);
                 if (orderMap.containsKey(orderId)) {

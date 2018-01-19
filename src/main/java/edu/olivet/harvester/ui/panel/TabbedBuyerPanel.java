@@ -58,19 +58,6 @@ public class TabbedBuyerPanel extends JTabbedPane {
         }
     }
 
-    public void addAllBuyerAccountTabs() {
-        Settings settings = Settings.load();
-        settings.getConfigs().forEach(config -> {
-            if (config.getPrimeBuyer() != null && StringUtils.isNotBlank(config.getPrimeBuyer().getEmail())) {
-                this.addTab(config.getCountry(), config.getPrimeBuyer());
-            }
-            if (config.getBuyer() != null && StringUtils.isNotBlank(config.getBuyer().getEmail())) {
-                this.addTab(config.getCountry(), config.getBuyer());
-            }
-
-        });
-    }
-
     public BuyerPanel reInitTabForOrder(Order order, Account buyer) {
         LOGGER.error("JXBrowser crashed, trying to recreate buyer panel");
         BuyerPanel buyerPanel = initTabForOrder(order, buyer);
@@ -82,19 +69,18 @@ public class TabbedBuyerPanel extends JTabbedPane {
     }
 
 
-    public BuyerPanel initTabForOrder(Order order, Account buyer) {
+    private BuyerPanel initTabForOrder(Order order, Account buyer) {
         Country country = OrderCountryUtils.getFulfillmentCountry(order);
         return getOrAddTab(country, buyer);
     }
 
     public BuyerPanel getOrAddTab(Country country, Account account) {
-        BuyerPanel buyerPanel = addTab(country, account);
-        highlight(buyerPanel);
-        return buyerPanel;
+        //highlight(buyerPanel);
+        return addTab(country, account);
     }
 
 
-    public void removeTab(BuyerPanel buyerPanel) {
+    private void removeTab(BuyerPanel buyerPanel) {
         String tabKey = getTabKey(buyerPanel.getCountry(), buyerPanel.getBuyer());
         try {
             buyerPanel.getBrowserView().getBrowser().dispose();
@@ -108,7 +94,7 @@ public class TabbedBuyerPanel extends JTabbedPane {
         buyerPanelIndexes.remove(index);
     }
 
-    public BuyerPanel addTab(Country country, Account account) {
+    private BuyerPanel addTab(Country country, Account account) {
         String tabKey = getTabKey(country, account);
         if (buyerPanels.containsKey(tabKey)) {
             LOGGER.info("Buyer account {} already initialized. ", tabKey);
@@ -159,7 +145,7 @@ public class TabbedBuyerPanel extends JTabbedPane {
         throw new BusinessException("No buyer panel found for buyer account " + tabKey);
     }
 
-    public BuyerPanel getBuyerPanel(Integer index) {
+    private BuyerPanel getBuyerPanel(Integer index) {
         if (buyerPanelIndexes.containsKey(index)) {
             return buyerPanels.get(buyerPanelIndexes.get(index));
         }
@@ -171,12 +157,19 @@ public class TabbedBuyerPanel extends JTabbedPane {
         return getBuyerPanel(getSelectedIndex());
     }
 
+    public void setRunningIcon(BuyerPanel buyerPanel) {
+        setIconAt(buyerPanel.getId(), UITools.getIcon("loading.gif"));
+    }
+
+    public void setNormalIcon(BuyerPanel buyerPanel) {
+        setIconAt(buyerPanel.getId(), UITools.getIcon(buyerPanel.getCountry().name().toLowerCase() + "Flag.png"));
+    }
 
     public void highlight(BuyerPanel buyerPanel) {
         highlight(buyerPanel.getId());
     }
 
-    public void highlight(int index) {
+    private void highlight(int index) {
         try {
             this.setSelectedIndex(index);
         } catch (Exception e) {

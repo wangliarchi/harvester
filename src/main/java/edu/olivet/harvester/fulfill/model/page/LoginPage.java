@@ -10,7 +10,7 @@ import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
-import edu.olivet.harvester.fulfill.exception.Exceptions.FailedBuyerAccountAuthenticationException;
+import edu.olivet.harvester.fulfill.exception.Exceptions.BuyerAccountAuthenticationException;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.service.LoginVerificationService;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
@@ -52,7 +52,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
 
     }
 
-    public boolean isLoggedIn() {
+    private boolean isLoggedIn() {
 
         //let the browser go to order history page
         JXBrowserHelper.loadPage(browser, country.baseUrl() + "/" + AmazonPage.DigitalOrderList.urlMark());
@@ -64,8 +64,8 @@ public class LoginPage extends FulfillmentPage implements PageObject {
     }
 
     @Repeat(expectedExceptions = BusinessException.class)
-    public void login() {
-        long start = System.currentTimeMillis();
+    private void login() {
+
         if (order != null) {
             JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "0");
         }
@@ -79,7 +79,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
 
         //amazon sometimes split login process into 2 pages, one page to enter email and next page to enter pw.
         DOMElement continueBtn = JXBrowserHelper.selectElementByCssSelector(browser, CONTINUE_BTN_SELECTOR);
-        if (continueBtn != null) {
+        if (continueBtn != null && email != null) {
             JXBrowserHelper.insertChecker(browser);
             ((DOMFormControlElement) email).getForm().submit();
             JXBrowserHelper.waitUntilNewPageLoaded(browser);
@@ -100,6 +100,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
             element.setChecked(true);
         }
 
+        long start = System.currentTimeMillis();
         JXBrowserHelper.insertChecker(browser);
         ((DOMFormControlElement) password).getForm().submit();
         JXBrowserHelper.waitUntilNewPageLoaded(browser);
@@ -109,7 +110,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
         if (errorDom != null) {
             String errorText = errorDom.getInnerText();
             if (StringUtils.isNotBlank(errorText)) {
-                throw new FailedBuyerAccountAuthenticationException("Failed to log in buyer account " + buyer.getEmail() + ". Error msg " + errorText);
+                throw new BuyerAccountAuthenticationException(buyer.getEmail() + ". Error msg " + errorText);
             }
         }
 
@@ -117,7 +118,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
         DOMElement codeRequested = JXBrowserHelper.selectElementByName(browser, "claimspicker");
         DOMElement continueButton = JXBrowserHelper.selectElementByCssSelector(browser, "#continue");
         if (codeRequested != null && continueButton != null) {
-            continueBtn.click();
+            continueButton.click();
             WaitTime.Shortest.execute();
             enterVerificationCode();
             WaitTime.Shortest.execute();
@@ -126,14 +127,15 @@ public class LoginPage extends FulfillmentPage implements PageObject {
         //check if captcha exists
         DOMElement captchaContainer = JXBrowserHelper.selectElementByCssSelector(browser, "#auth-captcha-image-container");
         if (captchaContainer != null) {
-            throw new FailedBuyerAccountAuthenticationException("Failed to log in buyer account " + buyer.getEmail() + " - fail to pass captcha challenge.");
+            throw new BuyerAccountAuthenticationException(buyer.getEmail() + " - fail to pass captcha challenge.");
         }
 
-        LOGGER.info("{} logged in successfully, now at {} -> {}, took {}", country.name(), browser.getTitle(), browser.getURL(), Strings.formatElapsedTime(start));
+        LOGGER.info("{} logged in successfully, now at {} -> {}, took {}", country.name(),
+                browser.getTitle(), browser.getURL(), Strings.formatElapsedTime(start));
     }
 
     @Repeat
-    public void enterVerificationCode() {
+    private void enterVerificationCode() {
 
         //fetch code from email
         DOMElement codeField = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, ".cvf-widget-input.cvf-widget-input-code");
@@ -158,7 +160,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
         ((DOMFormControlElement) codeField).getForm().submit();
 
         if (JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, ".cvf-widget-input.cvf-widget-input-code") != null) {
-            throw new FailedBuyerAccountAuthenticationException("Fail to enter verification code");
+            throw new BuyerAccountAuthenticationException("Fail to enter verification code");
         }
     }
 

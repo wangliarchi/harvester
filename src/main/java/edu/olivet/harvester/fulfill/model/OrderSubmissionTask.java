@@ -19,6 +19,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.inject.internal.Strings;
 import org.nutz.dao.Cnd;
 import org.nutz.dao.entity.annotation.Column;
 import org.nutz.dao.entity.annotation.Name;
@@ -123,11 +124,23 @@ public class OrderSubmissionTask extends PrimaryKey implements ArrayConvertable 
         return JSON.parseArray(orders, Order.class);
     }
 
-    public List<String> getInvalidOrders() {
+    public List<String> getInvalidOrderList() {
         if (StringUtils.isBlank(invalidOrders)) {
             return null;
         }
         return Lists.newArrayList(StringUtils.split(invalidOrders, "\n"));
+    }
+
+    public OrderTaskStatus taskStatus() {
+        return OrderTaskStatus.valueOf(status);
+    }
+
+    public void setTaskStatus(OrderTaskStatus taskStatus) {
+        this.status = taskStatus.name();
+    }
+
+    public boolean stopped() {
+        return taskStatus() == OrderTaskStatus.Stopped || taskStatus() == OrderTaskStatus.Deleted;
     }
 
     public RuntimeSettings convertToRuntimeSettings() {
@@ -177,15 +190,15 @@ public class OrderSubmissionTask extends PrimaryKey implements ArrayConvertable 
     }
 
 
-    public static final String[] COLUMNS = {"Date Created", "MKTPL", "Type", "Range", "T", "S", "F", "Status", ""};
+    public static final String[] COLUMNS = {"Created at", "MKTPL", "Type", "Range", "T", "S", "F", "Status", "Action"};
 
-    public static final int[] WIDTHS = {70, 35, 35, 70, 20, 20, 20, 60, 65};
+    public static final int[] WIDTHS = {70, 35, 35, 70, 20, 20, 20, 60, 75};
 
     @Override
     public Object[] toArray() {
-        return new Object[]{DateFormat.DATE_TIME_SHORT.format(this.dateCreated),
+        return new Object[] {DateFormat.DATE_TIME_SHORT.format(this.dateCreated),
                 marketplaceName,
-                SheetUtils.getTypeFromSpreadsheetName(spreadsheetName),
+                Strings.capitalize(SheetUtils.getTypeFromSpreadsheetName(spreadsheetName).name().toLowerCase()),
                 getOrderRange().getSheetName() + " " + convertToRuntimeSettings().getAdvancedSubmitSetting(),
                 totalOrders, success, failed,
                 status, "delete"};

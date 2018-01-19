@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
  */
 
 public class USPSAddressValidatorTest extends BaseTest {
-    @Inject
+    @Inject private
     USPSAddressValidator addressValidator;
 
     @Test

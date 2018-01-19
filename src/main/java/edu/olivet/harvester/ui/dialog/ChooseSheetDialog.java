@@ -5,11 +5,13 @@ import edu.olivet.foundations.ui.BaseDialog;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
+import edu.olivet.harvester.fulfill.model.setting.OrderSubmissionSettings;
 import edu.olivet.harvester.spreadsheet.model.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
@@ -48,8 +50,8 @@ public class ChooseSheetDialog extends BaseDialog {
         this.setResizable(false);
     }
 
-    JButton continueBtn;
-    JButton clearCacheBtn;
+    private JButton continueBtn;
+    private JButton clearCacheBtn;
 
     private void initComponents() {
 
@@ -84,6 +86,7 @@ public class ChooseSheetDialog extends BaseDialog {
 
 
         spreadScrollPane.setViewportView(spreadList);
+
 
         GroupLayout spreadLayout = new GroupLayout(spreadPane);
         spreadPane.setLayout(spreadLayout);
@@ -144,6 +147,7 @@ public class ChooseSheetDialog extends BaseDialog {
         getRootPane().setDefaultButton(okBtn);
         pack();
 
+
     }
 
     private void initEvents() {
@@ -187,8 +191,14 @@ public class ChooseSheetDialog extends BaseDialog {
             ok();
 
         });
-        //set first spreadsheet selected by default
-        this.spreadList.setSelectedIndex(0);
+
+        OrderSubmissionSettings orderSubmissionSettings = OrderSubmissionSettings.load();
+        if (StringUtils.isNotBlank(orderSubmissionSettings.getSpreadsheetName())) {
+            this.spreadList.setSelectedValue(orderSubmissionSettings.getSpreadsheetName(), true);
+        } else {
+            //set first spreadsheet selected by default
+            this.spreadList.setSelectedIndex(0);
+        }
         formsValueChanged();
     }
 

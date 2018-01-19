@@ -1,7 +1,6 @@
 package edu.olivet.harvester.model;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
@@ -93,31 +92,33 @@ public class BuyerAccountSettingUtils {
 
 
     public List<Account> getAccounts(Country country, OrderEnums.OrderItemType type, boolean primeBuyer) {
-        return accountSettings.stream().filter(it -> {
-            return it.getCountries().contains(country) &&
-                    StringUtils.equalsAnyIgnoreCase(it.getType(), type.name(), "both") &&
-                    StringUtils.equalsAnyIgnoreCase(it.getPrimeBuyer(), primeBuyer ? "Yes" : "No", "Both");
-        }).map(it -> it.getBuyerAccount()).collect(Collectors.toList());
+
+        return accountSettings.stream().filter(it ->
+                StringUtils.equalsAnyIgnoreCase(it.getCountryName(), country.name(), "all") &&
+                StringUtils.equalsAnyIgnoreCase(it.getType(), type.name(), "both") &&
+                StringUtils.equalsAnyIgnoreCase(it.getPrimeBuyer(), primeBuyer ? "Prime" : "Non-Prime", "Both"))
+                .map(BuyerAccountSetting::getBuyerAccount)
+                .collect(Collectors.toList());
     }
 
-    public void migrateFromSetting(Account buyer, Country country, OrderEnums.OrderItemType type, boolean primeBuyer) {
+    private void migrateFromSetting(Account buyer, Country country, OrderEnums.OrderItemType type, boolean primeBuyer) {
         BuyerAccountSetting accountSetting = getByEmail(buyer.getEmail());
         if (accountSetting == null) {
             accountSetting = new BuyerAccountSetting();
             accountSetting.setBuyerAccount(buyer);
-            accountSetting.setCountries(Lists.newArrayList(country));
-            accountSetting.setPrimeBuyer(primeBuyer ? "Yes" : "No");
+            accountSetting.setCountryName(country.name());
+            accountSetting.setPrimeBuyer(primeBuyer ? "Prime" : "Non-Prime");
             accountSetting.setType(type.name());
             accountSettings.add(accountSetting);
         } else {
-            if (!accountSetting.getCountries().contains(country)) {
-                accountSetting.getCountries().add(country);
+            if (!accountSetting.getCountryName().equalsIgnoreCase(country.name())) {
+                accountSetting.setCountryName("All");
             }
 
             if (!accountSetting.getType().equalsIgnoreCase(type.name())) {
                 accountSetting.setType("Both");
             }
-            boolean currentPrime = accountSetting.getPrimeBuyer().equalsIgnoreCase("Yes");
+            boolean currentPrime = accountSetting.getPrimeBuyer().equalsIgnoreCase("Prime");
             if (currentPrime != primeBuyer) {
                 accountSetting.setPrimeBuyer("Both");
             }
@@ -130,7 +131,7 @@ public class BuyerAccountSettingUtils {
 
     }
 
-    public static String getConfigPath() {
+    private static String getConfigPath() {
         if (Harvester.debugFlag) {
             return TEST_SETTINGS_FILE_PATH;
         }

@@ -21,9 +21,9 @@ import java.util.Observable;
 public class MarkStatusEvent extends Observable implements HarvesterUIEvent {
     private static final Logger LOGGER = LoggerFactory.getLogger(MarkStatusEvent.class);
 
-    @Inject
+    @Inject private
     RuntimeSettingsValidator validator;
-    @Inject
+    @Inject private
     MarkStatusService markStatusService;
 
     public void execute() {

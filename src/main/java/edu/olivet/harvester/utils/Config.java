@@ -16,6 +16,7 @@ public enum Config {
     ForbiddenSellers("forbidden_sellers.json", "Forbidden Sellers"),
     StopWords("stopwords.json", "Stopwords"),
     USForwardAddress("usBookTransAddr.json", "US FWD Address"),
+    UKForwardAddress("ukTransAddr.json", "UK FWD Address"),
     ShippingFeeLimit("shipping-limit.json", "Shipping Fee Limit"),
     Names("names", "Common used name list");
 

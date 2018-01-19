@@ -22,7 +22,7 @@ public class ReviewOrderChangePaymentMethod extends Step {
         orderReviewMultiPage.changePaymentMethod();
     }
 
-    @Inject SelectPaymentMethod selectPaymentMethod;
+    @Inject private SelectPaymentMethod selectPaymentMethod;
     public Step createDynamicInstance(FlowState state) {
         return selectPaymentMethod;
     }

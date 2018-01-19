@@ -73,12 +73,12 @@ public class MainPanel extends JPanel {
     }
 
     public void resetSplitPanelSizes() {
-        int height = Math.min(rightTabPanel.getPreferredSize().height + 50, getHeight() - 150);
+        int height = Math.max(rightTabPanel.getPreferredSize().height + 50, getHeight() - 200);
         verticalSplitPane1.setDividerLocation(height);
         horizontalSplitPane1.setDividerLocation(getWidth() - rightTabPanel.getPreferredSize().width - 20);
     }
 
-    public void initEventListeners() {
+    private void initEventListeners() {
         this.addComponentListener(new ComponentListener() {
             public void componentResized(ComponentEvent e) {
                 resetSplitPanelSizes();
@@ -104,12 +104,12 @@ public class MainPanel extends JPanel {
     private JSplitPane verticalSplitPane1;
     private JSplitPane horizontalSplitPane1;
     private RightTabPanel rightTabPanel;
-    public TabbedBuyerPanel mainWindowPanel;
+    private TabbedBuyerPanel mainWindowPanel;
 
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         JFrame frame = new JFrame();
         frame.setSize(new Dimension(1200, 700));
         frame.setTitle("Seller Panel Demo");

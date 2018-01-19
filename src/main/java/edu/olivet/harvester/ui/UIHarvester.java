@@ -80,7 +80,7 @@ public class UIHarvester extends AbstractApplicationUI {
     }
 
 
-    @Inject
+    @Inject private
     ConfirmShipmentEvent confirmShipmentEvent;
 
     @UIEvent
@@ -88,7 +88,7 @@ public class UIHarvester extends AbstractApplicationUI {
         confirmShipmentEvent.execute();
     }
 
-    @Inject
+    @Inject private
     OrderConfirmationHistoryEvent orderConfirmationHistoryEvent;
 
     @UIEvent
@@ -96,7 +96,7 @@ public class UIHarvester extends AbstractApplicationUI {
         orderConfirmationHistoryEvent.execute();
     }
 
-    @Inject
+    @Inject private
     OrderSubmissionLogEvent orderSubmissionLogEvent;
 
     @UIEvent
@@ -104,7 +104,7 @@ public class UIHarvester extends AbstractApplicationUI {
         orderSubmissionLogEvent.execute();
     }
 
-    @Inject
+    @Inject private
     LogViewer logViewer;
 
     @UIEvent
@@ -117,7 +117,7 @@ public class UIHarvester extends AbstractApplicationUI {
         logViewer.displayLogs(ConfigEnums.Log.Statistic);
     }
 
-    @Inject
+    @Inject private
     ListOrderSubmissionTasks listOrderSubmissionTasks;
 
     @UIEvent
@@ -125,7 +125,7 @@ public class UIHarvester extends AbstractApplicationUI {
         listOrderSubmissionTasks.execute();
     }
 
-    @Inject
+    @Inject private
     SettingEvent settingEvent;
 
     @UIEvent
@@ -148,7 +148,7 @@ public class UIHarvester extends AbstractApplicationUI {
     }
 
 
-    @Inject
+    @Inject private
     ReportBugEvent reportBugEvent;
 
     @UIEvent
@@ -157,7 +157,7 @@ public class UIHarvester extends AbstractApplicationUI {
     }
 
 
-    @Inject
+    @Inject private
     AddOrderSubmissionTaskEvent addOrderSubmissionTaskEvent;
 
     @UIEvent
@@ -170,7 +170,7 @@ public class UIHarvester extends AbstractApplicationUI {
         addOrderSubmissionTaskEvent.execute();
     }
 
-    @Inject
+    @Inject private
     ExportOrderEvent exportOrderEvent;
 
     @UIEvent
@@ -178,7 +178,7 @@ public class UIHarvester extends AbstractApplicationUI {
         exportOrderEvent.execute();
     }
 
-    @Inject
+    @Inject private
     TitleCheckerEvent titleCheckerEvent;
 
     @UIEvent
@@ -233,7 +233,7 @@ public class UIHarvester extends AbstractApplicationUI {
         return Harvester.APP_NAME;
     }
 
-    @Inject OrderSubmissionTaskService orderSubmissionTaskService;
+    @Inject private OrderSubmissionTaskService orderSubmissionTaskService;
 
     @Override
     public void cleanUp() {

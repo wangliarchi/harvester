@@ -6,6 +6,7 @@ import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
+import edu.olivet.harvester.fulfill.model.setting.OrderSubmissionSettings;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.model.BuyerAccountSettingUtils;
 import edu.olivet.harvester.model.OrderEnums.OrderItemType;
@@ -47,24 +48,27 @@ public class OrderSubmissionSettingsPanel extends JPanel {
     private static final int MAX_COUNT = 7;
     @Getter
     private List<String> sheetNames = new ArrayList<>();
-
-    GroupLayout layout = new GroupLayout(this);
-    GroupLayout.ParallelGroup hPG = layout.createParallelGroup(GroupLayout.Alignment.LEADING);
-    GroupLayout.SequentialGroup vSG = layout.createSequentialGroup();
     private int fieldWidth = 200;
     private int labelMinWidth = 80;
-
 
     public OrderSubmissionSettingsPanel(Window parentFrame) {
         this.parentFrame = parentFrame;
         initComponents();
         initLayout();
+
+        //
+        OrderSubmissionSettings orderSubmissionSettings = OrderSubmissionSettings.load();
+        if (orderSubmissionSettings.getCurrentCountry() != null) {
+            selectedMarketplace = orderSubmissionSettings.getCurrentCountry();
+        }
+
         initData();
         initEvents();
     }
 
 
-    public void initEvents() {
+    private void initEvents() {
+        OrderSubmissionSettings orderSubmissionSettings = OrderSubmissionSettings.load();
         marketplaceComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 if (e.getItem() != selectedMarketplace) {
@@ -72,6 +76,8 @@ public class OrderSubmissionSettingsPanel extends JPanel {
                     clearGoogleSheet();
                     clearSubmitRange();
                     initData();
+                    orderSubmissionSettings.setMarketplaceName(selectedMarketplace.name());
+                    orderSubmissionSettings.save();
                 }
 
 
@@ -98,18 +104,18 @@ public class OrderSubmissionSettingsPanel extends JPanel {
 
     }
 
-    public void hideDetails() {
+    private void hideDetails() {
         detailSettingsPanel.setVisible(false);
         parentFrame.pack();
     }
 
-    public void showDetails() {
+    private void showDetails() {
         detailSettingsPanel.setVisible(true);
         parentFrame.pack();
     }
 
-    public void selectGoogleSheet() {
-
+    private void selectGoogleSheet() {
+        OrderSubmissionSettings orderSubmissionSettings = OrderSubmissionSettings.load();
         AppScript appScript = new AppScript();
         Country selectedCountry = (Country) marketplaceComboBox.getSelectedItem();
         List<Spreadsheet> spreadsheets = Settings.load().listSpreadsheets(selectedCountry, appScript);
@@ -128,12 +134,16 @@ public class OrderSubmissionSettingsPanel extends JPanel {
             selectedSpreadsheetId = dialog.getSelectedWorksheets().get(0).getSpreadsheet().getSpreadsheetId();
             sheetNames = selectedWorksheets.stream().map(Worksheet::getSheetName).collect(Collectors.toList());
             sheetNames.add(0, "");
+
+            orderSubmissionSettings.setSpreadsheetId(selectedSpreadsheetId);
+            orderSubmissionSettings.setSpreadsheetName(selectedSheetName.getText());
+            orderSubmissionSettings.save();
             updateSheetOptions();
         }
     }
 
 
-    public void setAccounts4Country() {
+    private void setAccounts4Country() {
         Country currentCountry = selectedMarketplace;
         Settings.Configuration configuration;
         try {
@@ -144,7 +154,7 @@ public class OrderSubmissionSettingsPanel extends JPanel {
         }
 
         Account seller = configuration.getSeller();
-        Account[] sellers = seller == null ? new Account[0] : new Account[]{seller};
+        Account[] sellers = seller == null ? new Account[0] : new Account[] {seller};
         sellerComboBox.setModel(new DefaultComboBoxModel<>(sellers));
 
         //default to book
@@ -180,7 +190,7 @@ public class OrderSubmissionSettingsPanel extends JPanel {
 
     }
 
-    public void setOrderFinder() {
+    private void setOrderFinder() {
         Country currentCountry = selectedMarketplace;
         Settings.Configuration configuration = Settings.load().getConfigByCountry(currentCountry);
         if (FinderCodeUtils.validate(configuration.getUserCode())) {
@@ -231,7 +241,7 @@ public class OrderSubmissionSettingsPanel extends JPanel {
         for (OrderRange orderRange : orderRanges) {
             OrderSubmissionTask orderSubmissionTask = new OrderSubmissionTask();
             orderSubmissionTask.setSid(Settings.load().getSid());
-            if(marketplaceComboBox.getSelectedItem() !=null) {
+            if (marketplaceComboBox.getSelectedItem() != null) {
                 orderSubmissionTask.setMarketplaceName(((Country) marketplaceComboBox.getSelectedItem()).name());
             }
             //noinspection ConstantConditions
@@ -246,15 +256,17 @@ public class OrderSubmissionSettingsPanel extends JPanel {
             orderSubmissionTask.setSpreadsheetId(selectedSpreadsheetId);
             orderSubmissionTask.setSpreadsheetName(selectedSheetName.getText());
             orderSubmissionTask.setOrderRange(orderRange);
-            orderSubmissionTask.setBuyerAccount(((Account)buyerComboBox.getSelectedItem()).getEmail());
-            orderSubmissionTask.setPrimeBuyerAccount(((Account)primeBuyerComboBox.getSelectedItem()).getEmail());
+            assert (buyerComboBox.getSelectedItem()) != null;
+            orderSubmissionTask.setBuyerAccount(((Account) buyerComboBox.getSelectedItem()).getEmail());
+            assert (primeBuyerComboBox.getSelectedItem()) != null;
+            orderSubmissionTask.setPrimeBuyerAccount(((Account) primeBuyerComboBox.getSelectedItem()).getEmail());
             tasks.add(orderSubmissionTask);
         }
 
         return tasks;
     }
 
-    public List<OrderRange> collectOrderRanges() {
+    private List<OrderRange> collectOrderRanges() {
         List<OrderRange> ranges = new ArrayList<>();
         for (int i = 0; i < MAX_COUNT; i++) {
             String sheetName = (String) sheetNameMap.get(i).getSelectedItem();
@@ -276,7 +288,7 @@ public class OrderSubmissionSettingsPanel extends JPanel {
         return ranges;
     }
 
-    public void clearSubmitRange() {
+    private void clearSubmitRange() {
         for (int i = 0; i < MAX_COUNT; i++) {
             beginRowMap.get(i).setText("");
             endRowMap.get(i).setText("");
@@ -337,7 +349,10 @@ public class OrderSubmissionSettingsPanel extends JPanel {
     }
 
 
-    public void initLayout() {
+    private void initLayout() {
+        GroupLayout layout = new GroupLayout(this);
+        GroupLayout.ParallelGroup hParallelGroup = layout.createParallelGroup(GroupLayout.Alignment.LEADING);
+        GroupLayout.SequentialGroup vSequentialGroup = layout.createSequentialGroup();
 
         this.setLayout(layout);
 
@@ -345,49 +360,69 @@ public class OrderSubmissionSettingsPanel extends JPanel {
         initDetailSettingPanel();
 
 
-        hPG.addGroup(layout.createSequentialGroup()
+        hParallelGroup.addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(marketplaceLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(sellerLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(marketplaceLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                                        .addComponent(buyerLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+
                                 )
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addComponent(marketplaceComboBox, labelMinWidth, fieldWidth, fieldWidth)
-                                        .addComponent(sellerComboBox, labelMinWidth, fieldWidth, fieldWidth)
+                                        .addComponent(buyerComboBox, labelMinWidth, fieldWidth, fieldWidth)
+
+
                                 )
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addComponent(sellerLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                                        .addComponent(primeBuyerLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+
+                                )
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addComponent(sellerComboBox, labelMinWidth, fieldWidth, fieldWidth)
+                                        .addComponent(primeBuyerComboBox, labelMinWidth, fieldWidth, fieldWidth)
+
+                                )
+
 
                         )
                         .addGroup(layout.createSequentialGroup()
                                 .addComponent(googleSheetLabel, labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                 .addComponent(selectSheetButton, 100, 100, 100)
-                                .addComponent(selectedSheetName)
-                        )
+                                .addComponent(selectedSheetName))
                         .addComponent(sheetSelectionPanel)
                         .addComponent(showHideDetailButton)
                         .addComponent(detailSettingsPanel)
-
 
                 ).addContainerGap()
         );
 
 
-        vSG.addGroup(layout.createSequentialGroup()
+        vSequentialGroup.addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(marketplaceLabel)
-                        .addComponent(marketplaceComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(marketplaceComboBox)
+                        .addComponent(sellerLabel)
+                        .addComponent(sellerComboBox)
                 )
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(sellerLabel)
-                        .addComponent(sellerComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                )
+                        .addComponent(buyerLabel)
+                        .addComponent(buyerComboBox)
+                        .addComponent(primeBuyerLabel)
+                        .addComponent(primeBuyerComboBox))
+
+                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+
+
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(googleSheetLabel)
-                        .addComponent(selectSheetButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(selectSheetButton)
                         .addComponent(selectedSheetName)
                 )
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
@@ -400,12 +435,12 @@ public class OrderSubmissionSettingsPanel extends JPanel {
         );
 
 
-        layout.setHorizontalGroup(hPG);
-        layout.setVerticalGroup(vSG);
+        layout.setHorizontalGroup(hParallelGroup);
+        layout.setVerticalGroup(vSequentialGroup);
     }
 
 
-    public void initSheetSelections() {
+    private void initSheetSelections() {
         sheetSelectionPanel = new JPanel();
         sheetSelectionPanel.setVisible(false);
 
@@ -430,7 +465,8 @@ public class OrderSubmissionSettingsPanel extends JPanel {
             endRowMap.put(i, endRow);
 
             panelLayoutParallelGroup.addGroup(panelLayout.createSequentialGroup()
-                    .addComponent(sheetNameLbl, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE).addGap(5).addComponent(sheetNameBox, 150, 150, 150).addGap(5)
+                    .addComponent(sheetNameLbl, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                    .addGap(5).addComponent(sheetNameBox, 150, 150, 150).addGap(5)
                     .addComponent(beginRowLbl).addGap(5).addComponent(beginRow, rowFieldWidth, rowFieldWidth, rowFieldWidth).addGap(5)
                     .addComponent(endRowLbl).addGap(5).addComponent(endRow, rowFieldWidth, rowFieldWidth, rowFieldWidth));
 
@@ -446,7 +482,7 @@ public class OrderSubmissionSettingsPanel extends JPanel {
         panelLayout.setVerticalGroup(panelLayoutSequentialGroup);
     }
 
-    public void initDetailSettingPanel() {
+    private void initDetailSettingPanel() {
         detailSettingsPanel = new JPanel();
 
         GroupLayout panelLayout = new GroupLayout(detailSettingsPanel);
@@ -458,14 +494,12 @@ public class OrderSubmissionSettingsPanel extends JPanel {
                 .addGroup(panelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(panelLayout.createSequentialGroup()
                                 .addGroup(panelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(buyerLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
                                         .addComponent(lostLimitLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
                                         .addComponent(maxEddLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(codeFinderLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(codeFinderLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
 
                                 )
                                 .addGroup(panelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(buyerComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                         .addComponent(lostLimitComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                         .addComponent(maxDaysOverEddComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                         .addComponent(finderCodeTextField, labelMinWidth, fieldWidth, fieldWidth)
@@ -473,14 +507,12 @@ public class OrderSubmissionSettingsPanel extends JPanel {
                                 )
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(panelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(primeBuyerLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(priceLimitLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(noInvoiceLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(skipCheckLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(priceLimitLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                                        .addComponent(noInvoiceLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                                        .addComponent(skipCheckLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
 
                                 )
                                 .addGroup(panelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(primeBuyerComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                         .addComponent(priceLimitComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                         .addComponent(noInvoiceTextField, labelMinWidth, fieldWidth, fieldWidth)
                                         .addComponent(skipCheckComboBox, labelMinWidth, fieldWidth, fieldWidth)
@@ -493,33 +525,27 @@ public class OrderSubmissionSettingsPanel extends JPanel {
 
         panelLayoutSequentialGroup.addGroup(panelLayout.createSequentialGroup()
                 .addPreferredGap(ComponentPlacement.RELATED)
-                .addGroup(panelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(buyerLabel)
-                        .addComponent(buyerComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addComponent(primeBuyerLabel)
-                        .addComponent(primeBuyerComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
 
                 .addGroup(panelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(lostLimitLabel)
-                        .addComponent(lostLimitComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lostLimitComboBox)
                         .addComponent(priceLimitLabel)
-                        .addComponent(priceLimitComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(priceLimitComboBox)
                 )
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(maxEddLabel)
-                        .addComponent(maxDaysOverEddComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(maxDaysOverEddComboBox)
                         .addComponent(noInvoiceLabel)
-                        .addComponent(noInvoiceTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(noInvoiceTextField)
                 )
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(codeFinderLabel)
-                        .addComponent(finderCodeTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(finderCodeTextField)
                         .addComponent(skipCheckLabel)
-                        .addComponent(skipCheckComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(skipCheckComboBox)
                 )
                 .addContainerGap()
         );
@@ -530,7 +556,7 @@ public class OrderSubmissionSettingsPanel extends JPanel {
     }
 
 
-    public void initData() {
+    private void initData() {
         Settings systemSettings = Settings.load();
         List<Country> countries = systemSettings.listAllCountries();
 
@@ -544,14 +570,14 @@ public class OrderSubmissionSettingsPanel extends JPanel {
 
         noInvoiceTextField.setText("{No Invoice}");
 
-        lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"5", "7"}));
+        lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"5", "7"}));
 
-        priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[]{"3", "5"}));
+        priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"3", "5"}));
 
         setOrderFinder();
 
         maxDaysOverEddComboBox.setModel(new DefaultComboBoxModel<>(
-                new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}
+                new String[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"}
         ));
 
         maxDaysOverEddComboBox.setSelectedItem("7");
@@ -590,7 +616,7 @@ public class OrderSubmissionSettingsPanel extends JPanel {
     private JPanel sheetSelectionPanel;
     private JPanel detailSettingsPanel;
 
-    public Window parentFrame;
+    private Window parentFrame;
 
     public static void main(String[] args) {
         UITools.setTheme();
