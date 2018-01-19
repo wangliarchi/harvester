@@ -5,7 +5,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.*;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.utils.Settings;
 import edu.olivet.harvester.utils.Settings.Configuration;
 import org.apache.commons.lang3.StringUtils;

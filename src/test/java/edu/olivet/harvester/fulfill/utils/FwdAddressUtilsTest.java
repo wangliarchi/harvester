@@ -1,8 +1,8 @@
 package edu.olivet.harvester.fulfill.utils;
 
 import edu.olivet.harvester.common.BaseTest;
-import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.model.OrderEnums;
+import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.common.model.OrderEnums;
 import org.testng.annotations.Test;
 
 import java.util.List;

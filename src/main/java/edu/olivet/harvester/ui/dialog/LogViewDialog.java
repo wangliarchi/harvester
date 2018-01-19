@@ -4,7 +4,7 @@ import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Dates;
-import edu.olivet.harvester.model.ConfigEnums;
+import edu.olivet.harvester.common.model.ConfigEnums;
 import edu.olivet.harvester.utils.common.DateFormat;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;

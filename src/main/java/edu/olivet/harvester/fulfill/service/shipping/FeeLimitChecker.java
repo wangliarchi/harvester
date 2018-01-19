@@ -9,7 +9,7 @@ import edu.olivet.harvester.fulfill.model.ShippingEnums.ShippingSpeed;
 import edu.olivet.harvester.fulfill.model.ShippingEnums.ShippingType;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.utils.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

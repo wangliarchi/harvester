@@ -1,8 +1,8 @@
 package edu.olivet.harvester.fulfill.utils;
 
 import edu.olivet.foundations.amazon.Country;
-import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.model.OrderEnums;
+import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.common.model.OrderEnums;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/15/17 3:39 PM

@@ -1,7 +1,7 @@
 package edu.olivet.harvester.logger;
 
 import edu.olivet.foundations.utils.Constants;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

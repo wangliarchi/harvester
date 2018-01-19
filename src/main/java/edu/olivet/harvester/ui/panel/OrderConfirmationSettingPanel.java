@@ -6,7 +6,7 @@ import edu.olivet.foundations.job.TaskScheduler;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.harvester.job.BackgroundJob;
-import edu.olivet.harvester.model.SystemSettings;
+import edu.olivet.harvester.common.model.SystemSettings;
 
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;

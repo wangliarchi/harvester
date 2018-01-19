@@ -8,7 +8,7 @@ import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Directory;
 import edu.olivet.foundations.utils.Tools;
-import edu.olivet.harvester.model.OrderEnums;
+import edu.olivet.harvester.common.model.OrderEnums;
 import edu.olivet.harvester.spreadsheet.model.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.Harvester;

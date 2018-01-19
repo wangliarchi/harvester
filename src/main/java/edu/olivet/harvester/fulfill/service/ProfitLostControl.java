@@ -1,7 +1,7 @@
 package edu.olivet.harvester.fulfill.service;
 
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.utils.common.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 

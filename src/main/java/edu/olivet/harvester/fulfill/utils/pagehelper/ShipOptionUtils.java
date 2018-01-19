@@ -9,8 +9,8 @@ import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionExceptio
 import edu.olivet.harvester.fulfill.model.ShippingOption;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator.SkipValidation;
-import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.model.Remark;
+import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.common.model.Remark;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.common.DateFormat;

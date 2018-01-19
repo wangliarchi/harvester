@@ -3,8 +3,8 @@ package edu.olivet.harvester.fulfill.utils.validation;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.RegexUtils;
-import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.model.OrderEnums;
+import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.common.model.OrderEnums;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang3.StringUtils;
 

@@ -3,7 +3,7 @@ package edu.olivet.harvester.fulfill.model;
 import com.alibaba.fastjson.JSON;
 import edu.olivet.foundations.db.PrimaryKey;
 import edu.olivet.foundations.ui.ArrayConvertable;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.spreadsheet.utils.SheetUtils;
 import edu.olivet.harvester.utils.common.DateFormat;
 import lombok.AllArgsConstructor;

@@ -8,7 +8,7 @@ import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.model.ShippingEnums.ShippingSpeed;
-import edu.olivet.harvester.model.Money;
+import edu.olivet.harvester.common.model.Money;
 import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;

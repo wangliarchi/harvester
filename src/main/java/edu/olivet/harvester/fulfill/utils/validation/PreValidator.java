@@ -6,7 +6,7 @@ import edu.olivet.harvester.fulfill.model.ItemCompareResult;
 import edu.olivet.harvester.fulfill.service.CompareItemNameWorker;
 import edu.olivet.harvester.fulfill.utils.ISBNUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.utils.common.ThreadHelper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;

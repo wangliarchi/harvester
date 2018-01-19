@@ -5,7 +5,7 @@ import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.model.page.FulfillmentPage;
 import edu.olivet.harvester.fulfill.utils.OrderAddressUtils;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import org.apache.commons.lang3.StringUtils;

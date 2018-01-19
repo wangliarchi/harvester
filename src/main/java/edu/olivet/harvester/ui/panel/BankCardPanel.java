@@ -1,7 +1,7 @@
 package edu.olivet.harvester.ui.panel;
 
 import edu.olivet.foundations.ui.UITools;
-import edu.olivet.harvester.model.CreditCard;
+import edu.olivet.harvester.common.model.CreditCard;
 import lombok.Getter;
 
 import javax.swing.*;

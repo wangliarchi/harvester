@@ -4,7 +4,7 @@ import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Directory;
-import edu.olivet.harvester.model.ConfigEnums.Log;
+import edu.olivet.harvester.common.model.ConfigEnums.Log;
 import edu.olivet.harvester.ui.Harvester;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;

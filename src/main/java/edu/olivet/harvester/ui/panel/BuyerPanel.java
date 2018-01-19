@@ -11,7 +11,7 @@ import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.service.RuntimePanelObserver;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Getter;

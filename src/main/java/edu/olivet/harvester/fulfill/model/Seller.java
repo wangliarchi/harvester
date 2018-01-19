@@ -1,7 +1,7 @@
 package edu.olivet.harvester.fulfill.model;
 
 import edu.olivet.foundations.amazon.Country;
-import edu.olivet.harvester.model.Money;
+import edu.olivet.harvester.common.model.Money;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 

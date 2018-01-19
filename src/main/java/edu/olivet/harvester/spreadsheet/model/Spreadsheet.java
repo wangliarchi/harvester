@@ -4,7 +4,7 @@ package edu.olivet.harvester.spreadsheet.model;
 import com.alibaba.fastjson.annotation.JSONField;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.BusinessException;
-import edu.olivet.harvester.model.OrderEnums;
+import edu.olivet.harvester.common.model.OrderEnums;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Data;
 import lombok.Getter;

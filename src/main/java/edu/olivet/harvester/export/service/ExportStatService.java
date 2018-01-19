@@ -6,7 +6,7 @@ import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.*;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.utils.Settings;

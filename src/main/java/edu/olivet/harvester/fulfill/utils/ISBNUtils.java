@@ -9,7 +9,7 @@ import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.utils.pagehelper.HtmlParser;
 import edu.olivet.harvester.logger.ISBNLogger;
-import edu.olivet.harvester.model.ConfigEnums;
+import edu.olivet.harvester.common.model.ConfigEnums;
 import edu.olivet.harvester.utils.common.HttpUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomUtils;

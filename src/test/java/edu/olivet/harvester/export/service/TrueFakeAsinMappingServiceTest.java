@@ -2,7 +2,7 @@ package edu.olivet.harvester.export.service;
 
 import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.harvester.common.BaseTest;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import org.testng.annotations.Test;
 
 import java.util.List;

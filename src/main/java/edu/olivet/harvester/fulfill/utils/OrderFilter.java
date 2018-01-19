@@ -2,9 +2,9 @@ package edu.olivet.harvester.fulfill.utils;
 
 import edu.olivet.harvester.fulfill.model.setting.AdvancedSubmitSetting;
 import edu.olivet.harvester.fulfill.utils.validation.Predicates;
-import edu.olivet.harvester.model.ConfigEnums;
-import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.model.OrderEnums;
+import edu.olivet.harvester.common.model.ConfigEnums;
+import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.common.model.OrderEnums;
 import org.apache.commons.collections.CollectionUtils;
 
 import java.util.ArrayList;

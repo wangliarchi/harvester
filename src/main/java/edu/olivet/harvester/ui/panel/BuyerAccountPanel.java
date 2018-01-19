@@ -3,7 +3,7 @@ package edu.olivet.harvester.ui.panel;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.UITools;
-import edu.olivet.harvester.model.BuyerAccountSetting;
+import edu.olivet.harvester.common.model.BuyerAccountSetting;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;

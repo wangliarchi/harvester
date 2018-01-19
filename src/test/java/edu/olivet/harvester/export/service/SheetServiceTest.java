@@ -5,7 +5,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Now;
 import edu.olivet.harvester.common.BaseTest;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import org.apache.commons.lang3.time.DateUtils;
 import org.testng.annotations.Test;
 

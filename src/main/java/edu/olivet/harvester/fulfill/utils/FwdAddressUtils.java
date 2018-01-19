@@ -6,8 +6,8 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.Configs;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.model.Address;
-import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.model.OrderEnums.OrderItemType;
+import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.common.model.OrderEnums.OrderItemType;
 import edu.olivet.harvester.utils.Config;
 import org.apache.commons.lang3.StringUtils;
 

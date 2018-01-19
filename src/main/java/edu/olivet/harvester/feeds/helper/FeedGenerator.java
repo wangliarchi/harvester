@@ -7,7 +7,7 @@ import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Directory;
 import edu.olivet.foundations.utils.Tools;
-import edu.olivet.harvester.model.OrderEnums;
+import edu.olivet.harvester.common.model.OrderEnums;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

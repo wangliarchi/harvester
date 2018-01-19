@@ -3,7 +3,7 @@ package edu.olivet.harvester.fulfill.utils.validation;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.fulfill.model.ItemCompareResult;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import org.testng.annotations.Test;
 
 import java.util.List;

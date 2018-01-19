@@ -4,8 +4,8 @@ import com.amazonservices.mws.orders._2013_09_01.model.OrderItem;
 import com.mchange.lang.FloatUtils;
 import edu.olivet.foundations.amazon.MWSUtils;
 import edu.olivet.harvester.export.model.AmazonOrder;
-import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.model.Remark;
+import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.common.model.Remark;
 import org.apache.commons.lang3.StringUtils;
 
 /**

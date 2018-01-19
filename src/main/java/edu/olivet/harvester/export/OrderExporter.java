@@ -14,7 +14,7 @@ import edu.olivet.harvester.export.service.ExportOrderService;
 import edu.olivet.harvester.export.service.ExportStatService;
 import edu.olivet.harvester.export.service.SheetService;
 import edu.olivet.harvester.message.ErrorAlertService;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.ui.Actions;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Setter;

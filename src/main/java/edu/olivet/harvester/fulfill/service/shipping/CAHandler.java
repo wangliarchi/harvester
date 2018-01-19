@@ -6,7 +6,7 @@ import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.exception.Exceptions.*;
 import edu.olivet.harvester.fulfill.model.ShippingEnums.ShippingSpeed;
 import edu.olivet.harvester.fulfill.model.ShippingOption;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.Comparator;

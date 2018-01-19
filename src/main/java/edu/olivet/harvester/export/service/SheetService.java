@@ -10,9 +10,9 @@ import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Now;
 import edu.olivet.foundations.utils.Strings;
-import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.model.OrderEnums;
-import edu.olivet.harvester.service.OrderItemTypeHelper;
+import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.common.model.OrderEnums;
+import edu.olivet.harvester.common.service.OrderItemTypeHelper;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.spreadsheet.utils.SheetUtils;
@@ -49,9 +49,9 @@ public class SheetService extends SheetAPI {
             messagePanel.displayMsg(orders.size() + " order(s) exported.", LOGGER);
         } else {
             //divide orders to book and product group
-            List<edu.olivet.harvester.model.Order> bookOrders = new ArrayList<>();
-            List<edu.olivet.harvester.model.Order> productOrders = new ArrayList<>();
-            for (edu.olivet.harvester.model.Order order : orders) {
+            List<edu.olivet.harvester.common.model.Order> bookOrders = new ArrayList<>();
+            List<edu.olivet.harvester.common.model.Order> productOrders = new ArrayList<>();
+            for (edu.olivet.harvester.common.model.Order order : orders) {
                 if (orderItemTypeHelper.getItemType(order) == OrderEnums.OrderItemType.PRODUCT) {
                     productOrders.add(order);
                 } else {

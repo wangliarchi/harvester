@@ -5,7 +5,7 @@ import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.mock.MockDBModule;
 import edu.olivet.foundations.mock.MockDateModule;
 import edu.olivet.harvester.common.BaseTest;
-import edu.olivet.harvester.model.OrderEnums;
+import edu.olivet.harvester.common.model.OrderEnums;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;

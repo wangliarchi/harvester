@@ -11,7 +11,7 @@ import edu.olivet.harvester.fulfill.model.OrderSubmissionBuyerAccountTask;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.service.flowcontrol.OrderFlowEngine;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.ui.panel.TabbedBuyerPanel;
 import edu.olivet.harvester.ui.panel.TasksAndProgressPanel;
@@ -174,10 +174,13 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, String> {
                 }
 
                 if (e instanceof OutOfBudgetException) {
-                    UITools.error("No more money to spend :(");
+                    //UITools.error("No more money to spend :(");
+                    messageListener.addMsg(order, "No more money to spend :(", InformationLevel.Negative);
+                    orderSubmissionBuyerTaskService.stopTask(buyerAccountTask);
                     break;
                 } else if (e instanceof BuyerAccountAuthenticationException) {
-                    UITools.error(e.getMessage());
+                    messageListener.addMsg(order, e.getMessage(), InformationLevel.Negative);
+                    orderSubmissionBuyerTaskService.stopTask(buyerAccountTask);
                     break;
                 }
             } finally {

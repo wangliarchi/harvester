@@ -3,7 +3,7 @@ package edu.olivet.harvester.feeds.helper;
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.Tools;
-import edu.olivet.harvester.model.OrderEnums;
+import edu.olivet.harvester.common.model.OrderEnums;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 

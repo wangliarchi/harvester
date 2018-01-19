@@ -2,8 +2,8 @@ package edu.olivet.harvester.fulfill.utils;
 
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
-import edu.olivet.harvester.model.BuyerAccountSettingUtils;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.BuyerAccountSettingUtils;
+import edu.olivet.harvester.common.model.Order;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/15/17 3:13 PM

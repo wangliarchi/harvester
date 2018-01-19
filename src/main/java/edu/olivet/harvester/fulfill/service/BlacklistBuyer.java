@@ -1,8 +1,8 @@
 package edu.olivet.harvester.fulfill.service;
 
 import edu.olivet.harvester.fulfill.model.Address;
-import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.model.Remark;
+import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.common.model.Remark;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

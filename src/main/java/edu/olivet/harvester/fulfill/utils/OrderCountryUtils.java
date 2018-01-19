@@ -3,9 +3,9 @@ package edu.olivet.harvester.fulfill.utils;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
-import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.model.OrderEnums.OrderItemType;
-import edu.olivet.harvester.model.Remark;
+import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.common.model.OrderEnums.OrderItemType;
+import edu.olivet.harvester.common.model.Remark;
 import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.lang3.StringUtils;
 

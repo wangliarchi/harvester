@@ -5,7 +5,7 @@ import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import com.teamdev.jxbrowser.chromium.dom.DOMInputElement;
 import com.teamdev.jxbrowser.chromium.dom.DOMTextAreaElement;
 import edu.olivet.foundations.utils.WaitTime;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 
 import java.util.List;

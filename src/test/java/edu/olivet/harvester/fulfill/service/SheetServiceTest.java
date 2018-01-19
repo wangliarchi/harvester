@@ -2,7 +2,7 @@ package edu.olivet.harvester.fulfill.service;
 
 import com.google.inject.Inject;
 import edu.olivet.harvester.common.BaseTest;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import org.testng.annotations.Test;
 

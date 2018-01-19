@@ -3,7 +3,7 @@ package edu.olivet.harvester.fulfill.service.shipping;
 
 import edu.olivet.harvester.fulfill.model.ShippingEnums.ShippingSpeed;
 import edu.olivet.harvester.fulfill.model.ShippingOption;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 
 import java.util.List;
 

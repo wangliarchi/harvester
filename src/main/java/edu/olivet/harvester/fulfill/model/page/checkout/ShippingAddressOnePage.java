@@ -8,7 +8,7 @@ import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.model.Address;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 

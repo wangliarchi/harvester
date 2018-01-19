@@ -8,7 +8,7 @@ import edu.olivet.harvester.fulfill.model.OrderSubmissionBuyerAccountTask;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.utils.OrderBuyerUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.ui.panel.TabbedBuyerPanel;
 
@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 1/8/18 4:13 PM

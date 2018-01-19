@@ -1,6 +1,6 @@
 package edu.olivet.harvester.fulfill.service.flowcontrol;
 
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.MessageListener;

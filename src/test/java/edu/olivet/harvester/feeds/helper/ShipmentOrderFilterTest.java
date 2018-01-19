@@ -30,10 +30,10 @@ public class ShipmentOrderFilterTest extends BaseTest {
         Spreadsheet spreadsheet = appScript.reloadSpreadsheet(spreadsheetId);
         Worksheet worksheet = new Worksheet(spreadsheet, "08/31");
 
-        List<edu.olivet.harvester.model.Order> orders = appScript.getOrdersFromWorksheet(worksheet);
+        List<edu.olivet.harvester.common.model.Order> orders = appScript.getOrdersFromWorksheet(worksheet);
         StringBuilder resultSummary = new StringBuilder();
         StringBuilder resultDetail = new StringBuilder();
-        List<edu.olivet.harvester.model.Order> filterd = shipmentOrderFilter.removeDuplicatedOrders(orders, resultSummary, resultDetail);
+        List<edu.olivet.harvester.common.model.Order> filterd = shipmentOrderFilter.removeDuplicatedOrders(orders, resultSummary, resultDetail);
 
         assertEquals(filterd.size(), 10);
 
@@ -56,15 +56,15 @@ public class ShipmentOrderFilterTest extends BaseTest {
 
     @Test
     public void testRemoveWC() {
-        edu.olivet.harvester.model.Order order = BaseTest.prepareOrder();
+        edu.olivet.harvester.common.model.Order order = BaseTest.prepareOrder();
         order.status = "wc";
 
-        List<edu.olivet.harvester.model.Order> orders = new ArrayList<>(2);
+        List<edu.olivet.harvester.common.model.Order> orders = new ArrayList<>(2);
         orders.add(order);
 
         StringBuilder resultSummary = new StringBuilder();
         StringBuilder resultDetail = new StringBuilder();
-        List<edu.olivet.harvester.model.Order> filtered = shipmentOrderFilter.removeWCGrayLabelOrders(orders, resultSummary, resultDetail);
+        List<edu.olivet.harvester.common.model.Order> filtered = shipmentOrderFilter.removeWCGrayLabelOrders(orders, resultSummary, resultDetail);
 
         assertEquals(filtered.size(), 0);
 
@@ -84,27 +84,27 @@ public class ShipmentOrderFilterTest extends BaseTest {
 
     @Test
     public void testRemoveNotUnshippedOrders() {
-        List<edu.olivet.harvester.model.Order> orders = new ArrayList<>(3);
+        List<edu.olivet.harvester.common.model.Order> orders = new ArrayList<>(3);
 
-        edu.olivet.harvester.model.Order order = BaseTest.prepareOrder();
+        edu.olivet.harvester.common.model.Order order = BaseTest.prepareOrder();
         order.order_id = "113-3520286-4229806";
         order.setAmazonOrderStatus("Canceled");
         orders.add(order);
 
-        edu.olivet.harvester.model.Order orderShipped = BaseTest.prepareOrder();
+        edu.olivet.harvester.common.model.Order orderShipped = BaseTest.prepareOrder();
         orderShipped.order_id = "113-3520286-4229802";
         orderShipped.setAmazonOrderStatus("Shipped");
         orders.add(orderShipped);
 
 
-        edu.olivet.harvester.model.Order orderUnshipped = BaseTest.prepareOrder();
+        edu.olivet.harvester.common.model.Order orderUnshipped = BaseTest.prepareOrder();
         orderUnshipped.order_id = "113-3520286-4229803";
         orderUnshipped.setAmazonOrderStatus("Unshipped");
         orders.add(orderUnshipped);
 
         StringBuilder resultSummary = new StringBuilder();
         StringBuilder resultDetail = new StringBuilder();
-        List<edu.olivet.harvester.model.Order> filtered = shipmentOrderFilter.removeNotUnshippedOrders(orders, resultSummary, resultDetail);
+        List<edu.olivet.harvester.common.model.Order> filtered = shipmentOrderFilter.removeNotUnshippedOrders(orders, resultSummary, resultDetail);
 
         assertEquals(filtered.size(), 1);
 

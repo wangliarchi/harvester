@@ -1,6 +1,6 @@
 package edu.olivet.harvester.fulfill.model;
 
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 

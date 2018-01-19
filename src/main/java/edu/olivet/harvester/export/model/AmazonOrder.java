@@ -8,8 +8,8 @@ import edu.olivet.foundations.amazon.MWSUtils;
 import edu.olivet.foundations.db.PrimaryKey;
 import edu.olivet.harvester.fulfill.utils.ConditionUtils;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
-import edu.olivet.harvester.model.OrderEnums.OrderColumn;
-import edu.olivet.harvester.model.OrderEnums.Status;
+import edu.olivet.harvester.common.model.OrderEnums.OrderColumn;
+import edu.olivet.harvester.common.model.OrderEnums.Status;
 import edu.olivet.harvester.utils.ServiceUtils;
 import edu.olivet.harvester.utils.common.DateFormat;
 import edu.olivet.harvester.utils.common.NumberUtils;
@@ -104,14 +104,14 @@ public class AmazonOrder extends PrimaryKey {
      * </pre>
      */
 
-    public edu.olivet.harvester.model.Order toOrder() {
+    public edu.olivet.harvester.common.model.Order toOrder() {
         Order amazonOrder = MWSUtils.buildMwsObject(this.xml, Order.class);
 
         Address address = amazonOrder.getShippingAddress();
         OrderItem item = MWSUtils.buildMwsObject(this.itemXml, OrderItem.class);
         Country salesChanelCountry = Country.fromSalesChanel(amazonOrder.getSalesChannel());
 
-        edu.olivet.harvester.model.Order order = new edu.olivet.harvester.model.Order();
+        edu.olivet.harvester.common.model.Order order = new edu.olivet.harvester.common.model.Order();
         order.status = Status.Initial.value();
         order.order_id = this.orderId;
         order.recipient_name = address.getName();

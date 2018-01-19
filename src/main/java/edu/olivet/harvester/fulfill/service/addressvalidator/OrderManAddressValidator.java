@@ -14,7 +14,7 @@ import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.service.AddressValidatorService;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.message.ErrorAlertService;
-import edu.olivet.harvester.model.State;
+import edu.olivet.harvester.common.model.State;
 import edu.olivet.harvester.utils.Config;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -387,7 +387,7 @@ public class OrderManAddressValidator implements AddressValidator {
      * <pre>
      * Calculate similarity between two addresses
      * Used to determine whether the latest shipment location is similar as that of customer or seller
-     * <strong>NOT</strong> for common usage!
+     * <strong>NOT</strong> for edu.olivet.harvester.common usage!
      * </pre>
      */
     private double calcSimilarity(String addr1, String addr2) {

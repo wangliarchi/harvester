@@ -5,8 +5,8 @@ import edu.olivet.foundations.amazon.Account.AccountType;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.ui.UITools;
-import edu.olivet.harvester.model.BuyerAccountSettingUtils;
-import edu.olivet.harvester.model.OrderEnums;
+import edu.olivet.harvester.common.model.BuyerAccountSettingUtils;
+import edu.olivet.harvester.common.model.OrderEnums;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.dialog.BuyerAccountConfigDialog;
 import edu.olivet.harvester.ui.dialog.SellerPanelDialog;
@@ -20,7 +20,6 @@ import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Configuration panel for single marketplace

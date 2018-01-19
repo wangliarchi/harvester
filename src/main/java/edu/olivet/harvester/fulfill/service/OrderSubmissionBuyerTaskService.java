@@ -9,7 +9,7 @@ import edu.olivet.foundations.db.DBManager;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionBuyerAccountTask;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.OrderTaskStatus;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import org.apache.commons.lang3.StringUtils;
 import org.nutz.dao.Cnd;
 

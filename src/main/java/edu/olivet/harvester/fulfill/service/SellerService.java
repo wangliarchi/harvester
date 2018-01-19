@@ -11,7 +11,7 @@ import edu.olivet.harvester.fulfill.model.Rating;
 import edu.olivet.harvester.fulfill.model.Seller;
 import edu.olivet.harvester.fulfill.model.SellerEnums;
 import edu.olivet.harvester.fulfill.utils.ConditionUtils;
-import edu.olivet.harvester.model.Money;
+import edu.olivet.harvester.common.model.Money;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.order.PageUtils;
 import org.apache.commons.lang3.StringUtils;

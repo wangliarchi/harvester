@@ -8,7 +8,7 @@ import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.export.model.AmazonOrder;
 import edu.olivet.harvester.message.ErrorAlertService;
-import edu.olivet.harvester.service.ElasticSearchService;
+import edu.olivet.harvester.common.service.ElasticSearchService;
 import edu.olivet.harvester.utils.common.HttpUtils;
 import org.apache.commons.lang3.StringUtils;
 

@@ -3,7 +3,7 @@ package edu.olivet.harvester.fulfill.model;
 import com.google.common.base.Objects;
 import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

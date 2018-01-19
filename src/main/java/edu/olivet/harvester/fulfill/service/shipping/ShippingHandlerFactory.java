@@ -2,7 +2,7 @@ package edu.olivet.harvester.fulfill.service.shipping;
 
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/1/17 6:27 PM

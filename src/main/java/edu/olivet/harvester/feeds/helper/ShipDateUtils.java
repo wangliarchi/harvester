@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Now;
 import edu.olivet.foundations.utils.Strings;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.FastDateFormat;

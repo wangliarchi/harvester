@@ -7,7 +7,7 @@ import edu.olivet.foundations.utils.Directory;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
-import edu.olivet.harvester.model.OrderEnums.OrderItemType;
+import edu.olivet.harvester.common.model.OrderEnums.OrderItemType;
 import edu.olivet.harvester.ui.Harvester;
 import lombok.Data;
 

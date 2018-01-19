@@ -13,7 +13,7 @@ import edu.olivet.harvester.fulfill.model.setting.AdvancedSubmitSetting;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.fulfill.utils.validation.PreValidator;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.spreadsheet.model.OrderRange;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.dialog.ItemCheckResultDialog;

@@ -7,7 +7,7 @@ import edu.olivet.harvester.fulfill.service.StepHelper;
 import edu.olivet.harvester.fulfill.service.flowcontrol.FlowState;
 import edu.olivet.harvester.fulfill.service.flowcontrol.Step;
 import edu.olivet.harvester.message.ErrorAlertService;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

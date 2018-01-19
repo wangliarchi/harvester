@@ -9,7 +9,7 @@ import edu.olivet.harvester.fulfill.model.FulfillmentEnum;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.fulfill.utils.validation.RuntimeSettingsValidator;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.utils.MessageListener;
 import org.apache.commons.collections4.CollectionUtils;

@@ -1,7 +1,7 @@
 <#-- @ftlvariable name="languageCode" type="java.lang.String" -->
 <#-- @ftlvariable name="storeName" type="java.lang.String" -->
 <#-- @ftlvariable name="signature" type="java.lang.String" -->
-<#-- @ftlvariable name="order" type="edu.olivet.harvester.model.Order" -->
+<#-- @ftlvariable name="order" type="edu.olivet.harvester.common.model.Order" -->
 Dear ${order.recipient_name},
 
 This is ${signature}, the store manager of ${storeName}.

@@ -2,7 +2,7 @@ package edu.olivet.harvester.spreadsheet.utils;
 
 import com.google.api.services.sheets.v4.model.Color;
 import edu.olivet.foundations.utils.Strings;
-import edu.olivet.harvester.model.OrderEnums.OrderItemType;
+import edu.olivet.harvester.common.model.OrderEnums.OrderItemType;
 import edu.olivet.harvester.utils.common.DateFormat;
 import org.apache.commons.lang3.time.FastDateFormat;
 

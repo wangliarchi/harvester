@@ -14,8 +14,8 @@ import edu.olivet.harvester.export.model.AmazonOrder;
 import edu.olivet.harvester.export.utils.SelfOrderChecker;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.service.BlacklistBuyer;
-import edu.olivet.harvester.service.OrderService;
-import edu.olivet.harvester.service.mws.OrderClient;
+import edu.olivet.harvester.common.service.OrderService;
+import edu.olivet.harvester.common.service.mws.OrderClient;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Setter;
@@ -55,7 +55,7 @@ public class ExportOrderService extends OrderClient {
     @Setter
     private MessagePanel messagePanel;
 
-    public List<edu.olivet.harvester.model.Order> listUnexportedOrders(Date lastExportedDate, Date toDate, Country country) {
+    public List<edu.olivet.harvester.common.model.Order> listUnexportedOrders(Date lastExportedDate, Date toDate, Country country) {
 
         //list orders from amazon for the specified date range. order status include shipped, unshipped, and partiallyShipped
         List<Order> orders = listOrdersFromAmazon(lastExportedDate, toDate, country);
@@ -105,10 +105,10 @@ public class ExportOrderService extends OrderClient {
      *     handle blacklist buyer and self order check
      * </pre>
      */
-    public List<edu.olivet.harvester.model.Order> convertToOrders(List<AmazonOrder> amazonOrders) {
-        List<edu.olivet.harvester.model.Order> orderList = new ArrayList<>();
+    public List<edu.olivet.harvester.common.model.Order> convertToOrders(List<AmazonOrder> amazonOrders) {
+        List<edu.olivet.harvester.common.model.Order> orderList = new ArrayList<>();
         for (AmazonOrder amazonOrder : amazonOrders) {
-            edu.olivet.harvester.model.Order order;
+            edu.olivet.harvester.common.model.Order order;
             try {
                 order = amazonOrder.toOrder();
             } catch (Exception e) {
@@ -184,7 +184,7 @@ public class ExportOrderService extends OrderClient {
 
         //load orders from last 7 days to check duplicates
         List<String> spreadsheetIds = Settings.load().getConfigByCountry(country).listSpreadsheetIds();
-        Map<String, edu.olivet.harvester.model.Order> allOrders = new HashMap<>();
+        Map<String, edu.olivet.harvester.common.model.Order> allOrders = new HashMap<>();
 
 
         spreadsheetIds.forEach(it -> orderService.fetchOrders(sheetAPI.getSpreadsheet(it), minDate).forEach(order -> allOrders.put(order.order_id, order)));

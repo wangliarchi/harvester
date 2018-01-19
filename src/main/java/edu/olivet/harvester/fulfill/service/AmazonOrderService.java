@@ -29,7 +29,7 @@ public class AmazonOrderService {
     @Inject private ExportOrderService exportOrderService;
     @Inject private DBManager dbManager;
 
-    public edu.olivet.harvester.model.Order reloadOrder(edu.olivet.harvester.model.Order order) {
+    public edu.olivet.harvester.common.model.Order reloadOrder(edu.olivet.harvester.common.model.Order order) {
         //check local first
         AmazonOrder amazonOrder = loadFromLocal(order.order_id, order.sku);
         if (amazonOrder != null) {
@@ -45,7 +45,7 @@ public class AmazonOrderService {
         throw new BusinessException("Cant load order " + order.order_id + " " + order.sku);
     }
 
-    public AmazonOrder loadOrder(edu.olivet.harvester.model.Order order) {
+    public AmazonOrder loadOrder(edu.olivet.harvester.common.model.Order order) {
         Country country = OrderCountryUtils.getMarketplaceCountry(order);
         MarketWebServiceIdentity credential = Settings.load().getConfigByCountry(country).getMwsCredential();
         //load order info from amazon
