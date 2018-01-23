@@ -220,6 +220,7 @@ public class SettingsDialog extends BaseDialog {
                 }
 
                 Configuration config = cfgPanel.collect();
+                LOGGER.info(config.toString());
                 List<String> errors = config.validate();
                 if (CollectionUtils.isEmpty(errors)) {
                     config.setAccountCode(sid + config.getCountry().name());

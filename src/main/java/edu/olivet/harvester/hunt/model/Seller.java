@@ -2,6 +2,7 @@ package edu.olivet.harvester.hunt.model;
 
 import com.google.common.base.Objects;
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.utils.I18N;
 import edu.olivet.harvester.common.model.Money;
 import edu.olivet.harvester.fulfill.utils.ConditionUtils.Condition;
@@ -208,8 +209,15 @@ public class Seller {
         }
 
         return isIntlShippingAvailable();
+    }
 
-
+    /**
+     * 如果seller offer listing 所在国家 和 订单 邮寄国家 不一致，
+     * 视为国际 seller，计算的时候 要加国际邮费
+     */
+    public boolean isIntlSeller(Order order) {
+        return !CountryStateUtils.getInstance().getCountryCode(order.ship_country)
+                .equalsIgnoreCase(offerListingCountry.code());
     }
 
     public String getRatingUrl() {

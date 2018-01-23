@@ -2,13 +2,18 @@ package edu.olivet.harvester.hunt.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.inject.Inject;
+import com.sun.org.apache.xpath.internal.operations.Or;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.model.Money;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.common.model.OrderEnums.OrderItemType;
+import edu.olivet.harvester.common.service.OrderItemTypeHelper;
 import edu.olivet.harvester.fulfill.utils.ConditionUtils.Condition;
+import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.hunt.model.Seller;
 import edu.olivet.harvester.hunt.model.SellerEnums.SellerType;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
@@ -24,7 +29,6 @@ import java.util.stream.Collectors;
  */
 public class HuntVariableService extends AppScript {
     private static final String APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9HNzArF0rA5jxXlrBfc4CYm7Vy-iU0RSsi9nmgaSrQLfQKKY/exec";
-    //?r=%s&t=%s&c=%s
     private Map<String, JSONObject> VARIABLE_MAP = new HashMap<>();
 
     public enum Type {
@@ -33,16 +37,18 @@ public class HuntVariableService extends AppScript {
         Shipping
     }
 
-
-    public void setHuntingVariable(Seller seller, Country orderCountry, OrderItemType orderItemType, float orderPrice) {
+    @Inject OrderItemTypeHelper orderItemTypeHelper;
+    public void setHuntingVariable(Seller seller, Order order) {
         //seller variable
-        setSellerVariable(seller, orderCountry, orderItemType, orderPrice);
+        setSellerVariable(seller, order);
 
         //set rating variable
-        setRatingVariable(seller, orderCountry, orderItemType, orderPrice);
+        setRatingVariable(seller, order);
 
         //set shipping variable
-
+        if (seller.isIntlSeller(order)) {
+            setIntlShippingVariable(seller, order);
+        }
     }
 
 
@@ -80,7 +86,11 @@ public class HuntVariableService extends AppScript {
     }
 
 
-    private void setSellerVariable(Seller seller, Country orderCountry, OrderItemType orderItemType, float orderPrice) {
+    private void setSellerVariable(Seller seller, Order order) {
+        Country orderCountry = OrderCountryUtils.getMarketplaceCountry(order);
+        OrderItemType orderItemType = orderItemTypeHelper.getItemType(order);
+        float orderPrice = order.getOrderTotalPrice().toUSDAmount().floatValue();
+
         //seller variable
         JSONObject sellerVariables = getVariables(Type.Seller, orderCountry, orderItemType);
         String key = seller.getOfferListingCountry().name() + " " + seller.getType() + " " +
@@ -116,7 +126,11 @@ public class HuntVariableService extends AppScript {
         seller.setSellerVariable(sellerVariable);
     }
 
-    private void setRatingVariable(Seller seller, Country orderCountry, OrderItemType orderItemType, float orderPrice) {
+    private void setRatingVariable(Seller seller, Order order) {
+        Country orderCountry = OrderCountryUtils.getMarketplaceCountry(order);
+        OrderItemType orderItemType = orderItemTypeHelper.getItemType(order);
+        float orderPrice = order.getOrderTotalPrice().toUSDAmount().floatValue();
+
         //seller variable
         JSONObject sellerVariables = getVariables(Type.Rating, orderCountry, orderItemType);
 
@@ -149,6 +163,10 @@ public class HuntVariableService extends AppScript {
         seller.setRatingVariable(ratingVariable);
     }
 
+    private void setIntlShippingVariable(Seller seller, Order order) {
+
+    }
+
     public static void main(String[] args) {
         HuntVariableService huntVariableService = ApplicationContext.getBean(HuntVariableService.class);
         //huntVariableService.getVariables(Type.Seller, Country.US, OrderItemType.BOOK);
@@ -161,7 +179,15 @@ public class HuntVariableService extends AppScript {
         seller.setRating(91);
         seller.setPrice(new Money(15, Country.US));
         seller.setShippingFee(new Money(2.99f, Country.US));
-        huntVariableService.setHuntingVariable(seller, Country.US, OrderItemType.BOOK, 51);
+
+        Order order = new Order();
+        order.sales_chanel = "Amazon.com";
+        order.ship_country = "United States";
+        order.sku = "BKXXX";
+        order.price = "51.00";
+        order.shipping_fee = "2.99";
+
+        huntVariableService.setHuntingVariable(seller, order);
     }
 
 }

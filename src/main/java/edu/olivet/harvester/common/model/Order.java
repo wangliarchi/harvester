@@ -504,6 +504,8 @@ public class Order implements Keyable {
             }
         }
 
+        //type from sku
+
         return type;
     }
 
