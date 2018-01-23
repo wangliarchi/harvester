@@ -1,4 +1,4 @@
-package edu.olivet.harvester.fulfill.service;
+package edu.olivet.harvester.hunt.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -8,7 +8,7 @@ import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Directory;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.foundations.utils.WaitTime;
-import edu.olivet.harvester.fulfill.model.Seller;
+import edu.olivet.harvester.hunt.model.Seller;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.utils.Config;
 import org.apache.commons.collections4.CollectionUtils;
@@ -29,8 +29,8 @@ import java.util.stream.Collectors;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/13/17 4:15 PM
  */
-public class ForbiddenSeller extends AppScript {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ForbiddenSeller.class);
+public class ForbiddenSellerService extends AppScript {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ForbiddenSellerService.class);
     private static final String APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJd7lVCPpKiezuF1-CbYXCw6zbY8UQbYHqMdSJZ1X3kDD4diBX/exec?method=getsellers";
 
     private static final Map<String, List<String>> REGION_FORBIDDEN_LIST_CACHE = new HashMap<>();
@@ -80,7 +80,7 @@ public class ForbiddenSeller extends AppScript {
     }
 
     public static void main(String[] args) {
-        ForbiddenSeller f = ApplicationContext.getBean(ForbiddenSeller.class);
+        ForbiddenSellerService f = ApplicationContext.getBean(ForbiddenSellerService.class);
         f.load(Country.US);
     }
 }

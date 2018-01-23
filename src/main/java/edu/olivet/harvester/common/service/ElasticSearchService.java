@@ -25,10 +25,10 @@ import java.util.stream.Collectors;
  */
 public class ElasticSearchService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchService.class);
-    private static final String ELASTIC_SEARCH_ADDRESS = "http://35.188.127.209";
-    private static final String PRODUCT_INDEX = "product";
-    private static final String LISTING_MAPPING_INDEX = "listing-mapping";
-    private static final int MAX_ASIN_COUNT_PER_REQUEST = 15;
+    public static final String ELASTIC_SEARCH_ADDRESS = "http://35.188.127.209";
+    public static final String PRODUCT_INDEX = "product";
+    public static final String LISTING_MAPPING_INDEX = "listing-mapping";
+    public static final int MAX_ASIN_COUNT_PER_REQUEST = 15;
 
     public String searchISBN(String asin) {
         Map<String, Object> params = new HashMap<>();

@@ -1,4 +1,4 @@
-package edu.olivet.harvester.fulfill.utils.pagehelper;
+package edu.olivet.harvester.utils.http;
 
 import com.google.inject.Singleton;
 import com.mchange.lang.IntegerUtils;
@@ -25,6 +25,7 @@ public class HtmlParser {
         return elements != null && elements.size() > 0;
     }
 
+
     /**
      * 在多个CSS选择器中查询DOM元素, 其中任何一个找到有效结果时即刻返回, 适用于同一页面具有多变样式的场景
      */
@@ -37,6 +38,28 @@ public class HtmlParser {
             }
         }
         return elements;
+    }
+
+    public static Elements selectElementsByCssSelector(Element element, String selector) {
+        return selectElementsByCssSelectors(element, selector);
+    }
+
+    public static Elements selectElementsByCssSelectors(Element element, String... selectors) {
+        return elements(element, selectors);
+    }
+
+
+    public static Element select(Element doc, String... selectors) {
+        Elements elements = elements(doc, selectors);
+        if (elements != null) {
+            return elements.first();
+        }
+
+        return null;
+    }
+
+    public static Element selectElementByCssSelector(Element doc, String... selectors) {
+        return select(doc, selectors);
     }
 
 
@@ -54,7 +77,7 @@ public class HtmlParser {
 
     private boolean ifWavorLowQualityWords(String rowHtml) {
 
-        String[] lowQualities = new String[]{"water,damage,heavy,loose"};
+        String[] lowQualities = new String[] {"water,damage,heavy,loose"};
 
         return !Strings.containsAnyIgnoreCase(rowHtml, lowQualities);
     }
@@ -72,16 +95,19 @@ public class HtmlParser {
         return digits;
     }
 
+    public static String text(Element element){
+        return element.text().trim();
+    }
     /**
      * <pre>
      * 在给定的元素范围内，按照给定的选择器查找，并将所得结果<strong>第一个</strong>元素的文本内容返回
      * 如果找不到，则返回空白字符串
      * </pre>
      */
-    public static String text(Element doc, String selector) {
-        Elements elements = doc.select(selector);
-        if (elements.size() > 0) {
-            return elements.get(0).text().trim();
+    public static String text(Element parent, String... selectors) {
+        Element element = selectElementByCssSelector(parent, selectors);
+        if (element != null) {
+            return element.text().trim();
         }
         return StringUtils.EMPTY;
     }

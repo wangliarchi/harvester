@@ -9,6 +9,7 @@ public class NumberUtils {
     public static final DecimalFormat SINGLE_FORMAT = new DecimalFormat("0.0");
     public static final DecimalFormat DOUBLE_FORMAT = new DecimalFormat("0.00");
     public static final DecimalFormat CURRENCY_FORMAT = new DecimalFormat("0.000");
+    public static final Float ZERO = 0.0f;
 
     public static float round(float value, int scale) {
         return (float) (Math.round(value * Math.pow(10, scale)) / Math.pow(10, scale));

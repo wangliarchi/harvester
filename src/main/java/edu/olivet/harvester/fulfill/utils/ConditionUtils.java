@@ -19,35 +19,66 @@ import java.util.Map;
 public class ConditionUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConditionUtils.class);
 
-
+    /**
+     * https://www.amazon.com/gp/help/customer/display.html/ref=olp_cg_pop?ie=UTF8&nodeId=200143590&pop-up=1
+     */
     public enum Condition {
-        New("New"),
-        Collectible("Collectible"),
-        OpenBox("OpenBox"),
-        Refurbished("Refurbished"),
-        Used("Used"),
-        UsedLikeNew("Used - Like New"),
-        UsedVeryGood("Used - Very Good"),
-        UsedGood("Used - Good"),
-        UsedAcceptable("Used - Acceptable");
+        New("New", 100),
+
+        UsedLikeNew("Used - Like New", 90),
+        UsedVeryGood("Used - Very Good", 85),
+        UsedGood("Used - Good", 80),
+        UsedAcceptable("Used - Acceptable", 50),
+        Used("Used", 80),
+
+        CollectibleLikeNew("Collectible - Like New", 120),
+        CollectibleVeryGood("Collectible - Very Good", 110),
+        CollectibleGood("Collectible - Good", 100),
+        CollectibleAcceptable("Collectible - Acceptable", 50),
+        Collectible("Collectible", 50),
+
+        Refurbished("Refurbished", 50),
+
+        OpenBoxLikeNew("OpenBox - Like New", 90),
+        OpenBoxGood("OpenBox - Good", 80),
+        OpenBoxAcceptable("OpenBox - Acceptable", 50),
+        OpenBox("OpenBox", 50);
+
+        public static int NEW_SCORE = 100;
+        public static Condition parseFromText(String conditionText) {
+            String str = conditionText.replace("-", StringUtils.EMPTY).replace(StringUtils.SPACE, StringUtils.EMPTY).toLowerCase();
+            String translatedConditionText = ConditionUtils.translateCondition(str);
+            for (Condition condition : Condition.values()) {
+                if (condition.name().equalsIgnoreCase(translatedConditionText)) {
+                    return condition;
+                }
+            }
+
+            throw new BusinessException("Condition " + conditionText + " not recognized");
+        }
+
 
         private String text;
+        private int score;
+
+        public int score() {
+            return score;
+        }
 
         public String text() {
             return text;
         }
 
-        Condition(String text) {
+        Condition(String text, int score) {
             this.text = text;
+            this.score = score;
         }
 
         /**
          * 根据baseCondition判定是否为Used
          */
-        public static boolean used(String baseCondition) {
-            return Condition.Used.name().equalsIgnoreCase(baseCondition) ||
-                    Condition.OpenBox.name().equalsIgnoreCase(baseCondition) ||
-                    Condition.Refurbished.name().equalsIgnoreCase(baseCondition);
+        public boolean used() {
+            return score < NEW_SCORE;
         }
     }
 
@@ -94,9 +125,12 @@ public class ConditionUtils {
         return result;
     }
 
-    public static boolean goodToGo(String sellerCondition, String actualCondition) {
-        return getConditionLevel(translateCondition(actualCondition)) - getConditionLevel(translateCondition(sellerCondition)) >= -10;
+    public static boolean goodToGo(Condition sellerCondition, Condition actualCondition) {
+        return actualCondition.score() - sellerCondition.score() >= -10;
+    }
 
+    public static boolean goodToGo(String sellerCondition, String actualCondition) {
+        return goodToGo(Condition.parseFromText(sellerCondition), Condition.parseFromText(actualCondition));
     }
 
     public static int getConditionLevel(String cond) {

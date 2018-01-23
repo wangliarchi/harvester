@@ -2,7 +2,7 @@ package edu.olivet.harvester.fulfill.service.steps;
 
 import com.google.inject.Inject;
 import edu.olivet.harvester.fulfill.model.page.OfferListingPage;
-import edu.olivet.harvester.fulfill.service.SellerService;
+import edu.olivet.harvester.hunt.service.SellerService;
 import edu.olivet.harvester.fulfill.service.flowcontrol.FlowState;
 import edu.olivet.harvester.fulfill.service.flowcontrol.Step;
 import org.slf4j.Logger;

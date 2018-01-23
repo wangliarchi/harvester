@@ -4,8 +4,8 @@ import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.harvester.common.BaseTest;
-import edu.olivet.harvester.fulfill.model.Seller;
-import edu.olivet.harvester.fulfill.service.SellerService;
+import edu.olivet.harvester.hunt.model.Seller;
+import edu.olivet.harvester.hunt.service.SellerService;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import org.testng.annotations.Test;
 

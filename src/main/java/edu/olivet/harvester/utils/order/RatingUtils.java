@@ -1,6 +1,6 @@
 package edu.olivet.harvester.utils.order;
 
-import edu.olivet.harvester.fulfill.model.Seller;
+import edu.olivet.harvester.hunt.model.Seller;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/1/17 9:23 AM

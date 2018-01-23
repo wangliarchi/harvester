@@ -15,10 +15,10 @@ import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.model.FulfillmentEnum;
 import edu.olivet.harvester.fulfill.model.OrderFulfillmentRecord;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
-import edu.olivet.harvester.fulfill.model.Seller;
+import edu.olivet.harvester.hunt.model.Seller;
 import edu.olivet.harvester.fulfill.service.AmazonOrderService;
 import edu.olivet.harvester.fulfill.service.DailyBudgetHelper;
-import edu.olivet.harvester.fulfill.service.ForbiddenSeller;
+import edu.olivet.harvester.hunt.service.ForbiddenSellerService;
 import edu.olivet.harvester.fulfill.service.SheetService;
 import edu.olivet.harvester.fulfill.utils.*;
 import edu.olivet.harvester.common.model.Order;
@@ -644,7 +644,7 @@ public class OrderValidator {
     }
 
 
-    @Inject private ForbiddenSeller forbiddenSeller;
+    @Inject private ForbiddenSellerService forbiddenSeller;
 
     public String isNotForbiddenSeller(Order order) {
         if (OrderValidator.skipCheck(order, SkipValidation.ForbiddenSupplier)) {

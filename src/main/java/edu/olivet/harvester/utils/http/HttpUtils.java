@@ -1,4 +1,4 @@
-package edu.olivet.harvester.utils.common;
+package edu.olivet.harvester.utils.http;
 
 import edu.olivet.foundations.utils.BusinessException;
 import org.apache.commons.io.IOUtils;
@@ -34,11 +34,11 @@ public class HttpUtils {
     /**
      * Http连接超时上限设置:{@value} (毫秒)
      */
-    private static final int TIME_OUT = 30000;
-    private static final String FAIL = "Fail";
+    public static final int TIME_OUT = 30000;
+    public static final String FAIL = "Fail";
     public static final String HTTP_FAIL_REGEX = FAIL + ":[0-9]{3}";
-    private static final String COLON = ":";
-    private static final int MAX_MSG_LENGTH = 150;
+    public static final String COLON = ":";
+    public static final int MAX_MSG_LENGTH = 150;
 
     /**
      * 访问一个url地址，获取返回的文本内容

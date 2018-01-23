@@ -10,6 +10,7 @@ import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.ShippingEnums;
+import edu.olivet.harvester.fulfill.utils.ConditionUtils.Condition;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.common.model.OrderEnums.OrderColor;
@@ -482,6 +483,9 @@ public class Order implements Keyable {
         return type();
     }
 
+    public Condition condition(){
+        return Condition.parseFromText(condition);
+    }
     @JSONField(serialize = false)
     public OrderEnums.OrderItemType type() {
         if (type == null) {

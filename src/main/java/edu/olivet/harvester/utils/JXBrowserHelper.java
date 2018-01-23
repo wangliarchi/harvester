@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.CookieStore;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.cookie.BasicClientCookie;
+import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,6 +111,16 @@ public class JXBrowserHelper {
 
     }
 
+
+    public static BrowserView generalBrowserView;
+
+    public static BrowserView getGeneralBrowser() {
+        if (generalBrowserView == null) {
+            generalBrowserView = init("general", -1);
+        }
+
+        return generalBrowserView;
+    }
 
     /**
      * 初始化一个JXBrowser View
@@ -432,7 +443,11 @@ public class JXBrowserHelper {
     }
 
     public static DOMElement selectVisibleElement(Browser browser, String selector) {
-        List<DOMElement> elements = selectElementsByCssSelector(browser, selector);
+        return selectVisibleElement(browser.getDocument().getDocumentElement(), selector);
+    }
+
+    public static DOMElement selectVisibleElement(DOMElement rootElement, String selector) {
+        List<DOMElement> elements = selectElementsByCssSelector(rootElement, selector);
         for (DOMElement element : elements) {
             Rectangle r = element.getBoundingClientRect();
             if (!r.isEmpty()) {
@@ -456,6 +471,22 @@ public class JXBrowserHelper {
         DOMElement element = selectElementByCssSelector(doc, selector);
         if (element != null) {
             return element.getInnerText().trim();
+        }
+        return StringUtils.EMPTY;
+    }
+
+    public static String textFromHtml(String html) {
+        return Jsoup.parse(html).text().trim();
+    }
+
+    public static String textFromHtml(DOMElement domElement) {
+        return textFromHtml(domElement.getInnerHTML());
+    }
+
+    public static String textFromHtml(DOMElement doc, String selector) {
+        DOMElement element = selectElementByCssSelector(doc, selector);
+        if (element != null) {
+            return textFromHtml(element.getInnerHTML());
         }
         return StringUtils.EMPTY;
     }

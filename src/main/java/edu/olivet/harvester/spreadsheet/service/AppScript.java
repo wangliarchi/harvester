@@ -321,7 +321,7 @@ public class AppScript {
         return orders;
     }
 
-    private String get(Map<String, String> params) {
+    protected String get(Map<String, String> params) {
         String params4Url = this.params2Url(params);
         String url = APP_SCRIPT_URL + params4Url;
         try {
@@ -331,7 +331,7 @@ public class AppScript {
         }
     }
 
-    private String params2Url(Map<String, String> params) {
+    protected String params2Url(Map<String, String> params) {
         StringBuilder sb = new StringBuilder();
         if (params != null && !params.isEmpty()) {
             sb.append("?");

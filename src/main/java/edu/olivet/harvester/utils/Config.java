@@ -18,7 +18,8 @@ public enum Config {
     USForwardAddress("usBookTransAddr.json", "US FWD Address"),
     UKForwardAddress("ukTransAddr.json", "UK FWD Address"),
     ShippingFeeLimit("shipping-limit.json", "Shipping Fee Limit"),
-    Names("names", "Common used name list");
+    Names("names", "Common used name list"),
+    Translation("translations.properties", ""),;
 
     private String fileName;
     private String desc;

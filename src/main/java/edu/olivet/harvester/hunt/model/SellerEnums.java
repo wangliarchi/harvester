@@ -1,7 +1,8 @@
-package edu.olivet.harvester.fulfill.model;
+package edu.olivet.harvester.hunt.model;
 
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.utils.Constants;
+import edu.olivet.foundations.utils.Strings;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -82,14 +83,9 @@ public class SellerEnums {
      */
     public enum SellerType {
         AP("AP"),
-        ImagePrime("tp_Pr"),
         Prime("Pr"),
-        APWareHouse("Wr"),
-        ImagePt("tp_pt"),
         Pt("pt"),
-        BetterWorld("bw"),
-        Half("h"),
-        Ingram("in");
+        APWareHouse("Wr");
 
         private String abbrev;
 
@@ -114,14 +110,14 @@ public class SellerEnums {
          * @param type Seller类型
          */
         public static boolean isPrime(SellerType type) {
-            return type == AP || type == Prime || type == ImagePrime || type == APWareHouse;
+            return type == AP || type == Prime || type == APWareHouse;
         }
 
         /**
          * 判定当前Seller类型是否为普通Seller
          */
         public boolean isPt() {
-            return this == Pt || this == ImagePt;
+            return this == Pt ;
         }
 
         public boolean isAP() {
@@ -166,15 +162,36 @@ public class SellerEnums {
         InStock,
         /**
          * 已经无货
+         * Temporarily out of stock. Order now and we'll deliver when available.
          */
         OutOfStock,
         /**
          * 已经无货但短期马上补货，也可接受
+         * Back-ordered. Due in stock January 27 -- order now to reserve yours
          */
         WillBeInStockSoon,
         /**
          * 已经无货且短期不能补货，不可接受
          */
-        WontBeInStockSoon
+        WontBeInStockSoon;
+
+        final static String[] outOfStockKeywords = new String[] {"out of stock"};
+        final static String[] backOrderKeywords = new String[] {"Back-ordered"};
+
+        public static StockStatus parseFromText(String deliveryText) {
+            if (Strings.containsAnyIgnoreCase(deliveryText, outOfStockKeywords)) {
+                return OutOfStock;
+            }
+
+            if (Strings.containsAllIgnoreCase(deliveryText, backOrderKeywords)) {
+                return WillBeInStockSoon;
+            }
+
+            return InStock;
+        }
+
+
     }
+
+
 }

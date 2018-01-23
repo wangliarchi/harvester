@@ -8,9 +8,9 @@ import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
-import edu.olivet.harvester.fulfill.model.Seller;
-import edu.olivet.harvester.fulfill.model.SellerEnums;
-import edu.olivet.harvester.fulfill.service.SellerService;
+import edu.olivet.harvester.hunt.model.Seller;
+import edu.olivet.harvester.hunt.model.SellerEnums;
+import edu.olivet.harvester.hunt.service.SellerService;
 import edu.olivet.harvester.fulfill.utils.ConditionUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
@@ -99,7 +99,7 @@ public class OfferListingPage extends FulfillmentPage {
                         (seller.getType() == SellerEnums.SellerType.APWareHouse && order.sellerIsAPWarehouse());
 
                 //ConditionUtils
-                if (sellerEq && ConditionUtils.goodToGo(order.condition, seller.getCondition())) {
+                if (sellerEq && ConditionUtils.goodToGo(order.condition(), seller.getCondition())) {
                     return seller;
                 }
             }
