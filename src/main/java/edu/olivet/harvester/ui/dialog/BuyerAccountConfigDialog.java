@@ -193,20 +193,22 @@ public class BuyerAccountConfigDialog extends BaseDialog {
 
     @Override
     public void ok() {
-
         List<BuyerAccountSetting> settings = new ArrayList<>();
         for (BuyerAccountPanel buyerAccountPanel : buyerAccountPanels) {
             BuyerAccountSetting buyerAccountSetting = buyerAccountPanel.collect();
             if (buyerAccountSetting != null && buyerAccountSetting.getBuyerAccount() != null) {
+                if (!buyerAccountSetting.getBuyerAccount().valid()) {
+                    UITools.error("Buyer account " + buyerAccountSetting.getBuyerAccount().getEmail() + " is not valid. " +
+                            "Please enter both email address and password.");
+                    return;
+                }
                 settings.add(buyerAccountSetting);
             }
         }
 
-
         buyerAccountSettingUtils.setAccountSettings(settings);
         buyerAccountSettingUtils.save();
-
-
+        
         doClose();
     }
 
