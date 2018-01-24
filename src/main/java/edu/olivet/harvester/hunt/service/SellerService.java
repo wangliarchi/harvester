@@ -5,15 +5,15 @@ import com.teamdev.jxbrowser.chromium.Browser;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.*;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
+import edu.olivet.harvester.common.model.Money;
 import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.fulfill.utils.ConditionUtils.Condition;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
-import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.hunt.model.Rating;
 import edu.olivet.harvester.hunt.model.Rating.RatingType;
 import edu.olivet.harvester.hunt.model.Seller;
-import edu.olivet.harvester.fulfill.utils.ConditionUtils.*;
-import edu.olivet.harvester.common.model.Money;
 import edu.olivet.harvester.hunt.model.SellerEnums.SellerType;
+import edu.olivet.harvester.hunt.utils.SellerHuntUtil;
 import edu.olivet.harvester.utils.I18N;
 import edu.olivet.harvester.utils.common.NumberUtils;
 import edu.olivet.harvester.utils.http.HtmlFetcher;
@@ -46,7 +46,8 @@ public class SellerService {
     private static I18N I18N_AMAZON;
 
 
-    @Inject Now now;
+    @Inject
+    Now now;
 
     @Inject
     public void init() throws IOException {
@@ -63,11 +64,19 @@ public class SellerService {
             throw new BusinessException("No ISBN found for order yet");
         }
 
-        Country saleChannelCountry = OrderCountryUtils.getMarketplaceCountry(order);
-        Condition condition = order.condition();
+        List<Country> countriesToHunt = SellerHuntUtil.countriesToHunt(order);
+        Condition condition = order.originalCondition();
         String isbn = order.isbn;
 
-        return null;
+        List<Seller> sellers = new ArrayList<>();
+        for (Country country : countriesToHunt) {
+            List<Seller> sellersFromCountry = parseSellers(country, isbn, condition);
+            LOGGER.info(String.format("found %d sellers from %s for %s with condition %s",
+                    sellersFromCountry.size(), country.name(), isbn, condition));
+            sellers.addAll(sellersFromCountry);
+        }
+
+        return sellers;
     }
 
 
@@ -298,7 +307,8 @@ public class SellerService {
         return null;
     }
 
-    @Inject HtmlFetcher htmlFetcher;
+    @Inject
+    HtmlFetcher htmlFetcher;
 
     public void getSellerRatings(Seller seller) {
         Map<RatingType, Rating> ratings = getSellerRatings(seller.getRatingUrl());
@@ -333,7 +343,6 @@ public class SellerService {
         return ratings;
     }
 
-
     public Country getShipFromCountry(String shipFromCountryString, Country offerListingCountry) {
 
         if (StringUtils.isBlank(shipFromCountryString)) {
@@ -348,8 +357,6 @@ public class SellerService {
         }
 
         return offerListingCountry;
-
-
     }
 
     private String getOfferListingPageUrl(Country country, String asin, Condition condition) {

@@ -45,8 +45,12 @@ public class ConditionUtils {
         OpenBox("OpenBox", 50);
 
         public static int NEW_SCORE = 100;
+
         public static Condition parseFromText(String conditionText) {
             String str = conditionText.replace("-", StringUtils.EMPTY).replace(StringUtils.SPACE, StringUtils.EMPTY).toLowerCase();
+            if (StringUtils.startsWithIgnoreCase(str, "new")) {
+                return New;
+            }
             String translatedConditionText = ConditionUtils.translateCondition(str);
             for (Condition condition : Condition.values()) {
                 if (condition.name().equalsIgnoreCase(translatedConditionText)) {

@@ -3,7 +3,6 @@ package edu.olivet.harvester.hunt.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.inject.Inject;
-import com.sun.org.apache.xpath.internal.operations.Or;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
@@ -21,7 +20,9 @@ import org.jsoup.Jsoup;
 import org.nutz.lang.Lang;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -166,6 +167,7 @@ public class HuntVariableService extends AppScript {
     private void setIntlShippingVariable(Seller seller, Order order) {
 
     }
+
 
     public static void main(String[] args) {
         HuntVariableService huntVariableService = ApplicationContext.getBean(HuntVariableService.class);

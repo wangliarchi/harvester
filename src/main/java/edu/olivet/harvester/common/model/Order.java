@@ -7,13 +7,13 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.db.Keyable;
 import edu.olivet.foundations.utils.*;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
+import edu.olivet.harvester.common.model.OrderEnums.OrderColor;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.ShippingEnums;
 import edu.olivet.harvester.fulfill.utils.ConditionUtils.Condition;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
-import edu.olivet.harvester.common.model.OrderEnums.OrderColor;
 import edu.olivet.harvester.spreadsheet.utils.SheetUtils;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Data;
@@ -184,6 +184,16 @@ public class Order implements Keyable {
     public String originalRemark;
 
     /**
+     * Fulfillment is from country different from sales channel
+     */
+    @JSONField(serialize = false)
+    public boolean isIntlOrder() {
+        String marketplaceCountry = OrderCountryUtils.getMarketplaceCountry(this).code();
+        String shipToCountry = CountryStateUtils.getInstance().getCountryCode(OrderCountryUtils.getShipToCountry(this));
+        return !marketplaceCountry.equalsIgnoreCase(shipToCountry);
+    }
+
+    /**
      * Determine whether a order number is valid or not by detecting whether it matches Amazon, BetterWorld or Ingram Order Number Pattern
      */
     @JSONField(serialize = false)
@@ -270,12 +280,18 @@ public class Order implements Keyable {
         return isDirectShip();
     }
 
+    /**
+     * Fulfillment is from country different from sales channel
+     */
     @JSONField(serialize = false)
     public boolean isIntl() {
-        String fulfillmentCountry = OrderCountryUtils.getFulfillmentCountry(this).name();
-        String marketplaceCountry = CountryStateUtils.getInstance().getCountryCode(OrderCountryUtils.getShipToCountry(this));
-        return !fulfillmentCountry.equalsIgnoreCase(marketplaceCountry);
+        String fulfillmentCountry = OrderCountryUtils.getFulfillmentCountry(this).code();
+        String shipCountry = CountryStateUtils.getInstance().getCountryCode(OrderCountryUtils.getShipToCountry(this));
+        return !fulfillmentCountry.equalsIgnoreCase(shipCountry);
     }
+
+
+
 
     /**
      * Determine whether current order is fulfilled from US directly via its remark
@@ -483,8 +499,14 @@ public class Order implements Keyable {
         return type();
     }
 
+    @JSONField(serialize = false)
     public Condition condition(){
         return Condition.parseFromText(condition);
+    }
+
+    @JSONField(serialize = false)
+    public Condition originalCondition(){
+        return Condition.parseFromText(original_condition);
     }
     @JSONField(serialize = false)
     public OrderEnums.OrderItemType type() {
