@@ -151,7 +151,7 @@ public class Seller {
     private float shippingVariable = 0f;
 
 
-    public float totalForCalculation() {
+    public float getTotalForCalculation() {
         return getTotalPriceInUSD() + sellerVariable + ratingVariable + shippingVariable;
     }
 
@@ -183,6 +183,18 @@ public class Seller {
 
     public boolean isInStock() {
         return stockStatus == StockStatus.InStock || stockStatus == StockStatus.WillBeInStockSoon;
+    }
+
+    public boolean isPrime() {
+        return SellerType.isPrime(type);
+    }
+
+    public boolean isPt() {
+        return !isPrime();
+    }
+
+    public boolean isAP() {
+        return type.isAP();
     }
 
     public boolean isExpeditedAvailable() {
@@ -233,6 +245,13 @@ public class Seller {
         return price.toUSDAmount().floatValue() + shippingFee.toUSDAmount().floatValue();
     }
 
+    public Rating getRatingByType(RatingType type) {
+        if (ratings == null) {
+            return null;
+        }
+        return ratings.getOrDefault(type, null);
+    }
+
     /**
      * 将部分可能为null的字符串属性设为空白字符串
      */
@@ -278,9 +297,13 @@ public class Seller {
     /**
      * 获取Seller基本信息文本
      */
-    public String toSimpleString() {
-        return "[" + this.offerListingCountry.name() + ", " + this.name + ", " + this.uuid + ", " + DOUBLE_FORMAT.format(this.price) + ", " +
-                DOUBLE_FORMAT.format(this.shippingFee) + ", " + this.condition + ", " + this.type.abbrev() + ", " +
-                this.rating + "%, " + this.ratingCount + ", " + "]";
+    public String toString() {
+        return this.offerListingCountry.name() + ", " + this.name + ", " + this.getTotalForCalculation() + ", " + this.uuid + ", " +
+                this.price.usdText() + ", " + this.shippingFee.usdText() + ", " +
+                this.condition + ", " + this.type.abbrev() + ", " +
+                this.rating + "%, " + this.ratingCount + ", " +
+                getRatingByType(RatingType.Last30Days) + ", " + getRatingByType(RatingType.Last12Month) + ", " +
+                sellerVariable + ", " + ratingVariable + ", " + shippingVariable;
+
     }
 }

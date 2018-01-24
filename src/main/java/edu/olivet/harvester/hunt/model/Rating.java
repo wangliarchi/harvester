@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 10/31/17 11:29 AM
  */
@@ -13,6 +16,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Rating {
 
+    /**
+     * 好评率
+     */
+    private int positive;
+    /**
+     * feedback总数
+     */
+    private int count;
+
+    private RatingType type;
+
+
     public enum RatingType {
         Last30Days(1),
         Last90Days(2),
@@ -20,11 +35,12 @@ public class Rating {
         Lifetime(4);
 
         private int index;
+
         RatingType(int index) {
             this.index = index;
         }
 
-        public int getIndex(){
+        public int getIndex() {
             return index;
         }
     }
@@ -39,8 +55,17 @@ public class Rating {
     public static final int AP_POSITIVE = 100;
 
 
-    public Rating (RatingType type) {
+
+    public Rating(RatingType type) {
         this.type = type;
+    }
+
+    public static Map<RatingType, Rating> apRatings() {
+        Map<RatingType, Rating> apRatings = new HashMap<>();
+        for(RatingType type : RatingType.values()) {
+            apRatings.put(type,new Rating(AP_POSITIVE,AP_COUNT,type));
+        }
+        return apRatings;
     }
     /**
      * 判定一个Rating是否无效(具体表现为该列网页显示结果实际可能为"-"，解析为0)
@@ -50,23 +75,9 @@ public class Rating {
     }
 
 
-    /**
-     * 好评率
-     */
-    private int positive;
-
-    /**
-     * feedback总数
-     */
-    private int count;
-
-
-    private RatingType type;
-
-
     @Override
     public String toString() {
-        return UIText.text("supplier.rating.summary", this.positive, this.count);
+        return this.positive + "%, " + this.count;
     }
 
 }

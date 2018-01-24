@@ -48,6 +48,7 @@ public class SellerService {
 
     @Inject
     Now now;
+    @Inject SellerFilter sellerFilter;
 
     @Inject
     public void init() throws IOException {
@@ -59,20 +60,17 @@ public class SellerService {
         I18N_AMAZON = new I18N("i18n/Amazon");
     }
 
-    public List<Seller> getSellersForOrder(Order order) {
+    public List<Seller> getAllSellersForOrder(Order order) {
         if (StringUtils.isBlank(order.isbn)) {
             throw new BusinessException("No ISBN found for order yet");
         }
 
         List<Country> countriesToHunt = SellerHuntUtil.countriesToHunt(order);
-        Condition condition = order.originalCondition();
-        String isbn = order.isbn;
-
         List<Seller> sellers = new ArrayList<>();
         for (Country country : countriesToHunt) {
-            List<Seller> sellersFromCountry = parseSellers(country, isbn, condition);
+            List<Seller> sellersFromCountry = parseSellers(country, order.isbn, order.originalCondition());
             LOGGER.info(String.format("found %d sellers from %s for %s with condition %s",
-                    sellersFromCountry.size(), country.name(), isbn, condition));
+                    sellersFromCountry.size(), country.name(), order.isbn, order.original_condition));
             sellers.addAll(sellersFromCountry);
         }
 
@@ -80,13 +78,17 @@ public class SellerService {
     }
 
 
-    public List<Seller> parseSellers(Country country, String asin, Condition condition) {
-        String url = getOfferListingPageUrl(country, asin, condition);
+    public List<Seller> parseSellers(Country country, String isbn, Condition condition) {
+        String url = getOfferListingPageUrl(country, isbn, condition);
 
         List<Seller> sellers = new ArrayList<>();
         for (int i = 0; i < MAX_PAGE; i++) {
             Document document = htmlFetcher.getDocumentSilently(url);
-            sellers.addAll(parseSellers(document, country));
+            List<Seller> sellersByPage = parseSellers(document, country);
+
+            if (sellersByPage.size() > 0) {
+                sellers.addAll(sellersByPage);
+            }
 
             Element nextPageLink = HtmlParser.selectElementByCssSelector(document, "#olpOfferListColumn .a-pagination li.a-last a");
 
@@ -311,6 +313,14 @@ public class SellerService {
     HtmlFetcher htmlFetcher;
 
     public void getSellerRatings(Seller seller) {
+        if (seller.isAP()) {
+            seller.setRatings(Rating.apRatings());
+            return;
+        }
+
+        if (StringUtils.isBlank(seller.getRatingUrl())) {
+            return;
+        }
         Map<RatingType, Rating> ratings = getSellerRatings(seller.getRatingUrl());
         seller.setRatings(ratings);
     }
@@ -333,9 +343,19 @@ public class SellerService {
         for (RatingType type : RatingType.values()) {
             Rating rating = new Rating(type);
             String positiveText = positiveTds.get(type.getIndex()).text().replaceAll(Regex.NON_DIGITS.val(), "");
-            rating.setPositive(Integer.parseInt(positiveText));
+            try {
+                rating.setPositive(Integer.parseInt(positiveText));
+            } catch (Exception e) {
+                rating.setPositive(0);
+            }
+
             String totalText = totalTds.get(type.getIndex()).text().replaceAll(Regex.NON_DIGITS.val(), "");
-            rating.setCount(Integer.parseInt(totalText));
+            try {
+                rating.setCount(Integer.parseInt(totalText));
+            } catch (Exception e) {
+                rating.setCount(0);
+            }
+
             ratings.put(type, rating);
         }
 

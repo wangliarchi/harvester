@@ -83,6 +83,19 @@
     </appender>
 
 
+    <appender name="seller_hunting" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_ROOT}/seller_hunting.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_ROOT}/seller_hunting.%d{yyyy-M-d}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss}  %-5level - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
 
 
     <logger name="console" additivity="false" level="debug">
@@ -132,6 +145,11 @@
 
     <logger name="edu.olivet.harvester.logger.OrderSubmissionLogger" additivity="false" level="debug">
         <appender-ref ref="order_submission"/>
+        <appender-ref ref="console"/>
+    </logger>
+
+    <logger name="edu.olivet.harvester.logger.SellerHuntingLogger" additivity="false" level="debug">
+        <appender-ref ref="seller_hunting"/>
         <appender-ref ref="console"/>
     </logger>
 

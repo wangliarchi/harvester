@@ -18,6 +18,8 @@ import edu.olivet.harvester.hunt.model.SellerEnums.SellerType;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import org.jsoup.Jsoup;
 import org.nutz.lang.Lang;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -29,6 +31,8 @@ import java.util.stream.Collectors;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 1/22/2018 3:43 PM
  */
 public class HuntVariableService extends AppScript {
+    private static final Logger LOGGER = LoggerFactory.getLogger(HuntVariableService.class);
+
     private static final String APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9HNzArF0rA5jxXlrBfc4CYm7Vy-iU0RSsi9nmgaSrQLfQKKY/exec";
     private Map<String, JSONObject> VARIABLE_MAP = new HashMap<>();
 
@@ -39,6 +43,7 @@ public class HuntVariableService extends AppScript {
     }
 
     @Inject OrderItemTypeHelper orderItemTypeHelper;
+
     public void setHuntingVariable(Seller seller, Order order) {
         //seller variable
         setSellerVariable(seller, order);
@@ -94,10 +99,15 @@ public class HuntVariableService extends AppScript {
 
         //seller variable
         JSONObject sellerVariables = getVariables(Type.Seller, orderCountry, orderItemType);
-        String key = seller.getOfferListingCountry().name() + " " + seller.getType() + " " +
+        String key = seller.getOfferListingCountry().name() + " " + seller.getType().abbrev() + " " +
                 (seller.canDirectShip(orderCountry) ? "Direct" : "Export");
 
         JSONObject sellerVariablesByPrices = sellerVariables.getJSONObject(key);
+        if (sellerVariablesByPrices == null) {
+            LOGGER.error("Fail to find seller variables for {}", key);
+            throw new BusinessException("Fail to find seller variables for " + key);
+        }
+
         List<String> keys = sellerVariablesByPrices.keySet().stream().collect(Collectors.toList());
         keys.sort((m1, m2) -> Float.parseFloat(m1) > Float.parseFloat(m2) ? -1 : 1);
 

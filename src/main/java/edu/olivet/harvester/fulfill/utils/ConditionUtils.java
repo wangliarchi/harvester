@@ -45,6 +45,7 @@ public class ConditionUtils {
         OpenBox("OpenBox", 50);
 
         public static int NEW_SCORE = 100;
+        public static int ACCEPTABLE_SCORE = 50;
 
         public static Condition parseFromText(String conditionText) {
             String str = conditionText.replace("-", StringUtils.EMPTY).replace(StringUtils.SPACE, StringUtils.EMPTY).toLowerCase();
@@ -83,6 +84,10 @@ public class ConditionUtils {
          */
         public boolean used() {
             return score < NEW_SCORE;
+        }
+
+        public boolean acceptable() {
+            return score <= ACCEPTABLE_SCORE;
         }
     }
 

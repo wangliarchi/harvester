@@ -41,9 +41,9 @@ public class HtmlFetcher {
         }
 
         //use jxbrowser if failed
-        if (RegexUtils.containsRegex(html, HttpUtils.HTTP_FAIL_REGEX)) {
+        if (RegexUtils.containsRegex(html, HttpUtils.HTTP_FAIL_REGEX) || StringUtils.containsIgnoreCase(html, "captchacharacters")) {
             BrowserView browserView = JXBrowserHelper.getGeneralBrowser();
-            JXBrowserHelper.loadPage(browserView.getBrowser(),url);
+            JXBrowserHelper.loadPage(browserView.getBrowser(), url);
             html = browserView.getBrowser().getHTML();
         }
         if (StringUtils.isBlank(html)) {
