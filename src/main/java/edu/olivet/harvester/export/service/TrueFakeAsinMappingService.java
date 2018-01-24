@@ -38,6 +38,7 @@ public class TrueFakeAsinMappingService {
         });
 
         Map<String, String> listingMapping = elasticSearchService.searchISBNs(asins);
+
         orders.forEach(order -> {
             if (listingMapping.containsKey(order.getAsin())) {
                 order.setIsbn(listingMapping.get(order.getAsin()));

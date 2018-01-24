@@ -323,6 +323,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
                 LOGGER.error("做单过程中出现异常:", e);
             } finally {
                 resetSkipSetting();
+                PSEventListener.end();
             }
         }).start();
 

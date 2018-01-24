@@ -8,7 +8,7 @@ import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.model.OrderEnums;
+import edu.olivet.harvester.model.OrderEnums.*;
 import edu.olivet.harvester.service.mws.ProductAttributesHelper;
 import edu.olivet.harvester.service.mws.ProductClient;
 import lombok.Setter;
@@ -29,15 +29,14 @@ public class OrderItemTypeHelper {
     private ProductClient productClient;
 
     @Profile
-    public OrderEnums.OrderItemType getItemType(Order order) {
+    public OrderItemType getItemType(Order order) {
 
-        OrderEnums.OrderItemType type;
 
         //To save time, we will try sku pattern first.
 
         try {
 
-            type = this.getItemTypeBySku(order);
+            OrderItemType type = getItemTypeBySku(order);
 
             //LOGGER.info("Order item type for {} found as {} from SKU pattern. ASIN {}, SKU {}",
             //order.order_id,
@@ -50,11 +49,11 @@ public class OrderItemTypeHelper {
             // order.order_id, order.isbn, order.sku, e);
         }
 
-        return OrderEnums.OrderItemType.BOOK;
+        return OrderItemType.BOOK;
 
     }
 
-    public OrderEnums.OrderItemType getItemTypeBySku(Order order) {
+    public static OrderItemType getItemTypeBySku(Order order) {
 
         String sku = order.getSku();
 
@@ -67,7 +66,7 @@ public class OrderItemTypeHelper {
                 "SAFETY", "SPOR", "TOOL", "TOY", "access", "guowai", "bady", "kit", "out", "uban"};
 
         if (Strings.containsAnyIgnoreCase(sku, productKeywords)) {
-            return OrderEnums.OrderItemType.PRODUCT;
+            return OrderItemType.PRODUCT;
         }
 
 
@@ -75,7 +74,7 @@ public class OrderItemTypeHelper {
 
         for (String keyword : bookKeywords) {
             if (sku.toLowerCase().contains(keyword.toLowerCase())) {
-                return OrderEnums.OrderItemType.BOOK;
+                return OrderItemType.BOOK;
             }
         }
 
@@ -83,7 +82,7 @@ public class OrderItemTypeHelper {
 
     }
 
-    public OrderEnums.OrderItemType getItemTypeByMWSAPI(Order order) {
+    public OrderItemType getItemTypeByMWSAPI(Order order) {
 
         String asin = "";
 
@@ -118,9 +117,9 @@ public class OrderItemTypeHelper {
         String[] bookTypes = {"book", "dvd", "music"};
 
         if (Arrays.asList(bookTypes).contains(productGroup.toLowerCase())) {
-            return OrderEnums.OrderItemType.BOOK;
+            return OrderItemType.BOOK;
         }
 
-        return OrderEnums.OrderItemType.PRODUCT;
+        return OrderItemType.PRODUCT;
     }
 }

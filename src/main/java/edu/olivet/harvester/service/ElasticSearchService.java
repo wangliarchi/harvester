@@ -5,7 +5,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.ApplicationContext;
+import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.WaitTime;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -13,7 +15,6 @@ import org.nutz.lang.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,22 +56,28 @@ public class ElasticSearchService {
         Map<String, String> results = new HashMap<>();
 
         for (List<String> list : lists) {
-            Map<String, Object> params = new HashMap<>();
-            params.put("q", "asin:" + StringUtils.join(list.stream().map(it -> "\"" + StringUtils.strip(it) + "\"")
-                    .collect(Collectors.toList()), ","));
-            params.put("pretty", "true");
-            params.put("size", MAX_ASIN_COUNT_PER_REQUEST);
+            try {
+                Map<String, Object> params = new HashMap<>();
+                params.put("q", "asin:" + StringUtils.join(list.stream().map(it -> "\"" + StringUtils.strip(it) + "\"")
+                        .collect(Collectors.toList()), ","));
+                params.put("pretty", "true");
+                params.put("size", MAX_ASIN_COUNT_PER_REQUEST);
 
-            String json = request(LISTING_MAPPING_INDEX, params);
-            JSONObject response = JSON.parseObject(json);
-            int total = response.getJSONObject("hits").getInteger("total");
-            if (total > 0) {
-                JSONArray hits = response.getJSONObject("hits").getJSONArray("hits");
-                for (Object hit : hits) {
-                    String isbn = ((JSONObject) hit).getJSONObject("_source").getString("isbn");
-                    String asin = ((JSONObject) hit).getJSONObject("_source").getString("asin");
-                    results.put(asin, isbn);
+                String json = request(LISTING_MAPPING_INDEX, params);
+                JSONObject response = JSON.parseObject(json);
+                int total = response.getJSONObject("hits").getInteger("total");
+                if (total > 0) {
+                    JSONArray hits = response.getJSONObject("hits").getJSONArray("hits");
+                    for (Object hit : hits) {
+                        String isbn = ((JSONObject) hit).getJSONObject("_source").getString("isbn");
+                        String asin = ((JSONObject) hit).getJSONObject("_source").getString("asin");
+                        results.put(asin, isbn);
+                    }
                 }
+
+                WaitTime.Shortest.execute();
+            } catch (Exception e) {
+                LOGGER.error("", e);
             }
         }
 
@@ -121,15 +128,15 @@ public class ElasticSearchService {
         addIndex(PRODUCT_INDEX, id, params);
     }
 
-
+    @Repeat
     public String request(String index, Map<String, Object> params) {
         String params4Url = params2Url(params);
         String url = ELASTIC_SEARCH_ADDRESS + "/" + index + "/_search" + params4Url;
         try {
             return Jsoup.connect(url).timeout(WaitTime.Longer.valInMS())
                     .ignoreContentType(true).execute().body();
-        } catch (IOException e) {
-            throw Lang.wrapThrow(e);
+        } catch (Exception e) {
+            throw new BusinessException(e);
         }
     }
 
@@ -143,7 +150,7 @@ public class ElasticSearchService {
             Jsoup.connect(url).requestBody(json).header("Content-Type", "application/json")
                     .timeout(WaitTime.Longer.valInMS())
                     .ignoreContentType(true).post();
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw Lang.wrapThrow(e);
         }
     }

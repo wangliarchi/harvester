@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.CookieStore;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.cookie.BasicClientCookie;
+import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -456,6 +457,22 @@ public class JXBrowserHelper {
         DOMElement element = selectElementByCssSelector(doc, selector);
         if (element != null) {
             return element.getInnerText().trim();
+        }
+        return StringUtils.EMPTY;
+    }
+
+    public static String textFromHtml(String html) {
+        return Jsoup.parse(html).text().trim();
+    }
+
+    public static String textFromElement(DOMElement domElement) {
+        return textFromHtml(domElement.getInnerHTML());
+    }
+
+    public static String textFromElement(DOMElement doc, String selector) {
+        DOMElement element = selectElementByCssSelector(doc, selector);
+        if (element != null) {
+            return textFromHtml(element.getInnerHTML());
         }
         return StringUtils.EMPTY;
     }

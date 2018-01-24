@@ -8,7 +8,7 @@ import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.service.SheetService;
 import edu.olivet.harvester.fulfill.service.steps.ClearShoppingCart;
-import edu.olivet.harvester.fulfill.service.steps.Login;
+import edu.olivet.harvester.fulfill.service.steps.EbatesTransfer;
 import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.ui.panel.TabbedBuyerPanel;
@@ -24,17 +24,13 @@ public class OrderFlowEngine extends FlowParent {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderFlowEngine.class);
 
-    @Inject private
-    Login login;
+    @Inject private EbatesTransfer ebatesTransfer;
 
-    @Inject private
-    ClearShoppingCart clearShoppingCart;
+    @Inject private ClearShoppingCart clearShoppingCart;
 
-    @Inject private
-    MessageListener messageListener;
+    @Inject private MessageListener messageListener;
 
-    @Inject private
-    SheetService sheetService;
+    @Inject private SheetService sheetService;
 
     @SuppressWarnings("UnusedReturnValue")
     public FlowState process(Order order, BuyerPanel buyerPanel) {
@@ -46,8 +42,8 @@ public class OrderFlowEngine extends FlowParent {
         state.setOrder(order);
         state.setBuyerPanel(buyerPanel);
         state.setMessageListener(messageListener);
-        Step step = login;
-        step.stepName = login.getClass().toString();
+        Step step = ebatesTransfer;
+        step.stepName = ebatesTransfer.getClass().toString();
 
         Exception exception = null;
 
