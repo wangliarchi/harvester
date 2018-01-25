@@ -14,6 +14,7 @@ import edu.olivet.harvester.fulfill.model.ShippingEnums;
 import edu.olivet.harvester.fulfill.utils.ConditionUtils.Condition;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
+import edu.olivet.harvester.hunt.model.Seller;
 import edu.olivet.harvester.spreadsheet.utils.SheetUtils;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Data;
@@ -183,6 +184,16 @@ public class Order implements Keyable {
     @JSONField(serialize = false)
     public String originalRemark;
 
+    @JSONField(serialize = false)
+    public void setSellerData(Seller seller) {
+        this.seller = seller.getName();
+        seller_id = seller.getUuid();
+        seller_price = seller.getPrice().getAmount().toPlainString();
+        character = seller.getType().abbrev();
+        condition = seller.getCondition().text();
+
+        Remark.TO_BE_CHECKED.appendTo(remark);
+    }
     /**
      * Fulfillment is from country different from sales channel
      */

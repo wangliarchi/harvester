@@ -144,7 +144,7 @@ public class SellerFilter {
             }
         }
 
-        boolean result = ConditionUtils.goodToGo(seller.getCondition(), order.originalCondition());
+        boolean result = ConditionUtils.goodToGo(order.originalCondition(), seller.getCondition());
 
         if (!result) {
             SellerHuntingLogger.info("Seller {} not qualified as its condition {} is too low for order condition {}", seller, seller.getCondition(), order.original_condition);

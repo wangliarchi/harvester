@@ -80,6 +80,11 @@ public class UIHarvester extends AbstractApplicationUI {
     }
 
 
+    @UIEvent
+    public void findSupplier() {
+
+    }
+
     @Inject private
     ConfirmShipmentEvent confirmShipmentEvent;
 

@@ -98,7 +98,7 @@ public class UIElements extends AbstractUIContainer {
         return new Action[] {
                 Actions.ExportOrders,
                 Actions.SubmitOrder,
-                //Actions.FindSupplier,
+                Actions.FindSupplier,
                 Actions.ConfirmShipment,
                 Action.Settings,
                 Actions.ReportBug

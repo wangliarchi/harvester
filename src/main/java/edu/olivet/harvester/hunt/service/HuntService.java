@@ -38,14 +38,15 @@ public class HuntService {
         sellers.removeIf(seller -> !sellerFilter.isQualified(seller, order));
 
         if (CollectionUtils.isEmpty(sellers)) {
-            throw new BusinessException("No seller found for order" + order);
+            throw new BusinessException("No seller found");
         }
 
         //set calculation variables
         sellers.forEach(it -> huntVariableService.setHuntingVariable(it, order));
 
         //sort sellers
-        sellers.sort((Seller s1, Seller s2) -> s1.getTotalForCalculation() - s2.getTotalForCalculation() > 0 ? 1 : -1);
+        sellers.sort(SellerComparator.getInstance());
+        LOGGER.info("total {} sellers found - {}", sellers.size(), sellers);
 
         Seller seller = sellers.get(0);
         LOGGER.info("found seller {} for order {}, take {}", seller, order, Strings.formatElapsedTime(start));

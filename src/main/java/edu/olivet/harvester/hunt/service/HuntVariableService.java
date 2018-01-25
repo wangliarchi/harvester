@@ -129,8 +129,12 @@ public class HuntVariableService extends AppScript {
         float sellerVariable = 0;
         for (String price : keys) {
             if (orderPrice - seller.getTotalPriceInUSD() > Float.parseFloat(price)) {
-                sellerVariable = sellerVariablesByPrice.getFloat(price);
-                break;
+                try {
+                    sellerVariable = sellerVariablesByPrice.getFloat(price);
+                    break;
+                }catch (Exception e) {
+                    //LOGGER.info("{} {}",sellerVariablesByPrice,price);
+                }
             }
         }
 

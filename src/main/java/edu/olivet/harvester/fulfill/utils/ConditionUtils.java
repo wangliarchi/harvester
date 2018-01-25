@@ -134,8 +134,8 @@ public class ConditionUtils {
         return result;
     }
 
-    public static boolean goodToGo(Condition sellerCondition, Condition actualCondition) {
-        return actualCondition.score() - sellerCondition.score() >= -10;
+    public static boolean goodToGo(Condition orderCondition, Condition sellerCondition) {
+        return sellerCondition.score() - orderCondition.score() >= -10;
     }
 
     public static boolean goodToGo(String sellerCondition, String actualCondition) {

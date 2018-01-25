@@ -297,6 +297,17 @@ public class Seller {
     /**
      * 获取Seller基本信息文本
      */
+    public String toSimpleString() {
+        return "[" + this.offerListingCountry.name() + ", " + this.name + ", " + this.uuid + ", " +
+                this.condition + ", " + this.type.abbrev() + ", " +
+                this.price.usdText() + ", " + this.shippingFee.usdText() + ", " +
+                this.rating + "%, " + this.ratingCount + "]";
+
+    }
+
+    /**
+     * 获取Seller基本信息文本
+     */
     public String toString() {
         return this.offerListingCountry.name() + ", " + this.name + ", " + this.getTotalForCalculation() + ", " + this.uuid + ", " +
                 this.price.usdText() + ", " + this.shippingFee.usdText() + ", " +

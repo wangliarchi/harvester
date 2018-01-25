@@ -28,7 +28,6 @@ public class OrderItemTypeHelper {
     @Setter
     private ProductClient productClient;
 
-    @Profile
     public OrderItemType getItemType(Order order) {
 
 

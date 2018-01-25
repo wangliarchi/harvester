@@ -18,6 +18,7 @@ import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.dialog.ChooseSheetDialog;
 import edu.olivet.harvester.ui.dialog.SelectRangeDialog;
+import edu.olivet.harvester.ui.events.HuntSuppliersEvent;
 import edu.olivet.harvester.ui.events.MarkStatusEvent;
 import edu.olivet.harvester.ui.events.SubmitOrdersEvent;
 import edu.olivet.harvester.utils.FinderCodeUtils;
@@ -258,6 +259,8 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
 
         submitButton.addActionListener(evt -> submitOrders());
 
+        huntSupplierButton.addActionListener(evt -> huntSuppliers());
+
         pauseButton.addActionListener(evt -> {
             if (PSEventListener.paused()) {
                 PSEventListener.resume();
@@ -291,6 +294,21 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         skipCheckComboBox.setSelectedIndex(0);
         settings.setSkipValidation(OrderValidator.SkipValidation.None);
         settings.save();
+    }
+
+
+    private void huntSuppliers() {
+        new Thread(() -> {
+            try {
+                disableAllBtns();
+                ApplicationContext.getBean(HuntSuppliersEvent.class).execute();
+            } catch (Exception e) {
+                UITools.error("ERROR while hunting suppliers:" + e.getMessage(), UIText.title("title.code_error"));
+                LOGGER.error("ERROR while hunting suppliers:", e);
+            } finally {
+                restAllBtns();
+            }
+        }).start();
     }
 
     private void markStatus() {

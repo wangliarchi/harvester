@@ -335,6 +335,11 @@ public class SellerService {
         Map<RatingType, Rating> ratings = new HashMap<>();
 
         Element ratingTableElement = HtmlParser.select(document, "#feedback-summary-table");
+        if (ratingTableElement == null) {
+            LOGGER.error("no feedback table found");
+            return ratings;
+        }
+
         Elements trs = HtmlParser.elements(ratingTableElement, "tr");
         //positive - 2nd row, total - 5th row
         Elements positiveTds = HtmlParser.elements(trs.get(1), "td");
