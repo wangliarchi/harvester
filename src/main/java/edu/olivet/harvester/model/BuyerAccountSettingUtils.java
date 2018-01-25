@@ -37,7 +37,12 @@ public class BuyerAccountSettingUtils {
         if (file.exists() && file.isFile()) {
             accountSettings = JSON.parseArray(Tools.readFileToString(file), BuyerAccountSetting.class);
         } else {
-            loadFromSetting(Settings.load());
+            try {
+                loadFromSetting(Settings.load());
+            }catch (Exception e) {
+                //
+            }
+
         }
 
         accountSettings.removeIf(it -> it.getBuyerAccount() == null);

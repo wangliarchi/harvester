@@ -68,7 +68,7 @@ public class SettingsDialog extends BaseDialog {
                     //load setting migrated from orderman
                     settings = Migration.loadSettings();
                 } catch (Exception e1) {
-                    LOGGER.error("Error loading migration configuration file.");
+                    LOGGER.error("Error loading migration configuration file.",e1);
                     // -> Ignore
                 }
             }
