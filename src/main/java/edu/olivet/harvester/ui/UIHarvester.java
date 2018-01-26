@@ -228,6 +228,12 @@ public class UIHarvester extends AbstractApplicationUI {
         });
     }
 
+    @Inject OrderFulfillmentCheckerEvent orderFulfillmentCheckerEvent;
+    @UIEvent
+    public void orderFulfillmentChecker() {
+        orderFulfillmentCheckerEvent.execute();
+    }
+
     @Override
     public String getApplication() {
         return Harvester.APP_NAME;

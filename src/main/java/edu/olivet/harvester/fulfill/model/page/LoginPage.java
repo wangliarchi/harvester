@@ -64,7 +64,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
     }
 
     @Repeat(expectedExceptions = BusinessException.class)
-    private void login() {
+    public void login() {
 
         if (order != null) {
             JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "0");
