@@ -200,7 +200,10 @@ public class AppScript {
             List<Order> orders = readOrders(settings.getSpreadsheetId(), settings.getSheetName());
 
             orders = OrderFilter.filterOrders(orders, settings.getAdvancedSubmitSetting());
-            orders.forEach(it -> it.setContext(settings.context()));
+            orders.forEach(it -> {
+                it.setContext(settings.context());
+                it.setRuntimeSettings(settings);
+            });
 
             if (org.apache.commons.collections.CollectionUtils.isEmpty(orders)) {
                 return orders;
@@ -212,6 +215,8 @@ public class AppScript {
             if (advs.getSubmitRange() == ConfigEnums.SubmitRange.LimitCount && size > advs.getCountLimit()) {
                 return orders.subList(0, advs.getCountLimit());
             }
+
+
             return orders;
 
         } catch (Exception e) {

@@ -94,7 +94,7 @@ public class PlacedOrderDetailPage extends FulfillmentPage {
         address.setState(state);
         address.setZip(zip);
         address.setCountry(JXBrowserHelper.text(browser, ".displayAddressCountryName"));
-        address.setNoInvoiceText(buyerPanel.getOrder().getTask().getNoInvoiceText());
+        address.setNoInvoiceText(buyerPanel.getOrder().getRuntimeSettings().getNoInvoiceText());
         return address;
     }
 

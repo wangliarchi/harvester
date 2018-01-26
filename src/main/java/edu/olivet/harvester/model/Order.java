@@ -10,6 +10,8 @@ import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.ShippingEnums;
+import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
+import edu.olivet.harvester.fulfill.service.OrderSubmissionTaskService;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.model.OrderEnums.OrderColor;
@@ -611,6 +613,33 @@ public class Order implements Keyable {
      */
     @JSONField(serialize = false)
     OrderSubmissionTask task;
+
+    @JSONField(serialize = false)
+    RuntimeSettings runtimeSettings;
+
+    public OrderSubmissionTask getTask() {
+        if (task != null) {
+            return task;
+        }
+
+        if (runtimeSettings != null) {
+            return OrderSubmissionTaskService.convertFromRuntimeSettings(runtimeSettings);
+        }
+
+        return OrderSubmissionTaskService.convertFromRuntimeSettings(RuntimeSettings.load());
+    }
+
+    public RuntimeSettings getRuntimeSettings() {
+        if (task != null) {
+            return task.convertToRuntimeSettings();
+        }
+
+        if (runtimeSettings != null) {
+            return runtimeSettings;
+        }
+
+        return RuntimeSettings.load();
+    }
 
     @Override
     public String getKey() {

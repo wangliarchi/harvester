@@ -44,7 +44,22 @@ public class EbatesTransferPage extends FulfillmentPage implements PageObject {
             return;
         }
 
-        Account ebatesBuyer = Settings.load().getConfigByCountry(OrderCountryUtils.getMarketplaceCountry(order)).getEbatesBuyer();
+        Country country = OrderCountryUtils.getMarketplaceCountry(order);
+        if (country.europe()) {
+            country = Country.UK;
+        }
+        Account ebatesBuyer = null;
+        try {
+            ebatesBuyer = Settings.load().getConfigByCountry(country).getEbatesBuyer();
+        } catch (Exception e) {
+            //ebatesBuyer = Settings.load().getConfigByCountry(Country.US).getEbatesBuyer();
+            try {
+                ebatesBuyer = Settings.load().getConfigByCountry(Country.US).getEbatesBuyer();
+            } catch (Exception e1) {
+                //
+            }
+        }
+
 
         if (ebatesBuyer == null || !ebatesBuyer.valid()) {
             return;

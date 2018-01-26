@@ -61,7 +61,7 @@ public class DefaultHandler implements ShippingHandler {
     public List<ShippingOption> getValidateOptions(Order order, List<ShippingOption> shippingOptions) {
 
         Date orderEdd = order.latestEdd();
-        int maxDays = IntegerUtils.parseInt(order.getTask().getEddLimit(), 7);
+        int maxDays = IntegerUtils.parseInt(order.getRuntimeSettings().getEddLimit(), 7);
 
         DateTime start = new DateTime(orderEdd.getTime());
 

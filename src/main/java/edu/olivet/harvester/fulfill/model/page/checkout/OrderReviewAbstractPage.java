@@ -145,13 +145,13 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
             String state = StringUtils.join(Arrays.copyOf(regionZip, regionZip.length - 1), " ");
 
             Address enteredAddress = new Address();
-            enteredAddress.setName(name.replace(buyerPanel.getOrder().getTask().getNoInvoiceText(), ""));
+            enteredAddress.setName(name.replace(buyerPanel.getOrder().getRuntimeSettings().getNoInvoiceText(), ""));
             enteredAddress.setAddress1(addressLine1);
             enteredAddress.setAddress2(addressLine2);
             enteredAddress.setCity(city);
             enteredAddress.setState(state);
             enteredAddress.setZip(zip);
-            enteredAddress.setNoInvoiceText(buyerPanel.getOrder().getTask().getNoInvoiceText());
+            enteredAddress.setNoInvoiceText(buyerPanel.getOrder().getRuntimeSettings().getNoInvoiceText());
 
             if (StringUtils.isNotBlank(country)) {
                 enteredAddress.setCountry(country);

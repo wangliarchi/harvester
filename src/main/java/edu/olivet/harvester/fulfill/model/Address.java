@@ -61,8 +61,8 @@ public class Address {
         address.setZip(order.ship_zip);
         address.setName(order.recipient_name.replaceAll("\"", "").replaceAll("&#34;", ""));
 
-        if (order.getTask() != null) {
-            address.setNoInvoiceText(order.getTask().getNoInvoiceText());
+        if (order.getRuntimeSettings() != null) {
+            address.setNoInvoiceText(order.getRuntimeSettings().getNoInvoiceText());
         }
 
         if (StringUtils.isBlank(order.ship_phone_number) || "unlisted".equalsIgnoreCase(order.ship_phone_number)) {

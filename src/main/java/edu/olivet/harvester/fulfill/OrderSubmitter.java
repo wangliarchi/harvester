@@ -77,6 +77,7 @@ public class OrderSubmitter {
         OrderSubmissionTask task = orderSubmissionTaskService.createFromRuntimeSettings(runtimeSettings);
 
         execute(task, true);
+
         //todo
         while (true) {
             if (orderDispatcher.hasJobRunning()) {
@@ -85,7 +86,7 @@ public class OrderSubmitter {
             }
         }
         while (true) {
-            if (!orderDispatcher.hasJobRunning()) {
+            if (task.getTaskStatus() == OrderTaskStatus.Completed) {
                 PSEventListener.end();
                 break;
             }
@@ -104,6 +105,9 @@ public class OrderSubmitter {
         if (CollectionUtils.isEmpty(validOrders)) {
             task.setTaskStatus(OrderTaskStatus.Completed);
             orderSubmissionTaskService.saveTask(task, true);
+            if (singleTask) {
+                PSEventListener.end();
+            }
             return;
         }
 
