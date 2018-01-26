@@ -354,6 +354,12 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         submitButton.setVisible(true);
     }
 
+    public void showProgressBar() {
+        progressTextLabel.setVisible(true);
+        progressLabel.setVisible(true);
+        progressBar.setVisible(true);
+    }
+
     @Override
     public void disableStartButton() {
         disableAllBtns();
