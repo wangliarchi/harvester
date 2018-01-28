@@ -8,16 +8,24 @@ import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.service.ProgressUpdater;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
+import edu.olivet.harvester.hunt.model.HuntResult;
 import edu.olivet.harvester.hunt.model.Seller;
 import edu.olivet.harvester.hunt.service.HuntService;
+import edu.olivet.harvester.hunt.service.HuntWorker;
 import edu.olivet.harvester.hunt.service.SheetService;
 import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.panel.SimpleOrderSubmissionRuntimePanel;
 import edu.olivet.harvester.utils.MessageListener;
+import edu.olivet.harvester.utils.common.ThreadHelper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.nutz.aop.interceptor.async.Async;
 
+import javax.swing.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 1/19/2018 2:50 PM
@@ -38,7 +46,6 @@ public class Hunter {
         }
 
         huntForOrders(orders);
-
     }
 
     public void huntForWorksheets(List<Worksheet> worksheets) {
@@ -64,41 +71,62 @@ public class Hunter {
     }
 
     public void huntForOrders(List<Order> orders) {
+        messageListener.empty();
+
+        //remove invalid orders
+        orders.removeIf(order -> order.sellerHunted() || order.colorIsGray() || order.buyerCanceled());
+
+        if (CollectionUtils.isEmpty(orders)) {
+            messageListener.addMsg("No orders to hun ", InformationLevel.Negative);
+            return;
+        }
+
         ProgressUpdater.setProgressBarComponent(
                 SimpleOrderSubmissionRuntimePanel.getInstance().progressBar,
                 SimpleOrderSubmissionRuntimePanel.getInstance().progressTextLabel);
         ProgressUpdater.updateTotal(orders.size());
+
         PSEventListener.reset(SimpleOrderSubmissionRuntimePanel.getInstance());
         PSEventListener.start();
 
-        for (Order order : orders) {
-            if (!OrderCountryUtils.getShipToCountry(order).equalsIgnoreCase("US")) {
-                messageListener.addMsg(order, "only support us domestic orders only.", InformationLevel.Negative);
-                ProgressUpdater.failed();
-                continue;
-            }
-            Seller seller;
-            try {
-                seller = huntService.huntForOrder(order);
-            } catch (Exception e) {
-                messageListener.addMsg(order, "Failed to find seller - " + e.getMessage(), InformationLevel.Negative);
-                ProgressUpdater.failed();
-                continue;
-            }
+        // 定长 swingworkerlist
+        int jobNumber = 2;
+        List<HuntWorker> jobs = new ArrayList<>(jobNumber);
 
-            try {
-                order.setSellerData(seller);
-                sheetService.fillSellerInfo(order);
-                ProgressUpdater.success();
-                messageListener.addMsg(order, "Find seller  - " + seller.toSimpleString(), InformationLevel.Positive);
+        // 把所有order按照线程数发到几个list里面。
+        List<List<Order>> list = ThreadHelper.assign(orders, jobNumber);
 
-            } catch (Exception e) {
-                messageListener.addMsg(order, "Failed to write seller info to sheet - " + e.getMessage(), InformationLevel.Negative);
-                ProgressUpdater.failed();
-            }
+        final CountDownLatch latch = new CountDownLatch(jobNumber);
+
+        // 把order list分配给几个SwingWorder
+        for (List<Order> assignedOrders : list) {
+            jobs.add(new HuntWorker(assignedOrders, latch));
         }
 
-        PSEventListener.end();
+        // SwingWorker线程执行
+        for (HuntWorker job : jobs) {
+            job.execute();
+        }
+
+
+        // 负责监视是否所有找seller线程都完成的线程。
+        SwingWorker<Void, String> hook = new SwingWorker<Void, String>() {
+            @Override
+            @Async
+            protected Void doInBackground() throws Exception {
+                latch.await();
+                return null;
+            }
+
+            @Override
+            @Async
+            protected void done() {
+                PSEventListener.end();
+            }
+        };
+
+        hook.execute();
+
     }
 
 }

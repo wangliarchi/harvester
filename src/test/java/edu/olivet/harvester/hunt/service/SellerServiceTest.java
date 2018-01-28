@@ -248,10 +248,10 @@ public class SellerServiceTest extends BaseTest {
         String asin = "0323377033";
         Country country = Country.US;
         Condition condition = Condition.New;
-        List<Seller> sellers = sellerService.parseSellers(country,asin,condition);
+        List<Seller> sellers = sellerService.getAllSellers(country,asin,condition);
         assertEquals(sellers.size(),27);
 
-        sellers = sellerService.parseSellers(country,asin,Condition.Used);
+        sellers = sellerService.getAllSellers(country,asin,Condition.Used);
         assertEquals(sellers.size(),30);
     }
 }

@@ -14,11 +14,13 @@ import edu.olivet.harvester.hunt.model.Rating.RatingType;
 import edu.olivet.harvester.hunt.model.Seller;
 import edu.olivet.harvester.hunt.model.SellerEnums.SellerType;
 import edu.olivet.harvester.hunt.utils.SellerHuntUtil;
+import edu.olivet.harvester.logger.SellerHuntingLogger;
 import edu.olivet.harvester.utils.I18N;
 import edu.olivet.harvester.utils.common.NumberUtils;
 import edu.olivet.harvester.utils.http.HtmlFetcher;
 import edu.olivet.harvester.utils.http.HtmlParser;
 import edu.olivet.harvester.utils.order.PageUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -36,7 +38,7 @@ import java.util.*;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 10/31/17 11:38 AM
  */
 public class SellerService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SellerService.class);
+    private static final SellerHuntingLogger LOGGER = SellerHuntingLogger.getInstance();
 
     private Map<String, Boolean> wareHouseIdCache = new HashMap<>();
     /**
@@ -60,17 +62,21 @@ public class SellerService {
         I18N_AMAZON = new I18N("i18n/Amazon");
     }
 
-    public List<Seller> getAllSellersForOrder(Order order) {
+    public List<Seller> getSellersForOrder(Order order) {
         if (StringUtils.isBlank(order.isbn)) {
             throw new BusinessException("No ISBN found for order yet");
         }
 
         List<Country> countriesToHunt = SellerHuntUtil.countriesToHunt(order);
+        LOGGER.info(order, "Trying to find sellers for {} {} from {} {} - {}",
+                order.isbn, order.original_condition,
+                countriesToHunt.size(), countriesToHunt.size() == 1 ? "country" : "countries", countriesToHunt);
+
         List<Seller> sellers = new ArrayList<>();
         for (Country country : countriesToHunt) {
-            List<Seller> sellersFromCountry = parseSellers(country, order.isbn, order.originalCondition());
-            LOGGER.info(String.format("found %d sellers from %s for %s with condition %s",
-                    sellersFromCountry.size(), country.name(), order.isbn, order.original_condition));
+            List<Seller> sellersFromCountry = getSellersByCountry(country, order);
+            LOGGER.info(order, String.format("found %d sellers from %s \n",
+                    sellersFromCountry.size(), country.name()));
             sellers.addAll(sellersFromCountry);
         }
 
@@ -78,10 +84,58 @@ public class SellerService {
     }
 
 
-    public List<Seller> parseSellers(Country country, String isbn, Condition condition) {
-        String url = getOfferListingPageUrl(country, isbn, condition);
+    public List<Seller> getSellersByCountry(Country country, Order order) {
+        String isbn = Strings.fillMissingZero(order.isbn);
+        String url = getOfferListingPageUrl(country, isbn, order.originalCondition());
 
         List<Seller> sellers = new ArrayList<>();
+        for (int i = 0; i < MAX_PAGE; i++) {
+            Document document = htmlFetcher.getDocumentSilently(url);
+            LOGGER.saveHtml(order, "offer-listing-page-" + (i + 1), document.outerHtml());
+
+            List<Seller> sellersByPage = parseSellers(document, country);
+            LOGGER.info(order, "Found {} sellers on page {} on {}, url {} ", sellersByPage.size(), i + 1, country.baseUrl(), url);
+            if (CollectionUtils.isEmpty(sellersByPage)) {
+                break;
+            }
+            Seller lastSeller = sellersByPage.get(sellersByPage.size() - 1);
+
+
+            //remove unqualified sellers
+            sellersByPage.removeIf(seller -> !sellerFilter.isPreliminaryQualified(seller, order));
+
+            //get seller ratings on seller profile page
+            sellersByPage.forEach(seller -> this.getSellerRatings(seller));
+
+            //remove unqualified sellers
+            sellersByPage.removeIf(seller -> !sellerFilter.isQualified(seller, order));
+
+            sellers.addAll(sellersByPage);
+
+            //if already got 3 valid sellers, don't need to continue
+            if (sellers.size() >= 3) {
+                break;
+            }
+
+            //if last seller is too expensive, don't need to continue
+            if (!sellerFilter.profitQualified(lastSeller, order)) {
+                break;
+            }
+
+            url = nextPage(document, country);
+            if (url == null) {
+                break;
+            }
+            WaitTime.Shortest.execute();
+        }
+
+        return sellers;
+    }
+
+    public List<Seller> getAllSellers(Country country, String asin, Condition condition) {
+        List<Seller> sellers = new ArrayList<>();
+
+        String url = getOfferListingPageUrl(country, asin, condition);
         for (int i = 0; i < MAX_PAGE; i++) {
             Document document = htmlFetcher.getDocumentSilently(url);
             List<Seller> sellersByPage = parseSellers(document, country);
@@ -90,15 +144,9 @@ public class SellerService {
                 sellers.addAll(sellersByPage);
             }
 
-            Element nextPageLink = HtmlParser.selectElementByCssSelector(document, "#olpOfferListColumn .a-pagination li.a-last a");
-
-            if (nextPageLink == null) {
+            url = nextPage(document, country);
+            if (url == null) {
                 break;
-            }
-
-            url = nextPageLink.attr(PageUtils.HREF);
-            if (!StringUtils.containsIgnoreCase(url, "http://") && !StringUtils.containsIgnoreCase(url, "https://")) {
-                url = country.baseUrl() + "/" + url;
             }
             WaitTime.Shortest.execute();
         }
@@ -321,13 +369,20 @@ public class SellerService {
         if (StringUtils.isBlank(seller.getRatingUrl())) {
             return;
         }
-        Map<RatingType, Rating> ratings = getSellerRatings(seller.getRatingUrl());
-        seller.setRatings(ratings);
+        try {
+            Map<RatingType, Rating> ratings = getSellerRatings(seller.getRatingUrl());
+            seller.setRatings(ratings);
+        } catch (Exception e) {
+            //
+        }
+
+
     }
 
 
     public Map<RatingType, Rating> getSellerRatings(String url) {
         Document document = htmlFetcher.getDocumentSilently(url);
+        LOGGER.saveHtml(document);
         return getSellerRatings(document);
     }
 
@@ -387,6 +442,22 @@ public class SellerService {
     private String getOfferListingPageUrl(Country country, String asin, Condition condition) {
         String urlFormat = "%s/gp/offer-listing/%s/ref=olp_f_used?ie=UTF8&f_all=true&%s";
         return String.format(urlFormat, country.baseUrl(), asin, condition.used() ? "f_new=true&f_used=true" : "f_new=true");
+    }
+
+    private String nextPage(Document document, Country country) {
+
+        Element nextPageLink = HtmlParser.selectElementByCssSelector(document, "#olpOfferListColumn .a-pagination li.a-last a");
+
+        if (nextPageLink == null) {
+            return null;
+        }
+
+        String url = nextPageLink.attr(PageUtils.HREF);
+        if (!StringUtils.containsIgnoreCase(url, "http://") && !StringUtils.containsIgnoreCase(url, "https://")) {
+            url = country.baseUrl() + "/" + url;
+        }
+
+        return url;
     }
 
     public static void main(String[] args) {

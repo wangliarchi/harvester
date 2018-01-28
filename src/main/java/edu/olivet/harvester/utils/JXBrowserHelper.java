@@ -116,7 +116,7 @@ public class JXBrowserHelper {
 
     public static BrowserView getGeneralBrowser() {
         if (generalBrowserView == null) {
-            generalBrowserView = init("general", -1);
+            generalBrowserView = init("general" + System.currentTimeMillis() + (int) (Math.random() * 50 + 1), -1);
         }
 
         return generalBrowserView;

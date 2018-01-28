@@ -15,6 +15,7 @@ import edu.olivet.harvester.fulfill.utils.ConditionUtils.Condition;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.hunt.model.Seller;
+import edu.olivet.harvester.hunt.utils.SellerHuntUtil;
 import edu.olivet.harvester.spreadsheet.utils.SheetUtils;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Data;
@@ -192,8 +193,34 @@ public class Order implements Keyable {
         character = seller.getType().abbrev();
         condition = seller.getCondition().text();
 
-        Remark.TO_BE_CHECKED.appendTo(remark);
+
+        remark = Remark.TO_BE_CHECKED.appendTo(remark);
+
+
+        if (seller.isAddOn()) {
+            remark = Remark.ADD_ON.appendTo(remark);
+        }
+
+        remark = Remark.TO_BE_CHECKED.appendTo(remark);
+
+        String appendix = SellerHuntUtil.determineRemarkAppendix(seller, this);
+        this.addRemark(appendix);
+
     }
+
+
+    /**
+     * 追加批注
+     *
+     * @param content 待追加的批注文本
+     */
+    @JSONField(serialize = false)
+    public void addRemark(String content) {
+        if (StringUtils.isNotBlank(content) && !Strings.containsAnyIgnoreCase(this.remark, content)) {
+            this.remark += (StringUtils.SPACE + content);
+        }
+    }
+
     /**
      * Fulfillment is from country different from sales channel
      */
@@ -220,6 +247,24 @@ public class Order implements Keyable {
     public boolean addressChanged() {
         return Remark.ADDRESS_CHANGED.isContainedBy(this.remark);
     }
+
+    /**
+     * <pre>
+     * 校验一条订单是否已经完成找单:
+     * 1. 订单不能是灰条、Seller Canceled;
+     * 2. seller and/or seller id not blank
+     * 3. seller price, condition not blank
+     * </pre>
+     */
+    @JSONField(serialize = false)
+    public boolean sellerHunted() {
+        return !this.colorIsGray() && !this.canceledBySeller() &&
+                StringUtils.isNotBlank(seller) &&
+                StringUtils.isNotBlank(price) &&
+                StringUtils.isNotBlank(condition) &&
+                StringUtils.isNotBlank(character);
+    }
+
 
     /**
      * <pre>
@@ -300,8 +345,6 @@ public class Order implements Keyable {
         String shipCountry = CountryStateUtils.getInstance().getCountryCode(OrderCountryUtils.getShipToCountry(this));
         return !fulfillmentCountry.equalsIgnoreCase(shipCountry);
     }
-
-
 
 
     /**
@@ -511,14 +554,15 @@ public class Order implements Keyable {
     }
 
     @JSONField(serialize = false)
-    public Condition condition(){
+    public Condition condition() {
         return Condition.parseFromText(condition);
     }
 
     @JSONField(serialize = false)
-    public Condition originalCondition(){
+    public Condition originalCondition() {
         return Condition.parseFromText(original_condition);
     }
+
     @JSONField(serialize = false)
     public OrderEnums.OrderItemType type() {
         if (type == null) {

@@ -6,7 +6,9 @@ import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.hunt.model.Seller;
+import edu.olivet.harvester.logger.SellerHuntingLogger;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,26 +18,16 @@ import java.util.List;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 1/24/2018 3:55 PM
  */
 public class HuntService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(HuntService.class);
+    private static final SellerHuntingLogger LOGGER = SellerHuntingLogger.getInstance();
 
     @Inject SellerService sellerService;
     @Inject HuntVariableService huntVariableService;
-    @Inject SellerFilter sellerFilter;
+
 
     public Seller huntForOrder(Order order) {
         Long start = System.currentTimeMillis();
         //find sellers on amazon
-        List<Seller> sellers = sellerService.getAllSellersForOrder(order);
-
-        //remove unqualified sellers
-        sellers.removeIf(seller -> !sellerFilter.isPreliminaryQualified(seller, order));
-
-        //todo swingworker
-        //get seller ratings on seller profile page
-        sellers.forEach(seller -> sellerService.getSellerRatings(seller));
-
-        //remove unqualified sellers
-        sellers.removeIf(seller -> !sellerFilter.isQualified(seller, order));
+        List<Seller> sellers = sellerService.getSellersForOrder(order);
 
         if (CollectionUtils.isEmpty(sellers)) {
             throw new BusinessException("No seller found");
@@ -46,10 +38,12 @@ public class HuntService {
 
         //sort sellers
         sellers.sort(SellerComparator.getInstance());
-        LOGGER.info("total {} sellers found - {}", sellers.size(), sellers);
+        LOGGER.info(order, "total {} valid sellers found  - \n{}\n",
+                sellers.size(), StringUtils.join(sellers, "\n")
+        );
 
         Seller seller = sellers.get(0);
-        LOGGER.info("found seller {} for order {}, take {}", seller, order, Strings.formatElapsedTime(start));
+        LOGGER.info(order, "found seller [{}], take {} - {}\n", seller.getName(), Strings.formatElapsedTime(start), seller);
 
         return seller;
     }

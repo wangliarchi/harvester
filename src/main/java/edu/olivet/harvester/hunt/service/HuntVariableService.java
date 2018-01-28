@@ -55,6 +55,11 @@ public class HuntVariableService extends AppScript {
         if (seller.isIntlSeller(order)) {
             setIntlShippingVariable(seller, order);
         }
+
+        //if condition is lower
+        if (seller.getCondition().score() < order.originalCondition().score()) {
+            seller.setSellerVariable(seller.getSellerVariable() + 10);
+        }
     }
 
 
@@ -132,7 +137,7 @@ public class HuntVariableService extends AppScript {
                 try {
                     sellerVariable = sellerVariablesByPrice.getFloat(price);
                     break;
-                }catch (Exception e) {
+                } catch (Exception e) {
                     //LOGGER.info("{} {}",sellerVariablesByPrice,price);
                 }
             }

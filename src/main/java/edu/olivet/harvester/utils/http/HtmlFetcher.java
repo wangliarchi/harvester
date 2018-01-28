@@ -34,10 +34,6 @@ public class HtmlFetcher {
         String html = HttpUtils.getHTML(url);
         if (StringUtils.isBlank(html)) {
             return null;
-        } else if (RegexUtils.containsRegex(html, HttpUtils.HTTP_FAIL_REGEX)) {
-            // 遇到服务器端返回形如404、503等代码时尝试等待少许时间之后重复读取一次
-            WaitTime.Shortest.execute();
-            html = HttpUtils.getHTML(url);
         }
 
         //use jxbrowser if failed

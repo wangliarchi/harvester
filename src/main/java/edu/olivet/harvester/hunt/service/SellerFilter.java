@@ -2,6 +2,7 @@ package edu.olivet.harvester.hunt.service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.sun.org.apache.xpath.internal.operations.Or;
 import edu.olivet.foundations.utils.Now;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.common.model.Order;
@@ -22,8 +23,10 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public class SellerFilter {
+    private static final SellerHuntingLogger LOGGER = SellerHuntingLogger.getInstance();
     @Inject ForbiddenSellerService forbiddenSellerService;
     @Inject Now now;
+
 
     public boolean isQualified(Seller seller, Order order) {
         return isPreliminaryQualified(seller, order) &&
@@ -33,7 +36,8 @@ public class SellerFilter {
 
     public boolean isPreliminaryQualified(Seller seller, Order order) {
         if (seller.getShipFromCountry() != OrderCountryUtils.getMarketplaceCountry(order)) {
-            SellerHuntingLogger.info("Seller {} not qualified as its shipped from {}", seller, seller.getShipFromCountry());
+            LOGGER.info(order, "Seller [{}] not qualified as its shipped from {}, full info {}",
+                    seller.getName(), seller.getShipFromCountry(), seller);
 
             return false;
         }
@@ -43,31 +47,35 @@ public class SellerFilter {
         }
 
         if (seller.isPt() && forbiddenSellerService.isForbidden(seller)) {
-            SellerHuntingLogger.info("Seller {} not qualified as its forbidden seller", seller);
+            LOGGER.info(order, "Seller [{}] not qualified as its forbidden seller , full info {}",
+                    seller.getName(), seller);
             return false;
         }
 
-        return profitQualified(seller, order) && eddQualified(seller);
+        return profitQualified(seller, order) && eddQualified(seller, order);
 
     }
 
 
     public boolean profitQualified(Seller seller, Order order) {
         Float maxLoss = HuntStandardSettings.load().getMaxProfitLoss();
-        boolean result = order.getOrderTotalPrice().toUSDAmount().floatValue() - seller.getTotalPriceInUSD() > maxLoss;
+        Float profit = order.getOrderTotalPrice().toUSDAmount().floatValue() - seller.getTotalPriceInUSD();
+        boolean result = profit > maxLoss;
 
         if (result == false) {
-            SellerHuntingLogger.info("Seller {} not qualified as profit over max loss", seller);
+            LOGGER.info(order, "Seller [{}] not qualified as profit {} over max loss {}, full info {}",
+                    seller.getName(), maxLoss, profit, seller);
         }
         return result;
     }
 
-    public boolean eddQualified(Seller seller) {
+    public boolean eddQualified(Seller seller, Order order) {
         boolean result = seller.getLatestDeliveryDate() == null ||
                 seller.getLatestDeliveryDate().before(DateUtils.addDays(now.get(), 14));
 
         if (!result) {
-            SellerHuntingLogger.info("Seller {} not qualified as its edd {} too long", seller, seller.getLatestDeliveryDate());
+            LOGGER.info(order, "Seller [{}] not qualified as its edd {} too long, full info {}",
+                    seller.getName(), seller.getLatestDeliveryDate(), seller);
         }
 
         return result;
@@ -77,12 +85,14 @@ public class SellerFilter {
         HuntStandard huntStandard = HuntStandardSettings.load().getHuntStandard(order);
 
         if (seller.getRating() < huntStandard.getYearlyRating().getPositive()) {
-            SellerHuntingLogger.info("Seller {} not qualified as its yearly rating {}% is too low", seller, seller.getRating());
+            LOGGER.info(order, "Seller [{}] not qualified as its yearly rating {}% is lower than standard {}, full info {}",
+                    seller.getName(), seller.getRating(), huntStandard.getYearlyRating().getPositive(), seller);
             return false;
         }
 
         if (seller.getRatingCount() < huntStandard.getYearlyRating().getCount()) {
-            SellerHuntingLogger.info("Seller {} not qualified as its overall rating count {} is too low", seller, seller.getRatingCount());
+            LOGGER.info(order, "Seller [{}] not qualified as its overall rating count {} is lower than standard {}, full info {}",
+                    seller.getName(), seller.getRatingCount(), huntStandard.getYearlyRating().getCount(), seller);
             return false;
         }
 
@@ -93,12 +103,14 @@ public class SellerFilter {
         HuntStandard huntStandard = HuntStandardSettings.load().getHuntStandard(order);
 
         if (!huntStandard.monthlyRatingQualified(seller.getRatingByType(RatingType.Last30Days))) {
-            SellerHuntingLogger.info("Seller {} not qualified as its monthly rating {} is too low", seller, seller.getRatingByType(RatingType.Last30Days));
+            LOGGER.info(order, "Seller [{}] not qualified as its monthly rating {} is lower than standard {}, full info {}",
+                    seller.getName(), seller.getRatingByType(RatingType.Last30Days), huntStandard.getMonthlyRating(), seller);
             return false;
         }
 
         if (!huntStandard.yearlyRatingQualified(seller.getRatingByType(RatingType.Last12Month))) {
-            SellerHuntingLogger.info("Seller {} not qualified as its yearly rating {} is too low", seller, seller.getRatingByType(RatingType.Last12Month));
+            LOGGER.info(order, "Seller [{}] not qualified as its yearly rating {} is lower than standard {}, full info {}",
+                    seller.getName(), seller.getRatingByType(RatingType.Last12Month), huntStandard.getYearlyRating(), seller);
             return false;
         }
 
@@ -107,7 +119,8 @@ public class SellerFilter {
             if (seller.getRatingByType(RatingType.Last30Days).getPositive() < 95 ||
                     seller.getRatingByType(RatingType.Last30Days).getCount() < 10) {
 
-                SellerHuntingLogger.info("Seller {} not qualified as its monthly rating {} is too low for acceptable condition", seller, seller.getRatingByType(RatingType.Last30Days));
+                LOGGER.info(order, "Seller [{}] not qualified as its monthly rating {} is lower than {} for acceptable condition, {}",
+                        seller.getName(), seller.getRatingByType(RatingType.Last30Days), "[95,10]", seller);
 
                 return false;
 
@@ -133,13 +146,15 @@ public class SellerFilter {
 
         if (seller.getCondition().acceptable()) {
             if (order.getOrderTotalPrice().toUSDAmount().floatValue() > 40) {
-                SellerHuntingLogger.info("Seller {} not qualified as its price {} is too high for acceptable condition", seller, order.getOrderTotalPrice().usdText());
+                LOGGER.info("Seller [{}] not qualified as its price {} is higher than {} for acceptable condition - {}",
+                        seller.getName(), order.getOrderTotalPrice().usdText(), "$40", seller);
 
                 return false;
             }
 
             if (Strings.containsAnyIgnoreCase(seller.getConditionDetail(), "water", "damage", "heavy", "loose", "ink", "stain")) {
-                SellerHuntingLogger.info("Seller {} not qualified as its condition is not good for acceptable condition", seller);
+                SellerHuntingLogger.info("Seller [{}] not qualified as its condition is not good for acceptable condition",
+                        seller.getName());
                 return false;
             }
         }
@@ -147,7 +162,8 @@ public class SellerFilter {
         boolean result = ConditionUtils.goodToGo(order.originalCondition(), seller.getCondition());
 
         if (!result) {
-            SellerHuntingLogger.info("Seller {} not qualified as its condition {} is too low for order condition {}", seller, seller.getCondition(), order.original_condition);
+            SellerHuntingLogger.info("Seller [{}] not qualified as its condition {} is too low for order condition {} - {}",
+                    seller.getName(), seller.getCondition(), order.original_condition, seller);
         }
 
         return true;

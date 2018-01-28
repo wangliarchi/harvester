@@ -4,6 +4,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
+import edu.olivet.harvester.hunt.model.Seller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,5 +40,10 @@ public class SellerHuntUtil {
         }
 
         return countries.stream().distinct().collect(Collectors.toList());
+    }
+
+    public static String determineRemarkAppendix(Seller seller, Order order) {
+
+        return "";
     }
 }

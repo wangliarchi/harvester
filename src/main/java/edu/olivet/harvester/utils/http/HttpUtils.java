@@ -101,7 +101,7 @@ public class HttpUtils {
                 result = EntityUtils.toString(entity);
             } else {
                 String msg = StringUtils.defaultString(EntityUtils.toString(entity));
-                logger.warn("访问{}没有成功，HTTP返回状态码:{}, {}", url, statusCode, msg);
+                logger.warn("访问{}没有成功，HTTP返回状态码:{}", url, statusCode);
                 result = FAIL + COLON + statusCode + COLON + StringUtils.abbreviate(msg, MAX_MSG_LENGTH);
             }
             EntityUtils.consume(entity);
