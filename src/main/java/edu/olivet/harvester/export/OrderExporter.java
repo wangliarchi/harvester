@@ -99,13 +99,12 @@ public class OrderExporter {
         }
 
         //check if exporting service is running, load last updated date.
-        Date lastExportedDate;
+        Date lastExportedDate = DateUtils.addHours(now.get(), 36);
         try {
             lastExportedDate = exportStatService.getOrderExportFromDate(country);
         } catch (Exception e) {
             LOGGER.error("", e);
-            messagePanel.displayMsg(e.getMessage(), LOGGER, InformationLevel.Negative);
-            return;
+            //messagePanel.displayMsg(e.getMessage(), LOGGER, InformationLevel.Negative);
         }
 
         //if not manually set from date, use the date from init service
