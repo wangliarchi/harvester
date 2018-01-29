@@ -1,4 +1,4 @@
-package edu.olivet.harvester.common.service;
+package edu.olivet.harvester.service;
 
 import com.amazonservices.mws.products.model.Product;
 import com.google.inject.Inject;
@@ -11,6 +11,10 @@ import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.common.model.OrderEnums.*;
 import edu.olivet.harvester.common.service.mws.ProductAttributesHelper;
 import edu.olivet.harvester.common.service.mws.ProductClient;
+import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.model.OrderEnums.*;
+import edu.olivet.harvester.service.mws.ProductAttributesHelper;
+import edu.olivet.harvester.service.mws.ProductClient;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +32,9 @@ public class OrderItemTypeHelper {
     @Setter
     private ProductClient productClient;
 
+    @Profile
     public OrderItemType getItemType(Order order) {
+
 
 
         //To save time, we will try sku pattern first.

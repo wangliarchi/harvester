@@ -55,7 +55,7 @@ public class PlacedOrderDetailPage extends FulfillmentPage {
 
             Address address = parseShippingAddress();
             order.setFulfilledAddress(address);
-            Map<String, String> items = parseItems();
+            Map<String, Integer> items = parseItems();
             order.setFulfilledASIN(StringUtils.join(items.keySet(), ", "));
 
         } catch (Exception e) {
@@ -94,18 +94,32 @@ public class PlacedOrderDetailPage extends FulfillmentPage {
         address.setState(state);
         address.setZip(zip);
         address.setCountry(JXBrowserHelper.text(browser, ".displayAddressCountryName"));
-        address.setNoInvoiceText(buyerPanel.getOrder().getTask().getNoInvoiceText());
+        address.setNoInvoiceText(buyerPanel.getOrder().getRuntimeSettings().getNoInvoiceText());
         return address;
     }
 
-    public Map<String, String> parseItems() {
-        Map<String, String> items = new HashMap<>();
-        List<DOMElement> shipments = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-box.shipment");
+    public Map<String, Integer> parseItems() {
+        Map<String, Integer> items = new HashMap<>();
+        List<DOMElement> shipments = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-box.shipment .item-view-left-col-inner");
         for (DOMElement shipment : shipments) {
-            DOMElement link = JXBrowserHelper.selectElementByCssSelector(shipment, ".item-view-left-col-inner .a-link-normal");
+            DOMElement link = JXBrowserHelper.selectElementByCssSelector(shipment, ".a-link-normal");
             String asin = RegexUtils.getMatched(link.getAttribute("href"), RegexUtils.Regex.ASIN);
-            String money = JXBrowserHelper.text(shipment, ".a-size-small.a-color-price");
-            items.put(asin, money);
+            //String money = JXBrowserHelper.text(shipment, ".a-size-small.a-color-price");
+            int qty = 1;
+            try {
+                String qtyString = JXBrowserHelper.text(shipment, ".item-view-qty");
+                if (StringUtils.isNotBlank(qtyString)) {
+                    qty = Integer.parseInt(qtyString);
+                }
+            } catch (Exception e) {
+                //
+            }
+            if (items.containsKey(asin)) {
+                items.put(asin, qty + items.get(asin));
+            } else {
+                items.put(asin, qty);
+            }
+
         }
         return items;
     }

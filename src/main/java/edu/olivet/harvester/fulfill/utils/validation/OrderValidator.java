@@ -587,7 +587,8 @@ public class OrderValidator {
 
         List<OrderFulfillmentRecord> list = dbManager.query(OrderFulfillmentRecord.class,
                 Cnd.where("orderId", "=", order.order_id)
-                        .and("sku", "=", order.sku));
+                        .and("sku", "=", order.sku)
+                        .and("quantityPurchased", "=", order.quantity_purchased));
 
         List<OrderFulfillmentRecord> finalList = new ArrayList<>();
 
@@ -664,7 +665,7 @@ public class OrderValidator {
 
     public static String sellerPriceChangeNotExceedConfiguration(Order order, Seller seller) {
 
-        float maxAllowed = Float.parseFloat(order.getTask().getPriceLimit());
+        float maxAllowed = Float.parseFloat(order.getRuntimeSettings().getPriceLimit());
         float priceRaised = seller.getPrice().toUSDAmount().floatValue() - order.getSellerPrice().toUSDAmount().floatValue();
         if (maxAllowed < priceRaised) {
             return "Seller price raised " + String.format("%.2f", priceRaised) + " to " + seller.getPrice().usdText();
@@ -690,7 +691,7 @@ public class OrderValidator {
         if (StringUtils.isBlank(order.url) || order.url.length() <= 3) {
             return "";
         }
-        String prefix = String.format("%s/%s", order.sheetName, order.getTask().getSid());
+        String prefix = String.format("%s/%s", order.sheetName, order.getRuntimeSettings().getSid());
         if (!order.url.contains(prefix)) {
             return "Order url is invalid. current is '" + order.url + "', should be '" + prefix + "xxx'";
         }

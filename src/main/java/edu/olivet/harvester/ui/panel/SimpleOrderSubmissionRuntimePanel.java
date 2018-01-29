@@ -341,6 +341,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
                 LOGGER.error("做单过程中出现异常:", e);
             } finally {
                 resetSkipSetting();
+                PSEventListener.end();
             }
         }).start();
 
@@ -369,6 +370,12 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         huntSupplierButton.setVisible(true);
         markStatusButton.setVisible(true);
         submitButton.setVisible(true);
+    }
+
+    public void showProgressBar() {
+        progressTextLabel.setVisible(true);
+        progressLabel.setVisible(true);
+        progressBar.setVisible(true);
     }
 
     @Override

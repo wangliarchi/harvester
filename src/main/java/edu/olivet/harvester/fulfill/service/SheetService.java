@@ -12,6 +12,7 @@ import edu.olivet.harvester.common.model.OrderEnums.OrderColor;
 import edu.olivet.harvester.common.model.OrderEnums.OrderItemType;
 import edu.olivet.harvester.common.model.Remark;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
+import edu.olivet.harvester.spreadsheet.service.OrderHelper;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.utils.common.RandomUtils;
 import org.apache.commons.collections4.CollectionUtils;
@@ -56,6 +57,14 @@ public class SheetService extends SheetAPI {
         dateToUpdate.add(rowData);
 
         //remark
+        if (StringUtils.isBlank(order.quantity_fulfilled)) {
+            order.quantity_fulfilled = order.quantity_purchased;
+        }
+
+        if (!order.quantity_purchased.equals(order.quantity_fulfilled)) {
+            OrderHelper.addQuantityChangeRemark(order, order.quantity_fulfilled);
+        }
+        
         ValueRange remarkData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(order.remark)))
                 .setRange(String.format("%s!S%d", order.sheetName, row));
         dateToUpdate.add(remarkData);

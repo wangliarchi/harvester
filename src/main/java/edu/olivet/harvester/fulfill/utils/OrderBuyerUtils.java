@@ -12,10 +12,11 @@ public class OrderBuyerUtils {
 
     public static Account getBuyer(Order order) {
         if (order.sellerIsPrime()) {
-            return BuyerAccountSettingUtils.load().getByEmail(order.getTask().getPrimeBuyerAccount()).getBuyerAccount();
+            String buyerEmail = order.getRuntimeSettings().getPrimeBuyerAccount();
+            return BuyerAccountSettingUtils.load().getByEmail(buyerEmail).getBuyerAccount();
         }
 
-        return BuyerAccountSettingUtils.load().getByEmail(order.getTask().getBuyerAccount()).getBuyerAccount();
+        return BuyerAccountSettingUtils.load().getByEmail(order.getRuntimeSettings().getBuyerAccount()).getBuyerAccount();
     }
 
 

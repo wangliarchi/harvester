@@ -33,7 +33,7 @@ public class OrderCountryUtils {
                 return Settings.load().getSpreadsheetCountry(order.spreadsheetId);
             }
             try {
-                return Country.fromCode(order.getTask().getMarketplaceName());
+                return Country.fromCode(order.getRuntimeSettings().getMarketplaceName());
             } catch (Exception e1) {
                 //
             }

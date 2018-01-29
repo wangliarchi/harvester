@@ -12,7 +12,7 @@ import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.*;
-import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.CookieStore;

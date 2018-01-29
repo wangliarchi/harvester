@@ -72,7 +72,7 @@ public class OrderSubmissionTaskService {
         return dbManager.readById(id, OrderSubmissionTask.class);
     }
 
-    public OrderSubmissionTask createFromRuntimeSettings(RuntimeSettings settings) {
+    public static OrderSubmissionTask convertFromRuntimeSettings(RuntimeSettings settings) {
         OrderSubmissionTask orderSubmissionTask = new OrderSubmissionTask();
         orderSubmissionTask.setSid(settings.getSid());
         orderSubmissionTask.setMarketplaceName(settings.getMarketplaceName());
@@ -109,7 +109,11 @@ public class OrderSubmissionTaskService {
         orderSubmissionTask.setOrderRange(orderRange);
         orderSubmissionTask.setBuyerAccount(settings.getBuyerEmail());
         orderSubmissionTask.setPrimeBuyerAccount(settings.getPrimeBuyerEmail());
+        return orderSubmissionTask;
+    }
 
+    public OrderSubmissionTask createFromRuntimeSettings(RuntimeSettings settings) {
+        OrderSubmissionTask orderSubmissionTask = OrderSubmissionTaskService.convertFromRuntimeSettings(settings);
         orderSubmissionTask = saveTask(orderSubmissionTask);
 
         return orderSubmissionTask;

@@ -139,6 +139,10 @@ public class OrderSubmissionTask extends PrimaryKey implements ArrayConvertable 
         this.status = taskStatus.name();
     }
 
+    public OrderTaskStatus getTaskStatus() {
+        return OrderTaskStatus.valueOf(status);
+    }
+
     public boolean stopped() {
         return taskStatus() == OrderTaskStatus.Stopped || taskStatus() == OrderTaskStatus.Deleted;
     }
@@ -159,6 +163,8 @@ public class OrderSubmissionTask extends PrimaryKey implements ArrayConvertable 
         runtimeSettings.setNoInvoiceText(noInvoiceText);
         runtimeSettings.setFinderCode(finderCode);
         runtimeSettings.setSkipValidation(skipValidation);
+        runtimeSettings.setBuyerEmail(buyerAccount);
+        runtimeSettings.setPrimeBuyerEmail(primeBuyerAccount);
 
         AdvancedSubmitSetting advancedSubmitSetting = new AdvancedSubmitSetting();
         advancedSubmitSetting.setAutoLoop(false);

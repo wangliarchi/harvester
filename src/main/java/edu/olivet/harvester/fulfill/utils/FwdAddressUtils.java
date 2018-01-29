@@ -107,7 +107,7 @@ public class FwdAddressUtils {
 
     public static String generateUrl(Order order) {
         int lastIndex = getLastFWDIndex(order);
-        String prefix = String.format("%s/%s/%s", order.getTask().getFinderCode(), order.sheetName, order.getContext());
+        String prefix = String.format("%s/%s/%s", order.getRuntimeSettings().getFinderCode(), order.sheetName, order.getContext());
 
         return prefix + String.format("%03d", lastIndex + 1);
     }

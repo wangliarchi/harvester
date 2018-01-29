@@ -97,14 +97,15 @@ public class BuyerAccountPanel extends JPanel {
     }
 
     public BuyerAccountSetting collect() {
+
         BuyerAccountSetting buyerAccountSetting = new BuyerAccountSetting();
-        if (StringUtils.isNotBlank(buyerEmailField.getText()) && StringUtils.isNotBlank(buyerPasswordField.getText())) {
-            Account account = new Account(buyerEmailField.getText(), buyerPasswordField.getText(), Account.AccountType.Buyer);
-            buyerAccountSetting.setBuyerAccount(account);
-            buyerAccountSetting.setType((String) typeCombox.getSelectedItem());
-            buyerAccountSetting.setPrimeBuyer((String) primeCombox.getSelectedItem());
-            buyerAccountSetting.setCountryName((String) countryCombox.getSelectedItem());
-        }
+        //if (StringUtils.isNotBlank(buyerEmailField.getText()) && StringUtils.isNotBlank(buyerPasswordField.getText())) {
+        Account account = new Account(buyerEmailField.getText(), buyerPasswordField.getText(), Account.AccountType.Buyer);
+        buyerAccountSetting.setBuyerAccount(account);
+        buyerAccountSetting.setType((String) typeCombox.getSelectedItem());
+        buyerAccountSetting.setPrimeBuyer((String) primeCombox.getSelectedItem());
+        buyerAccountSetting.setCountryName((String) countryCombox.getSelectedItem());
+        //}
         return buyerAccountSetting;
     }
 

@@ -32,9 +32,25 @@ public abstract class ShippingAddressAbstract extends FulfillmentPage {
     }
 
     protected void fillNewAddressForm(Order order) {
+        Address address = OrderAddressUtils.orderShippingAddress(order);
+        if (address == null) {
+            throw new BusinessException("Order address is not valid");
+        }
+
+        for (int i = 0; i < 3; i++) {
+            try {
+                _fillNewAddressForm(address);
+                return;
+            } catch (Exception e) {
+                address.setZip("0" + address.getZip());
+            } finally {
+                JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
+            }
+        }
+    }
+
+    private void _fillNewAddressForm(Address address) {
         try {
-            Address address = OrderAddressUtils.orderShippingAddress(order);
-            assert address != null;
             JXBrowserHelper.fillValueForFormField(browser, SELECTOR_FULL_NAME, address.getName());
             JXBrowserHelper.fillValueForFormField(browser, SELECTOR_ADDR1, address.getAddress1());
             JXBrowserHelper.fillValueForFormField(browser, SELECTOR_ADDR2, address.getAddress2());
@@ -52,8 +68,6 @@ public abstract class ShippingAddressAbstract extends FulfillmentPage {
         } catch (Exception e) {
             LOGGER.info("can not fill ship address form", e);
             throw new BusinessException("can not fill ship address form, " + e.getMessage());
-        } finally {
-            JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
         }
 
 

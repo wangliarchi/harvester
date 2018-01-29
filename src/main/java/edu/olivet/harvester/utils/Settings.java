@@ -250,7 +250,8 @@ public class Settings {
             }
 
             if (StringUtils.isBlank(userCode)) {
-                list.add("User code not provided");
+                userCode = FinderCodeUtils.generate();
+                //list.add("User code not provided");
             } else if (!FinderCodeUtils.validate(userCode)) {
                 list.add("User code not valid.");
             }

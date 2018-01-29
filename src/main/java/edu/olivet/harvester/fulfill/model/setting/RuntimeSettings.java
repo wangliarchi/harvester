@@ -80,6 +80,14 @@ public class RuntimeSettings {
         return Strings.containsAnyIgnoreCase(spreadsheetName, "product", "prod") ? OrderItemType.PRODUCT : OrderItemType.BOOK;
     }
 
+    public String getPrimeBuyerAccount() {
+        return primeBuyerEmail;
+    }
+
+    public String getBuyerAccount() {
+        return buyerEmail;
+    }
+
     public String toString() {
         return context() + " " + spreadsheetName + " " + sheetName + " " + advancedSubmitSetting.toString();
     }

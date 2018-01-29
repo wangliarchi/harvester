@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class QtyUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(QtyUtils.class);
 
-    @Repeat(expectedExceptions = BusinessException.class)
+    @Repeat(expectedExceptions = BusinessException.class,times = 2)
     public static void updateQty(BuyerPanel buyerPanel, Order order) {
         Browser browser = buyerPanel.getBrowserView().getBrowser();
         if (StringUtils.isNotBlank(JXBrowserHelper.text(browser, ".quantity-display"))) {

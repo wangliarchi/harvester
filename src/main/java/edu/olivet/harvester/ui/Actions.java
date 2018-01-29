@@ -39,4 +39,6 @@ public class Actions {
     public static final Action SystemSettings = new Action("SystemSettings", "System Settings", null, "settings.gif");
 
     public static final Action TitleChecker = new Action("TitleChecker", "Product Title Checker", null, null);
+
+    public static final Action OrderFulfillmentChecker = new Action("OrderFulfillmentChecker", "Order Fulfillment Checker", null, null);
 }

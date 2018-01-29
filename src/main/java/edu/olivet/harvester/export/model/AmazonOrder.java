@@ -17,6 +17,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
+import org.apache.logging.log4j.util.Strings;
 import org.nutz.dao.entity.annotation.Column;
 import org.nutz.dao.entity.annotation.Name;
 import org.nutz.dao.entity.annotation.Table;
@@ -126,12 +127,14 @@ public class AmazonOrder extends PrimaryKey {
         order.shipping_fee = NumberUtils.toString(Float.parseFloat(item.getShippingPrice().getAmount()) / (float) item.getQuantityOrdered(), 2);
 
         if (StringUtils.isBlank(this.isbn)) {
-            order.isbn_address = this.isbn;
+            order.isbn = Strings.EMPTY;
+            order.isbn_address = Strings.EMPTY;
         } else {
             //统一用amazon.com的地址，找单的时候 可以换成实际做单国家的地址
             order.isbn_address = "https://www.amazon.com/dp/" + this.isbn;
+            order.isbn = this.isbn;
         }
-        order.isbn = this.isbn;
+
 
 
         order.seller = order.seller_id = order.seller_price = StringUtils.EMPTY;
