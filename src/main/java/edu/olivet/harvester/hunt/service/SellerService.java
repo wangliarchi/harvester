@@ -13,6 +13,7 @@ import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.hunt.model.Rating;
 import edu.olivet.harvester.hunt.model.Rating.RatingType;
 import edu.olivet.harvester.hunt.model.Seller;
+import edu.olivet.harvester.hunt.model.SellerEnums.SellerFullType;
 import edu.olivet.harvester.hunt.model.SellerEnums.SellerType;
 import edu.olivet.harvester.hunt.utils.SellerHuntUtil;
 import edu.olivet.harvester.utils.I18N;
@@ -64,23 +65,32 @@ public class SellerService {
             throw new BusinessException("No ISBN found for order yet");
         }
 
-        List<Country> countriesToHunt = SellerHuntUtil.countriesToHunt(order);
+        Map<Country, List<SellerFullType>> countriesToHunt = SellerHuntUtil.countriesToHunt(order);
         LOGGER.info(order, "Trying to find sellers for {} {} from {} {} - {}",
                 order.isbn, order.original_condition,
                 countriesToHunt.size(), countriesToHunt.size() == 1 ? "country" : "countries", countriesToHunt);
 
         List<Seller> sellers = new ArrayList<>();
-        for (Country country : countriesToHunt) {
-            List<Seller> sellersFromCountry = getSellersByCountry(country, order);
+
+        countriesToHunt.forEach((country, types) -> {
+            List<Seller> sellersFromCountry = getSellersByCountry(country, order, types);
             LOGGER.info(order, String.format("found %d sellers from %s \n",
                     sellersFromCountry.size(), country.name()));
             sellers.addAll(sellersFromCountry);
-        }
+        });
 
         return sellers;
     }
 
     public List<Seller> getSellersByCountry(Country country, Order order) {
+        List<SellerFullType> allowedTypes = SellerHuntUtil.countriesToHunt(order).getOrDefault(country, null);
+        if (CollectionUtils.isEmpty(allowedTypes)) {
+            throw new BusinessException("Country " + country + " is not allowed for order " + order.order_number + " " + order.isbn);
+        }
+        return getSellersByCountry(country, order, allowedTypes);
+    }
+
+    public List<Seller> getSellersByCountry(Country country, Order order, List<SellerFullType> allowedTypes) {
         String isbn = Strings.fillMissingZero(order.isbn);
         String url = getOfferListingPageUrl(country, isbn, order.originalCondition());
 
@@ -96,6 +106,7 @@ public class SellerService {
             LOGGER.saveHtml(order, order.isbn + "-offer-listing-page-" + (i + 1), document.outerHtml());
 
             List<Seller> sellersByPage = parseSellers(document, country);
+
             LOGGER.info(order, "Found {} sellers on page {} on {}, url {} ", sellersByPage.size(), i + 1, country.baseUrl(), url);
             if (CollectionUtils.isEmpty(sellersByPage)) {
                 break;
@@ -104,7 +115,9 @@ public class SellerService {
 
 
             //remove unqualified sellers
-            sellersByPage.removeIf(seller -> !sellerFilter.isPreliminaryQualified(seller, order));
+            sellersByPage.removeIf(seller -> !sellerFilter.isPreliminaryQualified(seller, order)
+                    || !sellerFilter.typeAllowed(seller, order, allowedTypes)
+            );
 
             //get seller ratings on seller profile page
             sellersByPage.forEach(seller -> this.getSellerRatings(seller, order));

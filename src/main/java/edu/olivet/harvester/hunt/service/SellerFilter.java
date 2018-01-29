@@ -2,6 +2,7 @@ package edu.olivet.harvester.hunt.service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.sun.org.apache.xpath.internal.operations.Or;
 import edu.olivet.foundations.utils.Now;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.common.model.Order;
@@ -11,7 +12,10 @@ import edu.olivet.harvester.hunt.model.HuntStandard;
 import edu.olivet.harvester.hunt.model.HuntStandardSettings;
 import edu.olivet.harvester.hunt.model.Rating.RatingType;
 import edu.olivet.harvester.hunt.model.Seller;
+import edu.olivet.harvester.hunt.model.SellerEnums.SellerFullType;
 import org.apache.commons.lang3.time.DateUtils;
+
+import java.util.List;
 
 
 /**
@@ -40,9 +44,11 @@ public class SellerFilter {
             return false;
         }
 
-        if (seller.isPt() && forbiddenSellerService.isForbidden(seller)) {
-            LOGGER.info(order, "Seller [{}] not qualified as its forbidden seller , full info {}",
-                    seller.getName(), seller);
+        if (!notForbiddenSeller(seller, order)) {
+            return false;
+        }
+
+        if (!checkAddon(seller, order)) {
             return false;
         }
 
@@ -50,6 +56,26 @@ public class SellerFilter {
 
     }
 
+
+    public boolean notForbiddenSeller(Seller seller, Order order) {
+        if (seller.isPt() && forbiddenSellerService.isForbidden(seller)) {
+            LOGGER.info(order, "Seller [{}] not qualified as its forbidden seller, full info {}",
+                    seller.getName(), seller);
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean checkAddon(Seller seller, Order order) {
+        if (seller.isAddOn() && order.isDomesticOrder()) {
+            LOGGER.info(order, "Seller [{}] not qualified as it's addon, not allowed for domestic orders, full info {}",
+                    seller.getName(), seller);
+            return false;
+        }
+
+        return true;
+    }
 
     public boolean profitQualified(Seller seller, Order order) {
         Float maxLoss = HuntStandardSettings.load().getMaxProfitLoss();
@@ -161,5 +187,20 @@ public class SellerFilter {
         }
 
         return true;
+    }
+
+    public boolean typeAllowed(Seller seller, Order order, List<SellerFullType> allowedTypes) {
+
+        List<SellerFullType> types = seller.suportedFullTypes(OrderCountryUtils.getMarketplaceCountry(order));
+        for (SellerFullType type : types) {
+            if (allowedTypes.contains(type)) {
+                return true;
+            }
+        }
+
+        LOGGER.info("Seller [{}] not qualified as its type is not allowed, supported {}, allowed {} - {}",
+                seller.getName(), types, allowedTypes, order.original_condition, seller);
+
+        return false;
     }
 }

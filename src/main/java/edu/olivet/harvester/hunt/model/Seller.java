@@ -13,7 +13,9 @@ import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -214,9 +216,10 @@ public class Seller {
         return intlShippingAvailable;
     }
 
-    public boolean canDirectShip(Country orderCountry) {
+    //todo  shipFromCountry or offerListingCountry?
+    public boolean canDirectShip(Country orderMarketPlaecCountry) {
 
-        if (shipFromCountry == orderCountry) {
+        if (shipFromCountry == orderMarketPlaecCountry) {
             return true;
         }
 
@@ -250,6 +253,19 @@ public class Seller {
             return null;
         }
         return ratings.getOrDefault(type, null);
+    }
+
+    public List<SellerFullType> suportedFullTypes(Country country) {
+        List<SellerFullType> types = new ArrayList<>();
+
+        if (canDirectShip(country)) {
+            types.add(SellerFullType.fromType(type, true));
+        }
+
+        if (offerListingCountry == Country.US || offerListingCountry == Country.UK) {
+            types.add(SellerFullType.fromType(type, false));
+        }
+        return types;
     }
 
     /**

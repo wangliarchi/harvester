@@ -1,6 +1,7 @@
 package edu.olivet.harvester.hunt.model;
 
 import edu.olivet.foundations.ui.UIText;
+import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Strings;
 import org.apache.commons.lang3.StringUtils;
@@ -166,6 +167,17 @@ public class SellerEnums {
             this.type = type;
             this.directShip = directShip;
         }
+
+        public static SellerFullType fromType(SellerType sellerType, boolean directShip) {
+            for (SellerFullType type : values()) {
+                if (sellerType == type.type && directShip == type.directShip) {
+                    return type;
+                }
+            }
+
+            throw new BusinessException("No seller type found for " + sellerType + " " + (directShip ? "direct" : "export"));
+        }
+
     }
 
     /**
