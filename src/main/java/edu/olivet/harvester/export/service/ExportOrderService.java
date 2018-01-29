@@ -210,14 +210,15 @@ public class ExportOrderService extends OrderClient {
         int i = 0;
         for (Order order : orders) {
             i++;
-            AmazonOrder amazonOrder = new AmazonOrder();
-            amazonOrder.setOrderId(order.getAmazonOrderId());
-            amazonOrder.setOrderStatus(order.getOrderStatus());
-            amazonOrder.setPurchaseDate(order.getPurchaseDate().toGregorianCalendar().getTime());
-            amazonOrder.setXml(order.toXML());
+
 
             List<OrderItem> items = orderFetcher.readItems(order.getAmazonOrderId(), Settings.load().getConfigByCountry(country).getMwsCredential());
             for (OrderItem item : items) {
+                AmazonOrder amazonOrder = new AmazonOrder();
+                amazonOrder.setOrderId(order.getAmazonOrderId());
+                amazonOrder.setOrderStatus(order.getOrderStatus());
+                amazonOrder.setPurchaseDate(order.getPurchaseDate().toGregorianCalendar().getTime());
+                amazonOrder.setXml(order.toXML());
                 amazonOrder.setOrderItemId(item.getOrderItemId());
                 amazonOrder.setAsin(item.getASIN());
                 amazonOrder.setSku(item.getSellerSKU());
