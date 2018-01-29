@@ -210,8 +210,6 @@ public class SellerServiceTest extends BaseTest {
         assertEquals(sellers.get(1).getShipFromCountry(),Country.DE);
         assertEquals(sellers.get(2).getShipFromCountry(),Country.UK);
         assertEquals(sellers.get(7).getShipFromCountry(),Country.US);
-
-
     }
 
     @Inject Now now;
@@ -253,5 +251,19 @@ public class SellerServiceTest extends BaseTest {
 
         sellers = sellerService.getAllSellers(country,asin,Condition.Used);
         assertEquals(sellers.size(),30);
+    }
+
+    @Test
+    public void testGetSellersByCountryUK() {
+        order = prepareOrder();
+        order.purchase_date = "2018-01-24_07:39:41";
+        order.sku = "XinUSBk2016-0819-C8EA1F4A32A";
+        order.sku_address = "https://www.amazon.com/dp/B011MEXATU";
+        order.price = "14.85";
+        order.shipping_fee = "24.95";
+        order.quantity_purchased = "1";
+        order.isbn = "60112816";
+        order.ship_country = "France";
+        order.sales_chanel = "Amazon.com";
     }
 }

@@ -117,7 +117,7 @@ public class SellerEnums {
          * 判定当前Seller类型是否为普通Seller
          */
         public boolean isPt() {
-            return this == Pt ;
+            return this == Pt;
         }
 
         public boolean isAP() {
@@ -147,6 +147,24 @@ public class SellerEnums {
                 }
             }
             throw new IllegalArgumentException(UIText.message("error.character.illegal", character, abbrevs()));
+        }
+    }
+
+
+    public enum SellerFullType {
+        APDirect(SellerType.AP, true),
+        APExport(SellerType.AP, false),
+        PrimeDirect(SellerType.Prime, true),
+        PrimeExport(SellerType.Prime, false),
+        PtDirect(SellerType.Pt, true),
+        PtExport(SellerType.Pt, false);
+
+        private SellerType type;
+        private boolean directShip;
+
+        SellerFullType(SellerType type, boolean directShip) {
+            this.type = type;
+            this.directShip = directShip;
         }
     }
 

@@ -1,18 +1,18 @@
 package edu.olivet.harvester.utils.http;
 
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
-import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.ui.UIText;
-import edu.olivet.foundations.ui.UITools;
+import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils;
-import edu.olivet.foundations.utils.WaitTime;
-import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.fulfill.exception.Exceptions.*;
 import edu.olivet.harvester.utils.JXBrowserHelper;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.nutz.aop.interceptor.async.Async;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,36 +25,72 @@ import org.slf4j.LoggerFactory;
 public class HtmlFetcher {
     private static final Logger LOGGER = LoggerFactory.getLogger(HtmlFetcher.class);
 
+    @Setter
+    private boolean silentMode = true;
+
+    @Repeat(expectedExceptions = BusinessException.class)
+    public Document getDocument(String url) {
+        if (silentMode) {
+            try {
+                return getDocumentSilently(url);
+            } catch (Exception e) {
+                //if robot check found, disable silent mode for this batch
+                if (e instanceof ServerFailException || e instanceof RobotFoundException) {
+                    silentMode = false;
+                }
+                LOGGER.error("failed to load html  via silent mode for {} - ", url, e);
+            }
+        }
+
+        try {
+            return getDocumentByBrowser(url);
+        } catch (Exception e) {
+            LOGGER.error("failed to load html via jxbrowser  for {} ", url, e);
+        }
+
+        throw new BusinessException("Fail to load html for url " + url);
+    }
+
     /**
      * 基于HttpClient访问一个url地址，获取对应的Document
      *
      * @param url url地址
      */
-    public Document getDocumentSilently(String url) throws ItemNotAvailableException, RobotFoundException, ServerFailException {
+    public Document getDocumentSilently(String url) {
         String html = HttpUtils.getHTML(url);
+        checkResponse(html);
+        Document doc = Jsoup.parse(html);
+        return doc;
+    }
+
+    @Async
+    public Document getDocumentByBrowser(String url) {
+        BrowserView browserView = JXBrowserHelper.getGeneralBrowser();
+        JXBrowserHelper.loadPage(browserView.getBrowser(), url);
+        String html = browserView.getBrowser().getHTML();
+
+        checkResponse(html);
+
+        return Jsoup.parse(html);
+    }
+
+    public void checkResponse(String html) throws ItemNotAvailableException, RobotFoundException, ServerFailException {
         if (StringUtils.isBlank(html)) {
-            return null;
+            throw new ItemNotAvailableException(html);
         }
 
-        //use jxbrowser if failed
-        if (RegexUtils.containsRegex(html, HttpUtils.HTTP_FAIL_REGEX) || StringUtils.containsIgnoreCase(html, "captchacharacters")) {
-            BrowserView browserView = JXBrowserHelper.getGeneralBrowser();
-            JXBrowserHelper.loadPage(browserView.getBrowser(), url);
-            html = browserView.getBrowser().getHTML();
+
+        if (html.startsWith(HttpUtils.FAIL + ":" + HttpStatus.SC_NOT_FOUND)) {
+            throw new ItemNotAvailableException(html);
         }
-        if (StringUtils.isBlank(html)) {
-            return null;
+
+        if (RegexUtils.containsRegex(html, HttpUtils.HTTP_FAIL_REGEX)) {
+            throw new ServerFailException(UIText.text("error.server.error", html));
         }
 
         Document doc = Jsoup.parse(html);
-        // 404意味着无货，可以继续在其他国家寻找，如果是其他比如500的内部服务器错误，直接取消本次找单
-        if (html.startsWith(HttpUtils.FAIL + ":" + HttpStatus.SC_NOT_FOUND)) {
-            throw new ItemNotAvailableException(html);
-        } else if (html.matches(HttpUtils.HTTP_FAIL_REGEX)) {
-            throw new ServerFailException(UIText.text("error.server.error", html));
-        } else if (doc.select("input#captchacharacters").size() > 0) {
+        if (doc.select("input#captchacharacters").size() > 0) {
             throw new RobotFoundException(doc.title());
         }
-        return doc;
     }
 }

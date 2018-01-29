@@ -1,4 +1,4 @@
-package edu.olivet.harvester.service;
+package edu.olivet.harvester.common.service;
 
 import com.amazonservices.mws.products.model.Product;
 import com.google.inject.Inject;
@@ -11,10 +11,6 @@ import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.common.model.OrderEnums.*;
 import edu.olivet.harvester.common.service.mws.ProductAttributesHelper;
 import edu.olivet.harvester.common.service.mws.ProductClient;
-import edu.olivet.harvester.model.Order;
-import edu.olivet.harvester.model.OrderEnums.*;
-import edu.olivet.harvester.service.mws.ProductAttributesHelper;
-import edu.olivet.harvester.service.mws.ProductClient;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,34 +28,20 @@ public class OrderItemTypeHelper {
     @Setter
     private ProductClient productClient;
 
-    @Profile
     public OrderItemType getItemType(Order order) {
-
-
-
         //To save time, we will try sku pattern first.
-
         try {
-
             OrderItemType type = getItemTypeBySku(order);
-
-            //LOGGER.info("Order item type for {} found as {} from SKU pattern. ASIN {}, SKU {}",
-            //order.order_id,
-            //type.name(), order.isbn, order.sku);
-
             return type;
-
         } catch (Exception e) {
             //LOGGER.warn("No product group info found by sku pattern for {}, ASIN {}, SKU {} - {}",
             // order.order_id, order.isbn, order.sku, e);
         }
 
         return OrderItemType.BOOK;
-
     }
 
     public static OrderItemType getItemTypeBySku(Order order) {
-
         String sku = order.getSku();
 
         if (sku.isEmpty()) {
@@ -74,7 +56,6 @@ public class OrderItemTypeHelper {
             return OrderItemType.PRODUCT;
         }
 
-
         String[] bookKeywords = {"book", "bk", "dvd", "cd"};
 
         for (String keyword : bookKeywords) {
@@ -84,7 +65,6 @@ public class OrderItemTypeHelper {
         }
 
         throw new BusinessException("Order item type for {} not found from SKU pattern. ASIN " + order.isbn + ", SKU " + sku);
-
     }
 
     public OrderItemType getItemTypeByMWSAPI(Order order) {

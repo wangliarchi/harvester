@@ -1,4 +1,4 @@
-package edu.olivet.harvester.model;
+package edu.olivet.harvester.common.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.google.common.base.Objects;
@@ -231,6 +231,11 @@ public class Order implements Keyable {
         String marketplaceCountry = OrderCountryUtils.getMarketplaceCountry(this).code();
         String shipToCountry = CountryStateUtils.getInstance().getCountryCode(OrderCountryUtils.getShipToCountry(this));
         return !marketplaceCountry.equalsIgnoreCase(shipToCountry);
+    }
+
+    @JSONField(serialize = false)
+    public boolean isDomesticOrder() {
+        return !isIntlOrder();
     }
 
     /**

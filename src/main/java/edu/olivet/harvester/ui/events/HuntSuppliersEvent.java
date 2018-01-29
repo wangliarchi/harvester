@@ -19,6 +19,7 @@ import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.Actions;
 import edu.olivet.harvester.ui.dialog.ChooseSheetDialog;
+import edu.olivet.harvester.ui.panel.SimpleOrderSubmissionRuntimePanel;
 import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -70,13 +71,18 @@ public class HuntSuppliersEvent extends Observable implements HarvesterUIEvent {
         if (CollectionUtils.isEmpty(spreadsheets)) {
             UITools.error("No order update sheet found. Please make sure it's configured and shared with " + Constants.RND_EMAIL, "Error");
         }
-        
+
         LOGGER.info("All spreadsheets loaded in {}", Strings.formatElapsedTime(start));
 
         ChooseSheetDialog dialog = UITools.setDialogAttr(new ChooseSheetDialog(spreadsheets, appScript));
 
         if (dialog.isOk()) {
             List<Worksheet> selectedWorksheets = dialog.getSelectedWorksheets();
+            Worksheet worksheet = selectedWorksheets.get(0);
+
+            SimpleOrderSubmissionRuntimePanel simpleOrderSubmissionRuntimePanel = SimpleOrderSubmissionRuntimePanel.getInstance();
+            simpleOrderSubmissionRuntimePanel.updateSettings(worksheet.getSpreadsheet().getSpreadsheetCountry(), worksheet);
+
             hunter.huntForWorksheets(selectedWorksheets);
         }
     }

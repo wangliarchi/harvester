@@ -16,6 +16,7 @@ import edu.olivet.harvester.common.model.OrderEnums.OrderItemType;
 import edu.olivet.harvester.spreadsheet.model.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
+import edu.olivet.harvester.ui.ProgressBarComponent;
 import edu.olivet.harvester.ui.dialog.ChooseSheetDialog;
 import edu.olivet.harvester.ui.dialog.SelectRangeDialog;
 import edu.olivet.harvester.ui.events.HuntSuppliersEvent;
@@ -24,6 +25,8 @@ import edu.olivet.harvester.ui.events.SubmitOrdersEvent;
 import edu.olivet.harvester.utils.FinderCodeUtils;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.Settings;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -44,7 +47,7 @@ import java.util.Map;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/6/17 7:32 PM
  */
-public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEventHandler, RuntimePanelObserver {
+public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEventHandler, RuntimePanelObserver, ProgressBarComponent {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleOrderSubmissionRuntimePanel.class);
 
@@ -658,6 +661,16 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
     }
 
 
+    public void updateSettings(Country country, Worksheet worksheet) {
+        marketplaceComboBox.setSelectedItem(country);
+        setAccounts4Country();
+        selectedWorksheet = worksheet;
+        googleSheetTextField.setText(worksheet.getSheetName());
+        selectedRangeLabel.setText("All");
+
+        saveRuntimeSettings();
+    }
+
     // Variables declaration - do not modify
     private JComboBox<Country> marketplaceComboBox;
     private JComboBox<Account> sellerComboBox;
@@ -683,8 +696,11 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
     private JComboBox<OrderValidator.SkipValidation> skipCheckComboBox;
 
     private JLabel progressLabel;
-    public JProgressBar progressBar;
-    public JLabel progressTextLabel;
+
+    @Getter
+    private JProgressBar progressBar;
+    @Getter
+    private JLabel progressTextLabel;
 
     private JTextField todayBudgetTextField;
     private JTextField todayUsedTextField;

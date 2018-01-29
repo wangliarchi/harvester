@@ -2,7 +2,6 @@ package edu.olivet.harvester.hunt.service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.sun.org.apache.xpath.internal.operations.Or;
 import edu.olivet.foundations.utils.Now;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.common.model.Order;
@@ -12,10 +11,7 @@ import edu.olivet.harvester.hunt.model.HuntStandard;
 import edu.olivet.harvester.hunt.model.HuntStandardSettings;
 import edu.olivet.harvester.hunt.model.Rating.RatingType;
 import edu.olivet.harvester.hunt.model.Seller;
-import edu.olivet.harvester.logger.SellerHuntingLogger;
 import org.apache.commons.lang3.time.DateUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -27,7 +23,6 @@ public class SellerFilter {
     @Inject ForbiddenSellerService forbiddenSellerService;
     @Inject Now now;
 
-
     public boolean isQualified(Seller seller, Order order) {
         return isPreliminaryQualified(seller, order) &&
                 sellerRatingQualified(seller, order) &&
@@ -38,7 +33,6 @@ public class SellerFilter {
         if (seller.getShipFromCountry() != OrderCountryUtils.getMarketplaceCountry(order)) {
             LOGGER.info(order, "Seller [{}] not qualified as its shipped from {}, full info {}",
                     seller.getName(), seller.getShipFromCountry(), seller);
-
             return false;
         }
 
@@ -64,7 +58,7 @@ public class SellerFilter {
 
         if (result == false) {
             LOGGER.info(order, "Seller [{}] not qualified as profit {} over max loss {}, full info {}",
-                    seller.getName(), maxLoss, profit, seller);
+                    seller.getName(), profit, maxLoss, seller);
         }
         return result;
     }
@@ -153,7 +147,7 @@ public class SellerFilter {
             }
 
             if (Strings.containsAnyIgnoreCase(seller.getConditionDetail(), "water", "damage", "heavy", "loose", "ink", "stain")) {
-                SellerHuntingLogger.info("Seller [{}] not qualified as its condition is not good for acceptable condition",
+                LOGGER.info("Seller [{}] not qualified as its condition is not good for acceptable condition",
                         seller.getName());
                 return false;
             }
@@ -162,7 +156,7 @@ public class SellerFilter {
         boolean result = ConditionUtils.goodToGo(order.originalCondition(), seller.getCondition());
 
         if (!result) {
-            SellerHuntingLogger.info("Seller [{}] not qualified as its condition {} is too low for order condition {} - {}",
+            LOGGER.info("Seller [{}] not qualified as its condition {} is too low for order condition {} - {}",
                     seller.getName(), seller.getCondition(), order.original_condition, seller);
         }
 

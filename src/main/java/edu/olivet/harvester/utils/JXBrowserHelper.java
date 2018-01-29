@@ -12,13 +12,14 @@ import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.*;
-import edu.olivet.harvester.model.Order;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.CookieStore;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.jsoup.Jsoup;
+import org.nutz.aop.interceptor.async.Async;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,14 +113,14 @@ public class JXBrowserHelper {
     }
 
 
-    public static BrowserView generalBrowserView;
+    public static Map<Long, BrowserView> generalBrowserViews = new HashMap<>();
 
+    @Async
     public static BrowserView getGeneralBrowser() {
-        if (generalBrowserView == null) {
-            generalBrowserView = init("general" + System.currentTimeMillis() + (int) (Math.random() * 50 + 1), -1);
-        }
+        long threadId = Thread.currentThread().getId();
 
-        return generalBrowserView;
+        return generalBrowserViews.computeIfAbsent(threadId, k -> init("general-" + threadId, -1));
+
     }
 
     /**
@@ -479,11 +480,11 @@ public class JXBrowserHelper {
         return Jsoup.parse(html).text().trim();
     }
 
-    public static String textFromHtml(DOMElement domElement) {
+    public static String textFromElement(DOMElement domElement) {
         return textFromHtml(domElement.getInnerHTML());
     }
 
-    public static String textFromHtml(DOMElement doc, String selector) {
+    public static String textFromElement(DOMElement doc, String selector) {
         DOMElement element = selectElementByCssSelector(doc, selector);
         if (element != null) {
             return textFromHtml(element.getInnerHTML());

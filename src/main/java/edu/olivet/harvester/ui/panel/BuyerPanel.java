@@ -12,6 +12,7 @@ import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.service.RuntimePanelObserver;
 import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.ui.ProgressBarComponent;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Getter;
@@ -25,7 +26,7 @@ import java.io.IOException;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 10/30/17 9:16 AM
  */
-public class BuyerPanel extends JPanel implements RuntimePanelObserver {
+public class BuyerPanel extends JPanel implements RuntimePanelObserver, ProgressBarComponent {
     private static final Logger LOGGER = LoggerFactory.getLogger(BuyerPanel.class);
 
     /**
@@ -46,7 +47,6 @@ public class BuyerPanel extends JPanel implements RuntimePanelObserver {
     private double zoomLevel;
     @Getter
     private Order order;
-    private int pid;
 
 
     public BuyerPanel(int id, Country country, Account buyer, double zoomLevel) {
@@ -366,7 +366,9 @@ public class BuyerPanel extends JPanel implements RuntimePanelObserver {
         return infoPanel;
     }
 
+    @Getter
     private JProgressBar progressBar;
+    @Getter
     private JLabel progressTextLabel;
     private JButton pauseButton;
     private JButton stopButton;

@@ -11,8 +11,8 @@ import edu.olivet.harvester.fulfill.model.OrderFulfillmentRecord;
 import edu.olivet.harvester.fulfill.model.page.LoginPage;
 import edu.olivet.harvester.fulfill.model.page.checkout.PlacedOrderDetailPage;
 import edu.olivet.harvester.fulfill.service.ProgressUpdater;
-import edu.olivet.harvester.model.BuyerAccountSettingUtils;
-import edu.olivet.harvester.model.OrderEnums.OrderItemType;
+import edu.olivet.harvester.common.model.BuyerAccountSettingUtils;
+import edu.olivet.harvester.common.model.OrderEnums.OrderItemType;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.ui.panel.SimpleOrderSubmissionRuntimePanel;
 import edu.olivet.harvester.ui.panel.TabbedBuyerPanel;
@@ -42,8 +42,7 @@ public class OrderFulfillmentCheckerEvent implements HarvesterUIEvent {
                     Cnd.where("quantityPurchased", ">", 1).desc("fulfillDate"));
 
             messageListener.empty();
-            ProgressUpdater.setProgressBarComponent(SimpleOrderSubmissionRuntimePanel.getInstance().progressBar,
-                    SimpleOrderSubmissionRuntimePanel.getInstance().progressTextLabel);
+            ProgressUpdater.setProgressBarComponent(SimpleOrderSubmissionRuntimePanel.getInstance());
             ProgressUpdater.updateTotal(list.size());
             SimpleOrderSubmissionRuntimePanel.getInstance().showProgressBar();
             for (OrderFulfillmentRecord record : list) {

@@ -115,9 +115,7 @@ public class OrderSubmitter {
         orderSubmissionTaskService.saveTask(task, true);
 
         if (singleTask) {
-            ProgressUpdater.setProgressBarComponent(
-                    SimpleOrderSubmissionRuntimePanel.getInstance().progressBar,
-                    SimpleOrderSubmissionRuntimePanel.getInstance().progressTextLabel);
+            ProgressUpdater.setProgressBarComponent(SimpleOrderSubmissionRuntimePanel.getInstance());
             ProgressUpdater.updateTotal(task.getTotalOrders());
             dailyBudgetHelper.addRuntimePanelObserver(task.getSpreadsheetId(), SimpleOrderSubmissionRuntimePanel.getInstance());
         }

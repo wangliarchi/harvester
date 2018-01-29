@@ -32,10 +32,10 @@ import java.util.concurrent.CountDownLatch;
  */
 public class Hunter {
 
-    @Inject HuntService huntService;
     @Inject AppScript appScript;
     @Inject private MessageListener messageListener;
-    @Inject SheetService sheetService;
+
+    private final static int HUNTER_JOB_NUMBER = 2;
 
     public void execute(RuntimeSettings runtimeSettings) {
         List<Order> orders = appScript.readOrders(runtimeSettings);
@@ -81,24 +81,19 @@ public class Hunter {
             return;
         }
 
-        ProgressUpdater.setProgressBarComponent(
-                SimpleOrderSubmissionRuntimePanel.getInstance().progressBar,
-                SimpleOrderSubmissionRuntimePanel.getInstance().progressTextLabel);
-        ProgressUpdater.updateTotal(orders.size());
-
+        ProgressUpdater.setProgressBarComponent(SimpleOrderSubmissionRuntimePanel.getInstance(), orders.size());
         PSEventListener.reset(SimpleOrderSubmissionRuntimePanel.getInstance());
         PSEventListener.start();
 
-        // 定长 swingworkerlist
-        int jobNumber = 2;
-        List<HuntWorker> jobs = new ArrayList<>(jobNumber);
+        // 定长swingworker list
+        List<HuntWorker> jobs = new ArrayList<>(HUNTER_JOB_NUMBER);
 
         // 把所有order按照线程数发到几个list里面。
-        List<List<Order>> list = ThreadHelper.assign(orders, jobNumber);
+        List<List<Order>> list = ThreadHelper.assign(orders, HUNTER_JOB_NUMBER);
 
-        final CountDownLatch latch = new CountDownLatch(jobNumber);
+        final CountDownLatch latch = new CountDownLatch(HUNTER_JOB_NUMBER);
 
-        // 把order list分配给几个SwingWorder
+        // 把order list分配给几个SwingWorker
         for (List<Order> assignedOrders : list) {
             jobs.add(new HuntWorker(assignedOrders, latch));
         }
@@ -110,7 +105,7 @@ public class Hunter {
 
 
         // 负责监视是否所有找seller线程都完成的线程。
-        SwingWorker<Void, String> hook = new SwingWorker<Void, String>() {
+        new SwingWorker<Void, String>() {
             @Override
             @Async
             protected Void doInBackground() throws Exception {
@@ -123,9 +118,7 @@ public class Hunter {
             protected void done() {
                 PSEventListener.end();
             }
-        };
-
-        hook.execute();
+        }.execute();
 
     }
 

@@ -59,30 +59,31 @@ public class UIHarvester extends AbstractApplicationUI {
         GroupLayout layout = new GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup()
-                    .addComponent(toolbar))
-                .addGroup(layout.createSequentialGroup()
-                    .addComponent(mainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
-                .addGroup(layout.createSequentialGroup()
-                    .addComponent(statusPane, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
-                    .addComponent(memoryUsageBar, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, 200))
+                layout.createParallelGroup(Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(toolbar))
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(mainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE))
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(statusPane, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                                .addComponent(memoryUsageBar, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, 200))
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(Alignment.CENTER)
-                .addGroup(layout.createSequentialGroup()
-                    .addComponent(toolbar, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-                    .addComponent(mainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createParallelGroup(Alignment.BASELINE)
-                        .addComponent(memoryUsageBar, 20, 20, 20).addComponent(statusPane, 20, 20, 20))
-                ));
+                layout.createParallelGroup(Alignment.CENTER)
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(toolbar, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(mainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                                .addGroup(layout.createParallelGroup(Alignment.BASELINE)
+                                        .addComponent(memoryUsageBar, 20, 20, 20).addComponent(statusPane, 20, 20, 20))
+                        ));
         pack();
     }
 
+    @Inject HuntSuppliersEvent huntSuppliersEvent;
 
     @UIEvent
     public void findSupplier() {
-
+        huntSuppliersEvent.run();
     }
 
     @Inject private
@@ -234,6 +235,7 @@ public class UIHarvester extends AbstractApplicationUI {
     }
 
     @Inject OrderFulfillmentCheckerEvent orderFulfillmentCheckerEvent;
+
     @UIEvent
     public void orderFulfillmentChecker() {
         orderFulfillmentCheckerEvent.execute();

@@ -1,6 +1,7 @@
 package edu.olivet.harvester.logger;
 
 import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.hunt.service.SellerHuntingLogger;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;

@@ -148,7 +148,7 @@
         <appender-ref ref="console"/>
     </logger>
 
-    <logger name="edu.olivet.harvester.logger.SellerHuntingLogger" additivity="false" level="debug">
+    <logger name="edu.olivet.harvester.hunt.service.SellerHuntingLogger" additivity="false" level="debug">
         <appender-ref ref="seller_hunting"/>
         <appender-ref ref="console"/>
     </logger>

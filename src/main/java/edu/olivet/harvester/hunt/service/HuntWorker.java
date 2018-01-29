@@ -3,6 +3,7 @@ package edu.olivet.harvester.hunt.service;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.service.ProgressUpdater;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.hunt.model.HuntResult;
@@ -40,6 +41,9 @@ public class HuntWorker extends SwingWorker<Void, HuntResult> {
     @Override
     protected Void doInBackground() throws Exception {
         for (Order order : orders) {
+            if (PSEventListener.stopped()) {
+                break;
+            }
             if (!OrderCountryUtils.getShipToCountry(order).equalsIgnoreCase("US")) {
                 publish(new HuntResult(order, "only support us domestic orders only.", ReturnCode.FAILURE));
                 continue;
@@ -49,7 +53,7 @@ public class HuntWorker extends SwingWorker<Void, HuntResult> {
             try {
                 seller = huntService.huntForOrder(order);
             } catch (Exception e) {
-                LOGGER.error("",e);
+                LOGGER.error("", e);
                 publish(new HuntResult(order, "Failed to find seller - " + e.getMessage(), ReturnCode.FAILURE));
                 continue;
             }
@@ -59,7 +63,7 @@ public class HuntWorker extends SwingWorker<Void, HuntResult> {
                 sheetService.fillSellerInfo(order);
                 publish(new HuntResult(order, "Find seller  - " + seller.toSimpleString(), ReturnCode.SUCCESS));
             } catch (Exception e) {
-                LOGGER.error("",e);
+                LOGGER.error("", e);
                 publish(new HuntResult(order, "Failed to write seller info to sheet - " + e.getMessage(), ReturnCode.SUCCESS));
 
             }

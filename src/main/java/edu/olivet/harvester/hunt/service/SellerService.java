@@ -1,6 +1,7 @@
 package edu.olivet.harvester.hunt.service;
 
 import com.google.inject.Inject;
+import com.sun.org.apache.xpath.internal.operations.Or;
 import com.teamdev.jxbrowser.chromium.Browser;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.*;
@@ -14,7 +15,6 @@ import edu.olivet.harvester.hunt.model.Rating.RatingType;
 import edu.olivet.harvester.hunt.model.Seller;
 import edu.olivet.harvester.hunt.model.SellerEnums.SellerType;
 import edu.olivet.harvester.hunt.utils.SellerHuntUtil;
-import edu.olivet.harvester.logger.SellerHuntingLogger;
 import edu.olivet.harvester.utils.I18N;
 import edu.olivet.harvester.utils.common.NumberUtils;
 import edu.olivet.harvester.utils.http.HtmlFetcher;
@@ -26,8 +26,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -47,10 +45,9 @@ public class SellerService {
     public static final int MAX_PAGE = 3;
     private static I18N I18N_AMAZON;
 
-
-    @Inject
-    Now now;
+    @Inject Now now;
     @Inject SellerFilter sellerFilter;
+    @Inject HtmlFetcher htmlFetcher;
 
     @Inject
     public void init() throws IOException {
@@ -58,8 +55,8 @@ public class SellerService {
         for (Map.Entry<String, String> entry : wareHouseIds.entrySet()) {
             wareHouseIdCache.put(entry.getValue(), true);
         }
-
         I18N_AMAZON = new I18N("i18n/Amazon");
+        htmlFetcher.setSilentMode(true);
     }
 
     public List<Seller> getSellersForOrder(Order order) {
@@ -83,15 +80,20 @@ public class SellerService {
         return sellers;
     }
 
-
     public List<Seller> getSellersByCountry(Country country, Order order) {
         String isbn = Strings.fillMissingZero(order.isbn);
         String url = getOfferListingPageUrl(country, isbn, order.originalCondition());
 
         List<Seller> sellers = new ArrayList<>();
         for (int i = 0; i < MAX_PAGE; i++) {
-            Document document = htmlFetcher.getDocumentSilently(url);
-            LOGGER.saveHtml(order, "offer-listing-page-" + (i + 1), document.outerHtml());
+            Document document;
+            try {
+                document = htmlFetcher.getDocument(url);
+            } catch (Exception e) {
+                //
+                continue;
+            }
+            LOGGER.saveHtml(order, order.isbn + "-offer-listing-page-" + (i + 1), document.outerHtml());
 
             List<Seller> sellersByPage = parseSellers(document, country);
             LOGGER.info(order, "Found {} sellers on page {} on {}, url {} ", sellersByPage.size(), i + 1, country.baseUrl(), url);
@@ -105,7 +107,7 @@ public class SellerService {
             sellersByPage.removeIf(seller -> !sellerFilter.isPreliminaryQualified(seller, order));
 
             //get seller ratings on seller profile page
-            sellersByPage.forEach(seller -> this.getSellerRatings(seller));
+            sellersByPage.forEach(seller -> this.getSellerRatings(seller, order));
 
             //remove unqualified sellers
             sellersByPage.removeIf(seller -> !sellerFilter.isQualified(seller, order));
@@ -137,7 +139,8 @@ public class SellerService {
 
         String url = getOfferListingPageUrl(country, asin, condition);
         for (int i = 0; i < MAX_PAGE; i++) {
-            Document document = htmlFetcher.getDocumentSilently(url);
+            Document document = htmlFetcher.getDocument(url);
+
             List<Seller> sellersByPage = parseSellers(document, country);
 
             if (sellersByPage.size() > 0) {
@@ -357,10 +360,7 @@ public class SellerService {
         return null;
     }
 
-    @Inject
-    HtmlFetcher htmlFetcher;
-
-    public void getSellerRatings(Seller seller) {
+    public void getSellerRatings(Seller seller, Order order) {
         if (seller.isAP()) {
             seller.setRatings(Rating.apRatings());
             return;
@@ -370,7 +370,9 @@ public class SellerService {
             return;
         }
         try {
-            Map<RatingType, Rating> ratings = getSellerRatings(seller.getRatingUrl());
+            Document document = htmlFetcher.getDocument(seller.getRatingUrl());
+            LOGGER.saveHtml(order, seller.getName() + " " + seller.getUuid(), document.outerHtml());
+            Map<RatingType, Rating> ratings = getSellerRatings(document);
             seller.setRatings(ratings);
         } catch (Exception e) {
             //
@@ -379,12 +381,6 @@ public class SellerService {
 
     }
 
-
-    public Map<RatingType, Rating> getSellerRatings(String url) {
-        Document document = htmlFetcher.getDocumentSilently(url);
-        LOGGER.saveHtml(document);
-        return getSellerRatings(document);
-    }
 
     public Map<RatingType, Rating> getSellerRatings(Document document) {
         Map<RatingType, Rating> ratings = new HashMap<>();
@@ -458,12 +454,6 @@ public class SellerService {
         }
 
         return url;
-    }
-
-    public static void main(String[] args) {
-        SellerService sellerService = ApplicationContext.getBean(SellerService.class);
-        String url = "https://www.amazon.com/sp?_encoding=UTF8&marketplaceID=ATVPDKIKX0DER&orderID=&seller=A2HNKYUQCVGGV2";
-        sellerService.getSellerRatings(url);
     }
 
 }

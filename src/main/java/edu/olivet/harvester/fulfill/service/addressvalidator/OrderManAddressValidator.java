@@ -32,10 +32,7 @@ public class OrderManAddressValidator implements AddressValidator {
      * 对数字类型文本做容错处理时，需补上缺少的字符内容:{@value}
      */
     private static final char DIGIT_ZERO = '0';
-    /**
-     * 一屏式模式下，地址信息的连接字符
-     */
-    private static final String SINGLE_PAGE_ADDR_SEPERATOR = ", ";
+
     /**
      * 比较地址属性时，在二者不相等的前提下，能接受的相似度最低值
      */
@@ -47,9 +44,6 @@ public class OrderManAddressValidator implements AddressValidator {
 
     private Map<String, String> addressRules;
 
-
-    @Inject
-    ErrorAlertService errorAlertService;
 
     /**
      * 合并普通缩写规则和UPS官方缩写规则，然后将亚马逊的规则写入覆盖

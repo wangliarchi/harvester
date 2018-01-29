@@ -1,6 +1,7 @@
 package edu.olivet.harvester.fulfill.service;
 
 import edu.olivet.foundations.utils.Strings;
+import edu.olivet.harvester.ui.ProgressBarComponent;
 
 import javax.swing.*;
 
@@ -14,10 +15,14 @@ public class ProgressUpdater {
     private static int failedCount = 0;
     private static long start;
 
-    public static void setProgressBarComponent(JProgressBar progressBar, JLabel progressTextLabel) {
-        ProgressUpdater.progressBar = progressBar;
-        ProgressUpdater.progressTextLabel = progressTextLabel;
-        init(0);
+    public static void setProgressBarComponent(ProgressBarComponent progressBarComponent, int total) {
+        ProgressUpdater.progressBar = progressBarComponent.getProgressBar();
+        ProgressUpdater.progressTextLabel = progressBarComponent.getProgressTextLabel();
+        init(total);
+    }
+
+    public static void setProgressBarComponent(ProgressBarComponent progressBarComponent) {
+        setProgressBarComponent(progressBarComponent, 0);
     }
 
     private static void init(int total) {

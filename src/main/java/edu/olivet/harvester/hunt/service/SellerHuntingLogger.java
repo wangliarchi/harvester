@@ -1,14 +1,11 @@
-package edu.olivet.harvester.logger;
+package edu.olivet.harvester.hunt.service;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.core.FileAppender;
-import com.sun.org.apache.xpath.internal.operations.Or;
-import edu.olivet.foundations.aop.Profile;
 import edu.olivet.foundations.utils.*;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
-import edu.olivet.harvester.spreadsheet.utils.SheetUtils;
 import lombok.Getter;
 import org.jsoup.nodes.Document;
 import org.slf4j.LoggerFactory;
@@ -105,7 +102,7 @@ public class SellerHuntingLogger {
     }
 
     public void saveHtml(Order order, String title, String html) {
-        title = title.replaceAll(RegexUtils.Regex.NON_ALPHA_LETTER_DIGIT.val(), "-");
+        title = title.trim().replaceAll(RegexUtils.Regex.NON_ALPHA_LETTER_DIGIT.val(), "-");
         String filePath = getOrderLogDir(order) + "/html/" + DateFormat.DATE_TIME_AS_FILENAME.format(new Date()) + "-" + title + ".html";
         try {
             File file = new File(filePath);
