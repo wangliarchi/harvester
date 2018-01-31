@@ -1,7 +1,6 @@
 package edu.olivet.harvester.hunt.service;
 
 import com.google.inject.Inject;
-import com.sun.org.apache.xpath.internal.operations.Or;
 import com.teamdev.jxbrowser.chromium.Browser;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.*;
@@ -15,7 +14,7 @@ import edu.olivet.harvester.hunt.model.Rating.RatingType;
 import edu.olivet.harvester.hunt.model.Seller;
 import edu.olivet.harvester.hunt.model.SellerEnums.SellerFullType;
 import edu.olivet.harvester.hunt.model.SellerEnums.SellerType;
-import edu.olivet.harvester.hunt.utils.SellerHuntUtil;
+import edu.olivet.harvester.hunt.utils.SellerHuntUtils;
 import edu.olivet.harvester.utils.I18N;
 import edu.olivet.harvester.utils.common.NumberUtils;
 import edu.olivet.harvester.utils.http.HtmlFetcher;
@@ -65,7 +64,7 @@ public class SellerService {
             throw new BusinessException("No ISBN found for order yet");
         }
 
-        Map<Country, List<SellerFullType>> countriesToHunt = SellerHuntUtil.countriesToHunt(order);
+        Map<Country, List<SellerFullType>> countriesToHunt = SellerHuntUtils.countriesToHunt(order);
         LOGGER.info(order, "Trying to find sellers for {} {} from {} {} - {}",
                 order.isbn, order.original_condition,
                 countriesToHunt.size(), countriesToHunt.size() == 1 ? "country" : "countries", countriesToHunt);
@@ -83,7 +82,7 @@ public class SellerService {
     }
 
     public List<Seller> getSellersByCountry(Country country, Order order) {
-        List<SellerFullType> allowedTypes = SellerHuntUtil.countriesToHunt(order).getOrDefault(country, null);
+        List<SellerFullType> allowedTypes = SellerHuntUtils.countriesToHunt(order).getOrDefault(country, null);
         if (CollectionUtils.isEmpty(allowedTypes)) {
             throw new BusinessException("Country " + country + " is not allowed for order " + order.order_number + " " + order.isbn);
         }
@@ -95,6 +94,8 @@ public class SellerService {
         String url = getOfferListingPageUrl(country, isbn, order.originalCondition());
 
         List<Seller> sellers = new ArrayList<>();
+
+        int maxSellerNumber = order.isIntlOrder() ? 5 : 3;
         for (int i = 0; i < MAX_PAGE; i++) {
             Document document;
             try {
@@ -113,7 +114,6 @@ public class SellerService {
             }
             Seller lastSeller = sellersByPage.get(sellersByPage.size() - 1);
 
-
             //remove unqualified sellers
             sellersByPage.removeIf(seller -> !sellerFilter.isPreliminaryQualified(seller, order)
                     || !sellerFilter.typeAllowed(seller, order, allowedTypes)
@@ -128,7 +128,7 @@ public class SellerService {
             sellers.addAll(sellersByPage);
 
             //if already got 3 valid sellers, don't need to continue
-            if (sellers.size() >= 3) {
+            if (sellers.size() >= maxSellerNumber) {
                 break;
             }
 

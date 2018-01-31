@@ -17,7 +17,7 @@ import edu.olivet.harvester.fulfill.service.OrderSubmissionTaskService;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.hunt.model.Seller;
-import edu.olivet.harvester.hunt.utils.SellerHuntUtil;
+import edu.olivet.harvester.hunt.utils.SellerHuntUtils;
 import edu.olivet.harvester.spreadsheet.utils.SheetUtils;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Data;
@@ -191,7 +191,8 @@ public class Order implements Keyable {
     public void setSellerData(Seller seller) {
         this.seller = seller.getName();
         seller_id = seller.getUuid();
-        seller_price = seller.getPrice().getAmount().toPlainString();
+        //todo USD or local currency?
+        seller_price = seller.getPrice().toUSDAmount().toPlainString();
         character = seller.getType().abbrev();
         condition = seller.getCondition().text();
 
@@ -205,7 +206,7 @@ public class Order implements Keyable {
 
         remark = Remark.TO_BE_CHECKED.appendTo(remark);
 
-        String appendix = SellerHuntUtil.determineRemarkAppendix(seller, this);
+        String appendix = SellerHuntUtils.determineRemarkAppendix(seller, this);
         this.addRemark(appendix);
 
     }

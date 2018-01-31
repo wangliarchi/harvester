@@ -8,14 +8,18 @@ import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.hunt.model.Seller;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Iterator;
 import java.util.List;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 1/24/2018 3:55 PM
  */
 public class HuntService {
-    private static final SellerHuntingLogger LOGGER = SellerHuntingLogger.getInstance();
+    private static final Logger LOGGER = LoggerFactory.getLogger(HuntService.class);
+    private static final SellerHuntingLogger HUNTING_LOGGER = SellerHuntingLogger.getInstance();
 
     @Inject SellerService sellerService;
     @Inject HuntVariableService huntVariableService;
@@ -31,16 +35,28 @@ public class HuntService {
         }
 
         //set calculation variables
-        sellers.forEach(it -> huntVariableService.setHuntingVariable(it, order));
-
+        for (Iterator<Seller> i = sellers.iterator(); i.hasNext(); ) {
+            Seller seller = i.next();
+            try {
+                huntVariableService.setHuntingVariable(seller, order);
+            } catch (Exception e) {
+                LOGGER.error("", e);
+                i.remove();
+                HUNTING_LOGGER.info(order, "Seller [{}] is not qualified as {}", e.getMessage());
+            }
+        }
+        //sellers.forEach(it -> huntVariableService.setHuntingVariable(it, order));
+        if (CollectionUtils.isEmpty(sellers)) {
+            throw new BusinessException("No seller found");
+        }
         //sort sellers
         sellers.sort(SellerComparator.getInstance());
-        LOGGER.info(order, "total {} valid sellers found  - \n{}\n",
+        HUNTING_LOGGER.info(order, "total {} valid sellers found  - \n{}\n",
                 sellers.size(), StringUtils.join(sellers, "\n")
         );
 
         Seller seller = sellers.get(0);
-        LOGGER.info(order, "found seller [{}], take {} - {}\n", seller.getName(), Strings.formatElapsedTime(start), seller);
+        HUNTING_LOGGER.info(order, "found seller [{}], take {} - {}\n", seller.getName(), Strings.formatElapsedTime(start), seller);
 
         return seller;
     }

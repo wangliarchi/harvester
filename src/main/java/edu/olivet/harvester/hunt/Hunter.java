@@ -77,7 +77,7 @@ public class Hunter {
         orders.removeIf(order -> order.sellerHunted() || order.colorIsGray() || order.buyerCanceled());
 
         if (CollectionUtils.isEmpty(orders)) {
-            messageListener.addMsg("No orders to hun ", InformationLevel.Negative);
+            messageListener.addMsg("No orders to hunt", InformationLevel.Negative);
             return;
         }
 

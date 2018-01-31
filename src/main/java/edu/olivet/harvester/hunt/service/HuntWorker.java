@@ -44,10 +44,6 @@ public class HuntWorker extends SwingWorker<Void, HuntResult> {
             if (PSEventListener.stopped()) {
                 break;
             }
-            if (!OrderCountryUtils.getShipToCountry(order).equalsIgnoreCase("US")) {
-                publish(new HuntResult(order, "only support us domestic orders only.", ReturnCode.FAILURE));
-                continue;
-            }
 
             Seller seller;
             try {

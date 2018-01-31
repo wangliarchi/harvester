@@ -47,6 +47,12 @@ public class Seller {
      * Seller类型
      */
     private SellerType type;
+
+    /**
+     * Seller类型
+     */
+    private SellerFullType fullType;
+
     /**
      * Seller名称
      */
@@ -217,9 +223,9 @@ public class Seller {
     }
 
     //todo  shipFromCountry or offerListingCountry?
-    public boolean canDirectShip(Country orderMarketPlaecCountry) {
+    public boolean canDirectShip(String shipToCountry) {
 
-        if (shipFromCountry == orderMarketPlaecCountry) {
+        if (offerListingCountry.code().equalsIgnoreCase(CountryStateUtils.getInstance().getCountryCode(shipToCountry))) {
             return true;
         }
 
@@ -255,7 +261,7 @@ public class Seller {
         return ratings.getOrDefault(type, null);
     }
 
-    public List<SellerFullType> suportedFullTypes(Country country) {
+    public List<SellerFullType> supportedFullTypes(String country) {
         List<SellerFullType> types = new ArrayList<>();
 
         if (canDirectShip(country)) {
@@ -266,6 +272,22 @@ public class Seller {
             types.add(SellerFullType.fromType(type, false));
         }
         return types;
+    }
+
+    public String getRemarkAppendix(Order order) {
+        return offerListingCountry.name() + " " + (getFullType(order).isDirectShip() ? "Shipment" : "FWD");
+    }
+
+    public SellerFullType getFullType(Order order) {
+        if (fullType == null) {
+            fullType = SellerFullType.fromType(type, canDirectShip(order.ship_country));
+        }
+
+        return fullType;
+    }
+
+    public float profit(Order order) {
+        return order.getOrderTotalPrice().toUSDAmount().floatValue() * 0.85f - getTotalPriceInUSD() - 1.8f;
     }
 
     /**
@@ -315,7 +337,8 @@ public class Seller {
      */
     public String toSimpleString() {
         return "[" + this.offerListingCountry.name() + ", " + this.name + ", " + this.uuid + ", " +
-                this.condition + ", " + this.type.abbrev() + ", " +
+                this.condition + ", " +
+                (this.fullType != null ? this.fullType.desc() + ", " : "") +
                 this.price.usdText() + ", " + this.shippingFee.usdText() + ", " +
                 this.rating + "%, " + this.ratingCount + "]";
 
@@ -326,6 +349,7 @@ public class Seller {
      */
     public String toString() {
         return this.offerListingCountry.name() + ", " + this.name + ", " + this.getTotalForCalculation() + ", " + this.uuid + ", " +
+                (this.fullType != null ? this.fullType.desc() + ", " : "") +
                 this.price.usdText() + ", " + this.shippingFee.usdText() + ", " +
                 this.condition + ", " + this.type.abbrev() + ", " +
                 this.rating + "%, " + this.ratingCount + ", " +

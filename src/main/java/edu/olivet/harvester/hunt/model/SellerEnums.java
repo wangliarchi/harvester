@@ -163,6 +163,7 @@ public class SellerEnums {
         private SellerType type;
         private boolean directShip;
 
+
         SellerFullType(SellerType type, boolean directShip) {
             this.type = type;
             this.directShip = directShip;
@@ -178,6 +179,17 @@ public class SellerEnums {
             throw new BusinessException("No seller type found for " + sellerType + " " + (directShip ? "direct" : "export"));
         }
 
+        public SellerType getSellerType() {
+            return type;
+        }
+
+        public boolean isDirectShip() {
+            return directShip;
+        }
+
+        public String desc() {
+            return type.abbrev + " " + (directShip ? "Direct" : "Export");
+        }
     }
 
     /**

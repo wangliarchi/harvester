@@ -25,6 +25,7 @@ import java.util.List;
 public class SellerFilter {
     private static final SellerHuntingLogger LOGGER = SellerHuntingLogger.getInstance();
     @Inject ForbiddenSellerService forbiddenSellerService;
+    @Inject HuntVariableService huntVariableService;
     @Inject Now now;
 
     public boolean isQualified(Seller seller, Order order) {
@@ -34,7 +35,7 @@ public class SellerFilter {
     }
 
     public boolean isPreliminaryQualified(Seller seller, Order order) {
-        if (seller.getShipFromCountry() != OrderCountryUtils.getMarketplaceCountry(order)) {
+        if (seller.getShipFromCountry() != seller.getOfferListingCountry()) {
             LOGGER.info(order, "Seller [{}] not qualified as its shipped from {}, full info {}",
                     seller.getName(), seller.getShipFromCountry(), seller);
             return false;
@@ -43,8 +44,7 @@ public class SellerFilter {
         if (!sellerOverallRatingQualified(seller, order)) {
             return false;
         }
-
-        if (!notForbiddenSeller(seller, order)) {
+        if (!notOutOfStock(seller, order)) {
             return false;
         }
 
@@ -52,10 +52,21 @@ public class SellerFilter {
             return false;
         }
 
-        return profitQualified(seller, order) && eddQualified(seller, order);
+        if (!notForbiddenSeller(seller, order)) {
+            return false;
+        }
 
+        return profitQualified(seller, order) && eddQualified(seller, order);
     }
 
+    public boolean notOutOfStock(Seller seller, Order order) {
+        if (!seller.isInStock()) {
+            LOGGER.info(order, "Seller [{}] not qualified as its out of stock, full info {}",
+                    seller.getName(), seller);
+            return false;
+        }
+        return true;
+    }
 
     public boolean notForbiddenSeller(Seller seller, Order order) {
         if (seller.isPt() && forbiddenSellerService.isForbidden(seller)) {
@@ -102,10 +113,11 @@ public class SellerFilter {
     }
 
     public boolean sellerOverallRatingQualified(Seller seller, Order order) {
-        HuntStandard huntStandard = HuntStandardSettings.load().getHuntStandard(order);
+        //HuntStandard huntStandard = HuntStandardSettings.load().getHuntStandard(order);
+        HuntStandard huntStandard = huntVariableService.getHuntStandard(seller, order);
 
         if (seller.getRating() < huntStandard.getYearlyRating().getPositive()) {
-            LOGGER.info(order, "Seller [{}] not qualified as its yearly rating {}% is lower than standard {}, full info {}",
+            LOGGER.info(order, "Seller [{}] not qualified as its yearly rating {}% is lower than standard {}%, full info {}",
                     seller.getName(), seller.getRating(), huntStandard.getYearlyRating().getPositive(), seller);
             return false;
         }
@@ -186,14 +198,15 @@ public class SellerFilter {
                     seller.getName(), seller.getCondition(), order.original_condition, seller);
         }
 
-        return true;
+        return result;
     }
 
     public boolean typeAllowed(Seller seller, Order order, List<SellerFullType> allowedTypes) {
 
-        List<SellerFullType> types = seller.suportedFullTypes(OrderCountryUtils.getMarketplaceCountry(order));
+        List<SellerFullType> types = seller.supportedFullTypes(order.ship_country);
         for (SellerFullType type : types) {
             if (allowedTypes.contains(type)) {
+                seller.setFullType(type);
                 return true;
             }
         }
