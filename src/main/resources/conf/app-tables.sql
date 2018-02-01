@@ -147,23 +147,23 @@ INSERT INTO order_submission_tasks_new (id, sid, marketplaceName, spreadsheetId,
 /* order submission record by buyer account */
 CREATE TABLE IF NOT EXISTS order_submission_tasks_by_buyer_accounts (
   id                 VARCHAR(100) PRIMARY KEY NOT NULL,
-  taskId             VARCHAR(40)             NOT NULL,
-  fulfillmentCountry VARCHAR(2)              NOT NULL,
-  buyerAccount       VARCHAR(255)            NOT NULL,
-  marketplaceName    VARCHAR(2)              NOT NULL,
-  spreadsheetId      VARCHAR(100)            NOT NULL,
-  spreadsheetName    VARCHAR(255)            NOT NULL,
-  sheetName          VARCHAR(255)            NOT NULL,
-  status             VARCHAR(255)            NOT NULL,
-  orders             TEXT                    NULL,
-  summary            TEXT                    NULL,
-  totalOrders        INT(5)                  NULL,
-  success            INT(5)                  NULL,
-  failed             INT(5)                  NULL,
-  timeTaken          VARCHAR(255)            NULL,
-  dateCreated        DATETIME                NOT NULL,
-  dateStarted        DATETIME                NULL,
-  dateEnded          DATETIME                NULL
+  taskId             VARCHAR(40)              NOT NULL,
+  fulfillmentCountry VARCHAR(2)               NOT NULL,
+  buyerAccount       VARCHAR(255)             NOT NULL,
+  marketplaceName    VARCHAR(2)               NOT NULL,
+  spreadsheetId      VARCHAR(100)             NOT NULL,
+  spreadsheetName    VARCHAR(255)             NOT NULL,
+  sheetName          VARCHAR(255)             NOT NULL,
+  status             VARCHAR(255)             NOT NULL,
+  orders             TEXT                     NULL,
+  summary            TEXT                     NULL,
+  totalOrders        INT(5)                   NULL,
+  success            INT(5)                   NULL,
+  failed             INT(5)                   NULL,
+  timeTaken          VARCHAR(255)             NULL,
+  dateCreated        DATETIME                 NOT NULL,
+  dateStarted        DATETIME                 NULL,
+  dateEnded          DATETIME                 NULL
 );
 
 /* amazon_orders */
@@ -228,3 +228,16 @@ CREATE TABLE IF NOT EXISTS amazon_orders_new (
 INSERT INTO amazon_orders_new
   SELECT *
   FROM amazon_order_logs;
+
+/* buyer_invoices */
+CREATE TABLE IF NOT EXISTS buyer_invoices (
+  buyerEmail     VARCHAR  NOT NULL,
+  country        VARCHAR  NOT NULL,
+  orderId        VARCHAR  NOT NULL,
+  cardNo         VARCHAR  NOT NULL,
+  orderTotal     FLOAT    NOT NULL,
+  purchaseDate   DATETIME NOT NULL,
+  dateDownloaded DATETIME NULL,
+  PRIMARY KEY (orderId)
+    ON CONFLICT IGNORE
+);

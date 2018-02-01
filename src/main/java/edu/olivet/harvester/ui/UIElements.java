@@ -72,6 +72,7 @@ public class UIElements extends AbstractUIContainer {
 
         map.put(Menu.ToolBox, new Action[] {
                 Actions.TitleChecker,
+                Action.Separator,
                 Actions.OrderFulfillmentChecker
         });
 

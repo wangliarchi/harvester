@@ -130,6 +130,13 @@ public class LoginPage extends FulfillmentPage implements PageObject {
             throw new BuyerAccountAuthenticationException(buyer.getEmail() + " - fail to pass captcha challenge.");
         }
 
+        email = JXBrowserHelper.selectElementByCssSelector(browser, EMAIL_SELECTOR);
+        password = JXBrowserHelper.selectElementByCssSelector(browser, PASSWORD_SELECTOR);
+
+        if (email != null || password != null) {
+            throw new BusinessException("Login failed");
+        }
+
         LOGGER.info("{} logged in successfully, now at {} -> {}, took {}", country.name(),
                 browser.getTitle(), browser.getURL(), Strings.formatElapsedTime(start));
     }

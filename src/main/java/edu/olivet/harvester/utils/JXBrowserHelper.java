@@ -1,6 +1,7 @@
 package edu.olivet.harvester.utils;
 
 import com.teamdev.jxbrowser.chromium.*;
+import com.teamdev.jxbrowser.chromium.PrintJob;
 import com.teamdev.jxbrowser.chromium.dom.*;
 import com.teamdev.jxbrowser.chromium.events.FinishLoadingEvent;
 import com.teamdev.jxbrowser.chromium.events.LoadAdapter;
@@ -566,6 +567,18 @@ public class JXBrowserHelper {
         }
     }
 
+    public static void printToPDF(Browser browser, String saveToPath) {
+        browser.setPrintHandler(printJob -> {
+            PrintSettings settings = printJob.getPrintSettings();
+            settings.setPrintToPDF(true);
+            settings.setPDFFilePath(saveToPath);
+            settings.setPrintBackgrounds(true);
+            return PrintStatus.CONTINUE;
+        });
+
+        browser.print();
+    }
+
 
     @Repeat
     public static void click(DOMElement element) {
@@ -574,11 +587,15 @@ public class JXBrowserHelper {
         waitUntilNotFound(element);
     }
 
+
     public static void loadSpreadsheet(Browser browser, Account account, String spreadsheetId) {
         String url = String.format("https://docs.google.com/spreadsheets/d/%s/edit#gid=1549829067", spreadsheetId);
         loadPage(browser, url);
         loginGoogleAccount(browser, account.getEmail(), account.getPassword());
     }
+
+
+
 
     public static void loginGoogleAccount(Browser browser, String email, String password) {
         //enter email address
