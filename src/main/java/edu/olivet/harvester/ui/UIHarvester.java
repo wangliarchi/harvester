@@ -200,6 +200,12 @@ public class UIHarvester extends AbstractApplicationUI {
         }
     }
 
+    @Inject DownloadInvoiceEvent downloadInvoiceEvent;
+    @UIEvent
+    public void downloadInvoice() {
+        downloadInvoiceEvent.execute();
+    }
+
     private void setDefaultSizes() {
         this.setResizable(true);
         this.setMinimumSize(new Dimension(800, 600));

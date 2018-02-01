@@ -41,4 +41,6 @@ public class Actions {
     public static final Action TitleChecker = new Action("TitleChecker", "Product Title Checker", null, null);
 
     public static final Action OrderFulfillmentChecker = new Action("OrderFulfillmentChecker", "Order Fulfillment Checker", null, null);
+
+    public static final Action DownloadInvoice = new Action("DownloadInvoice", "Download Invoice", null, null);
 }
