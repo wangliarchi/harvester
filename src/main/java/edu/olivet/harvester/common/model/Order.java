@@ -470,9 +470,11 @@ public class Order implements Keyable {
 
     @JSONField(serialize = false)
     public int eddDays() {
+        return eddDays(new Date());
+    }
+    @JSONField(serialize = false)
+    public int eddDays(Date today) {
         String estimatedDeliveryDateString = StringUtils.split(estimated_delivery_date, " ")[1];
-
-        Date today = new Date();
 
         Date estimatedDeliveryDate;
 

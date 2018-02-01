@@ -9,7 +9,9 @@ import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Now;
+import edu.olivet.harvester.fulfill.exception.Exceptions.NoBudgetException;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
+import edu.olivet.harvester.fulfill.exception.Exceptions.OutOfBudgetException;
 import edu.olivet.harvester.utils.common.NumberUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -59,11 +61,11 @@ public class DailyBudgetHelper {
         Float remaining = budgetData.get("budget") - budgetData.get("cost");
 
         if (budgetData.get("budget") <= 0) {
-            throw new OrderSubmissionException("Today's budget has not been entered yet. Please fill in 'Daily Cost' sheet.");
+            throw new NoBudgetException("Today's budget has not been entered yet. Please fill in 'Daily Cost' sheet.");
         }
 
         if (remaining <= 0) {
-            throw new OrderSubmissionException("You have exceed today's budget limit. ");
+            throw new OutOfBudgetException("You have exceed today's budget limit. ");
         }
 
 

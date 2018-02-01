@@ -158,9 +158,14 @@ public class Seller {
      */
     private float shippingVariable = 0f;
 
+    /**
+     * tax 成本计算系数
+     */
+    private float taxVariable = 0f;
+
 
     public float getTotalForCalculation() {
-        return getTotalPriceInUSD() + sellerVariable + ratingVariable + shippingVariable;
+        return getTotalPriceInUSD() + sellerVariable + ratingVariable + shippingVariable + taxVariable;
     }
 
     /**
@@ -274,9 +279,6 @@ public class Seller {
         return types;
     }
 
-    public String getRemarkAppendix(Order order) {
-        return offerListingCountry.name() + " " + (getFullType(order).isDirectShip() ? "Shipment" : "FWD");
-    }
 
     public SellerFullType getFullType(Order order) {
         if (fullType == null) {
@@ -287,7 +289,7 @@ public class Seller {
     }
 
     public float profit(Order order) {
-        return order.getOrderTotalPrice().toUSDAmount().floatValue() * 0.85f - getTotalPriceInUSD() - 1.8f;
+        return order.getOrderTotalPrice().toUSDAmount().floatValue() * 0.85f - getTotalPriceInUSD();
     }
 
     /**

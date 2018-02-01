@@ -11,6 +11,7 @@ import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
+import edu.olivet.harvester.fulfill.exception.Exceptions.NoBudgetException;
 import edu.olivet.harvester.fulfill.model.FulfillmentEnum;
 import edu.olivet.harvester.fulfill.model.ItemCompareResult;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
@@ -61,64 +62,26 @@ public class OrderSubmitter {
     DailyBudgetHelper dailyBudgetHelper;
 
     @Inject private
-    OrderService orderService;
-
-    @Inject private
     OrderSubmissionTaskService orderSubmissionTaskService;
 
     @Inject private OrderDispatcher orderDispatcher;
-    private static final Map<String, Boolean> DUPLICATION_CHECK_CACHE = new HashMap<>();
 
     private static final List<Country> SUPPORTED_MARKETPLACES =
             Lists.newArrayList(Country.US, Country.CA, Country.UK, Country.DE, Country.FR, Country.ES, Country.IT, Country.AU);
 
-    public void execute(RuntimeSettings runtimeSettings) {
-
-        OrderSubmissionTask task = orderSubmissionTaskService.createFromRuntimeSettings(runtimeSettings);
-
-        execute(task, true);
-
-        //todo
-        while (true) {
-            if (orderDispatcher.hasJobRunning()) {
-                PSEventListener.start();
-                break;
-            }
-        }
-        while (true) {
-            if (task.getTaskStatus() == OrderTaskStatus.Completed) {
-                PSEventListener.end();
-                break;
-            }
-        }
-    }
-
-
     public void execute(OrderSubmissionTask task) {
-        execute(task, false);
-    }
-
-    public void execute(OrderSubmissionTask task, boolean singleTask) {
         List<Order> validOrders = prepareOrderSubmission(task);
         if (CollectionUtils.isEmpty(validOrders)) {
             task.setTaskStatus(OrderTaskStatus.Completed);
             orderSubmissionTaskService.saveTask(task, true);
-            if (singleTask) {
-                PSEventListener.end();
-            }
             return;
         }
 
+        ProgressUpdater.updateTotal(validOrders.size());
         task.setTotalOrders(validOrders.size());
         task.setOrders(JSON.toJSONString(validOrders));
         task.setTaskStatus(OrderTaskStatus.Queued);
         orderSubmissionTaskService.saveTask(task, true);
-
-        if (singleTask) {
-            ProgressUpdater.setProgressBarComponent(SimpleOrderSubmissionRuntimePanel.getInstance());
-            ProgressUpdater.updateTotal(task.getTotalOrders());
-            dailyBudgetHelper.addRuntimePanelObserver(task.getSpreadsheetId(), SimpleOrderSubmissionRuntimePanel.getInstance());
-        }
 
         orderDispatcher.dispatch(validOrders, task);
     }
@@ -145,28 +108,6 @@ public class OrderSubmitter {
         return validOrders;
     }
 
-    public void _noOrders() {
-        LOGGER.info("No valid orders to submit.");
-        UITools.error("No valid orders to be submitted. See failed record log for more detail.");
-        messageListener.addMsg("No valid orders to be submitted.");
-    }
-
-    public void checkDuplicates(String spreadsheetId) {
-        //check duplication
-        if (!DUPLICATION_CHECK_CACHE.containsKey(spreadsheetId)) {
-            Spreadsheet spreadsheet = sheetService.getSpreadsheet(spreadsheetId);
-            List<Order> duplicatedOrders = orderService.findDuplicates(spreadsheet);
-            DUPLICATION_CHECK_CACHE.put(spreadsheetId, true);
-            if (CollectionUtils.isNotEmpty(duplicatedOrders)) {
-                String duplicates = StringUtils.join(duplicatedOrders.stream().map(it -> it.order_id + " @ " + it.sheetName)
-                        .collect(Collectors.toSet()).toArray(new String[duplicatedOrders.size()]), ", ");
-                String msg = String.format("%s duplicated orders found in %s, %s",
-                        duplicatedOrders.size(), spreadsheet.getProperties().getTitle(), duplicates);
-                throw new BusinessException(msg + "\n\n Please fix before submitting orders.");
-            }
-        }
-    }
-
     private List<Order> prepareOrderSubmission(OrderSubmissionTask task) {
 
 
@@ -186,7 +127,7 @@ public class OrderSubmitter {
             dailyBudgetHelper.checkBudget(task.getSpreadsheetId());
         } catch (Exception e) {
             LOGGER.error("Error when fetch daily budget", e);
-            throw e;
+            throw new NoBudgetException(e);
         }
 
         //checkDuplicates(settings.getSpreadsheetId());

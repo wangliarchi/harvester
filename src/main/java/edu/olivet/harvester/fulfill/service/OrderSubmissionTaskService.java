@@ -186,6 +186,12 @@ public class OrderSubmissionTaskService {
         orderSubmissionBuyerTaskService.deleteByTaskId(task.getId());
     }
 
+    public void hardDeleteTask(OrderSubmissionTask task) {
+        dbManager.deleteById(task.getId(), OrderSubmissionTask.class);
+        //delete buyer tasks as well
+        orderSubmissionBuyerTaskService.deleteByTaskId(task.getId());
+    }
+
     public void startTask(String id) {
         OrderSubmissionTask task = get(id);
         startTask(task);

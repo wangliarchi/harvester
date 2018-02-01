@@ -300,6 +300,11 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
     }
 
 
+    public void disableStopButton() {
+        stopButton.setEnabled(false);
+        pauseButton.setEnabled(false);
+    }
+
     private void huntSuppliers() {
         new Thread(() -> {
             try {
@@ -335,16 +340,11 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
                 return;
             }
             try {
-                disableAllBtns();
                 saveRuntimeSettings();
-                PSEventListener.reset(this);
                 ApplicationContext.getBean(SubmitOrdersEvent.class).execute();
             } catch (Exception e) {
                 UITools.error(UIText.message("message.submit.exception", e.getMessage()), UIText.title("title.code_error"));
                 LOGGER.error("做单过程中出现异常:", e);
-            } finally {
-                resetSkipSetting();
-                PSEventListener.end();
             }
         }).start();
 

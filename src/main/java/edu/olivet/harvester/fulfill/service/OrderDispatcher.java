@@ -11,12 +11,14 @@ import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.ui.panel.TabbedBuyerPanel;
+import org.elasticsearch.common.util.concurrent.CountDown;
 
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 1/8/18 4:13 PM
@@ -25,7 +27,7 @@ import java.util.Map;
 public class OrderDispatcher {
     //private static final Logger LOGGER = LoggerFactory.getLogger(OrderDispatcher.class);
     private static Map<String, BuyerPanelOrderWorker> jobs = new HashMap<>();
-
+    private static Map<String, CountDownLatch> latches = new HashMap<>();
 
     @Inject private OrderSubmissionBuyerTaskService orderSubmissionBuyerTaskService;
     @Inject private DailyBudgetHelper dailyBudgetHelper;
@@ -41,29 +43,31 @@ public class OrderDispatcher {
                 return true;
             }
         }
-
         return false;
     }
 
     public void dispatch(List<Order> orders, OrderSubmissionTask task) {
+        //按照账号/国家 分配订单
         Map<Account, Map<Country, List<Order>>> map = groupOrdersByBuyer(orders, task);
+
         map.forEach((buyer, countryListMap) -> countryListMap.forEach((country, orderList) -> {
             OrderSubmissionBuyerAccountTask buyerTask = orderSubmissionBuyerTaskService.create(country, buyer, task, orderList);
             BuyerPanel buyerPanel = TabbedBuyerPanel.getInstance().getOrAddTab(country, buyer);
             String key = buyerPanel.getKey();
             dailyBudgetHelper.addRuntimePanelObserver(task.getSpreadsheetId(), buyerPanel);
+            CountDownLatch latch = getLatch(key);
             BuyerPanelOrderWorker job = jobs.computeIfAbsent(key, k -> new BuyerPanelOrderWorker(buyerPanel));
 
-            job.addTask(buyerTask);
+            job.addTask(buyerTask, latch);
 
             if (job.getState() == SwingWorker.StateValue.PENDING) {
                 job.execute();
             }
-
-
         }));
 
-
+        if (!PSEventListener.isRunning()) {
+            PSEventListener.start();
+        }
     }
 
 
@@ -84,5 +88,24 @@ public class OrderDispatcher {
         orderList.add(order);
         countryListMap.put(fulfillmentCountry, orderList);
         map.put(buyerAccount, countryListMap);
+    }
+
+    private CountDownLatch getLatch(String key) {
+        CountDownLatch latch = latches.computeIfAbsent(key, k -> new CountDownLatch(1));
+
+        if (latch.getCount() == 0) {
+            latch = new CountDownLatch(1);
+        }
+
+        return latch;
+    }
+
+    private BuyerPanelOrderWorker getJob(String key, BuyerPanel buyerPanel, CountDownLatch latch) {
+        BuyerPanelOrderWorker job = jobs.computeIfAbsent(key, k -> new BuyerPanelOrderWorker(buyerPanel));
+        if (job.isDone()) {
+            job = new BuyerPanelOrderWorker(buyerPanel);
+        }
+
+        return job;
     }
 }

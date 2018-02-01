@@ -6,6 +6,7 @@ import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.hunt.model.Seller;
+import edu.olivet.harvester.hunt.utils.SellerHuntUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -45,12 +46,14 @@ public class HuntService {
                 HUNTING_LOGGER.info(order, "Seller [{}] is not qualified as {}", e.getMessage());
             }
         }
+
         //sellers.forEach(it -> huntVariableService.setHuntingVariable(it, order));
         if (CollectionUtils.isEmpty(sellers)) {
             throw new BusinessException("No seller found");
         }
+
         //sort sellers
-        sellers.sort(SellerComparator.getInstance());
+        SellerHuntUtils.sortSellers(sellers);
         HUNTING_LOGGER.info(order, "total {} valid sellers found  - \n{}\n",
                 sellers.size(), StringUtils.join(sellers, "\n")
         );

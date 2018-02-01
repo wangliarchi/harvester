@@ -22,13 +22,18 @@ public class PSEventListener {
     public static void reset(PSEventHandler eventHandler) {
         PSEventListener.eventHandler = eventHandler;
         status = Status.NotRunning;
-        eventHandler.hidePauseBtn();
+        new Thread(() -> {
+            PSEventListener.eventHandler.hidePauseBtn();
+            PSEventListener.eventHandler.disableStartButton();
+        }).start();
     }
 
     public static void start() {
         status = Status.Running;
-        eventHandler.showPauseBtn();
-        eventHandler.disableStartButton();
+        new Thread(() -> {
+            eventHandler.showPauseBtn();
+            eventHandler.disableStartButton();
+        }).start();
     }
 
     public static void pause() {
@@ -38,21 +43,24 @@ public class PSEventListener {
 
     public static void resume() {
         status = Status.Running;
-        eventHandler.resetPauseBtn();
+        new Thread(() -> {
+            eventHandler.resetPauseBtn();
+        }).start();
     }
 
     public static void stop() {
         status = Status.Stopped;
-        eventHandler.hidePauseBtn();
-        eventHandler.enableStartButton();
+        eventHandler.disableStopButton();
+        //eventHandler.enableStartButton();
     }
-
 
 
     public static void end() {
         status = Status.Ended;
-        eventHandler.hidePauseBtn();
-        eventHandler.enableStartButton();
+        new Thread(() -> {
+            eventHandler.hidePauseBtn();
+            eventHandler.enableStartButton();
+        }).start();
     }
 
     public static boolean isRunning() {
@@ -66,7 +74,6 @@ public class PSEventListener {
     public static boolean paused() {
         return status == Status.Paused;
     }
-
 
 
 }

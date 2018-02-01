@@ -22,8 +22,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
@@ -38,8 +41,8 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, String> {
     private final OrderValidator orderValidator;
     private final OrderFlowEngine orderFlowEngine;
     private final SheetService sheetService;
-    private BlockingQueue<OrderSubmissionBuyerAccountTask> tasks;
-
+    private final BlockingQueue<OrderSubmissionBuyerAccountTask> tasks;
+    private final List<CountDownLatch> latches;
 
     public BuyerPanelOrderWorker(BuyerPanel buyerPanel) {
         super();
@@ -51,6 +54,7 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, String> {
         orderFlowEngine = ApplicationContext.getBean(OrderFlowEngine.class);
         sheetService = ApplicationContext.getBean(SheetService.class);
         tasks = new LinkedBlockingDeque<>();
+        latches = new ArrayList<>();
     }
 
 
@@ -65,12 +69,13 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, String> {
     }
 
     public boolean isRunning() {
-        return tasks.size() > 0 || running;
+        return latches.size() > 0;
     }
 
-    public void addTask(OrderSubmissionBuyerAccountTask buyerAccountTask) {
+    public void addTask(OrderSubmissionBuyerAccountTask buyerAccountTask, CountDownLatch latch) {
         try {
             tasks.add(buyerAccountTask);
+            latches.add(latch);
             buyerPanel.updateTasksInfo(status());
         } catch (Exception e) {
             //UITools.error("加入任务队列过程中出现其他异常: " + e.getMessage());
@@ -86,6 +91,16 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, String> {
         TasksAndProgressPanel.getInstance().loadTasksToTable();
     }
 
+
+    protected void taskDone() {
+        Iterator<CountDownLatch> i = latches.iterator();
+        CountDownLatch latch = i.next();
+        latch.countDown();
+        if (latch.getCount() == 0) {
+            i.remove();
+        }
+    }
+
     @Override
     protected Void doInBackground() {
         Thread.currentThread().setName("ProcessingOrderWithBuyerPanel" + buyerPanel.getKey());
@@ -98,6 +113,7 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, String> {
                 buyerAccountTask = tasks.take();
             } catch (Exception e) {
                 LOGGER.warn("从任务队列中获取记录时出现异常:", e);
+                taskDone();
                 continue;
             }
 
@@ -108,6 +124,7 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, String> {
             //if task stopped
             if (task.stopped() || PSEventListener.stopped()) {
                 LOGGER.error("Task stopped");
+                taskDone();
                 continue;
             }
 
@@ -122,6 +139,7 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, String> {
                 LOGGER.error("error processing orders", e);
             }
             TabbedBuyerPanel.getInstance().setNormalIcon(buyerPanel);
+            taskDone();
             running = false;
         }
     }

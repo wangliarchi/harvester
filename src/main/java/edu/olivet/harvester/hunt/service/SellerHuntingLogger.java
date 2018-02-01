@@ -4,9 +4,12 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.core.FileAppender;
 import edu.olivet.foundations.utils.*;
+import edu.olivet.foundations.utils.Configs.LogMode;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
+import edu.olivet.harvester.utils.Config;
 import lombok.Getter;
+import lombok.Setter;
 import org.jsoup.nodes.Document;
 import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.LoggerContext;
@@ -25,6 +28,8 @@ public class SellerHuntingLogger {
     private static SellerHuntingLogger instance;
     private LoggerContext loggerContext;
     private FileAppender fileAppender;
+    @Setter
+    public LogMode logMode = LogMode.Productive;
 
     @Getter
     private Logger logger;
@@ -75,12 +80,17 @@ public class SellerHuntingLogger {
 
 
     public void info(Order order, String format, Object... arguments) {
-
+        if (logMode == LogMode.Development) {
+            return;
+        }
         this.setFile(order);
         this.getLogger().info(format, arguments);
     }
 
     public void error(Order order, String format, Object... arguments) {
+        if (logMode == LogMode.Development) {
+            return;
+        }
         this.setFile(order);
         this.getLogger().error(format, arguments);
     }
@@ -117,9 +127,13 @@ public class SellerHuntingLogger {
     }
 
     public void setFile(String filePath) {
-        fileAppender.stop();
-        fileAppender.setFile(filePath);
-        fileAppender.start();
+        try {
+            fileAppender.stop();
+            fileAppender.setFile(filePath);
+            fileAppender.start();
+        } catch (Exception e) {
+            //
+        }
     }
 
 

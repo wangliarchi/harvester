@@ -15,4 +15,6 @@ public interface PSEventHandler {
     void disableStartButton();
 
     void enableStartButton();
+
+    void disableStopButton();
 }

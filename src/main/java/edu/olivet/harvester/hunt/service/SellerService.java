@@ -48,6 +48,7 @@ public class SellerService {
     @Inject Now now;
     @Inject SellerFilter sellerFilter;
     @Inject HtmlFetcher htmlFetcher;
+    @Inject SellerHuntUtils sellerHuntUtils;
 
     @Inject
     public void init() throws IOException {
@@ -64,54 +65,44 @@ public class SellerService {
             throw new BusinessException("No ISBN found for order yet");
         }
 
-        Map<Country, List<SellerFullType>> countriesToHunt = SellerHuntUtils.countriesToHunt(order);
+        Map<Country, Set<SellerFullType>> countriesToHunt = sellerHuntUtils.countriesToHunt(order);
         LOGGER.info(order, "Trying to find sellers for {} {} from {} {} - {}",
                 order.isbn, order.original_condition,
                 countriesToHunt.size(), countriesToHunt.size() == 1 ? "country" : "countries", countriesToHunt);
 
-        List<Seller> sellers = new ArrayList<>();
-
+        final List<Seller> sellers = new ArrayList<>();
         countriesToHunt.forEach((country, types) -> {
             List<Seller> sellersFromCountry = getSellersByCountry(country, order, types);
-            LOGGER.info(order, String.format("found %d sellers from %s \n",
-                    sellersFromCountry.size(), country.name()));
+            LOGGER.info(order, String.format("found %d sellers from %s \n", sellersFromCountry.size(), country.name()));
             sellers.addAll(sellersFromCountry);
         });
 
         return sellers;
     }
 
-    public List<Seller> getSellersByCountry(Country country, Order order) {
-        List<SellerFullType> allowedTypes = SellerHuntUtils.countriesToHunt(order).getOrDefault(country, null);
-        if (CollectionUtils.isEmpty(allowedTypes)) {
-            throw new BusinessException("Country " + country + " is not allowed for order " + order.order_number + " " + order.isbn);
-        }
-        return getSellersByCountry(country, order, allowedTypes);
-    }
-
-    public List<Seller> getSellersByCountry(Country country, Order order, List<SellerFullType> allowedTypes) {
+    public List<Seller> getSellersByCountry(Country country, Order order, Set<SellerFullType> allowedTypes) {
         String isbn = Strings.fillMissingZero(order.isbn);
         String url = getOfferListingPageUrl(country, isbn, order.originalCondition());
 
-        List<Seller> sellers = new ArrayList<>();
-
+        final List<Seller> sellers = new ArrayList<>();
         int maxSellerNumber = order.isIntlOrder() ? 5 : 3;
+
         for (int i = 0; i < MAX_PAGE; i++) {
             Document document;
             try {
                 document = htmlFetcher.getDocument(url);
             } catch (Exception e) {
-                //
                 continue;
             }
+
             LOGGER.saveHtml(order, order.isbn + "-offer-listing-page-" + (i + 1), document.outerHtml());
 
             List<Seller> sellersByPage = parseSellers(document, country);
-
             LOGGER.info(order, "Found {} sellers on page {} on {}, url {} ", sellersByPage.size(), i + 1, country.baseUrl(), url);
             if (CollectionUtils.isEmpty(sellersByPage)) {
                 break;
             }
+
             Seller lastSeller = sellersByPage.get(sellersByPage.size() - 1);
 
             //remove unqualified sellers
@@ -127,7 +118,7 @@ public class SellerService {
 
             sellers.addAll(sellersByPage);
 
-            //if already got 3 valid sellers, don't need to continue
+            //if already got enough valid sellers, don't need to continue
             if (sellers.size() >= maxSellerNumber) {
                 break;
             }

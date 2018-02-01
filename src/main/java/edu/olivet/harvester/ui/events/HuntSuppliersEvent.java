@@ -12,6 +12,8 @@ import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.model.FulfillmentEnum;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.MarkStatusService;
+import edu.olivet.harvester.fulfill.service.PSEventListener;
+import edu.olivet.harvester.fulfill.service.ProgressUpdater;
 import edu.olivet.harvester.fulfill.utils.validation.RuntimeSettingsValidator;
 import edu.olivet.harvester.hunt.Hunter;
 import edu.olivet.harvester.spreadsheet.model.Spreadsheet;
@@ -46,9 +48,17 @@ public class HuntSuppliersEvent extends Observable implements HarvesterUIEvent {
     private AppScript appScript;
 
     public void execute() {
+        if (PSEventListener.isRunning()) {
+            UITools.error("Other task is running!");
+            return;
+        }
+
         //validate runtime setting
         RuntimeSettings settings = RuntimeSettings.load();
         RuntimeSettingsValidator.CheckResult result = validator.validate(settings, FulfillmentEnum.Action.HuntSupplier);
+
+        ProgressUpdater.setProgressBarComponent(SimpleOrderSubmissionRuntimePanel.getInstance());
+        PSEventListener.reset(SimpleOrderSubmissionRuntimePanel.getInstance());
 
         List<String> messages = result.getErrors();
         if (CollectionUtils.isNotEmpty(messages)) {
@@ -60,6 +70,12 @@ public class HuntSuppliersEvent extends Observable implements HarvesterUIEvent {
 
 
     public void run() {
+
+        if (PSEventListener.isRunning()) {
+            UITools.error("Other task is running!");
+            return;
+        }
+
         long start = System.currentTimeMillis();
 
         List<Spreadsheet> spreadsheets = new ArrayList<>();

@@ -77,7 +77,6 @@ public class OrderCountryUtils {
         }
 
         return getFulfillmentCountry(order).baseUrl() + result;
-
     }
 
 

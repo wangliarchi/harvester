@@ -11,9 +11,11 @@ import edu.olivet.harvester.fulfill.service.OrderSubmissionTaskService;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.ui.panel.TasksAndProgressPanel;
 import org.apache.commons.collections4.CollectionUtils;
+import org.nutz.aop.interceptor.async.Async;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.*;
 import java.util.List;
 
 /**
@@ -23,6 +25,7 @@ public class StartOrderSubmissionTasksEvent implements HarvesterUIEvent {
     private static final Logger LOGGER = LoggerFactory.getLogger(StartOrderSubmissionTasksEvent.class);
     @Inject private OrderSubmissionTaskService orderSubmissionTaskService;
     @Inject private OrderDispatcher orderDispatcher;
+
     @Override
     public void execute() {
         TasksAndProgressPanel tasksAndProgressPanel = TasksAndProgressPanel.getInstance();
@@ -33,20 +36,17 @@ public class StartOrderSubmissionTasksEvent implements HarvesterUIEvent {
             }
 
             PSEventListener.reset(tasksAndProgressPanel);
-            PSEventListener.start();
+            //PSEventListener.start();
             //stay listening until it's stopped by user
             while (!PSEventListener.stopped()) {
                 try {
                     List<OrderSubmissionTask> scheduledTasks = orderSubmissionTaskService.todayScheduledTasks();
-
                     if (CollectionUtils.isNotEmpty(scheduledTasks)) {
                         OrderSubmissionTask task = scheduledTasks.get(0);
                         ApplicationContext.getBean(OrderSubmitter.class).execute(task);
                     } else if (!orderDispatcher.hasJobRunning()) {
-                        //WaitTime.Short.execute();
                         break;
                     }
-
                     WaitTime.Normal.execute();
                 } catch (Exception e) {
                     LOGGER.error("", e);
@@ -57,10 +57,8 @@ public class StartOrderSubmissionTasksEvent implements HarvesterUIEvent {
 
             if (PSEventListener.stopped()) {
                 orderSubmissionTaskService.cleanUp();
-            } else {
-                PSEventListener.end();
             }
-
+            PSEventListener.end();
         }).start();
     }
 

@@ -21,6 +21,8 @@ import edu.olivet.harvester.utils.common.ThreadHelper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.nutz.aop.interceptor.async.Async;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -31,6 +33,7 @@ import java.util.concurrent.CountDownLatch;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 1/19/2018 2:50 PM
  */
 public class Hunter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Hunter.class);
 
     @Inject AppScript appScript;
     @Inject private MessageListener messageListener;
@@ -53,7 +56,7 @@ public class Hunter {
             try {
                 huntForWorksheet(worksheet);
             } catch (Exception e) {
-                //
+                LOGGER.error("Error when hunting sellers for {} - ", worksheet, e);
             }
         }
     }
@@ -81,8 +84,7 @@ public class Hunter {
             return;
         }
 
-        ProgressUpdater.setProgressBarComponent(SimpleOrderSubmissionRuntimePanel.getInstance(), orders.size());
-        PSEventListener.reset(SimpleOrderSubmissionRuntimePanel.getInstance());
+        ProgressUpdater.updateTotal(orders.size());
         PSEventListener.start();
 
         // 定长swingworker list

@@ -16,6 +16,7 @@ import edu.olivet.harvester.hunt.model.SellerEnums.SellerFullType;
 import org.apache.commons.lang3.time.DateUtils;
 
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -176,7 +177,7 @@ public class SellerFilter {
      */
     public boolean conditionQualified(Seller seller, Order order) {
 
-        if (seller.getCondition().acceptable()) {
+        if (order.originalCondition().used() && seller.getCondition().acceptable()) {
             if (order.getOrderTotalPrice().toUSDAmount().floatValue() > 40) {
                 LOGGER.info("Seller [{}] not qualified as its price {} is higher than {} for acceptable condition - {}",
                         seller.getName(), order.getOrderTotalPrice().usdText(), "$40", seller);
@@ -189,6 +190,8 @@ public class SellerFilter {
                         seller.getName());
                 return false;
             }
+
+            return true;
         }
 
         boolean result = ConditionUtils.goodToGo(order.originalCondition(), seller.getCondition());
@@ -201,7 +204,7 @@ public class SellerFilter {
         return result;
     }
 
-    public boolean typeAllowed(Seller seller, Order order, List<SellerFullType> allowedTypes) {
+    public boolean typeAllowed(Seller seller, Order order, Set<SellerFullType> allowedTypes) {
 
         List<SellerFullType> types = seller.supportedFullTypes(order.ship_country);
         for (SellerFullType type : types) {

@@ -147,6 +147,21 @@ public class Exceptions {
     }
 
     /**
+     * gift card out of balance异常定义
+     */
+    public static class NoBudgetException extends OrderSubmissionException {
+        private static final long serialVersionUID = 548234872567663633L;
+
+        public NoBudgetException(String message) {
+            super(message);
+        }
+
+        public NoBudgetException(Throwable cause) {
+            super(cause);
+        }
+    }
+
+    /**
      * Seller out of stock异常定义
      */
     public static class OutOfStockException extends RuntimeException {
