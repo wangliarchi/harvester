@@ -96,10 +96,12 @@ public class InvoiceDownloader {
         //todo if before 6 month
         String url = country.baseUrl() + "/gp/your-account/order-history?opt=ab&digitalOrders=1&unifiedOrders=1&returnTo=&orderFilter=months-6";
         JXBrowserHelper.loadPage(browser, url);
+        WaitTime.Short.execute();
 
         List<String> patterns = Lists.newArrayList("MMMMM dd yyyy", "dd MMMMM yyyy");
 
         int totalDownloaded = 0;
+        outerloop:
         while (true) {
             String pageUrl = browser.getURL();
             List<DOMElement> orderBoxes = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-box-group.order");
@@ -143,7 +145,7 @@ public class InvoiceDownloader {
 
                 if (date.before(fromDate)) {
                     LOGGER.error("{} before date {}", date,fromDate);
-                    break;
+                    break outerloop;
                 }
                 if (date.after(toDate)) {
                     LOGGER.error("{} after date {}", date,toDate);
@@ -183,13 +185,16 @@ public class InvoiceDownloader {
                 loginPage = new LoginPage(buyerPanel);
                 loginPage.execute(null);
             }
-
-            JXBrowserHelper.loadPage(browser, pageUrl);
-            WaitTime.Short.execute();
             //next page
             DOMElement nextPage = JXBrowserHelper.selectElementByCssSelector(browser, ".a-pagination .a-last a");
             if (nextPage == null) {
-                break;
+                JXBrowserHelper.loadPage(browser, pageUrl);
+                WaitTime.Short.execute();
+                //next page
+                nextPage = JXBrowserHelper.selectElementByCssSelector(browser, ".a-pagination .a-last a");
+                if (nextPage == null) {
+                    break;
+                }
             }
             JXBrowserHelper.insertChecker(browser);
             nextPage.click();
