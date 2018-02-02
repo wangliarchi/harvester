@@ -3,10 +3,7 @@ package edu.olivet.harvester.utils;
 import com.teamdev.jxbrowser.chromium.*;
 import com.teamdev.jxbrowser.chromium.PrintJob;
 import com.teamdev.jxbrowser.chromium.dom.*;
-import com.teamdev.jxbrowser.chromium.events.FinishLoadingEvent;
-import com.teamdev.jxbrowser.chromium.events.LoadAdapter;
-import com.teamdev.jxbrowser.chromium.events.RenderAdapter;
-import com.teamdev.jxbrowser.chromium.events.RenderEvent;
+import com.teamdev.jxbrowser.chromium.events.*;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import com.teamdev.jxbrowser.chromium.swing.internal.LightWeightWidget;
 import edu.olivet.foundations.amazon.Account;
@@ -567,17 +564,7 @@ public class JXBrowserHelper {
         }
     }
 
-    public static void printToPDF(Browser browser, String saveToPath) {
-        browser.setPrintHandler(printJob -> {
-            PrintSettings settings = printJob.getPrintSettings();
-            settings.setPrintToPDF(true);
-            settings.setPDFFilePath(saveToPath);
-            settings.setPrintBackgrounds(true);
-            return PrintStatus.CONTINUE;
-        });
 
-        browser.print();
-    }
 
 
     @Repeat

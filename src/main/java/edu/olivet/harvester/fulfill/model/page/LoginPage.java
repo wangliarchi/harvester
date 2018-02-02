@@ -1,5 +1,6 @@
 package edu.olivet.harvester.fulfill.model.page;
 
+import com.teamdev.jxbrowser.chromium.Browser;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import com.teamdev.jxbrowser.chromium.dom.DOMFormControlElement;
 import com.teamdev.jxbrowser.chromium.dom.DOMInputElement;
@@ -58,8 +59,16 @@ public class LoginPage extends FulfillmentPage implements PageObject {
         JXBrowserHelper.loadPage(browser, country.baseUrl() + "/" + AmazonPage.DigitalOrderList.urlMark());
 
         DOMElement email = JXBrowserHelper.selectElementByCssSelector(browser, EMAIL_SELECTOR);
+        DOMElement password = JXBrowserHelper.selectElementByCssSelector(browser, PASSWORD_SELECTOR);
+        return email == null && password == null;
 
-        return email == null;
+    }
+
+    public static boolean needLoggedIn(Browser browser) {
+        //let the browser go to order history page
+        DOMElement email = JXBrowserHelper.selectElementByCssSelector(browser, EMAIL_SELECTOR);
+        DOMElement password = JXBrowserHelper.selectElementByCssSelector(browser, PASSWORD_SELECTOR);
+        return email != null || password != null;
 
     }
 
@@ -130,10 +139,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
             throw new BuyerAccountAuthenticationException(buyer.getEmail() + " - fail to pass captcha challenge.");
         }
 
-        email = JXBrowserHelper.selectElementByCssSelector(browser, EMAIL_SELECTOR);
-        password = JXBrowserHelper.selectElementByCssSelector(browser, PASSWORD_SELECTOR);
-
-        if (email != null || password != null) {
+        if (!isLoggedIn()) {
             throw new BusinessException("Login failed");
         }
 

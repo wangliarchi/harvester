@@ -87,14 +87,14 @@ public class DownloadInvoiceDialog extends BaseDialog {
         fromDateSettings.setAllowEmptyDates(false);
 
         fromDatePicker = new DatePicker(fromDateSettings);
-        fromDatePicker.setDate(today.minusDays(4));
+        fromDatePicker.setDate(today.minusDays(10));
 
         JLabel toLabel = new JLabel();
         toLabel.setText("To Date");
         DatePickerSettings toDateSettings = new DatePickerSettings();
         toDateSettings.setAllowEmptyDates(false);
         toDatePicker = new DatePicker(toDateSettings);
-        toDatePicker.setDate(today.minusDays(1));
+        toDatePicker.setDate(today.minusDays(3));
 
         spreadScrollPane.setViewportView(buyerList);
 

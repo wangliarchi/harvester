@@ -4,6 +4,7 @@ import edu.olivet.deploy.Language;
 import edu.olivet.foundations.ui.BaseDialog;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
+import edu.olivet.harvester.ui.panel.DownloadInvoiceSettingPanel;
 import edu.olivet.harvester.ui.panel.OrderConfirmationSettingPanel;
 import edu.olivet.harvester.ui.panel.OrderExportSettingPanel;
 
@@ -38,6 +39,8 @@ public class SystemSettingsDialog  extends BaseDialog {
         tabbedPane.addTab("Order Export",orderExportSettingPanel);
         orderConfirmationSettingPanel = new OrderConfirmationSettingPanel();
         tabbedPane.addTab("Order Confirmation",orderConfirmationSettingPanel);
+        downloadInvoiceSettingPanel = new DownloadInvoiceSettingPanel();
+        tabbedPane.addTab("Download Invoices",downloadInvoiceSettingPanel);
 
 
 
@@ -78,11 +81,12 @@ public class SystemSettingsDialog  extends BaseDialog {
 
     private OrderExportSettingPanel orderExportSettingPanel;
     private OrderConfirmationSettingPanel orderConfirmationSettingPanel;
+    private DownloadInvoiceSettingPanel downloadInvoiceSettingPanel;
     @Override
     public void ok() {
         orderExportSettingPanel.collectData();
         orderConfirmationSettingPanel.collectData();
-
+        downloadInvoiceSettingPanel.collectData();
         UITools.info("System settings have been saved successfully.");
         ok = true;
         doClose();

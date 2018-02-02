@@ -25,7 +25,7 @@ public class DownloadInvoiceEvent implements HarvesterUIEvent {
 
         if (dialog.isOk()) {
             DownloadParams downloadParams  = dialog.getDownloadParams();
-            invoiceDownloader.setMessagePanel(new ProgressDetail(Actions.DownloadInvoice));
+            //invoiceDownloader.setMessagePanel(new ProgressDetail(Actions.DownloadInvoice));
             invoiceDownloader.download(downloadParams);
         }
     }
