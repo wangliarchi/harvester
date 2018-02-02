@@ -31,7 +31,7 @@ public class DownloadInvoiceSettingPanel extends JPanel {
         final JLabel enableAutoExportLabel = new JLabel("Enable Auto Download?");
         enableAutoDownloadComboBox = new JComboBox<>();
         enableAutoDownloadComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"No", "Yes"}));
-        if (systemSettings.isEnableOrderExport()) {
+        if (systemSettings.isEnableInvoiceDownloading()) {
             enableAutoDownloadComboBox.setSelectedItem("Yes");
         } else {
             enableAutoDownloadComboBox.setSelectedItem("No");
@@ -45,7 +45,7 @@ public class DownloadInvoiceSettingPanel extends JPanel {
         final JLabel rangeLabel = new JLabel("before or after");
         allowedRangeComBox = new JComboBox<>();
         allowedRangeComBox.setModel(new DefaultComboBoxModel<>(new Integer[] {0, 5, 10, 15, 20, 25, 30, 60, 90, 120}));
-        allowedRangeComBox.setSelectedItem(systemSettings.getOrderExportAllowedRange());
+        allowedRangeComBox.setSelectedItem(systemSettings.getInvoiceDownloadingAllowedRange());
         final JLabel unitLabel = new JLabel("minutes");
 
         GroupLayout layout = new GroupLayout(this);
@@ -100,7 +100,7 @@ public class DownloadInvoiceSettingPanel extends JPanel {
 
     public void collectData() {
         SystemSettings systemSettings = SystemSettings.load();
-        boolean oldData = systemSettings.isEnableOrderExport();
+        boolean oldData = systemSettings.isEnableInvoiceDownloading();
         //noinspection ConstantConditions
         if ("Yes".equalsIgnoreCase(enableAutoDownloadComboBox.getSelectedItem().toString())) {
             systemSettings.setEnableInvoiceDownloading(true);
@@ -108,7 +108,7 @@ public class DownloadInvoiceSettingPanel extends JPanel {
             systemSettings.setEnableInvoiceDownloading(false);
         }
 
-        if (oldData != systemSettings.isEnableOrderExport()) {
+        if (oldData != systemSettings.isEnableInvoiceDownloading()) {
             TaskScheduler taskScheduler = ApplicationContext.getBean(TaskScheduler.class);
             taskScheduler.deleteJob(BackgroundJob.InvoiceDownloading.getClazz());
             if (oldData) {
@@ -122,7 +122,7 @@ public class DownloadInvoiceSettingPanel extends JPanel {
         }
 
         systemSettings.setInvoiceDownloadTime(exportTimePicker.getTime());
-        systemSettings.setInvoiceDownladingAlowedRange((int) allowedRangeComBox.getSelectedItem());
+        systemSettings.setInvoiceDownloadingAllowedRange((int) allowedRangeComBox.getSelectedItem());
         systemSettings.save();
     }
 

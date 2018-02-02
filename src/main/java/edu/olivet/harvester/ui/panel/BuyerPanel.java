@@ -64,7 +64,7 @@ public class BuyerPanel extends JPanel implements RuntimePanelObserver, Progress
     }
 
     private String profilePathName() {
-        return this.buyer.key() + Constants.HYPHEN + this.id;
+        return this.buyer.key() + Constants.HYPHEN + this.country.name();
     }
 
     @Getter

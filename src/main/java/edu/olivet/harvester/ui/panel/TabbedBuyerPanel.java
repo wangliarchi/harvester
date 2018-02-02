@@ -80,7 +80,7 @@ public class TabbedBuyerPanel extends JTabbedPane {
     }
 
 
-    private void removeTab(BuyerPanel buyerPanel) {
+    public void removeTab(BuyerPanel buyerPanel) {
         String tabKey = getTabKey(buyerPanel.getCountry(), buyerPanel.getBuyer());
         try {
             buyerPanel.getBrowserView().getBrowser().dispose();

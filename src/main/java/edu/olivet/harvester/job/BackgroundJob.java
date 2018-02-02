@@ -20,7 +20,7 @@ public enum BackgroundJob {
 
     OrderExporting("0 30 7 ? * MON,TUE,WED,THU,FRI,SAT *", OrderExportingJob.class),
 
-    InvoiceDownloading("0 0 2 ? * MON,TUE,WED,THU,FRI,SAT *", DownloadInvoiceJob.class),
+    InvoiceDownloading("0 0 3 ? * MON,TUE,WED,THU,FRI,SAT *", DownloadInvoiceJob.class),
     /**
      * check unshipped orders, and send notification to account owner
      * run all weekdays and Saturday. random time between 17:00-18:00pm

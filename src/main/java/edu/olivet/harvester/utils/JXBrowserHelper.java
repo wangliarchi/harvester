@@ -340,6 +340,7 @@ public class JXBrowserHelper {
         browser.forwardKeyEvent(new BrowserKeyEvent(RELEASED, code, character));
     }
 
+    @Repeat(expectedExceptions = BusinessException.class)
     public static void loadPage(Browser browser, String url) {
         try {
             Browser.invokeAndWaitFinishLoadingMainFrame(browser, it -> it.loadURL(url));

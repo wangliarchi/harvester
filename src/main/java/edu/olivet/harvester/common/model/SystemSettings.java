@@ -25,8 +25,8 @@ public class SystemSettings {
     private Integer orderConfirmationAllowedRange = 60;
 
     private boolean enableInvoiceDownloading = false;
-    private LocalTime invoiceDownloadTime = LocalTime.of(2, 0);
-    private Integer invoiceDownladingAlowedRange = 15;
+    private LocalTime invoiceDownloadTime = LocalTime.of(3, 0);
+    private Integer invoiceDownloadingAllowedRange = 15;
 
     public static final String SYSTEM_SETTINGS_FILE_PATH = Directory.Customize.path() + "/system-settings.json";
     public static final String TEST_SYSTEM_SETTINGS_FILE_PATH = "src/test/resources/conf/system-settings.json";
