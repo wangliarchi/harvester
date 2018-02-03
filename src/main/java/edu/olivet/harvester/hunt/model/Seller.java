@@ -3,7 +3,6 @@ package edu.olivet.harvester.hunt.model;
 import com.google.common.base.Objects;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.harvester.common.model.Order;
-import edu.olivet.harvester.utils.I18N;
 import edu.olivet.harvester.common.model.Money;
 import edu.olivet.harvester.fulfill.utils.ConditionUtils.Condition;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
@@ -211,30 +210,20 @@ public class Seller {
     }
 
     public boolean isExpeditedAvailable() {
-        if (SellerType.isPrime(type)) {
-            return true;
-        }
-
-        return expeditedAvailable;
+        return SellerType.isPrime(type) || expeditedAvailable;
 
     }
 
     public boolean isIntlShippingAvailable() {
-        if (type == SellerType.AP) {
-            return true;
-        }
+        return type == SellerType.AP || intlShippingAvailable;
 
-        return intlShippingAvailable;
     }
 
     //todo  shipFromCountry or offerListingCountry?
     public boolean canDirectShip(String shipToCountry) {
 
-        if (offerListingCountry.code().equalsIgnoreCase(CountryStateUtils.getInstance().getCountryCode(shipToCountry))) {
-            return true;
-        }
+        return offerListingCountry.code().equalsIgnoreCase(CountryStateUtils.getInstance().getCountryCode(shipToCountry)) || isIntlShippingAvailable();
 
-        return isIntlShippingAvailable();
     }
 
     /**
@@ -288,8 +277,14 @@ public class Seller {
         return fullType;
     }
 
+    private float estimatedProfit = 0.0f;
+
+    /**
+     * in USD
+     */
     public float profit(Order order) {
-        return order.getOrderTotalPrice().toUSDAmount().floatValue() * 0.85f - getTotalPriceInUSD();
+        estimatedProfit = order.getAmazonPayout().toUSDAmount().floatValue() - getTotalForCalculation();
+        return estimatedProfit;
     }
 
     /**
@@ -351,12 +346,12 @@ public class Seller {
      */
     public String toString() {
         return this.offerListingCountry.name() + ", " + this.name + ", " + this.getTotalForCalculation() + ", " + this.uuid + ", " +
+                this.latestDeliveryDate + ", " + this.estimatedProfit + ", " +
                 (this.fullType != null ? this.fullType.desc() + ", " : "") +
                 this.price.usdText() + ", " + this.shippingFee.usdText() + ", " +
                 this.condition + ", " + this.type.abbrev() + ", " +
                 this.rating + "%, " + this.ratingCount + ", " +
                 getRatingByType(RatingType.Last30Days) + ", " + getRatingByType(RatingType.Last12Month) + ", " +
                 sellerVariable + ", " + ratingVariable + ", " + shippingVariable;
-
     }
 }

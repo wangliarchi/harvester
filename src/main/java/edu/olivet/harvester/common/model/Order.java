@@ -8,6 +8,8 @@ import edu.olivet.foundations.db.Keyable;
 import edu.olivet.foundations.utils.*;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.harvester.common.model.OrderEnums.OrderColor;
+import edu.olivet.harvester.common.model.OrderEnums.OrderItemType;
+import edu.olivet.harvester.common.service.OrderItemTypeHelper;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.ShippingEnums;
@@ -472,6 +474,7 @@ public class Order implements Keyable {
     public int eddDays() {
         return eddDays(new Date());
     }
+
     @JSONField(serialize = false)
     public int eddDays(Date today) {
         String estimatedDeliveryDateString = StringUtils.split(estimated_delivery_date, " ")[1];
@@ -686,6 +689,16 @@ public class Order implements Keyable {
 
     }
 
+    @JSONField(serialize = false)
+    public Money getAmazonPayout() {
+        float priceFloat = getOrderTotalPrice().getAmount().floatValue() * 0.85f;
+        if (OrderItemTypeHelper.getItemTypeBySku(this) == OrderItemType.BOOK) {
+            priceFloat -= 1.8;
+        }
+        return new Money(priceFloat, OrderCountryUtils.getMarketplaceCountry(this));
+    }
+
+    //order.getOrderTotalPrice().toUSDAmount().floatValue() * 0.85f
     @JSONField(serialize = false)
     public Money orderTotalCost;
 

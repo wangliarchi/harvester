@@ -11,11 +11,9 @@ import edu.olivet.harvester.fulfill.service.OrderSubmissionTaskService;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.ui.panel.TasksAndProgressPanel;
 import org.apache.commons.collections4.CollectionUtils;
-import org.nutz.aop.interceptor.async.Async;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
 import java.util.List;
 
 /**

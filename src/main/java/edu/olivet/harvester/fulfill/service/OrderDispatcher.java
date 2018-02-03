@@ -11,7 +11,6 @@ import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.ui.panel.TabbedBuyerPanel;
-import org.elasticsearch.common.util.concurrent.CountDown;
 
 import javax.swing.*;
 import java.util.ArrayList;

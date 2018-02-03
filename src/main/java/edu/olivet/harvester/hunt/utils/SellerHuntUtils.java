@@ -3,7 +3,6 @@ package edu.olivet.harvester.hunt.utils;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
-import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Now;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.common.model.OrderEnums.OrderItemType;
@@ -15,10 +14,8 @@ import edu.olivet.harvester.hunt.model.SellerEnums.SellerFullType;
 import edu.olivet.harvester.hunt.service.HuntVariableService;
 import edu.olivet.harvester.hunt.service.SellerComparator;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.recycler.Recycler.C;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 1/23/18 6:00 PM
@@ -48,9 +45,7 @@ public class SellerHuntUtils {
                 //
             }
 
-            huntVariableService.supportedIntlTypes(order).forEach((country, types) -> {
-                addCountry(countries, country, types.toArray(new SellerFullType[types.size()]));
-            });
+            huntVariableService.supportedIntlTypes(order).forEach((country, types) -> addCountry(countries, country, types.toArray(new SellerFullType[types.size()])));
         }
 
         addUKFwd(countries, order);

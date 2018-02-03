@@ -2,19 +2,14 @@ package edu.olivet.harvester.ui.dialog;
 
 import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.DatePickerSettings;
-import com.github.lgooddatepicker.components.DateTimePicker;
-import com.github.lgooddatepicker.components.TimePickerSettings;
 import edu.olivet.deploy.Language;
 import edu.olivet.foundations.amazon.Account;
-import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.BaseDialog;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.common.model.BuyerAccountSetting;
 import edu.olivet.harvester.common.model.BuyerAccountSettingUtils;
-import edu.olivet.harvester.export.model.OrderExportParams;
 import edu.olivet.harvester.finance.model.DownloadParams;
-import edu.olivet.harvester.utils.Settings;
 import lombok.Getter;
 import org.apache.commons.lang3.time.DateUtils;
 
@@ -24,7 +19,6 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import java.awt.event.*;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
@@ -94,7 +88,7 @@ public class DownloadInvoiceDialog extends BaseDialog {
         DatePickerSettings toDateSettings = new DatePickerSettings();
         toDateSettings.setAllowEmptyDates(false);
         toDatePicker = new DatePicker(toDateSettings);
-        toDatePicker.setDate(today.minusDays(3));
+        toDatePicker.setDate(today.minusDays(1));
 
         spreadScrollPane.setViewportView(buyerList);
 

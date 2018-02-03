@@ -94,6 +94,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
             JXBrowserHelper.waitUntilNewPageLoaded(browser);
         }
 
+        WaitTime.Shortest.execute();
         DOMElement password = JXBrowserHelper.selectElementByCssSelector(browser, PASSWORD_SELECTOR);
         if (password == null) {
             return;

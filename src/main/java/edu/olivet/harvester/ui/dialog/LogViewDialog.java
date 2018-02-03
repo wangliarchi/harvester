@@ -470,7 +470,7 @@ public class LogViewDialog extends JDialog {
         pack();
     }
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         UITools.setTheme();
         LogViewDialog dialog = new LogViewDialog(null, true, StringUtils.EMPTY);
         dialog.addWindowListener(new WindowAdapter() {

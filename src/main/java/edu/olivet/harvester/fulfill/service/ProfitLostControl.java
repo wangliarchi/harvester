@@ -1,21 +1,59 @@
 package edu.olivet.harvester.fulfill.service;
 
+import com.alibaba.fastjson.JSON;
+import edu.olivet.foundations.aop.Repeat;
+import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.utils.Settings;
 import edu.olivet.harvester.utils.common.NumberUtils;
+import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Jsoup;
+import org.nutz.lang.Lang;
+
+import java.io.IOException;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/10/17 6:09 PM
  */
 public class ProfitLostControl {
+    private static final String APPSCRIPT_URL = "https://script.google.com/macros/s/AKfycbz92MpAp86yAfYkekA8eSv6gYyUrg0BCzW33i1VgnaBwOgK4THe/exec";
+
+    @Repeat(expectedExceptions = BusinessException.class)
+    protected static String get() {
+        String url = APPSCRIPT_URL + "?account=" + Settings.load().getSid();
+        try {
+            return Jsoup.connect(url).timeout(WaitTime.Longer.valInMS()).ignoreContentType(true).execute().body();
+        } catch (IOException e) {
+            throw Lang.wrapThrow(e);
+        }
+    }
+
+    @Data
+    public static class ProfileControlVariable {
+        float breakPoint;
+        float min1;
+        float min2;
+    }
+
+    public static ProfileControlVariable profileControlVariable = null;
+
+    public static ProfileControlVariable getVariable() {
+        if (profileControlVariable == null) {
+            String json = get();
+            profileControlVariable = JSON.parseObject(json, ProfileControlVariable.class);
+        }
+        return profileControlVariable;
+    }
 
     /**
      * order earning in USD
      */
     public static float earning(Order order) {
         String qty = StringUtils.isNotBlank(order.quantity_fulfilled) ? order.quantity_fulfilled : order.quantity_purchased;
-        Float value = (order.getOrderTotalPrice().toUSDAmount().floatValue() * 0.85f - 1.8f) * Float.parseFloat(qty);
+        float value = order.getAmazonPayout().toUSDAmount().floatValue() * Float.parseFloat(qty);
         return NumberUtils.round(value, 2);
     }
 
@@ -26,6 +64,7 @@ public class ProfitLostControl {
         float earning = earning(order);
         return NumberUtils.round(earning - cost, 2);
     }
+
 
     /**
      * <pre>
@@ -45,21 +84,28 @@ public class ProfitLostControl {
      * </pre>
      */
     public static boolean canPlaceOrder(Order order, Float cost) {
+        //
+
+        ProfileControlVariable profileControlVariable = getVariable();
         float lostLimit;
         if (order.fulfilledFromUK()) {
             lostLimit = 0;
         } else if (OrderValidator.skipCheck(order, OrderValidator.SkipValidation.Profit)) {
             lostLimit = -20;
         } else {
-            if (cost <= 20) {
-                lostLimit = -5;
+            if (cost <= profileControlVariable.breakPoint) {
+                lostLimit = profileControlVariable.min1;
             } else {
-                lostLimit = cost * 0.05f;
+                lostLimit = cost * profileControlVariable.min2;
             }
         }
         float profit = profit(order, cost);
 
         return profit - lostLimit >= 0;
+    }
+
+    public static void main(String[] args) {
+        ProfitLostControl.getVariable();
     }
 
 }

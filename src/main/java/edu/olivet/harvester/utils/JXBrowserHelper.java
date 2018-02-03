@@ -1,7 +1,6 @@
 package edu.olivet.harvester.utils;
 
 import com.teamdev.jxbrowser.chromium.*;
-import com.teamdev.jxbrowser.chromium.PrintJob;
 import com.teamdev.jxbrowser.chromium.dom.*;
 import com.teamdev.jxbrowser.chromium.events.*;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
@@ -100,7 +99,7 @@ public class JXBrowserHelper {
                     order.sheetName.replaceAll("/", "") + "/" +
                     order.row + "_" + order.order_id + "/images/" +
                     step + "-" + title + ".png";
-            saveScreenshot(filePath, buyerPanel.getBrowserView());
+            //saveScreenshot(filePath, buyerPanel.getBrowserView());
 
             String htmlFilePath = filePath.replaceAll(".png", ".html").replaceAll("/images/", "/html/");
             saveHTMLSourceFile(htmlFilePath, buyerPanel.getBrowserView().getBrowser());

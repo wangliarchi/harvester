@@ -172,6 +172,7 @@ public class Predicates {
         public Map<String, OrderIdStatistic> getCardinalityMap() {
             Map<String, OrderIdStatistic> map = new HashMap<>();
             Map<String, Integer> countMap = new HashMap<>();
+            //noinspection MismatchedQueryAndUpdateOfCollection
             Map<String, Integer> finishedMap = new HashMap<>();
 
             for (Order order : orders) {

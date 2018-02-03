@@ -1,6 +1,5 @@
 package edu.olivet.harvester.hunt.model;
 
-import edu.olivet.foundations.ui.UIText;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -55,18 +54,18 @@ public class Rating {
     public static final int AP_POSITIVE = 100;
 
 
-
     public Rating(RatingType type) {
         this.type = type;
     }
 
     public static Map<RatingType, Rating> apRatings() {
         Map<RatingType, Rating> apRatings = new HashMap<>();
-        for(RatingType type : RatingType.values()) {
-            apRatings.put(type,new Rating(AP_POSITIVE,AP_COUNT,type));
+        for (RatingType type : RatingType.values()) {
+            apRatings.put(type, new Rating(AP_POSITIVE, AP_COUNT, type));
         }
         return apRatings;
     }
+
     /**
      * 判定一个Rating是否无效(具体表现为该列网页显示结果实际可能为"-"，解析为0)
      */

@@ -2,12 +2,10 @@ package edu.olivet.harvester.hunt.service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.sun.org.apache.xpath.internal.operations.Or;
 import edu.olivet.foundations.utils.Now;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.fulfill.utils.ConditionUtils;
-import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.hunt.model.HuntStandard;
 import edu.olivet.harvester.hunt.model.HuntStandardSettings;
 import edu.olivet.harvester.hunt.model.Rating.RatingType;
@@ -49,15 +47,8 @@ public class SellerFilter {
             return false;
         }
 
-        if (!checkAddon(seller, order)) {
-            return false;
-        }
+        return checkAddon(seller, order) && notForbiddenSeller(seller, order) && profitQualified(seller, order) && eddQualified(seller, order);
 
-        if (!notForbiddenSeller(seller, order)) {
-            return false;
-        }
-
-        return profitQualified(seller, order) && eddQualified(seller, order);
     }
 
     public boolean notOutOfStock(Seller seller, Order order) {
@@ -80,21 +71,21 @@ public class SellerFilter {
     }
 
     public boolean checkAddon(Seller seller, Order order) {
-        if (seller.isAddOn() && order.isDomesticOrder()) {
-            LOGGER.info(order, "Seller [{}] not qualified as it's addon, not allowed for domestic orders, full info {}",
-                    seller.getName(), seller);
-            return false;
-        }
+        //if (seller.isAddOn() && order.isDomesticOrder()) {
+        //    LOGGER.info(order, "Seller [{}] not qualified as it's addon, not allowed for domestic orders, full info {}",
+        //            seller.getName(), seller);
+        //    return false;
+        //}
 
         return true;
     }
 
     public boolean profitQualified(Seller seller, Order order) {
         Float maxLoss = HuntStandardSettings.load().getMaxProfitLoss();
-        Float profit = order.getOrderTotalPrice().toUSDAmount().floatValue() - seller.getTotalPriceInUSD();
+        Float profit = seller.profit(order);
         boolean result = profit > maxLoss;
 
-        if (result == false) {
+        if (!result) {
             LOGGER.info(order, "Seller [{}] not qualified as profit {} over max loss {}, full info {}",
                     seller.getName(), profit, maxLoss, seller);
         }

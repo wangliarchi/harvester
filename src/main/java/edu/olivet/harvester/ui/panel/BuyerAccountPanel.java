@@ -6,7 +6,6 @@ import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.common.model.BuyerAccountSetting;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.util.Arrays;
@@ -40,6 +39,7 @@ public class BuyerAccountPanel extends JPanel {
         typeCombox.setSelectedItem(buyerAccountSetting.getType());
         primeCombox.setSelectedItem(buyerAccountSetting.getPrimeBuyer());
         countryCombox.setSelectedItem(buyerAccountSetting.getCountryName());
+        buyerAccountNo.setText(buyerAccountSetting.getAccountNo());
     }
 
     private void initComponents() {
@@ -55,6 +55,7 @@ public class BuyerAccountPanel extends JPanel {
 
         primeCombox = new JComboBox<>();
         primeCombox.setModel(new DefaultComboBoxModel<>(new String[] {"Both", "Prime", "Non-Prime"}));
+
 
         GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);
@@ -76,6 +77,8 @@ public class BuyerAccountPanel extends JPanel {
 
                                 .addComponent(primeCombox, 100, 100, 100)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(buyerAccountNo, 30, 30, 30)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                         ));
 
 
@@ -89,6 +92,7 @@ public class BuyerAccountPanel extends JPanel {
                                         .addComponent(countryCombox)
                                         .addComponent(typeCombox)
                                         .addComponent(primeCombox)
+                                        .addComponent(buyerAccountNo)
                                 )
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)));
         UITools.addListener2Textfields(this);
@@ -105,6 +109,7 @@ public class BuyerAccountPanel extends JPanel {
         buyerAccountSetting.setType((String) typeCombox.getSelectedItem());
         buyerAccountSetting.setPrimeBuyer((String) primeCombox.getSelectedItem());
         buyerAccountSetting.setCountryName((String) countryCombox.getSelectedItem());
+        buyerAccountSetting.setAccountNo(buyerAccountNo.getText());
         //}
         return buyerAccountSetting;
     }
@@ -114,6 +119,7 @@ public class BuyerAccountPanel extends JPanel {
     private JComboBox<String> countryCombox;
     private JComboBox<String> typeCombox;
     private JComboBox<String> primeCombox;
+    private JTextField buyerAccountNo = new JTextField();
 
     public static void main(String[] args) {
 

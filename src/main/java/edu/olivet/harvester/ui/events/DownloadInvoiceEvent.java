@@ -1,11 +1,9 @@
 package edu.olivet.harvester.ui.events;
 
 import com.google.inject.Inject;
-import edu.olivet.foundations.ui.ProgressDetail;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.finance.InvoiceDownloader;
 import edu.olivet.harvester.finance.model.DownloadParams;
-import edu.olivet.harvester.ui.Actions;
 import edu.olivet.harvester.ui.dialog.DownloadInvoiceDialog;
 
 /**

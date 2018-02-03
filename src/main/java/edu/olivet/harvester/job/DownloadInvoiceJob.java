@@ -6,7 +6,6 @@ import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.harvester.common.model.CronjobLog;
 import edu.olivet.harvester.common.model.SystemSettings;
-import edu.olivet.harvester.export.OrderExporter;
 import edu.olivet.harvester.finance.InvoiceDownloader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

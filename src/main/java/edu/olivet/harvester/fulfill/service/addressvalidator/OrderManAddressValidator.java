@@ -13,7 +13,6 @@ import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.service.AddressValidatorService;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
-import edu.olivet.harvester.message.ErrorAlertService;
 import edu.olivet.harvester.common.model.State;
 import edu.olivet.harvester.utils.Config;
 import org.apache.commons.collections4.CollectionUtils;

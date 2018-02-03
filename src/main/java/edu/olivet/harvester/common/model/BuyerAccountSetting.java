@@ -12,4 +12,5 @@ public class BuyerAccountSetting {
     private String countryName = "All";
     private String type;
     private String primeBuyer;
+    private String accountNo = "0";
 }

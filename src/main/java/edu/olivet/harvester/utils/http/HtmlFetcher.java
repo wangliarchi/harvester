@@ -59,8 +59,7 @@ public class HtmlFetcher {
     public Document getDocumentSilently(String url) {
         String html = HttpUtils.getHTML(url);
         checkResponse(html);
-        Document doc = Jsoup.parse(html);
-        return doc;
+        return Jsoup.parse(html);
     }
 
     @Async

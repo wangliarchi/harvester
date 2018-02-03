@@ -8,7 +8,6 @@ import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.service.SheetService;
 import edu.olivet.harvester.fulfill.service.steps.ClearShoppingCart;
-import edu.olivet.harvester.fulfill.service.steps.Login;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.fulfill.service.steps.EbatesTransfer;
 import edu.olivet.harvester.ui.panel.BuyerPanel;

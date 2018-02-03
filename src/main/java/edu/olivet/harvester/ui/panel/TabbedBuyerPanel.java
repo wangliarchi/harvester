@@ -87,9 +87,13 @@ public class TabbedBuyerPanel extends JTabbedPane {
         } catch (Exception e) {
             //
         }
+        for (int i = 0; i < getTabCount(); i++) {
+            if (getTitleAt(i).equalsIgnoreCase(tabKey)) {
+                this.remove(i);
+            }
+            //other stuff
+        }
         int index = buyerPanel.getId();
-        this.remove(index);
-
         buyerPanels.remove(tabKey);
         buyerPanelIndexes.remove(index);
     }

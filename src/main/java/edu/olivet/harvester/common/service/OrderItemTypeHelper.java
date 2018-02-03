@@ -3,7 +3,6 @@ package edu.olivet.harvester.common.service;
 import com.amazonservices.mws.products.model.Product;
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
-import edu.olivet.foundations.aop.Profile;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.foundations.utils.Strings;
@@ -31,8 +30,7 @@ public class OrderItemTypeHelper {
     public OrderItemType getItemType(Order order) {
         //To save time, we will try sku pattern first.
         try {
-            OrderItemType type = getItemTypeBySku(order);
-            return type;
+            return getItemTypeBySku(order);
         } catch (Exception e) {
             //LOGGER.warn("No product group info found by sku pattern for {}, ASIN {}, SKU {} - {}",
             // order.order_id, order.isbn, order.sku, e);
@@ -56,15 +54,7 @@ public class OrderItemTypeHelper {
             return OrderItemType.PRODUCT;
         }
 
-        String[] bookKeywords = {"book", "bk", "dvd", "cd"};
-
-        for (String keyword : bookKeywords) {
-            if (sku.toLowerCase().contains(keyword.toLowerCase())) {
-                return OrderItemType.BOOK;
-            }
-        }
-
-        throw new BusinessException("Order item type for {} not found from SKU pattern. ASIN " + order.isbn + ", SKU " + sku);
+        return OrderItemType.BOOK;
     }
 
     public OrderItemType getItemTypeByMWSAPI(Order order) {

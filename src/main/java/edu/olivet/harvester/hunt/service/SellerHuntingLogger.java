@@ -7,7 +7,6 @@ import edu.olivet.foundations.utils.*;
 import edu.olivet.foundations.utils.Configs.LogMode;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
-import edu.olivet.harvester.utils.Config;
 import lombok.Getter;
 import lombok.Setter;
 import org.jsoup.nodes.Document;
@@ -27,7 +26,7 @@ public class SellerHuntingLogger {
     //private static final Logger logger = LoggerFactory.getLogger(SellerHuntingLogger.class);
     private static SellerHuntingLogger instance;
     private LoggerContext loggerContext;
-    private FileAppender fileAppender;
+    private FileAppender<ch.qos.logback.classic.spi.ILoggingEvent> fileAppender;
     @Setter
     public LogMode logMode = LogMode.Productive;
 
@@ -45,7 +44,7 @@ public class SellerHuntingLogger {
     private SellerHuntingLogger() {
         loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 
-        fileAppender = new FileAppender();
+        fileAppender = new FileAppender<>();
         fileAppender.setContext(loggerContext);
         fileAppender.setName("seller_hunting");
         // set the file name

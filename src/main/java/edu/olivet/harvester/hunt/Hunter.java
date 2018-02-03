@@ -7,19 +7,12 @@ import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.service.ProgressUpdater;
-import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
-import edu.olivet.harvester.hunt.model.HuntResult;
-import edu.olivet.harvester.hunt.model.Seller;
-import edu.olivet.harvester.hunt.service.HuntService;
 import edu.olivet.harvester.hunt.service.HuntWorker;
-import edu.olivet.harvester.hunt.service.SheetService;
 import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
-import edu.olivet.harvester.ui.panel.SimpleOrderSubmissionRuntimePanel;
 import edu.olivet.harvester.utils.MessageListener;
 import edu.olivet.harvester.utils.common.ThreadHelper;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.nutz.aop.interceptor.async.Async;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +31,10 @@ public class Hunter {
     @Inject AppScript appScript;
     @Inject private MessageListener messageListener;
 
-    private final static int HUNTER_JOB_NUMBER = 2;
+    private static final int HUNTER_JOB_NUMBER = 2;
 
     public void execute(RuntimeSettings runtimeSettings) {
+        messageListener.addMsg("Reading orders from order update sheet " + runtimeSettings.getSpreadsheetName() + " " + runtimeSettings.getAdvancedSubmitSetting().toString());
         List<Order> orders = appScript.readOrders(runtimeSettings);
 
         if (CollectionUtils.isEmpty(orders)) {
@@ -97,7 +91,7 @@ public class Hunter {
 
         // 把order list分配给几个SwingWorker
         for (List<Order> assignedOrders : list) {
-            jobs.add(new HuntWorker(assignedOrders, latch));
+            jobs.add(new HuntWorker(assignedOrders, latch, messageListener));
         }
 
         // SwingWorker线程执行

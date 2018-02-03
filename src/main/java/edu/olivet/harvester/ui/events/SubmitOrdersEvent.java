@@ -59,6 +59,7 @@ public class SubmitOrdersEvent extends Observable implements HarvesterUIEvent {
                     }
 
                     PSEventListener.end();
+                    break;
                 }
             }
         }).start();

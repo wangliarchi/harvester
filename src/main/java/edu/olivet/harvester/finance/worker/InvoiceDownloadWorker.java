@@ -10,6 +10,7 @@ import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.utils.*;
+import edu.olivet.harvester.common.model.BuyerAccountSettingUtils;
 import edu.olivet.harvester.common.model.Money;
 import edu.olivet.harvester.finance.model.BuyerOrderInvoice;
 import edu.olivet.harvester.fulfill.model.page.LoginPage;
@@ -23,7 +24,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.java2d.SurfaceDataProxy.CountdownTracker;
 
 import javax.swing.*;
 import java.io.File;
@@ -65,7 +65,11 @@ public class InvoiceDownloadWorker extends SwingWorker<Void, Void> {
 
 
             for (Country country : SellerHuntUtils.countriesToHunt()) {
-                downloadByCountry(country, buyer, fromDate, toDate);
+                try {
+                    downloadByCountry(country, buyer, fromDate, toDate);
+                } catch (Exception e) {
+                    LOGGER.error("", e);
+                }
                 WaitTime.Shortest.execute();
             }
             messageListener.addMsg(String.format("Finished downloading invoice  from %s, took %s.",
@@ -106,7 +110,7 @@ public class InvoiceDownloadWorker extends SwingWorker<Void, Void> {
                 dateString = dateString.replaceAll("[^\\p{L}\\p{Nd} ]+", "").trim();
                 dateString = dateString.replace(" de ", " ");
                 String[] dateStringParts = dateString.split(" ");
-                List<String> list = Lists.newArrayList(dateStringParts).stream().map(it -> StringUtils.capitalize(it)).collect(Collectors.toList());
+                List<String> list = Lists.newArrayList(dateStringParts).stream().map(StringUtils::capitalize).collect(Collectors.toList());
                 list.removeIf(StringUtils::isBlank);
                 dateString = StringUtils.join(list, " ");
 
@@ -135,7 +139,7 @@ public class InvoiceDownloadWorker extends SwingWorker<Void, Void> {
 
                 if (date == null) {
                     LOGGER.error("fail to parse date {}", dateString);
-                    messageListener.addMsg("fail to parse date " + dateString);
+                    messageListener.addMsg("fail to parse date " + dateString, InformationLevel.Negative);
                     continue;
                 }
 
@@ -199,7 +203,7 @@ public class InvoiceDownloadWorker extends SwingWorker<Void, Void> {
         }
 
         messageListener.addMsg("Total " + totalDownloaded + " invoices downloaded for " + buyer.getEmail() +
-                " from country " + country + ", took " + Strings.formatElapsedTime(start));
+                " from country " + country + ", took " + Strings.formatElapsedTime(start), InformationLevel.Positive);
 
         TabbedBuyerPanel.getInstance().removeTab(buyerPanel);
     }
@@ -224,8 +228,9 @@ public class InvoiceDownloadWorker extends SwingWorker<Void, Void> {
     public String getDropboxFilePath(BuyerOrderInvoice invoice) {
         //20151203_3-December-2015
         String dateString = FastDateFormat.getInstance("yyyyMMdd_d-MMMMM-yyyy").format(invoice.getPurchaseDate());
-        return "/2018-ORDER INVOICES/" + Settings.load().getSid() + invoice.getCountry().toUpperCase() + "/" +
-                invoice.getBuyerEmail().toLowerCase() + "/" + dateString;
+        String accountNo = BuyerAccountSettingUtils.load().getByEmail(invoice.getBuyerEmail()).getAccountNo();
+        return "/2018-ORDER INVOICES/" + Settings.load().getSid() + "/" + invoice.getCountry().toUpperCase() + "/" +
+                accountNo + "-" + invoice.getBuyerEmail().toLowerCase() + "/" + dateString;
     }
 
     public void downloadInvoice(BuyerOrderInvoice invoice, Browser browser) {

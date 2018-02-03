@@ -67,7 +67,9 @@ public class BuyerAccountConfigDialog extends BaseDialog {
 
 
         if (buyerAccountSettingUtils.getAccountSettings().size() > 0) {
-            for (BuyerAccountSetting buyerAccountSetting : buyerAccountSettingUtils.getAccountSettings()) {
+            List<BuyerAccountSetting> accountSettings = buyerAccountSettingUtils.getAccountSettings();
+            accountSettings.sort((a, b) -> StringUtils.compare(a.getBuyerAccount().getEmail().toLowerCase(), b.getBuyerAccount().getEmail().toLowerCase()));
+            for (BuyerAccountSetting buyerAccountSetting : accountSettings) {
                 BuyerAccountPanel buyerAccountPanel = new BuyerAccountPanel(buyerAccountSetting);
                 buyerAccountPanels.add(buyerAccountPanel);
                 hParallelGroup.addGroup(GroupLayout.Alignment.TRAILING,
@@ -150,6 +152,7 @@ public class BuyerAccountConfigDialog extends BaseDialog {
         final JLabel countryLabel = new JLabel("Country");
         final JLabel typeLabel = new JLabel("Type");
         final JLabel primeLabel = new JLabel("Prime Buyer");
+        final JLabel accountNo = new JLabel("No.");
 
         GroupLayout layout = new GroupLayout(headerPanel);
         headerPanel.setLayout(layout);
@@ -167,6 +170,9 @@ public class BuyerAccountConfigDialog extends BaseDialog {
                                 .addComponent(typeLabel, 100, 100, 100)
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(primeLabel, 100, 100, 100)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(accountNo, 30, 30, 30)
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                         ));
 
         int vGap = 5, height = 30;
@@ -180,6 +186,7 @@ public class BuyerAccountConfigDialog extends BaseDialog {
                                         .addComponent(countryLabel)
                                         .addComponent(typeLabel)
                                         .addComponent(primeLabel)
+                                        .addComponent(accountNo)
                                 )
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)));
 
@@ -208,7 +215,7 @@ public class BuyerAccountConfigDialog extends BaseDialog {
 
         buyerAccountSettingUtils.setAccountSettings(settings);
         buyerAccountSettingUtils.save();
-        
+
         doClose();
     }
 

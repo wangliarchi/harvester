@@ -13,7 +13,7 @@ public class HuntResult {
      *
      * @author <a href="mailto:nathanael4ever@gmail.com>Nathanael Yang</a>
      */
-    public static enum ReturnCode {
+    public enum ReturnCode {
         SUCCESS,
         FAILURE
     }

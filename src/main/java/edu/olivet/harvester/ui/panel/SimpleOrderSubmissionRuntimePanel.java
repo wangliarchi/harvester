@@ -26,7 +26,6 @@ import edu.olivet.harvester.utils.FinderCodeUtils;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Getter;
-import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -447,6 +446,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
 
         if (CollectionUtils.isEmpty(spreadsheets)) {
             UITools.error("No order update sheet found. Please make sure it's configured and shared with " + Constants.RND_EMAIL, "Error");
+            return;
         }
 
         ChooseSheetDialog chooseSheetDialog = new ChooseSheetDialog(spreadsheets, appScript);

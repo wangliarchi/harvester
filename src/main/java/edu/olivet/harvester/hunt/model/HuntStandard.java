@@ -54,11 +54,10 @@ public class HuntStandard {
                 return newBookDefault();
             case UsedBook:
                 return usedBookDefault();
-            case Product:
+            default:
                 return newProductDefault();
         }
 
-        return newBookDefault();
     }
 
     public static HuntStandard newBookDefault() {
@@ -81,20 +80,12 @@ public class HuntStandard {
 
 
     public boolean monthlyRatingQualified(Rating rating) {
-        if (rating == null) {
-            return false;
-        }
+        return rating != null && rating.getCount() >= monthlyRating.getCount() && rating.getPositive() >= monthlyRating.getPositive();
 
-        return rating.getCount() >= monthlyRating.getCount() &&
-                rating.getPositive() >= monthlyRating.getPositive();
     }
 
     public boolean yearlyRatingQualified(Rating rating) {
-        if (rating == null) {
-            return false;
-        }
+        return rating != null && rating.getCount() >= yearlyRating.getCount() && rating.getPositive() >= yearlyRating.getPositive();
 
-        return rating.getCount() >= yearlyRating.getCount() &&
-                rating.getPositive() >= yearlyRating.getPositive();
     }
 }

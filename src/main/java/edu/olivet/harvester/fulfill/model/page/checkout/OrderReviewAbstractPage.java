@@ -44,7 +44,6 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
 
 
     public void checkTotalCost(Order order) {
-
         Money grandTotal = parseTotal();
 
         if (!ProfitLostControl.canPlaceOrder(order, grandTotal.toUSDAmount().floatValue())) {
@@ -60,22 +59,16 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
 
         order.orderTotalCost = grandTotal;
         order.cost = grandTotal.toUSDAmount().toPlainString();
-
-
     }
 
 
     public void checkShippingCost(Order order) {
-
         Money shippingCost = parseShippingFee();
 
         if (!FeeLimitChecker.getInstance().notExceed(order, shippingCost.getAmount().floatValue())) {
             throw new OrderSubmissionException("Order shipping cost " + shippingCost.usdText() + " exceed maximum limit. ");
         }
-
-
         order.shippingCost = shippingCost;
-
     }
 
 
@@ -101,7 +94,6 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
     }
 
     public Money parseTotal() {
-
         DOMElement transactionalTablePriceElement = JXBrowserHelper.selectElementByCssSelector(browser,
                 "#subtotals-transactional-table .order-summary-tfx-grand-total-stressed .a-color-price.a-text-right," +
                         "#subtotals-transactional-table .grand-total-price");
@@ -164,8 +156,6 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
 
             throw new BusinessException("Error parse shipping address for " + buyerPanel.getOrder().order_id);
         }
-
-
     }
 
     public void reviewShippingAddress(AddressValidator addressValidator) {
@@ -176,7 +166,6 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
                     "Address failed review. Entered %s, origin %s",
                     enteredAddress, OrderAddressUtils.orderShippingAddress(buyerPanel.getOrder())));
         }
-
     }
 
 
@@ -185,7 +174,6 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         if (PSEventListener.stopped()) {
             throw new OrderSubmissionException("Process stopped as requested.");
         }
-
 
         DOMElement placeOrderBtn = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser,
                 "#submitOrderButtonId .a-button-input, .place-your-order-button");
@@ -204,7 +192,6 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         }
 
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
-
     }
 
 }

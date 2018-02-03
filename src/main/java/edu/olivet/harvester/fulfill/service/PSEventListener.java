@@ -30,10 +30,9 @@ public class PSEventListener {
 
     public static void start() {
         status = Status.Running;
-        new Thread(() -> {
-            eventHandler.showPauseBtn();
-            eventHandler.disableStartButton();
-        }).start();
+
+        eventHandler.showPauseBtn();
+        eventHandler.disableStartButton();
     }
 
     public static void pause() {
@@ -43,9 +42,7 @@ public class PSEventListener {
 
     public static void resume() {
         status = Status.Running;
-        new Thread(() -> {
-            eventHandler.resetPauseBtn();
-        }).start();
+        new Thread(() -> eventHandler.resetPauseBtn()).start();
     }
 
     public static void stop() {
@@ -57,10 +54,10 @@ public class PSEventListener {
 
     public static void end() {
         status = Status.Ended;
-        new Thread(() -> {
-            eventHandler.hidePauseBtn();
-            eventHandler.enableStartButton();
-        }).start();
+
+        eventHandler.hidePauseBtn();
+        eventHandler.enableStartButton();
+
     }
 
     public static boolean isRunning() {

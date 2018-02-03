@@ -217,8 +217,8 @@ public class SellerEnums {
          */
         WontBeInStockSoon;
 
-        final static String[] outOfStockKeywords = new String[] {"out of stock"};
-        final static String[] backOrderKeywords = new String[] {"Back-ordered"};
+        static final  String[] outOfStockKeywords = new String[] {"out of stock"};
+        static final  String[] backOrderKeywords = new String[] {"Back-ordered"};
 
         public static StockStatus parseFromText(String deliveryText) {
             if (Strings.containsAnyIgnoreCase(deliveryText, outOfStockKeywords)) {

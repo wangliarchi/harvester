@@ -5,7 +5,6 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.fulfill.utils.ConditionUtils.Condition;
 import edu.olivet.harvester.hunt.model.Seller;
-import org.elasticsearch.common.recycler.Recycler.C;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;

@@ -2,7 +2,6 @@ package edu.olivet.harvester.fulfill.service;
 
 
 import edu.olivet.foundations.ui.InformationLevel;
-import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.exception.Exceptions.*;

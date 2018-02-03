@@ -16,6 +16,7 @@ import edu.olivet.harvester.hunt.model.SellerEnums.SellerFullType;
 import edu.olivet.harvester.hunt.model.SellerEnums.SellerType;
 import edu.olivet.harvester.hunt.utils.SellerHuntUtils;
 import edu.olivet.harvester.utils.I18N;
+import edu.olivet.harvester.utils.common.DatetimeHelper;
 import edu.olivet.harvester.utils.common.NumberUtils;
 import edu.olivet.harvester.utils.http.HtmlFetcher;
 import edu.olivet.harvester.utils.http.HtmlParser;
@@ -28,8 +29,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -106,8 +105,8 @@ public class SellerService {
             Seller lastSeller = sellersByPage.get(sellersByPage.size() - 1);
 
             //remove unqualified sellers
-            sellersByPage.removeIf(seller -> !sellerFilter.isPreliminaryQualified(seller, order)
-                    || !sellerFilter.typeAllowed(seller, order, allowedTypes)
+            sellersByPage.removeIf(seller -> !sellerFilter.isPreliminaryQualified(seller, order) ||
+                    !sellerFilter.typeAllowed(seller, order, allowedTypes)
             );
 
             //get seller ratings on seller profile page
@@ -246,7 +245,14 @@ public class SellerService {
         I18N_AMAZON.setLocale(country.locale());
         final String arrivesText = I18N_AMAZON.getText("shipping.arrives", country);
         if (StringUtils.startsWithIgnoreCase(stockText, arrivesText)) {
-            seller.setLatestDeliveryDate(parseEdd(stockText, country));
+            Date edd = null;
+            String eddText = stockText.substring(0, stockText.lastIndexOf("."));
+            try {
+                edd = DatetimeHelper.parseEdd(eddText, country, now.get());
+            } catch (Exception e) {
+                LOGGER.error("{} - {} ", stockText, eddText, e);
+            }
+            seller.setLatestDeliveryDate(edd);
         }
 
         // 是否为AddOn
@@ -334,35 +340,6 @@ public class SellerService {
         return seller;
     }
 
-
-    public Date parseEdd(String text, Country country) {
-        //Arrives between Jan. 26 - Feb. 12. Read more
-        try {
-            String[] parts = text.split("-");
-            String[] monthDay = parts[1].split("\\.");
-            String dateString = monthDay[0].trim() + " " + monthDay[1].trim();
-
-            SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd", country.locale());
-
-            Date date = dateFormat.parse(dateString);
-            int years = Dates.getYear(now.get()) - 1970;
-            if (Dates.getField(date, Calendar.MONTH) < Dates.getField(now.get(), Calendar.MONTH)) {
-                years += 1;
-            }
-
-            Calendar c = Calendar.getInstance();
-            c.setTime(date);
-            c.add(Calendar.YEAR, years);
-            date = c.getTime();
-            return date;
-        } catch (ParseException e) {
-            //LOGGER.error("", e);
-            //ignore
-            //throw new BusinessException(e);
-        }
-
-        return null;
-    }
 
     public void getSellerRatings(Seller seller, Order order) {
         if (seller.isAP()) {

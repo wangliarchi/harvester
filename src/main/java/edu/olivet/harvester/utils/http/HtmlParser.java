@@ -95,9 +95,10 @@ public class HtmlParser {
         return digits;
     }
 
-    public static String text(Element element){
+    public static String text(Element element) {
         return element.text().trim();
     }
+
     /**
      * <pre>
      * 在给定的元素范围内，按照给定的选择器查找，并将所得结果<strong>第一个</strong>元素的文本内容返回

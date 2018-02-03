@@ -376,7 +376,7 @@ public class BuyerPanel extends JPanel implements RuntimePanelObserver, Progress
     private JLabel budgetInfoLabel;
 
     public String getKey() {
-        return this.buyer.key() + Constants.HYPHEN + this.country.name();
+        return this.buyer.getEmail() + Constants.HYPHEN + this.country.name();
     }
 
     public static void main(String[] args) {

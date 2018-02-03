@@ -10,7 +10,6 @@ import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Now;
 import edu.olivet.harvester.fulfill.exception.Exceptions.NoBudgetException;
-import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OutOfBudgetException;
 import edu.olivet.harvester.utils.common.NumberUtils;
 import org.apache.commons.collections4.CollectionUtils;

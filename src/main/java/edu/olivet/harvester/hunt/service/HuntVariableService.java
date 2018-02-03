@@ -6,10 +6,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.aop.Repeat;
-import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.WaitTime;
-import edu.olivet.harvester.common.model.Money;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.common.model.OrderEnums.OrderItemType;
 import edu.olivet.harvester.common.service.OrderItemTypeHelper;
@@ -31,7 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 1/22/2018 3:43 PM
@@ -186,7 +183,12 @@ public class HuntVariableService extends AppScript {
         }
 
         List<String> keys = new ArrayList<>(sellerVariablesByPrices.keySet());
-        keys.sort((m1, m2) -> Float.parseFloat(m1) > Float.parseFloat(m2) ? -1 : 1);
+        keys.sort((String m1, String m2) -> {
+            if(Float.parseFloat(m1) == Float.parseFloat(m2)) {
+                return 0;
+            }
+            return Float.parseFloat(m1) > Float.parseFloat(m2) ? -1 : 1;
+        });
 
         JSONObject sellerVariablesByPrice = null;
         for (String price : keys) {
@@ -201,7 +203,12 @@ public class HuntVariableService extends AppScript {
         }
 
         keys = new ArrayList<>(sellerVariablesByPrice.keySet());
-        keys.sort((m1, m2) -> Float.parseFloat(m1) > Float.parseFloat(m2) ? -1 : 1);
+        keys.sort((String m1, String m2) -> {
+            if(Float.parseFloat(m1) == Float.parseFloat(m2)) {
+                return 0;
+            }
+            return Float.parseFloat(m1) > Float.parseFloat(m2) ? -1 : 1;
+        });
 
         float sellerVariable = 0;
         for (String price : keys) {
@@ -234,8 +241,13 @@ public class HuntVariableService extends AppScript {
         //seller variable
         JSONObject sellerVariables = getVariables(Type.Rating, orderCountry, orderItemType);
 
-        List<String> keys = sellerVariables.keySet().stream().collect(Collectors.toList());
-        keys.sort((m1, m2) -> Float.parseFloat(m1) > Float.parseFloat(m2) ? -1 : 1);
+        List<String> keys = new ArrayList<>(sellerVariables.keySet());
+        keys.sort((String m1, String m2) -> {
+            if(Float.parseFloat(m1) == Float.parseFloat(m2)) {
+                return 0;
+            }
+            return Float.parseFloat(m1) > Float.parseFloat(m2) ? -1 : 1;
+        });
 
         JSONObject sellerVariablesByPrice = null;
         for (String price : keys) {
@@ -249,8 +261,13 @@ public class HuntVariableService extends AppScript {
             throw new BusinessException("No rating variables found for" + orderPrice);
         }
 
-        keys = sellerVariablesByPrice.keySet().stream().collect(Collectors.toList());
-        keys.sort((m1, m2) -> Float.parseFloat(m1) > Float.parseFloat(m2) ? -1 : 1);
+        keys = new ArrayList<>(sellerVariablesByPrice.keySet());
+        keys.sort((String m1, String m2) -> {
+            if(Float.parseFloat(m1) == Float.parseFloat(m2)) {
+                return 0;
+            }
+            return Float.parseFloat(m1) > Float.parseFloat(m2) ? -1 : 1;
+        });
 
         float ratingVariable = 0;
         for (String rating : keys) {
@@ -300,7 +317,7 @@ public class HuntVariableService extends AppScript {
         shippingVariables.forEach((k, v) -> {
             try {
                 String[] parts = StringUtils.split(k, " ");
-                SellerFullType type = SellerFullType.fromType(SellerType.getByCharacter(parts[1]), "Direct".equalsIgnoreCase(parts[2]) ? true : false);
+                SellerFullType type = SellerFullType.fromType(SellerType.getByCharacter(parts[1]), "Direct".equalsIgnoreCase(parts[2]));
                 sellerHuntUtils.addCountry(supportedTypes, Country.fromCode(parts[0]), type);
             } catch (Exception e) {
                 LOGGER.error("Fail to find seller variables for {}", e);

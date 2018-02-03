@@ -77,7 +77,7 @@ public class SupplierStandardConfigDialog extends BaseDialog {
     }
 
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         UIText.setLocale(Language.current());
         UITools.setTheme();
         UITools.setDialogAttr(new SupplierStandardConfigDialog(), true);

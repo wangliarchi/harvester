@@ -39,7 +39,7 @@ public class BuyerAccountSettingUtils {
         } else {
             try {
                 loadFromSetting(Settings.load());
-            }catch (Exception e) {
+            } catch (Exception e) {
                 //
             }
 
@@ -100,8 +100,8 @@ public class BuyerAccountSettingUtils {
 
         return accountSettings.stream().filter(it ->
                 StringUtils.equalsAnyIgnoreCase(it.getCountryName(), country.name(), "all") &&
-                StringUtils.equalsAnyIgnoreCase(it.getType(), type.name(), "both") &&
-                StringUtils.equalsAnyIgnoreCase(it.getPrimeBuyer(), primeBuyer ? "Prime" : "Non-Prime", "Both"))
+                        StringUtils.equalsAnyIgnoreCase(it.getType(), type.name(), "both") &&
+                        StringUtils.equalsAnyIgnoreCase(it.getPrimeBuyer(), primeBuyer ? "Prime" : "Non-Prime", "Both"))
                 .map(BuyerAccountSetting::getBuyerAccount)
                 .collect(Collectors.toList());
     }
