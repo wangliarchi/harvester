@@ -46,8 +46,10 @@ public class InvoiceDownloaderService {
     private static final String DROPBOX_TOKEN = "BgIiNZFmjgAAAAAAAAABhre_O2isId2YhqjXzj_HM80sKQJuSPKJ7e6lZSnmCyS8";
     private static final String DROPBOX_ROOT_DIR = "/INVOICES/";
 
-    @Inject MessageListener messageListener;
-    @Inject Now now;
+    @Inject
+    MessageListener messageListener;
+    @Inject
+    Now now;
 
     @Inject
     public void init() {
@@ -59,13 +61,16 @@ public class InvoiceDownloaderService {
         Country country = buyerPanel.getCountry();
         String url = country.baseUrl() + "/gp/your-account/order-history?opt=ab&digitalOrders=1&unifiedOrders=1&returnTo=&orderFilter=";
         //default to last 6 month
+        int totalDays = 0;
         if (fromDate.after(DateUtils.addMonths(now.get(), -6))) {
             url += "months-6";
+            totalDays = 180;
         } else {
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(fromDate);
             int year = calendar.get(Calendar.YEAR);
             url += "year-" + year;
+            totalDays = 365;
         }
 
         //go to the first page
@@ -73,12 +78,14 @@ public class InvoiceDownloaderService {
         WaitTime.Shortest.execute();
 
         //find page numbers
-        DOMElement lastPage = JXBrowserHelper.selectElementByCssSelector(browser, ".a-pagination .a-normal a");
-        if (lastPage == null) {
+        List<DOMElement> pagination = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-pagination .a-normal a");
+
+        if (pagination.size() == 0) {
             return;
         }
-
+        DOMElement lastPage = pagination.get(pagination.size() - 1);
         int pages = IntegerUtils.parseInt(lastPage.getInnerText(), 1);
+
 
         //first page
         List<DOMElement> orderBoxes = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-box-group.order");
@@ -89,28 +96,49 @@ public class InvoiceDownloaderService {
                 return;
             }
         }
+        if (pages <= 5) {
+            return;
+        }
 
         //二分法
         int page = pages / 2;
         int lastType = 2;
+
+        int days = Dates.daysBetween(toDate, now.get());
+        if (days <= 5) {
+            page = pages * days / totalDays;
+        }
+
         while (true) {
-            String pageUrl = url + "&startIndex=" + page;
+            String pageUrl = url + "&startIndex=" + (page - 1) * 10;
             JXBrowserHelper.loadPage(browser, pageUrl);
             WaitTime.Shortest.execute();
-            lastType = checkPurchaseDateOnPage(buyerPanel, toDate, lastType);
-            if (lastType == 0) {
+            int type = checkPurchaseDateOnPage(buyerPanel, toDate, lastType);
+            messageListener.addMsg("currently on page " + page);
+
+            if (type == 0) {
                 break;
             }
 
-            if (lastType == 2) {
+            if (type == 2) {
                 page = page + (pages - page) / 2;
-            } else if (lastType == -2) {
-                page = page - (pages - page) / 2;
-            } else if (lastType == 1) {
+            } else if (type == -2) {
+                if (lastType == -2) {
+                    page = page - page / 2;
+                } else {
+                    page = page - (pages - page) / 2;
+                }
+            } else if (type == 1) {
                 page = page + 1;
             } else {
                 page = page - 1;
             }
+
+            if (page <= 1 || page >= pages - 1) {
+                break;
+            }
+
+            lastType = type;
         }
 
     }
@@ -128,7 +156,7 @@ public class InvoiceDownloaderService {
 
         dateString = JXBrowserHelper.text(orderBoxes.get(orderBoxes.size() - 1), ".order-info .a-col-left .a-span3 .value,.order-info .a-col-left .a-span4 .value");
         Date lastPurchaseDate = parseOrderDate(dateString, country);
-
+        messageListener.addMsg("first order " + firstPurchaseDate + ", last order " + lastPurchaseDate);
         //last 2017-07-01, 还要往后翻，继续2分
         if (lastPurchaseDate.after(toDate)) {
             return 2;
