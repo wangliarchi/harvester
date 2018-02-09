@@ -26,12 +26,14 @@ import static org.testng.Assert.*;
 public class SellerServiceTest extends BaseTest {
     @Inject SellerService sellerService;
     Browser browser;
+
     @Inject
     public void initBrowser() {
         BrowserView browserView = JXBrowserHelper.init("test", -1);
         browser = browserView.getBrowser();
         now.set(Dates.parseDate("2018-01-20"));
     }
+
     @Test
     public void testSellersUsBookUsed() {
 
@@ -188,9 +190,9 @@ public class SellerServiceTest extends BaseTest {
 
         List<Seller> sellers = sellerService.parseSellers(browser, Country.US);
 
-        assertEquals(sellers.get(1).getShipFromCountry(),Country.US);
-        assertEquals(sellers.get(6).getShipFromCountry(),Country.US);
-        assertEquals(sellers.get(7).getShipFromCountry(),Country.DE);
+        assertEquals(sellers.get(1).getShipFromCountry(), Country.US);
+        assertEquals(sellers.get(6).getShipFromCountry(), Country.US);
+        assertEquals(sellers.get(7).getShipFromCountry(), Country.DE);
 
 
     }
@@ -204,13 +206,14 @@ public class SellerServiceTest extends BaseTest {
 
         List<Seller> sellers = sellerService.parseSellers(browser, Country.DE);
 
-        assertEquals(sellers.get(0).getShipFromCountry(),Country.UK);
-        assertEquals(sellers.get(1).getShipFromCountry(),Country.DE);
-        assertEquals(sellers.get(2).getShipFromCountry(),Country.UK);
-        assertEquals(sellers.get(7).getShipFromCountry(),Country.US);
+        assertEquals(sellers.get(0).getShipFromCountry(), Country.UK);
+        assertEquals(sellers.get(1).getShipFromCountry(), Country.DE);
+        assertEquals(sellers.get(2).getShipFromCountry(), Country.UK);
+        assertEquals(sellers.get(7).getShipFromCountry(), Country.US);
     }
 
     @Inject Now now;
+
     @Test
     public void testSellerEDD() {
         File htmlFile = new File(TEST_DATA_ROOT + File.separator + "pages" + File.separator + "seller" + File.separator + "us-book-backorder.html");
@@ -218,8 +221,8 @@ public class SellerServiceTest extends BaseTest {
         WaitTime.Short.execute();
 
         List<Seller> sellers = sellerService.parseSellers(browser, Country.US);
-        assertEquals(DateFormat.FULL_DATE.format(sellers.get(0).getLatestDeliveryDate()),"2018-02-12");
-        assertEquals(DateFormat.FULL_DATE.format(sellers.get(6).getLatestDeliveryDate()),"2018-03-08");
+        assertEquals(DateFormat.FULL_DATE.format(sellers.get(0).getLatestDeliveryDate()), "2018-02-12");
+        assertEquals(DateFormat.FULL_DATE.format(sellers.get(6).getLatestDeliveryDate()), "2018-03-08");
     }
 
 
@@ -229,14 +232,14 @@ public class SellerServiceTest extends BaseTest {
         Document document = Jsoup.parse(Tools.readFileToString(htmlFile));
 
         Map<RatingType, Rating> ratings = sellerService.getSellerRatings(document);
-        assertEquals(ratings.get(RatingType.Last30Days).getCount(),502);
-        assertEquals(ratings.get(RatingType.Last30Days).getPositive(),96);
-        assertEquals(ratings.get(RatingType.Last90Days).getCount(),1825);
-        assertEquals(ratings.get(RatingType.Last90Days).getPositive(),97);
-        assertEquals(ratings.get(RatingType.Last12Month).getCount(),8863);
-        assertEquals(ratings.get(RatingType.Last12Month).getPositive(),97);
-        assertEquals(ratings.get(RatingType.Lifetime).getCount(),161885);
-        assertEquals(ratings.get(RatingType.Lifetime).getPositive(),98);
+        assertEquals(ratings.get(RatingType.Last30Days).getCount(), 502);
+        assertEquals(ratings.get(RatingType.Last30Days).getPositive(), 96);
+        assertEquals(ratings.get(RatingType.Last90Days).getCount(), 1825);
+        assertEquals(ratings.get(RatingType.Last90Days).getPositive(), 97);
+        assertEquals(ratings.get(RatingType.Last12Month).getCount(), 8863);
+        assertEquals(ratings.get(RatingType.Last12Month).getPositive(), 97);
+        assertEquals(ratings.get(RatingType.Lifetime).getCount(), 161885);
+        assertEquals(ratings.get(RatingType.Lifetime).getPositive(), 98);
     }
 
     @Test
@@ -244,11 +247,11 @@ public class SellerServiceTest extends BaseTest {
         String asin = "0323377033";
         Country country = Country.US;
         Condition condition = Condition.New;
-        List<Seller> sellers = sellerService.getAllSellers(country,asin,condition);
-        assertEquals(sellers.size(),27);
+        List<Seller> sellers = sellerService.getAllSellers(country, asin, condition);
+        assertEquals(sellers.size(), 27);
 
-        sellers = sellerService.getAllSellers(country,asin,Condition.Used);
-        assertEquals(sellers.size(),30);
+        sellers = sellerService.getAllSellers(country, asin, Condition.Used);
+        assertEquals(sellers.size(), 30);
     }
 
     @Test
@@ -263,5 +266,18 @@ public class SellerServiceTest extends BaseTest {
         order.isbn = "60112816";
         order.ship_country = "France";
         order.sales_chanel = "Amazon.com";
+    }
+
+    @Test
+    public void testParseShipFromCountry() {
+        String text = "Ships from United Kingdom. Learn more about import fees and international shipping time.";
+        assertEquals(sellerService.parseShipFromCountry(text, Country.CA), Country.UK);
+    }
+
+    @Test
+    public void testParseEdd() {
+        now.set(Dates.parseDate("2018-02-05"));
+        String text = "Arrives between Feb. 21 - March 7.";
+        assertEquals(sellerService.parseEdd(text, Country.CA), Dates.parseDate("2018-03-07"));
     }
 }

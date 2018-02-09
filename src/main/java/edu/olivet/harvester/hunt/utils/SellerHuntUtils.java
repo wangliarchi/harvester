@@ -1,11 +1,13 @@
 package edu.olivet.harvester.hunt.utils;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.Now;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.common.model.OrderEnums.OrderItemType;
+import edu.olivet.harvester.common.model.Remark;
 import edu.olivet.harvester.common.service.OrderItemTypeHelper;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
@@ -23,6 +25,7 @@ import java.util.*;
 public class SellerHuntUtils {
     @Inject HuntVariableService huntVariableService;
     @Inject Now now;
+    @Inject OrderItemTypeHelper orderItemTypeHelper;
 
     public Map<Country, Set<SellerFullType>> countriesToHunt(Order order) {
         Map<Country, Set<SellerFullType>> countries = new HashMap<>();
@@ -51,6 +54,11 @@ public class SellerHuntUtils {
         addUKFwd(countries, order);
         addUSFwd(countries, order);
 
+        //欧洲书 可以找 DE AP
+        if (saleChannelCountry.europe() && orderItemTypeHelper.getItemType(order) == OrderItemType.BOOK) {
+            addCountry(countries, Country.DE, SellerFullType.APDirect);
+        }
+
         return countries;
     }
 
@@ -68,7 +76,12 @@ public class SellerHuntUtils {
             return;
         }
 
-        addCountry(countries, Country.UK, SellerFullType.APExport, SellerFullType.PrimeExport, SellerFullType.PtExport);
+        if (orderItemTypeHelper.getItemType(order) == OrderItemType.BOOK) {
+            addCountry(countries, Country.UK, SellerFullType.APDirect, SellerFullType.PrimeDirect, SellerFullType.PtDirect);
+        } else {
+            addCountry(countries, Country.UK, SellerFullType.APExport, SellerFullType.PrimeExport, SellerFullType.PtExport);
+        }
+
     }
 
     /**
@@ -85,7 +98,11 @@ public class SellerHuntUtils {
             return;
         }
 
-        addCountry(countries, Country.US, SellerFullType.APExport, SellerFullType.PrimeExport, SellerFullType.PtExport);
+        if (orderItemTypeHelper.getItemType(order) == OrderItemType.BOOK) {
+            addCountry(countries, Country.US, SellerFullType.APDirect, SellerFullType.PrimeDirect, SellerFullType.PtExport);
+        } else {
+            addCountry(countries, Country.US, SellerFullType.APExport, SellerFullType.PrimeExport, SellerFullType.PtExport);
+        }
     }
 
 
@@ -171,5 +188,26 @@ public class SellerHuntUtils {
 
     public static void sortSellers(List<Seller> sellers) {
         sellers.sort(SellerComparator.getInstance());
+    }
+
+
+    public static void setSellerDataForOrder(Order order, Seller seller) {
+        order.seller = seller.getName();
+        order.seller_id = seller.getUuid();
+        //todo USD or local currency?
+        order.seller_price = seller.getPrice().getAmount().toPlainString();
+        order.character = seller.getType().abbrev();
+        order.condition = seller.getCondition().text();
+
+
+        order.remark = Remark.TO_BE_CHECKED.appendTo(order.remark);
+
+
+        if (seller.isAddOn()) {
+            order.remark = Remark.ADD_ON.appendTo(order.remark);
+        }
+
+        String appendix = determineRemarkAppendix(seller, order);
+        order.addRemark(appendix);
     }
 }

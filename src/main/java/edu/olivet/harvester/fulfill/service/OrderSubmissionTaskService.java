@@ -86,6 +86,7 @@ public class OrderSubmissionTaskService {
         orderSubmissionTask.setNoInvoiceText(settings.getNoInvoiceText());
         orderSubmissionTask.setFinderCode(settings.getFinderCode());
         orderSubmissionTask.setSkipValidation(settings.getSkipValidation());
+        orderSubmissionTask.setSkipValidationCol(settings.getSkipValidation().name());
         orderSubmissionTask.setSpreadsheetId(settings.getSpreadsheetId());
         orderSubmissionTask.setSpreadsheetName(settings.getSpreadsheetName());
 
@@ -168,7 +169,9 @@ public class OrderSubmissionTaskService {
         }
 
         task.setOrderRangeCol(task.getOrderRange().toString());
-        task.setSkipValidationCol(task.getSkipValidation().toString());
+        if (StringUtils.isBlank(task.getSkipValidationCol())) {
+            task.setSkipValidationCol(task.getSkipValidation().name());
+        }
 
         dbManager.insertOrUpdate(task, OrderSubmissionTask.class);
 

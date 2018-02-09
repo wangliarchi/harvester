@@ -10,8 +10,11 @@ import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.common.model.OrderEnums.OrderItemType;
+import edu.olivet.harvester.common.model.State;
 import edu.olivet.harvester.common.service.OrderItemTypeHelper;
 import edu.olivet.harvester.fulfill.utils.ConditionUtils.Condition;
+import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
+import edu.olivet.harvester.fulfill.utils.FwdAddressUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.hunt.model.HuntStandard;
 import edu.olivet.harvester.hunt.model.Rating;
@@ -39,7 +42,7 @@ public class HuntVariableService extends AppScript {
 
     private static final String APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9HNzArF0rA5jxXlrBfc4CYm7Vy-iU0RSsi9nmgaSrQLfQKKY/exec";
     private Map<String, JSONObject> VARIABLE_MAP = new HashMap<>();
-    private static final Float AP_TAX = 0.05f;
+    private static final Float AP_TAX = 0.0225f;
     @Inject OrderItemTypeHelper orderItemTypeHelper;
     @Inject SellerHuntUtils sellerHuntUtils;
 
@@ -58,14 +61,12 @@ public class HuntVariableService extends AppScript {
         //rating variable
         setRatingVariable(seller, order);
 
-        setTaxVariable(seller);
+        setTaxVariable(seller, order);
 
         //shipping variable
         if (seller.isIntlSeller(order)) {
             setIntlShippingVariable(seller, order);
         }
-
-
 
         //if condition is lower
         if (seller.getCondition().score() < order.originalCondition().score()) {
@@ -125,6 +126,9 @@ public class HuntVariableService extends AppScript {
         return standard;
     }
 
+    private String getKey(Type type, Country country, OrderItemType orderItemType) {
+        return type.name() + country.name() + orderItemType.name();
+    }
 
     public JSONObject getVariables(Type type, Country country, OrderItemType orderItemType) {
         String key = getKey(type, country, orderItemType);
@@ -140,9 +144,6 @@ public class HuntVariableService extends AppScript {
         return JSON.parseObject(json);
     }
 
-    private String getKey(Type type, Country country, OrderItemType orderItemType) {
-        return type.name() + country.name() + orderItemType.name();
-    }
 
     @Repeat(expectedExceptions = BusinessException.class)
     protected String get(Map<String, String> params) {
@@ -159,18 +160,19 @@ public class HuntVariableService extends AppScript {
     public void setSellerVariable(Seller seller, Order order) {
         Country orderCountry = OrderCountryUtils.getMarketplaceCountry(order);
         OrderItemType orderItemType = orderItemTypeHelper.getItemType(order);
-        float orderPrice = order.getOrderTotalPrice().toUSDAmount().floatValue();
+        float orderPrice = order.getOrderTotalPrice().getAmount().floatValue();
 
         //seller variable
         JSONObject sellerVariables = getVariables(Type.Seller, orderCountry, orderItemType);
         String key = seller.getOfferListingCountry().name() + " " + seller.getType().abbrev();
+        String altKey = key;
         if (seller.getOfferListingCountry() != Country.US && !seller.isIntlSeller(order)) {
-            key = "Local " + seller.getType().abbrev();
+            altKey = "Local " + seller.getType().abbrev();
         }
 
         JSONObject sellerVariablesByPrices = null;
         for (Map.Entry<String, Object> entry : sellerVariables.entrySet()) {
-            if (key.equalsIgnoreCase(entry.getKey())) {
+            if (key.equalsIgnoreCase(entry.getKey()) || altKey.equalsIgnoreCase(entry.getKey())) {
                 sellerVariablesByPrices = (JSONObject) entry.getValue();
                 break;
             }
@@ -184,7 +186,7 @@ public class HuntVariableService extends AppScript {
 
         List<String> keys = new ArrayList<>(sellerVariablesByPrices.keySet());
         keys.sort((String m1, String m2) -> {
-            if(Float.parseFloat(m1) == Float.parseFloat(m2)) {
+            if (Float.parseFloat(m1) == Float.parseFloat(m2)) {
                 return 0;
             }
             return Float.parseFloat(m1) > Float.parseFloat(m2) ? -1 : 1;
@@ -204,7 +206,7 @@ public class HuntVariableService extends AppScript {
 
         keys = new ArrayList<>(sellerVariablesByPrice.keySet());
         keys.sort((String m1, String m2) -> {
-            if(Float.parseFloat(m1) == Float.parseFloat(m2)) {
+            if (Float.parseFloat(m1) == Float.parseFloat(m2)) {
                 return 0;
             }
             return Float.parseFloat(m1) > Float.parseFloat(m2) ? -1 : 1;
@@ -222,28 +224,58 @@ public class HuntVariableService extends AppScript {
             }
         }
 
+
+        //如果ship from 国家和 offer listing 所在国家不一样，加一个国家卖家的 权重系数
+        if (seller.getShipFromCountry() != seller.getOfferListingCountry()) {
+            sellerVariable += seller.getTotalPrice() * 0.1;
+        }
+
         seller.setSellerVariable(sellerVariable);
     }
 
+    /**
+     * US AP tax
+     */
+    public void setTaxVariable(Seller seller, Order order) {
 
-    public void setTaxVariable(Seller seller) {
-        //AP TAX
-        if (seller.isAP() && seller.getOfferListingCountry() == Country.US) {
-            seller.setTaxVariable(seller.getTotalPriceInUSD() * AP_TAX);
+        if (!seller.isAP() || seller.getOfferListingCountry() != Country.US ||
+                (!"US".equalsIgnoreCase(CountryStateUtils.getInstance().getCountryCode(order.ship_country)) && seller.isDirectShip())) {
+            seller.setTaxVariable(0);
+            return;
         }
+
+        float taxRate = AP_TAX;
+        //try {
+        //    String stateName = order.ship_state;
+        //    if (!"US".equalsIgnoreCase(CountryStateUtils.getInstance().getCountryCode(order.ship_country))) {
+        //        stateName = FwdAddressUtils.getUSFwdAddress().getState();
+        //    }
+        //    State state = State.parse(stateName);
+        //    taxRate = (float) state.getTaxRate();
+        //} catch (Exception e) {
+        //
+        //}
+
+        seller.setTaxVariable(seller.getTotalPriceInUSD() * taxRate);
+
     }
 
     public void setRatingVariable(Seller seller, Order order) {
+        if (seller.isAP()) {
+            seller.setRatingVariable(0);
+            return;
+        }
         Country orderCountry = OrderCountryUtils.getMarketplaceCountry(order);
         OrderItemType orderItemType = orderItemTypeHelper.getItemType(order);
-        float orderPrice = order.getOrderTotalPrice().toUSDAmount().floatValue();
+        float orderPrice = order.getOrderTotalPrice().getAmount().floatValue();
 
         //seller variable
         JSONObject sellerVariables = getVariables(Type.Rating, orderCountry, orderItemType);
 
+        //sort by selling price
         List<String> keys = new ArrayList<>(sellerVariables.keySet());
         keys.sort((String m1, String m2) -> {
-            if(Float.parseFloat(m1) == Float.parseFloat(m2)) {
+            if (Float.parseFloat(m1) == Float.parseFloat(m2)) {
                 return 0;
             }
             return Float.parseFloat(m1) > Float.parseFloat(m2) ? -1 : 1;
@@ -261,17 +293,19 @@ public class HuntVariableService extends AppScript {
             throw new BusinessException("No rating variables found for" + orderPrice);
         }
 
+        //sort by rating
         keys = new ArrayList<>(sellerVariablesByPrice.keySet());
         keys.sort((String m1, String m2) -> {
-            if(Float.parseFloat(m1) == Float.parseFloat(m2)) {
+            if (Float.parseFloat(m1) == Float.parseFloat(m2)) {
                 return 0;
             }
             return Float.parseFloat(m1) > Float.parseFloat(m2) ? -1 : 1;
         });
 
+        //
         float ratingVariable = 0;
         for (String rating : keys) {
-            if (seller.getRating() >= Integer.parseInt(rating)) {
+            if (seller.getRatingByType(RatingType.Last30Days).getPositive() >= Integer.parseInt(rating)) {
                 ratingVariable = sellerVariablesByPrice.getFloat(rating);
                 break;
             }
@@ -287,7 +321,7 @@ public class HuntVariableService extends AppScript {
         JSONObject sellerVariables = getVariables(Type.Shipping, orderCountry, orderItemType);
 
 
-        List<SellerFullType> types = seller.supportedFullTypes(order.ship_country);
+        List<SellerFullType> types = seller.supportedFullTypes(order.ship_country, orderItemTypeHelper.getItemType(order));
         Set<SellerFullType> allowedTypes = sellerHuntUtils.countriesToHunt(order).getOrDefault(seller.getOfferListingCountry(), null);
         for (SellerFullType type : types) {
             if (allowedTypes.contains(type)) {
@@ -317,8 +351,8 @@ public class HuntVariableService extends AppScript {
         shippingVariables.forEach((k, v) -> {
             try {
                 String[] parts = StringUtils.split(k, " ");
-                SellerFullType type = SellerFullType.fromType(SellerType.getByCharacter(parts[1]), "Direct".equalsIgnoreCase(parts[2]));
-                sellerHuntUtils.addCountry(supportedTypes, Country.fromCode(parts[0]), type);
+                SellerFullType type = SellerFullType.fromType(SellerType.getByCharacter(parts[1].trim()), "Direct".equalsIgnoreCase(parts[2]));
+                sellerHuntUtils.addCountry(supportedTypes, Country.fromCode(parts[0].trim()), type);
             } catch (Exception e) {
                 LOGGER.error("Fail to find seller variables for {}", e);
             }

@@ -139,7 +139,7 @@ public class MessageListener implements MessageQueue {
     public void addMsg(Order order, String msg, InformationLevel... infoLevels) {
         Country country = OrderCountryUtils.getMarketplaceCountry(order);
         this.addLongMsg(String.format("%s %s - %s - row %d - %s - %s",
-                country != null ? country.name() : order.getSpreadsheetId(), order.type().name(),
+                country != null ? (country.europe() ? "EU" : country.name()) : order.getSpreadsheetId(), order.type().name(),
                 order.sheetName, order.row, order.order_id, msg), infoLevels);
     }
 

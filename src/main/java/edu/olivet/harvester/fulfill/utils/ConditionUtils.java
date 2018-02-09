@@ -10,6 +10,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.Charset;
+import java.text.Normalizer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -91,12 +93,18 @@ public class ConditionUtils {
         }
     }
 
-    public static String translateCondition(String str) {
-        Map<String, String> conditionI18N = Configs.load("conditions.properties", Configs.KeyCase.LowerCase);
+    public static Map<String, String> conditionI18N;
 
+    public static String translateCondition(String str) {
+        if (conditionI18N == null) {
+            conditionI18N = Configs.load("conditions.properties", Configs.KeyCase.LowerCase);
+        }
         String translated = conditionI18N.get(str.toLowerCase());
         if (translated == null) {
-            translated = conditionI18N.get(str.toLowerCase().replace(StringUtils.SPACE, StringUtils.EMPTY));
+            String key = str.toLowerCase().replaceAll(Constants.HYPHEN, StringUtils.EMPTY).replaceAll(StringUtils.SPACE, StringUtils.EMPTY);
+            key = StringUtils.stripAccents(key);
+            key = Normalizer.normalize(key, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+            translated = conditionI18N.get(key);
             if (translated == null) {
                 LOGGER.info("No translation info found for {}", str);
                 return str;
@@ -150,5 +158,9 @@ public class ConditionUtils {
             throw new BusinessException(UIText.message("error.condition.invalid", cond));
         }
         return IntegerUtils.parseInt(lvl, 50);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(ConditionUtils.translateCondition("De 2ª mano - Muy bueno"));
     }
 }

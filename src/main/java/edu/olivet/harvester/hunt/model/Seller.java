@@ -4,6 +4,8 @@ import com.google.common.base.Objects;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.common.model.Money;
+import edu.olivet.harvester.common.model.OrderEnums.OrderItemType;
+import edu.olivet.harvester.common.service.OrderItemTypeHelper;
 import edu.olivet.harvester.fulfill.utils.ConditionUtils.Condition;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.hunt.model.Rating.RatingType;
@@ -12,10 +14,7 @@ import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 10/31/17 11:24 AM
@@ -139,7 +138,7 @@ public class Seller {
     /**
      * rating情况
      */
-    private Map<RatingType, Rating> ratings;
+    private Map<RatingType, Rating> ratings = new HashMap<>();
 
 
     /**
@@ -164,7 +163,11 @@ public class Seller {
 
 
     public float getTotalForCalculation() {
-        return getTotalPriceInUSD() + sellerVariable + ratingVariable + shippingVariable + taxVariable;
+        return getTotalPriceInUSD() + getVariableValue();
+    }
+
+    public float getVariableValue() {
+        return sellerVariable + ratingVariable + shippingVariable + taxVariable;
     }
 
     /**
@@ -214,15 +217,23 @@ public class Seller {
 
     }
 
+    public boolean isDirectShip() {
+        return fullType != null && fullType.isDirectShip();
+    }
+
     public boolean isIntlShippingAvailable() {
         return type == SellerType.AP || intlShippingAvailable;
 
     }
 
     //todo  shipFromCountry or offerListingCountry?
-    public boolean canDirectShip(String shipToCountry) {
+    public boolean canDirectShip(String shipToCountry, OrderItemType type) {
+        if (type == OrderItemType.BOOK && (isPrime())) {
+            return true;
+        }
 
-        return offerListingCountry.code().equalsIgnoreCase(CountryStateUtils.getInstance().getCountryCode(shipToCountry)) || isIntlShippingAvailable();
+        return offerListingCountry.code().equalsIgnoreCase(CountryStateUtils.getInstance().getCountryCode(shipToCountry))
+                || isIntlShippingAvailable();
 
     }
 
@@ -244,8 +255,20 @@ public class Seller {
     }
 
 
+    public Float getTotalPrice() {
+        if (price == null) {
+            return 0f;
+        }
+        return price.getAmount().floatValue() +
+                (shippingFee == null ? 0 : shippingFee.getAmount().floatValue());
+    }
+
     public Float getTotalPriceInUSD() {
-        return price.toUSDAmount().floatValue() + shippingFee.toUSDAmount().floatValue();
+        if (price == null) {
+            return 0f;
+        }
+        return price.toUSDAmount().floatValue() +
+                (shippingFee == null ? 0 : shippingFee.toUSDAmount().floatValue());
     }
 
     public Rating getRatingByType(RatingType type) {
@@ -255,10 +278,10 @@ public class Seller {
         return ratings.getOrDefault(type, null);
     }
 
-    public List<SellerFullType> supportedFullTypes(String country) {
+    public List<SellerFullType> supportedFullTypes(String country, OrderItemType orderItemType) {
         List<SellerFullType> types = new ArrayList<>();
 
-        if (canDirectShip(country)) {
+        if (canDirectShip(country, orderItemType)) {
             types.add(SellerFullType.fromType(type, true));
         }
 
@@ -271,7 +294,7 @@ public class Seller {
 
     public SellerFullType getFullType(Order order) {
         if (fullType == null) {
-            fullType = SellerFullType.fromType(type, canDirectShip(order.ship_country));
+            fullType = SellerFullType.fromType(type, canDirectShip(order.ship_country, OrderItemTypeHelper.getItemTypeBySku(order)));
         }
 
         return fullType;
@@ -346,12 +369,13 @@ public class Seller {
      */
     public String toString() {
         return this.offerListingCountry.name() + ", " + this.name + ", " + this.getTotalForCalculation() + ", " + this.uuid + ", " +
-                this.latestDeliveryDate + ", " + this.estimatedProfit + ", " +
+                this.estimatedProfit + ", " +
                 (this.fullType != null ? this.fullType.desc() + ", " : "") +
-                this.price.usdText() + ", " + this.shippingFee.usdText() + ", " +
-                this.condition + ", " + this.type.abbrev() + ", " +
-                this.rating + "%, " + this.ratingCount + ", " +
+                (this.price == null ? "" : this.price.usdText()) + ", " +
+                (this.shippingFee == null ? "" : this.shippingFee.usdText()) + ", " +
+                this.condition + ", " + (this.type == null ? "" : this.type.abbrev()) + ", " +
+                this.latestDeliveryDate + ", " +
                 getRatingByType(RatingType.Last30Days) + ", " + getRatingByType(RatingType.Last12Month) + ", " +
-                sellerVariable + ", " + ratingVariable + ", " + shippingVariable;
+                sellerVariable + ", " + ratingVariable + ", " + shippingVariable + ", " + taxVariable;
     }
 }

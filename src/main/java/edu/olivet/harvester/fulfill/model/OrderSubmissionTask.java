@@ -111,8 +111,12 @@ public class OrderSubmissionTask extends PrimaryKey implements ArrayConvertable 
     }
 
     public SkipValidation getSkipValidation() {
-        if (skipValidation == null && StringUtils.isNotBlank(skipValidationCol)) {
-            skipValidation = SkipValidation.valueOf(skipValidationCol);
+        if ((skipValidation == null || skipValidation == SkipValidation.None) && StringUtils.isNotBlank(skipValidationCol)) {
+            try {
+                skipValidation = SkipValidation.fromLabel(skipValidationCol);
+            }catch (Exception e) {
+                //skipValidation = SkipValidation.valueOf(skipValidationCol);
+            }
         }
         return skipValidation;
     }

@@ -189,31 +189,6 @@ public class Order implements Keyable {
     @JSONField(serialize = false)
     public String originalRemark;
 
-    @JSONField(serialize = false)
-    public void setSellerData(Seller seller) {
-        this.seller = seller.getName();
-        seller_id = seller.getUuid();
-        //todo USD or local currency?
-        seller_price = seller.getPrice().toUSDAmount().toPlainString();
-        character = seller.getType().abbrev();
-        condition = seller.getCondition().text();
-
-
-        remark = Remark.TO_BE_CHECKED.appendTo(remark);
-
-
-        if (seller.isAddOn()) {
-            remark = Remark.ADD_ON.appendTo(remark);
-        }
-
-        remark = Remark.TO_BE_CHECKED.appendTo(remark);
-
-        String appendix = SellerHuntUtils.determineRemarkAppendix(seller, this);
-        this.addRemark(appendix);
-
-    }
-
-
     /**
      * 追加批注
      *
@@ -595,7 +570,9 @@ public class Order implements Keyable {
         }
 
         //type from sku
-
+        if (type == null) {
+            type = OrderItemTypeHelper.getItemTypeBySku(this);
+        }
         return type;
     }
 

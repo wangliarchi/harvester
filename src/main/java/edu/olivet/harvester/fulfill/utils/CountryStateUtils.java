@@ -47,15 +47,10 @@ public class CountryStateUtils {
         }
 
         String countryCode = countryCodes.get(shippingCountry);
-        if (StringUtils.isBlank(countryCode)) {
-            if (!countryCodes.containsValue(shippingCountry.toUpperCase())) {
-                throw new IllegalArgumentException(UIText.message("error.shipcountry.invalid", shippingCountry));
-            } else {
-                countryCode = shippingCountry;
-            }
+        if (StringUtils.isNotBlank(countryCode)) {
+            return countryCode;
         }
-
-        return countryCode;
+        return shippingCountry;
     }
 
 

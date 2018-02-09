@@ -46,9 +46,10 @@ public class HtmlFetcher {
             return getDocumentByBrowser(url);
         } catch (Exception e) {
             LOGGER.error("failed to load html via jxbrowser  for {} ", url, e);
+            throw new BusinessException("Fail to load html for url " + url);
         }
 
-        throw new BusinessException("Fail to load html for url " + url);
+        //throw new BusinessException("Fail to load html for url " + url);
     }
 
     /**

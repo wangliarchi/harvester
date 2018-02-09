@@ -192,6 +192,12 @@ public class UIHarvester extends AbstractApplicationUI {
         titleCheckerEvent.execute();
     }
 
+    @Inject OrderInfoCheckerEvent orderInfoCheckerEvent;
+    @UIEvent
+    public void orderChecker() {
+        orderInfoCheckerEvent.execute();
+    }
+
     @UIEvent
     public void configBuyerAccount() {
         BuyerAccountConfigDialog dialog = UITools.setDialogAttr(new BuyerAccountConfigDialog());

@@ -1,5 +1,7 @@
 package edu.olivet.harvester.hunt.service;
 
+import edu.olivet.harvester.hunt.model.Rating;
+import edu.olivet.harvester.hunt.model.Rating.RatingType;
 import edu.olivet.harvester.hunt.model.Seller;
 
 import java.util.Comparator;
@@ -34,12 +36,16 @@ public class SellerComparator implements Comparator<Seller> {
         }
 
         // 然后比rating
-        rc = -Integer.compare(seller.getRating(), seller2Compare.getRating());
+        rc = -Double.compare(seller.getRatingByType(RatingType.Last30Days).score(),
+                seller2Compare.getRatingByType(RatingType.Last30Days).score());
+
         if (rc != 0) {
             return rc;
         }
 
         // 然后比count
-        return -Integer.compare(seller.getRatingCount(), seller2Compare.getRatingCount());
+        return -Double.compare(seller.getRatingByType(RatingType.Last12Month).score(),
+                seller2Compare.getRatingByType(RatingType.Last12Month).score());
     }
+
 }

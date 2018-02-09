@@ -75,8 +75,11 @@ public class DefaultHandler implements ShippingHandler {
             int daysExceedOrderEdd = Days.daysBetween(start, end).getDays();
 
             //Expedited Shipping requested
-            return (!order.expeditedShipping() || it.isExpedited()) &&
-                    (OrderValidator.skipCheck(order, OrderValidator.SkipValidation.EDD) ||
+            if (order.expeditedShipping() && !it.isExpedited()) {
+                return false;
+            }
+
+            return (OrderValidator.skipCheck(order, OrderValidator.SkipValidation.EDD) ||
                             Remark.isDN(order.remark) ||
                             latestDate.before(orderEdd) ||
                             daysExceedOrderEdd <= maxDays);

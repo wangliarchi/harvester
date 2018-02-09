@@ -78,6 +78,12 @@ public class StepHelper {
                 if (EnterShippingAddress.class.getName().equals(state.getPrevStep().stepName)) {
                     return reviewOrderChangePaymentMethod;
                 }
+
+                //if from shipping address page, then change payment method
+                if (SelectShippingMethod.class.getName().equals(state.getPrevStep().stepName)) {
+                    return reviewOrderChangePaymentMethod;
+                }
+
                 //if from payment method page, then to update qty
                 if (SelectPaymentMethod.class.getName().equals(state.getPrevStep().stepName)) {
                     return reviewOrderUpdateQty;

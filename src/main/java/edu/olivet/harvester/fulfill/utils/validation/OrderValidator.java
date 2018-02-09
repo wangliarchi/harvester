@@ -97,6 +97,21 @@ public class OrderValidator {
             this.label = label;
         }
 
+        public static SkipValidation fromLabel(String label) {
+            try {
+                return valueOf(label);
+            } catch (Exception e) {
+                //
+            }
+            for (SkipValidation value : values()) {
+                if (value.label.equalsIgnoreCase(label)) {
+                    return value;
+                }
+            }
+
+            return None;
+        }
+
         @Override
         public String toString() {
             return UIText.label(this.label);
@@ -146,6 +161,7 @@ public class OrderValidator {
         }
 
         return validWithValidators(order,
+                Validator.IsNotFulfilled,
                 Validator.NotGrayOrder,
                 Validator.NotSelfOrder,
                 Validator.IsSupplierHunted,
@@ -250,9 +266,7 @@ public class OrderValidator {
     }
 
     public String isFulfilled(Order order) {
-        boolean fulfilled = StringUtils.containsIgnoreCase(order.status, "fi") &&
-                StringUtils.isNotBlank(order.cost) && StringUtils.isNotBlank(order.order_number) && StringUtils.isNotBlank(order.account);
-
+        boolean fulfilled = order.fulfilled();
         if (fulfilled) {
             return "";
         }

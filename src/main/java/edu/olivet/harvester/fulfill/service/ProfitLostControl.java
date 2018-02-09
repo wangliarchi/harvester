@@ -32,20 +32,28 @@ public class ProfitLostControl {
     }
 
     @Data
-    public static class ProfileControlVariable {
+    public static class ProfitControlVariable {
         float breakPoint;
         float min1;
         float min2;
     }
 
-    public static ProfileControlVariable profileControlVariable = null;
+    public static ProfitControlVariable profitControlVariable = null;
 
-    public static ProfileControlVariable getVariable() {
-        if (profileControlVariable == null) {
-            String json = get();
-            profileControlVariable = JSON.parseObject(json, ProfileControlVariable.class);
+    public static ProfitControlVariable getVariable() {
+        if (profitControlVariable == null) {
+            try {
+                String json = get();
+                profitControlVariable = JSON.parseObject(json, ProfitControlVariable.class);
+            } catch (Exception e) {
+                //fail to load from service
+                profitControlVariable = new ProfitControlVariable();
+                profitControlVariable.setBreakPoint(20);
+                profitControlVariable.setMin1(-5);
+                profitControlVariable.setMin2(0.05f);
+            }
         }
-        return profileControlVariable;
+        return profitControlVariable;
     }
 
     /**
@@ -86,17 +94,17 @@ public class ProfitLostControl {
     public static boolean canPlaceOrder(Order order, Float cost) {
         //
 
-        ProfileControlVariable profileControlVariable = getVariable();
+        ProfitControlVariable profitControlVariable = getVariable();
         float lostLimit;
         if (order.fulfilledFromUK()) {
             lostLimit = 0;
         } else if (OrderValidator.skipCheck(order, OrderValidator.SkipValidation.Profit)) {
             lostLimit = -20;
         } else {
-            if (cost <= profileControlVariable.breakPoint) {
-                lostLimit = profileControlVariable.min1;
+            if (cost <= profitControlVariable.breakPoint) {
+                lostLimit = profitControlVariable.min1;
             } else {
-                lostLimit = cost * profileControlVariable.min2;
+                lostLimit = cost * profitControlVariable.min2;
             }
         }
         float profit = profit(order, cost);

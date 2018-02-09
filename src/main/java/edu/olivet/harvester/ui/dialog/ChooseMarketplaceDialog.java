@@ -38,14 +38,14 @@ public class ChooseMarketplaceDialog extends BaseDialog {
 
     public ChooseMarketplaceDialog() {
         super(null, true);
-
         this.initComponents();
         this.initEvents();
         this.setResizable(false);
     }
 
-
+    @Getter
     private DateTimePicker fromDateTimePicker;
+    @Getter
     private DateTimePicker toDateTimePicker;
 
     private void initComponents() {

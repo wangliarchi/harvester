@@ -151,11 +151,8 @@ public class OrderService {
                 } catch (Exception e) {
                     //LOGGER.error("", e);
                 }
-                if (StringUtils.isEmpty(order.order_id) || StringUtils.isEmpty(order.sku)) {
-                    continue;
-                }
 
-                if (!RegexUtils.Regex.AMAZON_ORDER_NUMBER.isMatched(order.order_id)) {
+                if (StringUtils.isEmpty(order.order_id) || !RegexUtils.Regex.AMAZON_ORDER_NUMBER.isMatched(order.order_id)) {
                     continue;
                 }
 
@@ -164,14 +161,12 @@ public class OrderService {
                 ordersForSheet.add(order);
             }
 
-
             LOGGER.info("{}->{} found {} orders", spreadsheetId, sheetName, ordersForSheet.size());
 
             orders.addAll(ordersForSheet);
         }
 
         return orders;
-
     }
 
     public List<Order> fetchOrders(Spreadsheet spreadsheet, Range<Date> dateRange) {
@@ -260,7 +255,6 @@ public class OrderService {
 
         return orders;
     }
-
 
 
     public Map<String, Map<Integer, Color>> fetchBackgroundColors(String spreadsheetId, List<String> ranges) {

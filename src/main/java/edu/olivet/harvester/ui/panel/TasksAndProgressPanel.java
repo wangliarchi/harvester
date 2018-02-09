@@ -256,6 +256,7 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
 
             taskTable.changeSelection(taskTable.getRowCount() - 1, 0, false, false);
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             //
         }
 

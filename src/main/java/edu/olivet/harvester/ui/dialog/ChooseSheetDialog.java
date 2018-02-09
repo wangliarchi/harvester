@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Data source spreadsheet selection dialog
@@ -193,7 +194,9 @@ public class ChooseSheetDialog extends BaseDialog {
         });
 
         OrderSubmissionSettings orderSubmissionSettings = OrderSubmissionSettings.load();
-        if (StringUtils.isNotBlank(orderSubmissionSettings.getSpreadsheetName())) {
+        if (StringUtils.isNotBlank(orderSubmissionSettings.getSpreadsheetName()) &&
+                spreadsheets.stream().map(it -> it.getTitle()).collect(Collectors.toList())
+                        .contains(orderSubmissionSettings.getSpreadsheetName())) {
             this.spreadList.setSelectedValue(orderSubmissionSettings.getSpreadsheetName(), true);
         } else {
             //set first spreadsheet selected by default

@@ -42,7 +42,7 @@ public enum State {
     NE(300, 170, "Nebraska", 0),
     NV(95, 180, "Nevada", 0),
     NH(625, 100, "New Hampshire", 0),
-    NJ(600, 175, "New Jersey", 0.0702),
+    NJ(600, 175, "New Jersey", 0.06625),
     NM(215, 280, "New Mexico", 0),
     NY(580, 130, "New York", 0.0888),
     NC(560, 250, "North Carolina", 0),
@@ -99,6 +99,10 @@ public enum State {
 
     public String desc() {
         return desc;
+    }
+
+    public double getTaxRate() {
+        return taxRate;
     }
 
     private static final Map<String, State> cache = new HashMap<>();

@@ -8,6 +8,7 @@ import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.service.ProgressUpdater;
 import edu.olivet.harvester.hunt.model.HuntResult;
 import edu.olivet.harvester.hunt.model.Seller;
+import edu.olivet.harvester.hunt.utils.SellerHuntUtils;
 import edu.olivet.harvester.utils.MessageListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ public class HuntWorker extends SwingWorker<Void, HuntResult> {
     private final MessageListener messageListener;
     private final CountDownLatch latch;
 
-    public HuntWorker(List<Order> orders, CountDownLatch latch,MessageListener messageListener) {
+    public HuntWorker(List<Order> orders, CountDownLatch latch, MessageListener messageListener) {
         this.huntService = ApplicationContext.getBean(HuntService.class);
         this.orders = orders;
         this.latch = latch;
@@ -70,7 +71,7 @@ public class HuntWorker extends SwingWorker<Void, HuntResult> {
         }
 
         try {
-            order.setSellerData(seller);
+            SellerHuntUtils.setSellerDataForOrder(order, seller);
             sheetService.fillSellerInfo(order);
             publish(new HuntResult(order, "Find seller  - " + seller.toSimpleString(), ReturnCode.SUCCESS));
         } catch (Exception e) {

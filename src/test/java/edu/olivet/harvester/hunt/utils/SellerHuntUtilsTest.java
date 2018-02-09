@@ -46,7 +46,6 @@ public class SellerHuntUtilsTest extends BaseTest {
         sellerHuntUtils.addCountry(countries, Country.CA, SellerFullType.APDirect, SellerFullType.PrimeDirect);
 
         assertEquals(sellerHuntUtils.countriesToHunt(order), countries);
-
     }
 
     @Test
@@ -70,7 +69,6 @@ public class SellerHuntUtilsTest extends BaseTest {
         sellerHuntUtils.addCountry(countries, Country.US, SellerFullType.APDirect, SellerFullType.PrimeDirect, SellerFullType.PtDirect);
 
         assertEquals(sellerHuntUtils.countriesToHunt(order), countries);
-
     }
 
     @Test
@@ -94,9 +92,32 @@ public class SellerHuntUtilsTest extends BaseTest {
         sellerHuntUtils.addCountry(countries, Country.US, SellerFullType.APDirect, SellerFullType.PrimeDirect, SellerFullType.PtDirect);
         sellerHuntUtils.addCountry(countries, Country.UK, SellerFullType.APExport, SellerFullType.PrimeExport, SellerFullType.PtExport);
         assertEquals(sellerHuntUtils.countriesToHunt(order), countries);
-
     }
 
+
+    @Test
+    public void countriesToHuntCABookLocal() {
+        now.set(Dates.parseDate("2018-01-25"));
+        order = prepareOrder();
+        order.purchase_date = "2018-02-03T21:07:00+00:00";
+        order.sku = "XinUSBk2016-0819-C8EA1F4A32A";
+        order.sku_address = "https://www.amazon.com/dp/B011MEXATU";
+        order.price = "58.46";
+        order.shipping_fee = "6.49";
+        order.quantity_purchased = "1";
+        order.isbn = "0801427231";
+        order.ship_country = "Canada";
+        order.sales_chanel = "Amazon.ca";
+        order.estimated_delivery_date = "2018-02-26 2018-03-20";
+
+        Map<Country, Set<SellerFullType>> countries = new HashMap<>();
+
+        sellerHuntUtils.addCountry(countries, Country.CA, SellerFullType.APDirect, SellerFullType.PrimeDirect, SellerFullType.PtDirect);
+        sellerHuntUtils.addCountry(countries, Country.US, SellerFullType.APDirect, SellerFullType.PrimeDirect, SellerFullType.PtExport);
+        sellerHuntUtils.addCountry(countries, Country.UK, SellerFullType.APDirect, SellerFullType.PrimeDirect, SellerFullType.PtDirect);
+
+        assertEquals(sellerHuntUtils.countriesToHunt(order), countries);
+    }
 
     @Test
     public void determineRemarkAppendixUSBookLocal() {
@@ -283,13 +304,33 @@ public class SellerHuntUtilsTest extends BaseTest {
         assertEquals(SellerHuntUtils.determineRemarkAppendix(seller, order), "UK Shipment");
     }
 
+    @Test
+    public void determineRemarkAppendixEUProduct() {
+        order = prepareOrder();
+        order.sku = "XinUSPro2016-0819-C8EA1F4A32A";
+        order.sku_address = "https://www.amazon.com/dp/B011MEXATU";
+        order.ship_country = "United Kingdom";
+        order.sales_chanel = "Amazon.co.uk";
 
+        Seller seller = new Seller();
+        seller.setOfferListingCountry(Country.US);
+        seller.setType(SellerType.Pt);
+        assertEquals(SellerHuntUtils.determineRemarkAppendix(seller, order), "");
 
-
-
-
-
-
-
+//        seller = new Seller();
+//        seller.setOfferListingCountry(Country.US);
+//        seller.setType(SellerType.AP);
+//        assertEquals(SellerHuntUtils.determineRemarkAppendix(seller, order), "US Shipment");
+//
+//        seller = new Seller();
+//        seller.setOfferListingCountry(Country.UK);
+//        seller.setType(SellerType.Pt);
+//        assertEquals(SellerHuntUtils.determineRemarkAppendix(seller, order), "UK FWD");
+//
+//        seller = new Seller();
+//        seller.setOfferListingCountry(Country.UK);
+//        seller.setType(SellerType.AP);
+//        assertEquals(SellerHuntUtils.determineRemarkAppendix(seller, order), "UK Shipment");
+    }
 
 }

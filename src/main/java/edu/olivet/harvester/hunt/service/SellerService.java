@@ -2,7 +2,9 @@ package edu.olivet.harvester.hunt.service;
 
 import com.google.inject.Inject;
 import com.teamdev.jxbrowser.chromium.Browser;
+import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.*;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.harvester.common.model.Money;
@@ -27,6 +29,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
@@ -35,8 +39,8 @@ import java.util.*;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 10/31/17 11:38 AM
  */
 public class SellerService {
-    private static final SellerHuntingLogger LOGGER = SellerHuntingLogger.getInstance();
-
+    private static final SellerHuntingLogger LOGGER = SellerHuntingLogger.getLogger(SellerService.class);
+    private static final Logger logger = LoggerFactory.getLogger(SellerService.class);
     private Map<String, Boolean> wareHouseIdCache = new HashMap<>();
     /**
      * 程序找单时默认翻页数上限:{@value}
@@ -65,19 +69,24 @@ public class SellerService {
         }
 
         Map<Country, Set<SellerFullType>> countriesToHunt = sellerHuntUtils.countriesToHunt(order);
-        LOGGER.info(order, "Trying to find sellers for {} {} from {} {} - {}",
+        LOGGER.setOrder(order).getLogger().info("Trying to find sellers for {} {} from {} {} - {}",
                 order.isbn, order.original_condition,
                 countriesToHunt.size(), countriesToHunt.size() == 1 ? "country" : "countries", countriesToHunt);
 
         final List<Seller> sellers = new ArrayList<>();
         countriesToHunt.forEach((country, types) -> {
-            List<Seller> sellersFromCountry = getSellersByCountry(country, order, types);
-            LOGGER.info(order, String.format("found %d sellers from %s \n", sellersFromCountry.size(), country.name()));
-            sellers.addAll(sellersFromCountry);
+            try {
+                List<Seller> sellersFromCountry = getSellersByCountry(country, order, types);
+                LOGGER.setOrder(order).getLogger().info(String.format("found %d sellers from %s \n", sellersFromCountry.size(), country.name()));
+                sellers.addAll(sellersFromCountry);
+            } catch (Exception e) {
+                LOGGER.setOrder(order).getLogger().info(Strings.getExceptionMsg(e));
+            }
         });
 
         return sellers;
     }
+
 
     public List<Seller> getSellersByCountry(Country country, Order order, Set<SellerFullType> allowedTypes) {
         String isbn = Strings.fillMissingZero(order.isbn);
@@ -97,7 +106,8 @@ public class SellerService {
             LOGGER.saveHtml(order, order.isbn + "-offer-listing-page-" + (i + 1), document.outerHtml());
 
             List<Seller> sellersByPage = parseSellers(document, country);
-            LOGGER.info(order, "Found {} sellers on page {} on {}, url {} ", sellersByPage.size(), i + 1, country.baseUrl(), url);
+
+            LOGGER.setOrder(order).getLogger().info("Found {} sellers on page {} on {}, url {} ", sellersByPage.size(), i + 1, country.baseUrl(), url);
             if (CollectionUtils.isEmpty(sellersByPage)) {
                 break;
             }
@@ -133,6 +143,7 @@ public class SellerService {
             }
             WaitTime.Shortest.execute();
         }
+
 
         return sellers;
     }
@@ -242,67 +253,16 @@ public class SellerService {
         seller.setStockStatusFromText(stockText);
 
         //edd
-        I18N_AMAZON.setLocale(country.locale());
-        final String arrivesText = I18N_AMAZON.getText("shipping.arrives", country);
-        if (StringUtils.startsWithIgnoreCase(stockText, arrivesText)) {
-            Date edd = null;
-            String eddText = stockText.substring(0, stockText.lastIndexOf("."));
-            try {
-                edd = DatetimeHelper.parseEdd(eddText, country, now.get());
-            } catch (Exception e) {
-                LOGGER.error("{} - {} ", stockText, eddText, e);
-            }
-            seller.setLatestDeliveryDate(edd);
-        }
+        seller.setLatestDeliveryDate(this.parseEdd(stockText, country));
 
         // 是否为AddOn
         if (HtmlParser.select(row, "i.a-icon.a-icon-addon") != null) {
             seller.setAddOn(true);
         }
 
-        // 快递是否可用、运输详情信息(目前暂时不对日本进行校验)
-        String exEnabled = "shipping.ex.enabled";
-        if (country != Country.JP) {
-            exEnabled = I18N_AMAZON.getText("shipping.ex.enabled", country);
-        }
-
-        // two day shipping 也算是快递
-        String twodayshippingEnabledText = I18N_AMAZON.getText("shipping.twoday.enabled", country);
-        String intlEnabledText = "shipping.intl.enabled";
-        String shipsFromText = "shipping.from";
-
-        if (country != Country.JP) {
-            intlEnabledText = I18N_AMAZON.getText("shipping.intl.enabled", country);
-            shipsFromText = I18N_AMAZON.getText("shipping.from", country);
-        }
-
         Elements deliveryInfos = HtmlParser.selectElementsByCssSelector(row,
                 "div.a-column.a-span3.olpDeliveryColumn > ul.a-vertical  li  span.a-list-item");
-        for (Element line : deliveryInfos) {
-            String txt = HtmlParser.text(line);
-
-            if (txt.startsWith(shipsFromText)) {
-                // 形如: Ships from CO, United States. Ships from United Kingdom.
-                String from = txt;
-                if (txt.indexOf('.') != -1) {
-                    from = txt.substring(0, txt.indexOf('.'));
-                }
-                from = from.replace(shipsFromText, StringUtils.EMPTY);
-                String[] arr = StringUtils.split(from, ',');
-                if (arr.length >= 2) {
-                    seller.setShippingFromState(arr[0].trim());
-                    seller.setShipFromCountry(getShipFromCountry(arr[1].trim(), country));
-                } else {
-                    seller.setShipFromCountry(getShipFromCountry(arr[0].trim(), country));
-                }
-            } else if (StringUtils.contains(txt, exEnabled) || StringUtils.contains(txt, twodayshippingEnabledText)) {
-                seller.setExpeditedAvailable(true);
-            } else if (StringUtils.contains(txt, intlEnabledText)) {
-                seller.setIntlShippingAvailable(true);
-            }
-        }
-
-
+        this.parseDeliveryInfo(country, deliveryInfos, seller);
         if (seller.getShippingFromCountry() == null && StringUtils.isBlank(seller.getShippingFromState())) {
             Country shipFromCountry = getShipFromCountry(HtmlParser.text(row, "div.a-column.a-span3.olpDeliveryColumn"), country);
             seller.setShipFromCountry(shipFromCountry);
@@ -319,7 +279,7 @@ public class SellerService {
                                 .replaceAll(RegexUtils.Regex.NON_DIGITS.val(), StringUtils.EMPTY).trim());
                 seller.setRating(rating);
             } catch (Exception e) {
-                LOGGER.error("Cant get rating number for seller {}", seller.getName());
+                logger.error("Cant get rating number for seller {}", seller.getName());
             }
 
             String ratingText = HtmlParser.text(row, "div.a-column.a-span2.olpSellerColumn > p:nth-child(2)");
@@ -340,6 +300,62 @@ public class SellerService {
         return seller;
     }
 
+
+    public void parseDeliveryInfo(Country country, Elements deliveryInfos, Seller seller) {
+        String shipsFromText = I18N_AMAZON.getText("shipping.from", country);
+        String twodayshippingEnabledText = I18N_AMAZON.getText("shipping.twoday.enabled", country);
+        String intlEnabledText = I18N_AMAZON.getText("shipping.intl.enabled", country);
+        String exEnabled = I18N_AMAZON.getText("shipping.ex.enabled", country);
+
+        for (Element line : deliveryInfos) {
+            String txt = HtmlParser.text(line);
+            if (txt.startsWith(shipsFromText)) {
+                // 形如: Ships from CO, United States. Ships from United Kingdom.
+                seller.setShipFromCountry(parseShipFromCountry(txt, country));
+            } else if (StringUtils.contains(txt, exEnabled) || StringUtils.contains(txt, twodayshippingEnabledText)) {
+                seller.setExpeditedAvailable(true);
+            } else if (StringUtils.contains(txt, intlEnabledText)) {
+                seller.setIntlShippingAvailable(true);
+            }
+        }
+
+
+    }
+
+    public Country parseShipFromCountry(String txt, Country country) {
+        // 形如: Ships from CO, United States. Ships from United Kingdom.
+        String shipsFromText = I18N_AMAZON.getText("shipping.from", country);
+        String from = txt;
+        if (txt.indexOf('.') != -1) {
+            from = txt.substring(0, txt.indexOf('.'));
+        }
+        from = from.replace(shipsFromText, StringUtils.EMPTY);
+        String[] arr = StringUtils.split(from, ',');
+        if (arr.length >= 2) {
+            return getShipFromCountry(arr[1].trim(), country);
+            //seller.setShippingFromState(arr[0].trim());
+            //seller.setShipFromCountry(getShipFromCountry(arr[1].trim(), country));
+        }
+        return getShipFromCountry(arr[0].trim(), country);
+    }
+
+    public Date parseEdd(String stockText, Country country) {
+        I18N_AMAZON.setLocale(country.locale());
+        Date edd = null;
+        final String arrivesText = I18N_AMAZON.getText("shipping.arrives", country);
+        if (StringUtils.startsWithIgnoreCase(stockText, arrivesText)) {
+
+            String eddText = stockText.substring(0, stockText.lastIndexOf("."));
+            try {
+                edd = DatetimeHelper.parseEdd(eddText, country, now.get());
+            } catch (Exception e) {
+                logger.error("{} - {} ", stockText, eddText, e);
+            }
+
+        }
+        return edd;
+        //seller.setLatestDeliveryDate(edd);
+    }
 
     public void getSellerRatings(Seller seller, Order order) {
         if (seller.isAP()) {
@@ -368,7 +384,7 @@ public class SellerService {
 
         Element ratingTableElement = HtmlParser.select(document, "#feedback-summary-table");
         if (ratingTableElement == null) {
-            LOGGER.error("no feedback table found");
+            logger.error("no feedback table found");
             return ratings;
         }
 

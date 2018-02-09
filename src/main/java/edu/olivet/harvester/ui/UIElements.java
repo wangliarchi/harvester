@@ -23,14 +23,13 @@ public class UIElements extends AbstractUIContainer {
     private final Menu harvester = new Menu("Harvester", "H");
     private final Menu submitOrder = new Menu("Submit Order", "O");
     private final Menu confirmShipment = new Menu("Confirm Shipment", "C");
-    private final Menu finance = new Menu("Finance", "F");
+    //private final Menu finance = new Menu("Finance", "F");
     @Override
     public Menu[] getMenus() {
         return new Menu[] {
                 harvester,
                 submitOrder,
                 confirmShipment,
-                finance,
                 Menu.Settings,
                 Menu.ToolBox,
                 Menu.Help
@@ -66,14 +65,14 @@ public class UIElements extends AbstractUIContainer {
                 Actions.OrderConfirmationHistory
         });
 
-        map.put(finance, new Action[] {
-                Actions.DownloadInvoice
-        });
 
         map.put(Menu.ToolBox, new Action[] {
                 Actions.TitleChecker,
+                Actions.OrderChecker,
                 Action.Separator,
-                Actions.OrderFulfillmentChecker
+                Actions.OrderFulfillmentChecker,
+                Action.Separator,
+                Actions.DownloadInvoice
         });
 
 

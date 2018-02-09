@@ -228,7 +228,6 @@ public class AppScript {
 
     @Repeat(expectedExceptions = BusinessException.class)
     public List<Order> readOrders(String spreadId, String sheetName) {
-
         final long start = System.currentTimeMillis();
         List<Order> orders;
         try {
@@ -246,7 +245,6 @@ public class AppScript {
             orders = this.parse(json);
             LOGGER.info("Read {} orders from sheet {} via app script in {}", orders.size(), sheetName, Strings.formatElapsedTime(start));
         }
-
 
         orders.forEach(it -> {
             it.setSheetName(sheetName);

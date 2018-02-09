@@ -20,7 +20,7 @@ import java.util.List;
  */
 public class HuntService {
     private static final Logger LOGGER = LoggerFactory.getLogger(HuntService.class);
-    private static final SellerHuntingLogger HUNTING_LOGGER = SellerHuntingLogger.getInstance();
+    private static final SellerHuntingLogger HUNTING_LOGGER = SellerHuntingLogger.getLogger(HuntService.class);
 
     @Inject SellerService sellerService;
     @Inject HuntVariableService huntVariableService;
@@ -43,23 +43,23 @@ public class HuntService {
             } catch (Exception e) {
                 LOGGER.error("", e);
                 i.remove();
-                HUNTING_LOGGER.info(order, "Seller [{}] is not qualified as {}", e.getMessage());
+                HUNTING_LOGGER.setOrder(order).getLogger().info("Seller [{}] is not qualified as {}", e.getMessage());
             }
         }
 
         //sellers.forEach(it -> huntVariableService.setHuntingVariable(it, order));
         if (CollectionUtils.isEmpty(sellers)) {
-            throw new BusinessException("No seller found");
+            throw new BusinessException("No seller qualified");
         }
 
         //sort sellers
         SellerHuntUtils.sortSellers(sellers);
-        HUNTING_LOGGER.info(order, "total {} valid sellers found  - \n{}\n",
+        HUNTING_LOGGER.setOrder(order).getLogger().info("total {} valid sellers found  - \n{}\n",
                 sellers.size(), StringUtils.join(sellers, "\n")
         );
 
         Seller seller = sellers.get(0);
-        HUNTING_LOGGER.info(order, "found seller [{}], take {} - {}\n", seller.getName(), Strings.formatElapsedTime(start), seller);
+        HUNTING_LOGGER.setOrder(order).getLogger().info("found seller [{}], take {} - {}\n", seller.getName(), Strings.formatElapsedTime(start), seller);
 
         return seller;
     }

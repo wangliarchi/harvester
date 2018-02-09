@@ -9,7 +9,7 @@ import static org.testng.Assert.*;
 public class SellerHuntingLoggerTest {
     @Test
     public void getFilePath() {
-        SellerHuntingLogger logger = SellerHuntingLogger.getInstance();
+        SellerHuntingLogger logger = SellerHuntingLogger.getLogger(SellerHuntingLoggerTest.class);
 
         Order order = new Order();
         order.sheetName = "01/25";

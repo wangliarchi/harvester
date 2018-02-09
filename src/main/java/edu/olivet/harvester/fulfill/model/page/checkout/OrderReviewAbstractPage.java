@@ -42,7 +42,6 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         super(buyerPanel);
     }
 
-
     public void checkTotalCost(Order order) {
         Money grandTotal = parseTotal();
 

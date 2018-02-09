@@ -79,4 +79,31 @@ public class Rating {
         return this.positive + "%, " + this.count;
     }
 
+    /**
+     * <summary >
+     * Ratings
+     * (Lower bound of Wilson score confidence interval for a Bernoulli parameter)
+     * </summary>
+     * <param name="positive">Positive ratings</param>
+     * <param name="negative">Negative ratings</param>
+     * <returns></returns>
+     */
+    public double ratingScore(int positive, int negative) {
+        return (((positive + 1.9208) / (positive + negative) -
+                1.96 * Math.sqrt(((positive * negative) / (positive + negative)) + 0.9604) / (positive + negative)) / (1 + 3.8416 / (positive + negative)));
+    }
+
+    public double score() {
+        int positiveCount = (int) ((float) count * (float) positive / 100f);
+        int negativeCount = count - positiveCount;
+        return ratingScore(positiveCount, negativeCount);
+    }
+
+    public static void main(String[] args) {
+        Rating rating = new Rating(99, 194, RatingType.Last30Days);
+        System.out.println(rating.score());
+
+        rating = new Rating(95, 39, RatingType.Last30Days);
+        System.out.println(rating.score());
+    }
 }

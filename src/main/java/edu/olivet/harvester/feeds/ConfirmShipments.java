@@ -133,8 +133,6 @@ public class ConfirmShipments {
         Worksheet selectedWorksheet = new Worksheet(workingSpreadsheet, sheetName);
 
         confirmShipmentForWorksheet(selectedWorksheet);
-
-
     }
 
 
@@ -156,7 +154,6 @@ public class ConfirmShipments {
             return;
         }
 
-
         while (true) {
             try {
                 List<FeedSubmissionInfo> submissionInfo = getUnprocessedFeedSubmission(country);
@@ -173,7 +170,6 @@ public class ConfirmShipments {
             }
         }
 
-
         messagePanel.addMsgSeparator();
         messagePanel.displayMsg(
             String.format("Starting confirming shipments for worksheet %s at %s", worksheet.toString(), Dates.now()), LOGGER);
@@ -181,13 +177,10 @@ public class ConfirmShipments {
         //get orders from google spreadsheet, all errors are handled.
         List<Order> orders = getOrdersFromWorksheet(worksheet, country);
 
-
         messagePanel.displayMsg(orders.size() + "  order(s) found on the worksheet. ");
-
 
         resultSummary.append("Total ").append(orders.size()).append(" found; ");
         resultDetail.append("Total ").append(orders.size()).append(" orders found.").append("\n");
-
 
         if (orders.isEmpty()) {
             return;
