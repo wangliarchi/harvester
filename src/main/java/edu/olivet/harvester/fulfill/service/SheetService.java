@@ -64,7 +64,7 @@ public class SheetService extends SheetAPI {
         if (!order.quantity_purchased.equals(order.quantity_fulfilled)) {
             OrderHelper.addQuantityChangeRemark(order, order.quantity_fulfilled);
         }
-        
+
         ValueRange remarkData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(order.remark)))
                 .setRange(String.format("%s!S%d", order.sheetName, row));
         dateToUpdate.add(remarkData);
@@ -101,10 +101,10 @@ public class SheetService extends SheetAPI {
     public void fillUnsuccessfulMsg(String spreadsheetId, Order order, String msg) {
         //need to relocate order row on google sheet, as it may be arranged during order fulfillment process.
         int row = locateOrder(order);
-
+        order.addRemark(msg);
         List<ValueRange> dateToUpdate = new ArrayList<>();
 
-        ValueRange statusData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(order.remark + " " + msg)))
+        ValueRange statusData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(order.remark)))
                 .setRange(String.format("%s!S%d", order.sheetName, row));
         dateToUpdate.add(statusData);
 

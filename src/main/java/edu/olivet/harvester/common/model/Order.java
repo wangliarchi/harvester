@@ -196,6 +196,9 @@ public class Order implements Keyable {
      */
     @JSONField(serialize = false)
     public void addRemark(String content) {
+        if (StringUtils.isBlank(this.remark)) {
+            this.remark = content;
+        }
         if (StringUtils.isNotBlank(content) && !Strings.containsAnyIgnoreCase(this.remark, content)) {
             this.remark += (StringUtils.SPACE + content);
         }
