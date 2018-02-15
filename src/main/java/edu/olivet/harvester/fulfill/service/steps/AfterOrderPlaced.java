@@ -1,6 +1,7 @@
 package edu.olivet.harvester.fulfill.service.steps;
 
 import com.google.inject.Inject;
+import edu.olivet.harvester.common.model.Remark;
 import edu.olivet.harvester.fulfill.model.page.checkout.OrderPlacedSuccessPage;
 import edu.olivet.harvester.fulfill.service.SheetService;
 import edu.olivet.harvester.fulfill.service.StepHelper;
@@ -54,6 +55,7 @@ public class AfterOrderPlaced extends Step {
     SheetService sheetService;
 
     private void updateInfoToOrderSheet(String spreadsheetId, Order order) {
+        order.remark = Remark.removeFailedRemark(order.remark);
         sheetService.fillFulfillmentOrderInfo(spreadsheetId, order);
     }
 
