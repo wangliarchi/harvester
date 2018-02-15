@@ -57,11 +57,16 @@ public class GiftOptionHelper {
                 WaitTime.Shortest.execute();
             }
 
-            DOMElement continueBtn = JXBrowserHelper.selectVisibleElement(browser, continueBtnSelector);
-            assert continueBtn != null;
-            continueBtn.click();
-            WaitTime.Shortest.execute();
-            JXBrowserHelper.waitUntilNotFound(continueBtn);
+            try {
+                DOMElement continueBtn = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, continueBtnSelector);
+                if (continueBtn != null) {
+                    continueBtn.click();
+                    WaitTime.Shortest.execute();
+                    JXBrowserHelper.waitUntilNotFound(continueBtn);
+                }
+            } catch (Exception e) {
+                //
+            }
         }
 
 
