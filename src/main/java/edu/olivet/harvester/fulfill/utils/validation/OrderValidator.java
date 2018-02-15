@@ -123,8 +123,11 @@ public class OrderValidator {
         if (Remark.FORCE_FULFILL.isContainedBy(order.remark)) {
             return true;
         }
-
-        return skipCheck(order.getTask(), skipValidation);
+        try {
+            return skipCheck(order.getTask(), skipValidation);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public static boolean skipCheck(@NotNull OrderSubmissionTask task, SkipValidation skipValidation) {
@@ -237,7 +240,7 @@ public class OrderValidator {
     }
 
 
-    public String statusMarkedCorrectForSubmit(Order order) {
+    public String StatusMarkedCorrectForSubmit(Order order) {
         String status = OrderStatusUtils.determineStatus(order);
         if (order.status.equals(status)) {
             return "";
@@ -428,32 +431,36 @@ public class OrderValidator {
             return Strings.getExceptionMsg(e);
         }
 
-        try {
-            Order reloadedOrder = amazonOrderService.reloadOrder(order);
-            if (reloadedOrder != null) {
+        if (!skipCheck(order, SkipValidation.Address) && !Remark.ADDRESS_CHANGED.isContainedBy(order.remark)) {
+            try {
+                Order reloadedOrder = amazonOrderService.reloadOrder(order);
+                if (reloadedOrder != null) {
 
-                if (!StringUtils.equalsAnyIgnoreCase(order.recipient_name.replaceAll("^\"|\"$", ""),
-                        reloadedOrder.recipient_name.replaceAll("^\"|\"$", ""))) {
-                    return "Order recipient name is not the same from amazon. please check in seller center";
-                }
+                    if (!StringUtils.equalsAnyIgnoreCase(order.recipient_name.replaceAll("^\"|\"$", ""),
+                            reloadedOrder.recipient_name.replaceAll("^\"|\"$", ""))) {
+                        return "Order recipient name is not the same from amazon. please check in seller center";
+                    }
 
-                if (!StringUtils.equalsAnyIgnoreCase(order.ship_address_1.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""),
-                        reloadedOrder.ship_address_1.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""),
-                        reloadedOrder.ship_address_2.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), "")) ||
-                        !StringUtils.equalsAnyIgnoreCase(order.ship_address_2.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""),
-                                reloadedOrder.ship_address_1.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""),
-                                reloadedOrder.ship_address_2.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""))) {
-                    return "Order shipping address is not the same from amazon. please check in seller center";
+                    if (!StringUtils.equalsAnyIgnoreCase(order.ship_address_1.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""),
+                            reloadedOrder.ship_address_1.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""),
+                            reloadedOrder.ship_address_2.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), "")) ||
+                            !StringUtils.equalsAnyIgnoreCase(order.ship_address_2.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""),
+                                    reloadedOrder.ship_address_1.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""),
+                                    reloadedOrder.ship_address_2.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), ""))) {
+                        return "Order shipping address is not the same from amazon. please check in seller center";
+                    }
+
+
+                    if (!StringUtils.equalsAnyIgnoreCase(order.ship_country, reloadedOrder.ship_country)) {
+                        return "Order shipping country is not the same from amazon. please check in seller center";
+                    }
+                    if (!StringUtils.equalsAnyIgnoreCase(order.ship_state, reloadedOrder.ship_state)) {
+                        return "Order shipping state is the same from amazon. please check in seller center";
+                    }
                 }
-                if (!StringUtils.equalsAnyIgnoreCase(order.ship_country, reloadedOrder.ship_country)) {
-                    return "Order shipping country is not the same from amazon. please check in seller center";
-                }
-                if (!StringUtils.equalsAnyIgnoreCase(order.ship_state, reloadedOrder.ship_state)) {
-                    return "Order shipping state is the same from amazon. please check in seller center";
-                }
+            } catch (Exception e) {
+                //ignore
             }
-        } catch (Exception e) {
-            //ignore
         }
         return "";
     }
