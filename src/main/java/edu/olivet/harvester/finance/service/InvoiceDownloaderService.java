@@ -12,8 +12,8 @@ import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.utils.*;
+import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.harvester.common.model.BuyerAccountSettingUtils;
-import edu.olivet.harvester.common.model.Money;
 import edu.olivet.harvester.finance.model.BuyerOrderInvoice;
 import edu.olivet.harvester.fulfill.model.page.LoginPage;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
@@ -56,145 +56,19 @@ public class InvoiceDownloaderService {
         dropboxAssistant = new DropboxAssistant("HarvesterFinanceApp", DROPBOX_TOKEN, false, "/");
     }
 
-    public void goToTheRightPage(BuyerPanel buyerPanel, Date fromDate, Date toDate) {
-        Browser browser = buyerPanel.getBrowserView().getBrowser();
-        Country country = buyerPanel.getCountry();
-        String url = country.baseUrl() + "/gp/your-account/order-history?opt=ab&digitalOrders=1&unifiedOrders=1&returnTo=&orderFilter=";
-        //default to last 6 month
-        int totalDays = 0;
-        if (fromDate.after(DateUtils.addMonths(now.get(), -6))) {
-            url += "months-6";
-            totalDays = 180;
-        } else {
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(fromDate);
-            int year = calendar.get(Calendar.YEAR);
-            url += "year-" + year;
-            totalDays = 365;
-        }
-
-        //go to the first page
-        JXBrowserHelper.loadPage(browser, url);
-        WaitTime.Shortest.execute();
-
-        //find page numbers
-        List<DOMElement> pagination = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-pagination .a-normal a");
-
-        if (pagination.size() == 0) {
-            return;
-        }
-        DOMElement lastPage = pagination.get(pagination.size() - 1);
-        int pages = IntegerUtils.parseInt(lastPage.getInnerText(), 1);
-
-
-        //first page
-        List<DOMElement> orderBoxes = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-box-group.order");
-        for (DOMElement orderElement : orderBoxes) {
-            String dateString = JXBrowserHelper.text(orderElement, ".order-info .a-col-left .a-span3 .value,.order-info .a-col-left .a-span4 .value");
-            Date date = parseOrderDate(dateString, country);
-            if (date.before(toDate)) {
-                return;
-            }
-        }
-        if (pages <= 5) {
-            return;
-        }
-
-        //二分法
-        int page = pages / 2;
-        int lastType = 2;
-
-        int days = Dates.daysBetween(toDate, now.get());
-        if (days <= 5) {
-            page = pages * days / totalDays;
-        }
-
-        while (true) {
-            String pageUrl = url + "&startIndex=" + (page - 1) * 10;
-            JXBrowserHelper.loadPage(browser, pageUrl);
-            WaitTime.Shortest.execute();
-            int type = checkPurchaseDateOnPage(buyerPanel, toDate, lastType);
-            messageListener.addMsg("currently on page " + page);
-
-            if (type == 0) {
-                break;
-            }
-
-            if (type == 2) {
-                page = page + (pages - page) / 2;
-            } else if (type == -2) {
-                if (lastType == -2) {
-                    page = page - page / 2;
-                } else {
-                    page = page - (pages - page) / 2;
-                }
-            } else if (type == 1) {
-                page = page + 1;
-            } else {
-                page = page - 1;
-            }
-
-            if (page <= 1 || page >= pages - 1) {
-                break;
-            }
-
-            lastType = type;
-        }
-
-    }
-
-    public int checkPurchaseDateOnPage(BuyerPanel buyerPanel, Date toDate, int lastType) {
-        Browser browser = buyerPanel.getBrowserView().getBrowser();
-        Country country = buyerPanel.getCountry();
-        List<DOMElement> orderBoxes = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-box-group.order");
-
-
-        //2017-04-01 - 2017-05-01
-        //check first order
-        String dateString = JXBrowserHelper.text(orderBoxes.get(0), ".order-info .a-col-left .a-span3 .value,.order-info .a-col-left .a-span4 .value");
-        Date firstPurchaseDate = parseOrderDate(dateString, country);
-
-        dateString = JXBrowserHelper.text(orderBoxes.get(orderBoxes.size() - 1), ".order-info .a-col-left .a-span3 .value,.order-info .a-col-left .a-span4 .value");
-        Date lastPurchaseDate = parseOrderDate(dateString, country);
-        messageListener.addMsg("first order " + firstPurchaseDate + ", last order " + lastPurchaseDate);
-        //last 2017-07-01, 还要往后翻，继续2分
-        if (lastPurchaseDate.after(toDate)) {
-            return 2;
-        }
-
-        //first , last 2017-03-01, 要往前翻，继续2分
-        if (firstPurchaseDate.before(toDate)) {
-            return -2;
-        }
-
-        //first 2017-05-01,往前翻一页
-        if (firstPurchaseDate.equals(toDate)) {
-            return -1;
-        }
-        //first 2017-05-02
-        if (firstPurchaseDate.after(toDate)) {
-            if (lastType == -1) {
-                return 0;
-            }
-
-            //last 2017-05-01
-            if (lastPurchaseDate.equals(toDate) || lastPurchaseDate.before(toDate)) {
-                return 0;
-            }
-        }
-
-        return 0;
-    }
-
 
     public void downloadByCountry(Country country, Account buyer, Date fromDate, Date toDate) {
         long start = System.currentTimeMillis();
         BuyerPanel buyerPanel = TabbedBuyerPanel.getInstance().getOrAddTab(country, buyer);
         TabbedBuyerPanel.getInstance().setRunningIcon(buyerPanel);
         Browser browser = buyerPanel.getBrowserView().getBrowser();
-        LoginPage loginPage = new LoginPage(buyerPanel);
-        loginPage.execute(null);
 
+        try {
+            login(buyerPanel);
+        } catch (Exception e) {
+            LOGGER.error(Strings.getExceptionMsg(e));
+            return;
+        }
 
         goToTheRightPage(buyerPanel, fromDate, toDate);
 
@@ -202,12 +76,46 @@ public class InvoiceDownloaderService {
         int totalDownloaded = 0;
         outerloop:
         while (true) {
-            String pageUrl = browser.getURL();
-            List<DOMElement> orderBoxes = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-box-group.order");
-            for (DOMElement orderElement : orderBoxes) {
+            if (LoginPage.needLoggedIn(browser)) {
+                try {
+                    login(buyerPanel);
+                    WaitTime.Normal.execute();
+                } catch (Exception e) {
+                    LOGGER.error(Strings.getExceptionMsg(e));
+                    return;
+                }
+            }
 
+            String pageUrl = browser.getURL();
+
+            List<DOMElement> orderBoxes = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-box-group.order");
+            String totalString = JXBrowserHelper.text(browser, "#controlsContainer .num-orders").replaceAll(Regex.NON_DIGITS.val(), "");
+            int totalOrders = IntegerUtils.parseInt(totalString, 0);
+            if (orderBoxes.size() < 10) {
+                //try reload
+                JXBrowserHelper.loadPage(browser, pageUrl);
+                if (totalOrders > 10) {
+                    JXBrowserHelper.waitUntilVisible(browser, ".a-pagination");
+                } else {
+                    WaitTime.Normal.execute();
+                }
+                orderBoxes = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-box-group.order");
+            }
+
+            LOGGER.info("\n{} - {} - orders {}", buyer.getEmail(), pageUrl, orderBoxes.size());
+            for (DOMElement orderElement : orderBoxes) {
                 String dateString = JXBrowserHelper.text(orderElement, ".order-info .a-col-left .a-span3 .value,.order-info .a-col-left .a-span4 .value");
-                Date date = parseOrderDate(dateString, country);
+                if (StringUtils.isBlank(dateString)) {
+                    LOGGER.error("No date info found.");
+                    continue;
+                }
+
+                Date date = null;
+                try {
+                    date = parseOrderDate(dateString, country);
+                } catch (Exception e) {
+                    LOGGER.error("fail to parse date {}", dateString, e);
+                }
 
                 if (date == null) {
                     LOGGER.error("fail to parse date {}", dateString);
@@ -217,32 +125,35 @@ public class InvoiceDownloaderService {
 
                 if (date.before(fromDate)) {
                     LOGGER.error("{} before date {}", date, fromDate);
+                    JXBrowserHelper.loadPage(browser, pageUrl);
                     break outerloop;
                 }
+
                 if (date.after(toDate)) {
                     LOGGER.error("{} after date {}", date, toDate);
                     continue;
                 }
 
-                String orderId = JXBrowserHelper.text(orderElement, ".order-info .a-col-right .a-size-mini .value");
-                String totalText = JXBrowserHelper.text(orderElement, ".order-info .a-col-left .a-span2 .value");
-                BuyerOrderInvoice invoice = new BuyerOrderInvoice();
-                invoice.setBuyerEmail(buyer.getEmail());
-                invoice.setCountry(country.name());
-                invoice.setPurchaseDate(date);
-                invoice.setOrderId(orderId);
-                String filePath = getLocalFilePath(invoice);
-                File file = new File(filePath);
-                if (file.exists()) {
-                    LOGGER.error("Invoice for order {} from {} {} already downloaded", orderId, buyer.getEmail(), country.name());
-                    continue;
-                }
-
-                invoice.setCardNo("");
-                Money total = Money.fromText(totalText, country);
-                invoice.setOrderTotal(total.toUSDAmount().floatValue());
-
                 try {
+                    String orderId = JXBrowserHelper.text(orderElement, ".order-info .a-col-right .a-size-mini .value");
+                    //String totalText = JXBrowserHelper.text(orderElement, ".order-info .a-col-left .a-span2 .value");
+                    BuyerOrderInvoice invoice = new BuyerOrderInvoice();
+                    invoice.setBuyerEmail(buyer.getEmail());
+                    invoice.setCountry(country.name());
+                    invoice.setPurchaseDate(date);
+                    invoice.setOrderId(orderId);
+                    String filePath = getLocalFilePath(invoice);
+                    File file = new File(filePath);
+                    if (file.exists()) {
+                        LOGGER.error("Invoice for order {} from {} {} already downloaded", orderId, buyer.getEmail(), country.name());
+                        continue;
+                    }
+
+                    invoice.setCardNo("");
+                    //Money total = Money.fromText(totalText, country);
+                    invoice.setOrderTotal(0);
+
+
                     downloadInvoice(invoice, browser);
                     totalDownloaded++;
                 } catch (Exception e) {
@@ -253,37 +164,62 @@ public class InvoiceDownloaderService {
             }
 
 
-            if (LoginPage.needLoggedIn(browser)) {
-                loginPage = new LoginPage(buyerPanel);
-                loginPage.execute(null);
-            }
-
             //next page
             DOMElement nextPage = JXBrowserHelper.selectElementByCssSelector(browser, ".a-pagination .a-last a");
             if (nextPage == null) {
                 JXBrowserHelper.loadPage(browser, pageUrl);
-                WaitTime.Short.execute();
+                WaitTime.Normal.execute();
                 //next page
                 nextPage = JXBrowserHelper.selectElementByCssSelector(browser, ".a-pagination .a-last a");
                 if (nextPage == null) {
+                    LOGGER.info("\n{} - page end", buyer.getEmail());
                     break;
                 }
             }
 
 
             JXBrowserHelper.insertChecker(browser);
+            String nextPageUrl = buyerPanel.getCountry().baseUrl() + nextPage.getAttribute("href");
             nextPage.click();
-            WaitTime.Short.execute();
             JXBrowserHelper.waitUntilNewPageLoaded(browser);
-            WaitTime.Short.execute();
+
+
+            if (LoginPage.needLoggedIn(browser)) {
+                try {
+                    login(buyerPanel);
+                    JXBrowserHelper.loadPage(browser, nextPageUrl);
+                } catch (Exception e) {
+                    LOGGER.error(Strings.getExceptionMsg(e));
+                    return;
+                }
+            }
+
+            WaitTime.Normal.execute();
         }
 
         messageListener.addMsg("Total " + totalDownloaded + " invoices downloaded for " + buyer.getEmail() +
                 " from country " + country + ", took " + Strings.formatElapsedTime(start), InformationLevel.Positive);
 
-        TabbedBuyerPanel.getInstance().removeTab(buyerPanel);
+        if (totalDownloaded > 10 || TabbedBuyerPanel.getInstance().getTabCount() <= 3) {
+            TabbedBuyerPanel.getInstance().setNormalIcon(buyerPanel);
+        } else {
+            TabbedBuyerPanel.getInstance().removeTab(buyerPanel);
+        }
+
     }
 
+
+    protected void login(BuyerPanel buyerPanel) {
+
+        LoginPage loginPage = new LoginPage(buyerPanel);
+        loginPage.execute(null);
+
+        while (LoginPage.needLoggedIn(buyerPanel.getBrowserView().getBrowser())) {
+            loginPage = new LoginPage(buyerPanel);
+            loginPage.execute(null);
+            WaitTime.Short.execute();
+        }
+    }
 
     /**
      * <pre>
@@ -332,17 +268,24 @@ public class InvoiceDownloaderService {
             settings.setPrintBackgrounds(true);
 
             printJob.addPrintJobListener(event -> {
-                LOGGER.info("Invoice PDF saved to {}", filePath);
-                messageListener.addMsg("Invoice PDF saved to " + filePath);
+                LOGGER.info(invoice.getBuyerEmail() + " invoice PDF saved to {}", filePath);
+                messageListener.addMsg(invoice.getBuyerEmail() + " invoice PDF saved to " + filePath);
                 //upload to dropbox
-                try {
-                    String dropboxFilePath = getDropboxFilePath(invoice);
-                    dropboxAssistant.upload(new File(filePath), dropboxFilePath);
-                    LOGGER.info("Uploaded file to {}", dropboxFilePath);
-                    messageListener.addMsg("Invoice PDF uploaded to dropbox folder " + dropboxFilePath);
-                } catch (Exception e) {
-                    messageListener.addMsg("Invoice PDF " + file + " failed to upload to dropbox folder", InformationLevel.Negative);
+                for (int i = 0; i < 3; i++) {
+                    try {
+                        String dropboxFilePath = getDropboxFilePath(invoice);
+                        dropboxAssistant.upload(new File(filePath), dropboxFilePath);
+                        LOGGER.info(invoice.getBuyerEmail() + " uploaded file to {}", dropboxFilePath);
+                        messageListener.addMsg(invoice.getBuyerEmail() + " invoice PDF uploaded to dropbox folder " + dropboxFilePath);
+                        return;
+                    } catch (Exception e) {
+                        //
+                        LOGGER.error("", e);
+                        WaitTime.Longest.execute();
+                    }
                 }
+
+                messageListener.addMsg(invoice.getBuyerEmail() + " invoice PDF " + file + " failed to upload to dropbox folder", InformationLevel.Negative);
             });
             return PrintStatus.CONTINUE;
         });
@@ -391,6 +334,173 @@ public class InvoiceDownloaderService {
         }
 
         return date;
+    }
+
+
+    public void goToTheRightPage(BuyerPanel buyerPanel, Date fromDate, Date toDate) {
+        Browser browser = buyerPanel.getBrowserView().getBrowser();
+        Country country = buyerPanel.getCountry();
+        String url = country.baseUrl() + "/gp/your-account/order-history?opt=ab&digitalOrders=1&unifiedOrders=1&returnTo=&orderFilter=";
+        //default to last 6 month
+        int totalDays = 0;
+        if (fromDate.after(DateUtils.addMonths(now.get(), -6))) {
+            url += "months-6";
+            totalDays = 180;
+        } else {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(fromDate);
+            int year = calendar.get(Calendar.YEAR);
+            url += "year-" + year;
+            totalDays = 365;
+        }
+
+        //go to the first page
+        JXBrowserHelper.loadPage(browser, url);
+        WaitTime.Shortest.execute();
+
+        //find page numbers
+        List<DOMElement> pagination = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-pagination .a-normal a");
+
+        if (pagination.size() == 0) {
+            return;
+        }
+        DOMElement lastPage = pagination.get(pagination.size() - 1);
+        int pages = IntegerUtils.parseInt(lastPage.getInnerText(), 1);
+
+
+        //first page
+        List<DOMElement> orderBoxes = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-box-group.order");
+        for (DOMElement orderElement : orderBoxes) {
+            String dateString = JXBrowserHelper.text(orderElement, ".order-info .a-col-left .a-span3 .value,.order-info .a-col-left .a-span4 .value");
+            Date date = parseOrderDate(dateString, country);
+            if (date.before(toDate)) {
+                return;
+            }
+        }
+        if (pages <= 5) {
+            return;
+        }
+
+        //二分法
+        int lastPageNo = 0;
+        int page = pages / 2;
+        int lastType = 2;
+
+        int days = Dates.daysBetween(toDate, now.get());
+        if (days <= 5) {
+            page = pages * days / totalDays;
+        }
+
+        while (true) {
+            String pageUrl = url + "&startIndex=" + (page - 1) * 10;
+            JXBrowserHelper.loadPage(browser, pageUrl);
+
+
+            if (LoginPage.needLoggedIn(browser)) {
+                try {
+                    login(buyerPanel);
+                    JXBrowserHelper.loadPage(browser, pageUrl);
+                    WaitTime.Normal.execute();
+                } catch (Exception e) {
+                    LOGGER.error(Strings.getExceptionMsg(e));
+                    return;
+                }
+            }
+
+
+            WaitTime.Shortest.execute();
+
+            messageListener.addMsg(buyerPanel.getBuyer().getEmail() + " currently on page " + page + ", total " + pages + " pages");
+
+            lastType = checkPurchaseDateOnPage(buyerPanel, toDate, lastType);
+
+
+            if (lastType == 0) {
+                break;
+            }
+
+            int newPage = page;
+            if (lastType == 2) {
+                //lastPageNo
+                newPage = page + Math.abs(page - lastPageNo) / 2;
+                if (newPage <= page) {
+                    newPage = page + 1;
+                    lastType = 1;
+                }
+            } else if (lastType == -2) {
+                newPage = page - Math.abs(page - lastPageNo) / 2;
+                if (newPage >= page) {
+                    newPage = page - 1;
+                    lastType = -1;
+                }
+            } else if (lastType == 1) {
+                newPage = page + 1;
+            } else {
+                newPage = page - 1;
+            }
+
+            if (newPage <= 1 || newPage >= pages - 1) {
+                break;
+            }
+
+            lastPageNo = page;
+            page = newPage;
+        }
+
+    }
+
+    public int checkPurchaseDateOnPage(BuyerPanel buyerPanel, Date toDate, int lastType) {
+        Browser browser = buyerPanel.getBrowserView().getBrowser();
+        Country country = buyerPanel.getCountry();
+        List<DOMElement> orderBoxes = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-box-group.order");
+
+
+        //2017-04-01 - 2017-05-01
+        //check first order
+        String dateString = JXBrowserHelper.text(orderBoxes.get(0), ".order-info .a-col-left .a-span3 .value,.order-info .a-col-left .a-span4 .value");
+        Date firstPurchaseDate = parseOrderDate(dateString, country);
+
+        dateString = JXBrowserHelper.text(orderBoxes.get(orderBoxes.size() - 1), ".order-info .a-col-left .a-span3 .value,.order-info .a-col-left .a-span4 .value");
+        Date lastPurchaseDate = parseOrderDate(dateString, country);
+        messageListener.addMsg("first order " + firstPurchaseDate + ", last order " + lastPurchaseDate + ", type " + lastType);
+        //last 2017-07-01, 还要往后翻，继续2分
+        if (lastPurchaseDate.after(toDate)) {
+            return 2;
+        }
+
+        //first 2017-03-01，要往前翻，继续2分
+        if (firstPurchaseDate.before(toDate)) {
+            if (lastType == 1) {
+                return 0;
+            }
+
+            return -2;
+        }
+
+        //first 2017-05-01,往前翻一页
+        if (firstPurchaseDate.equals(toDate)) {
+            if (lastType == 1) {
+                return 0;
+            }
+            return -1;
+        }
+
+        //first 2017-05-02
+        if (firstPurchaseDate.after(toDate)) {
+            if (lastType == -1) {
+                return 0;
+            }
+
+            //last 2017-05-01
+            if (lastPurchaseDate.equals(toDate) || lastPurchaseDate.before(toDate)) {
+                return 0;
+            }
+
+            //last 2017-05-02，往后翻
+            return 1;
+        }
+
+        return 0;
     }
 
     public static void main(String[] args) {
