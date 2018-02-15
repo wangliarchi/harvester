@@ -10,6 +10,7 @@ import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
+import edu.olivet.harvester.fulfill.service.PSEventListener.Status;
 import edu.olivet.harvester.fulfill.service.RuntimePanelObserver;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.ui.ProgressBarComponent;
@@ -106,6 +107,10 @@ public class BuyerPanel extends JPanel implements RuntimePanelObserver, Progress
         progressBar.setValue(processedTotal);
         progressTextLabel.setText(String.format("%d of %d, %d success, %d failed, took %s",
                 processedTotal, total, successCount, failedCount, Strings.formatElapsedTime(start)));
+
+        if (progressBar.getMaximum() == processedTotal) {
+            state = Status.NotRunning;
+        }
     }
 
     private String tasksInfo = "";
@@ -168,7 +173,11 @@ public class BuyerPanel extends JPanel implements RuntimePanelObserver, Progress
         return state == PSEventListener.Status.Stopped;
     }
 
-    public void recreateBrowser() {
+    public boolean running() {
+        return state == Status.Running;
+    }
+
+    public void killBrowser() {
         try {
             int pid = (int) browserView.getBrowser().getRenderProcessInfo().getPID();
             browserView.getBrowser().dispose();
@@ -177,7 +186,10 @@ public class BuyerPanel extends JPanel implements RuntimePanelObserver, Progress
             //
             LOGGER.error("", e);
         }
+    }
 
+    public void recreateBrowser() {
+        killBrowser();
         this.browserView = JXBrowserHelper.init(this.profilePathName(), zoomLevel);
         toHomePage();
         WaitTime.Short.execute();
