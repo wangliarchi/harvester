@@ -1,6 +1,5 @@
 package edu.olivet.harvester.hunt.utils;
 
-import com.alibaba.fastjson.annotation.JSONField;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
@@ -192,15 +191,19 @@ public class SellerHuntUtils {
 
 
     public static void setSellerDataForOrder(Order order, Seller seller) {
+
+        if (StringUtils.isBlank(order.seller)) {
+            order.remark = Remark.TO_BE_CHECKED.appendTo(order.remark);
+        } else {
+            order.remark = "New Seller Hunted";
+        }
+
         order.seller = seller.getName();
         order.seller_id = seller.getUuid();
         //todo USD or local currency?
         order.seller_price = seller.getPrice().getAmount().toPlainString();
         order.character = seller.getType().abbrev();
         order.condition = seller.getCondition().text();
-
-
-        order.remark = Remark.TO_BE_CHECKED.appendTo(order.remark);
 
 
         if (seller.isAddOn()) {
