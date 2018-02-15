@@ -6,6 +6,7 @@ import com.mchange.lang.IntegerUtils;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
+import edu.olivet.harvester.fulfill.exception.Exceptions.SellerEddTooLongException;
 import edu.olivet.harvester.fulfill.model.ShippingEnums.ShippingSpeed;
 import edu.olivet.harvester.fulfill.model.ShippingOption;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
@@ -61,7 +62,7 @@ public class DefaultHandler implements ShippingHandler {
     public List<ShippingOption> getValidateOptions(Order order, List<ShippingOption> shippingOptions) {
 
         Date orderEdd = order.latestEdd();
-        int maxDays = IntegerUtils.parseInt(order.getRuntimeSettings().getEddLimit(), 7);
+        int maxDays = order.buyerExpeditedShipping() ? 3 : IntegerUtils.parseInt(order.getRuntimeSettings().getEddLimit(), 7);
 
         DateTime start = new DateTime(orderEdd.getTime());
 
@@ -79,17 +80,21 @@ public class DefaultHandler implements ShippingHandler {
                 return false;
             }
 
+            if (order.stdShipping() && it.isExpedited()) {
+                return false;
+            }
+
             return (OrderValidator.skipCheck(order, OrderValidator.SkipValidation.EDD) ||
-                            Remark.isDN(order.remark) ||
-                            latestDate.before(orderEdd) ||
-                            daysExceedOrderEdd <= maxDays);
+                    Remark.isDN(order.remark) ||
+                    latestDate.before(orderEdd) ||
+                    daysExceedOrderEdd <= maxDays);
         }).collect(Collectors.toList());
 
 
         if (CollectionUtils.isEmpty(validShippingOptions)) {
             Date latestDate = shippingOptions.get(0).getLatestDeliveryDate();
             int days = Math.abs(Dates.daysBetween(latestDate, orderEdd));
-            throw new OrderSubmissionException("No shipping option available. Earliest EDD is " +
+            throw new SellerEddTooLongException("No shipping option available. Earliest EDD is " +
                     Dates.format(latestDate, DateFormat.US_FEEDBACK_DATE.pattern()) + ", order EDD is " +
                     Dates.format(order.latestEdd(), DateFormat.US_FEEDBACK_DATE.pattern()) +
                     ", exceed order EDD " + days + " days");
