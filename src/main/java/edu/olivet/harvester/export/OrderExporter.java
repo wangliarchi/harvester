@@ -102,6 +102,7 @@ public class OrderExporter {
         Date lastExportedDate = DateUtils.addHours(now.get(), 36);
         try {
             lastExportedDate = exportStatService.getOrderExportFromDate(country);
+            lastExportedDate = DateUtils.addHours(lastExportedDate, -1);
         } catch (Exception e) {
             LOGGER.error("", e);
             //messagePanel.displayMsg(e.getMessage(), LOGGER, InformationLevel.Negative);
@@ -113,7 +114,7 @@ public class OrderExporter {
         }
 
         //if not manually set to date, set to 5 mins before now.
-        if (toDate == null) {
+        if (toDate == null || toDate.after(now.get())) {
             toDate = DateUtils.addMinutes(now.get(), -5);
         }
 
