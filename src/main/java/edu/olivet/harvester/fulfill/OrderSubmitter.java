@@ -92,6 +92,10 @@ public class OrderSubmitter {
                 error = orderValidator.isValid(order, FulfillmentEnum.Action.SubmitOrder);
             }
 
+            if (StringUtils.isBlank(error)) {
+                error = orderValidator.StatusMarkedCorrectForSubmit(order);
+            }
+
             if (StringUtils.isNotBlank(error)) {
                 messageListener.addMsg(order, error, InformationLevel.Negative);
             } else {
@@ -131,9 +135,9 @@ public class OrderSubmitter {
         if (CollectionUtils.isEmpty(orders)) {
             orders = appScript.readOrders(task);
             orders = titleCheck(orders);
-        } else if (System.currentTimeMillis() - task.getDateCreated().getTime() > 10 * 60 * 1000) {
-            orders = sheetService.reloadOrders(orders);
         }
+
+        orders = sheetService.reloadOrders(orders);
 
         String resultSummary = String.format("Finished loading orders to submit for %s, %d orders found, took %s",
                 task.convertToRuntimeSettings().toString(), orders.size(), Strings.formatElapsedTime(start));
