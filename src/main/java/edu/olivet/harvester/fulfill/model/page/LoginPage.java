@@ -57,6 +57,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
 
         //let the browser go to order history page
         JXBrowserHelper.loadPage(browser, country.baseUrl() + "/" + AmazonPage.DigitalOrderList.urlMark());
+        WaitTime.Shortest.execute();
 
         DOMElement email = JXBrowserHelper.selectElementByCssSelector(browser, EMAIL_SELECTOR);
         DOMElement password = JXBrowserHelper.selectElementByCssSelector(browser, PASSWORD_SELECTOR);
