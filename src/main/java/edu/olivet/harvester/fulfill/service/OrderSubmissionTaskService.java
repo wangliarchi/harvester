@@ -152,6 +152,7 @@ public class OrderSubmissionTaskService {
         return task;
     }
 
+
     public OrderSubmissionTask saveTask(OrderSubmissionTask task) {
         //if new, generate id
         if (StringUtils.isBlank(task.getId())) {
@@ -175,8 +176,12 @@ public class OrderSubmissionTaskService {
 
         dbManager.insertOrUpdate(task, OrderSubmissionTask.class);
 
-        return task;
 
+        if (task.retryRequired()) {
+            retryTask(task);
+        }
+
+        return task;
     }
 
     @Inject private
@@ -223,6 +228,15 @@ public class OrderSubmissionTaskService {
         task.setTaskStatus(OrderTaskStatus.Completed);
         task.setDateEnded(new Date());
         saveTask(task);
+    }
+
+
+    public OrderSubmissionTask retryTask(OrderSubmissionTask task) {
+        task.setTaskStatus(OrderTaskStatus.Retried);
+        saveTask(task);
+
+        OrderSubmissionTask newTask = task.copy();
+        return saveTask(newTask);
     }
 
 
