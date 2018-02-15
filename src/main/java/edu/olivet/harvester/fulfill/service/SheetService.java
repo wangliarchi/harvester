@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.harvester.common.model.OrderEnums.Status;
 import edu.olivet.harvester.fulfill.utils.FwdAddressUtils;
 import edu.olivet.harvester.fulfill.utils.OrderStatusUtils;
 import edu.olivet.harvester.common.model.Order;
@@ -35,8 +36,9 @@ public class SheetService extends SheetAPI {
     @Repeat(times = 5, expectedExceptions = BusinessException.class)
     public void fillFulfillmentOrderInfo(String spreadsheetId, Order order) {
         //need to relocate order row on google sheet, as it may be arranged during order fulfillment process.
-        int row = locateOrder(order);
-
+        //int row = locateOrder(order);
+        //reloaded before order placed, dont need to reload again;
+        int row = order.row;
         List<ValueRange> dateToUpdate = new ArrayList<>();
 
         //status
@@ -102,11 +104,15 @@ public class SheetService extends SheetAPI {
         //need to relocate order row on google sheet, as it may be arranged during order fulfillment process.
         int row = locateOrder(order);
         order.addRemark(msg);
+        order.status = Status.Initial.value();
         List<ValueRange> dateToUpdate = new ArrayList<>();
 
-        ValueRange statusData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(order.remark)))
+        ValueRange statusData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(order.status)))
+                .setRange(String.format("%s!A%d", order.sheetName, row));
+        ValueRange remarkData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(order.remark)))
                 .setRange(String.format("%s!S%d", order.sheetName, row));
         dateToUpdate.add(statusData);
+        dateToUpdate.add(remarkData);
 
         try {
             this.batchUpdateValues(spreadsheetId, dateToUpdate);
@@ -204,7 +210,6 @@ public class SheetService extends SheetAPI {
         //id, sku, seller, price, remark
         Order o = reloadOrder(order);
         return o.row;
-
     }
 
 
@@ -226,27 +231,16 @@ public class SheetService extends SheetAPI {
                 LOGGER.info("Cant find order " + order.order_id + "on sheet" + order.sheetName);
                 continue;
             }
+
             List<Order> os = orderMap.get(order.order_id);
+            Order reloadedOrder = findOrder(order, os);
 
-            for (Order o : os) {
-                if (o.equalsLite(order)) {
-                    if (StringUtils.equalsAnyIgnoreCase(o.remark, order.remark, order.originalRemark)) {
-                        o.setContext(order.getContext());
-                        reloadedOrders.add(o);
-                        break;
-                    } else if (o.row == order.row || StringUtils.isBlank(order.remark)) {
-                        o.setContext(order.getContext());
-                        reloadedOrders.add(o);
-                        break;
-                    }
-                }
+            if (reloadedOrder != null) {
+                reloadedOrders.add(reloadedOrder);
             }
-
-
         }
 
         return reloadedOrders.stream().distinct().collect(Collectors.toList());
-
     }
 
     public Order reloadOrder(Order order) {
@@ -257,45 +251,73 @@ public class SheetService extends SheetAPI {
     }
 
     @Repeat(expectedExceptions = BusinessException.class)
-    private Order _reloadOrder(Order order) {
+    protected Order _reloadOrder(Order order) {
         //id, sku, seller, price, remark
         List<Order> orders = appScript.readOrders(order.spreadsheetId, order.sheetName);
-        List<Order> validOrders = orders.stream().filter(it -> it.equalsLite(order)).collect(Collectors.toList());
+        List<Order> validOrders = orders.stream().filter(it -> it.equalsSuperLite(order) ||
+                (StringUtils.length(order.last_code) == 8 && StringUtils.equalsIgnoreCase(order.last_code, it.last_code))
+        ).collect(Collectors.toList());
+
         if (CollectionUtils.isEmpty(validOrders)) {
             LOGGER.error("Cant reload order {} from {} - all orders {} - valid {}", order, order.sheetName, orders, validOrders);
             throw new BusinessException("Cant find order " + order + "on order sheet");
         }
 
-        if (validOrders.size() == 1) {
-            return validOrders.get(0);
-        }
 
+        Order reloadedOrder = findOrder(order, validOrders);
 
-        for (Order o : validOrders) {
-            if (o.equalsLite(order)) {
-                if (StringUtils.length(order.last_code) == 8 && StringUtils.equalsIgnoreCase(order.last_code, o.last_code)) {
-                    return o;
-                }
-                if (o.row == order.row && StringUtils.equalsAnyIgnoreCase(o.remark, order.remark, order.originalRemark)) {
-                    return o;
-                }
-
-            }
-        }
-
-        for (Order o : validOrders) {
-            if (o.equalsLite(order)) {
-                if (StringUtils.equalsAnyIgnoreCase(o.remark, order.remark, order.originalRemark)) {
-                    return o;
-                } else if (o.row == order.row || StringUtils.isBlank(order.remark)) {
-                    return o;
-                }
-            }
-
+        if (reloadedOrder != null) {
+            return reloadedOrder;
         }
 
         throw new BusinessException("Cant find order " + order + "on order sheet");
+    }
 
+    private Order findOrder(Order order, List<Order> os) {
+        Order reloadedOrder = null;
+
+        if (os.size() == 1) {
+            reloadedOrder = os.get(0);
+        }
+
+        //check by last code. when mark status, each row will assign a random code
+        if (reloadedOrder == null) {
+            if (StringUtils.length(order.last_code) == 8) {
+                for (Order o : os) {
+                    if (order.last_code.equalsIgnoreCase(o.last_code)) {
+                        reloadedOrder = o;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (reloadedOrder == null) {
+            for (Order o : os) {
+                if (o.equalsLite(order) &&
+                        StringUtils.equalsAnyIgnoreCase(o.remark, order.remark, order.originalRemark)) {
+                    reloadedOrder = o;
+                    break;
+                }
+            }
+        }
+
+        if (reloadedOrder == null) {
+            for (Order o : os) {
+                if (o.equalsLite(order) &&
+                        (o.row == order.row || StringUtils.isBlank(order.remark))) {
+                    reloadedOrder = o;
+                    break;
+                }
+            }
+        }
+
+        if (reloadedOrder != null) {
+            reloadedOrder.setContext(order.getContext());
+            reloadedOrder.setTask(order.getTask());
+        }
+
+        return reloadedOrder;
     }
 
 
