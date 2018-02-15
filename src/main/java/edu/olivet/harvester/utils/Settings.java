@@ -75,7 +75,8 @@ public class Settings {
 
     public void saveToFile() {
         File file = new File(getConfigPath());
-        Tools.writeStringToFile(file, JSON.toJSONString(this, true));
+        String json = JSON.toJSONString(this, true);
+        Tools.writeStringToFile(file, json);
         reload();
     }
 
