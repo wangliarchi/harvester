@@ -8,6 +8,7 @@ import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.service.ProgressUpdater;
 import edu.olivet.harvester.hunt.service.HuntWorker;
+import edu.olivet.harvester.hunt.service.SheetService;
 import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.utils.MessageListener;
@@ -29,6 +30,7 @@ public class Hunter {
     private static final Logger LOGGER = LoggerFactory.getLogger(Hunter.class);
 
     @Inject AppScript appScript;
+    @Inject SheetService sheetService;
     @Inject private MessageListener messageListener;
 
     private static final int HUNTER_JOB_NUMBER = 2;
@@ -63,8 +65,8 @@ public class Hunter {
             return;
         }
 
-        huntForOrders(orders);
 
+        huntForOrders(orders);
     }
 
     public void huntForOrders(List<Order> orders) {
@@ -76,6 +78,12 @@ public class Hunter {
         if (CollectionUtils.isEmpty(orders)) {
             messageListener.addMsg("No orders to hunt", InformationLevel.Negative);
             return;
+        }
+
+        try {
+            sheetService.updateLastCode(orders.get(0).getSpreadsheetId(), orders);
+        } catch (Exception e) {
+            //
         }
 
         ProgressUpdater.updateTotal(orders.size());
