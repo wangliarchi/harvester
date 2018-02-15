@@ -107,8 +107,11 @@ public class SheetService extends SheetAPI {
         int protectedId = lockSheet(spreadsheetId, sheetProperties.getSheetId(), "Order exporting process is running.");
         int lastRow = getLastRow(spreadsheetId, sheetName);
         try {
-            List<List<Object>> values = convertOrdersToRangeValues(orders, spreadsheetId, sheetName);
-            this.spreadsheetValuesAppend(spreadsheetId, sheetName, new ValueRange().setValues(values));
+            String range = String.format("%s!A%d:AW%d", sheetName, lastRow + 1, lastRow + orders.size() + 1);
+            List<List<Object>> values = convertOrdersToRangeValues(orders);
+
+            LOGGER.info("write orders to {}, range {}, orders {}", spreadsheetId, range, orders.size());
+            this.spreadsheetValuesAppend(spreadsheetId, range, new ValueRange().setValues(values));
         } catch (Exception e) {
             throw new BusinessException(e);
         } finally {
@@ -198,7 +201,7 @@ public class SheetService extends SheetAPI {
 
     private static final Map<String, Field> ORDER_FIELDS_CACHE = new HashMap<>();
 
-    public List<List<Object>> convertOrdersToRangeValues(List<Order> orders, String destSpreadId, String sheetName) {
+    public List<List<Object>> convertOrdersToRangeValues(List<Order> orders) {
         List<List<Object>> values = new ArrayList<>();
         orders.forEach(order -> {
             Object[] row = new String[OrderEnums.OrderColumn.values().length];
