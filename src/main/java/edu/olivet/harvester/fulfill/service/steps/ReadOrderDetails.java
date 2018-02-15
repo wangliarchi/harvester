@@ -13,7 +13,6 @@ import edu.olivet.harvester.fulfill.model.page.LoginPage;
 import edu.olivet.harvester.fulfill.model.page.checkout.CheckoutEnum.CheckoutPage;
 import edu.olivet.harvester.fulfill.model.page.checkout.PlacedOrderDetailPage;
 import edu.olivet.harvester.fulfill.service.DailyBudgetHelper;
-import edu.olivet.harvester.fulfill.service.SheetService;
 import edu.olivet.harvester.fulfill.service.StepHelper;
 import edu.olivet.harvester.fulfill.service.flowcontrol.FlowState;
 import edu.olivet.harvester.fulfill.service.flowcontrol.Step;
@@ -31,10 +30,7 @@ import java.util.Date;
  */
 public class ReadOrderDetails extends Step {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReadOrderDetails.class);
-    @Inject
-    SheetService sheetService;
-    @Inject private
-    DailyBudgetHelper dailyBudgetHelper;
+    @Inject private DailyBudgetHelper dailyBudgetHelper;
 
     @Override
     protected void process(FlowState state) {
