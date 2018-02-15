@@ -5,6 +5,7 @@ import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.export.service.TrueFakeAsinMappingService;
 import edu.olivet.harvester.hunt.model.Seller;
 import edu.olivet.harvester.hunt.utils.SellerHuntUtils;
 import org.apache.commons.collections4.CollectionUtils;
@@ -24,11 +25,19 @@ public class HuntService {
 
     @Inject SellerService sellerService;
     @Inject HuntVariableService huntVariableService;
-
+    @Inject TrueFakeAsinMappingService trueFakeAsinMappingService;
 
     public Seller huntForOrder(Order order) {
         Long start = System.currentTimeMillis();
         //find sellers on amazon
+        if (StringUtils.isBlank(order.isbn)) {
+            try {
+                order.isbn = trueFakeAsinMappingService.getISBN(order);
+                order.isbn_address = "https://www.amazon.com/dp/" + order.isbn;
+            } catch (Exception e) {
+                throw new BusinessException("No isbn found for order");
+            }
+        }
         List<Seller> sellers = sellerService.getSellersForOrder(order);
 
         if (CollectionUtils.isEmpty(sellers)) {
