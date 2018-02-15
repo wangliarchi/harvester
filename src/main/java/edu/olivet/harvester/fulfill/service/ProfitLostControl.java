@@ -92,8 +92,15 @@ public class ProfitLostControl {
      * </pre>
      */
     public static boolean canPlaceOrder(Order order, Float cost) {
-        //
+        //0
+        float lostLimit = getLostLimit(order, cost);
+        float profit = profit(order, cost);
 
+        return profit - lostLimit >= 0;
+    }
+
+
+    public static float getLostLimit(Order order, Float cost) {
         ProfitControlVariable profitControlVariable = getVariable();
         float lostLimit;
         if (order.fulfilledFromUK()) {
@@ -107,9 +114,8 @@ public class ProfitLostControl {
                 lostLimit = cost * profitControlVariable.min2;
             }
         }
-        float profit = profit(order, cost);
 
-        return profit - lostLimit >= 0;
+        return lostLimit;
     }
 
     public static void main(String[] args) {
