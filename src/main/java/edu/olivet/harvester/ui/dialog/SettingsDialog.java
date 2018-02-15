@@ -68,7 +68,7 @@ public class SettingsDialog extends BaseDialog {
                     //load setting migrated from orderman
                     settings = Migration.loadSettings();
                 } catch (Exception e1) {
-                    LOGGER.error("Error loading migration configuration file.",e1);
+                    LOGGER.error("Error loading migration configuration file.", e1);
                     // -> Ignore
                 }
             }
@@ -97,10 +97,7 @@ public class SettingsDialog extends BaseDialog {
             final JCheckBox checkBox = new JCheckBox(country.label(), settings == null || map.containsKey(country));
             checkBox.addActionListener(e -> {
                 if (checkBox.isSelected()) {
-                    ConfigurationPanel cfgPanel = this.addPanel(country);
-                    if (settings != null) {
-                        cfgPanel.load(map.get(country));
-                    }
+                    this.addPanel(country, map.get(country));
                 } else {
                     Component[] tabs = tabbedPane.getComponents();
                     int i = 0;
@@ -115,10 +112,7 @@ public class SettingsDialog extends BaseDialog {
             });
             checkBoxes.put(country, checkBox);
             if (checkBox.isSelected()) {
-                ConfigurationPanel cfgPanel = this.addPanel(country);
-                if (settings != null) {
-                    cfgPanel.load(map.get(country));
-                }
+                this.addPanel(country, map.get(country));
             }
         }
 
@@ -148,8 +142,8 @@ public class SettingsDialog extends BaseDialog {
         pack();
     }
 
-    private ConfigurationPanel addPanel(Country country) {
-        ConfigurationPanel cfgPanel = new ConfigurationPanel(country);
+    private ConfigurationPanel addPanel(Country country, Configuration cfg) {
+        ConfigurationPanel cfgPanel = new ConfigurationPanel(country, cfg);
         tabbedPane.addTab(country.label(), UITools.getIcon(country.name().toLowerCase() + "Flag.png"), cfgPanel);
         return cfgPanel;
     }
@@ -220,7 +214,7 @@ public class SettingsDialog extends BaseDialog {
                 }
 
                 Configuration config = cfgPanel.collect();
-                LOGGER.info(config.toString());
+                //LOGGER.info(config.toString());
                 List<String> errors = config.validate();
                 if (CollectionUtils.isEmpty(errors)) {
                     config.setAccountCode(sid + config.getCountry().name());
