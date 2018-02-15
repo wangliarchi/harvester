@@ -6,6 +6,7 @@ import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.foundations.utils.Strings;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.export.model.AmazonOrder;
 import edu.olivet.harvester.message.ErrorAlertService;
 import edu.olivet.harvester.common.service.ElasticSearchService;
@@ -55,9 +56,12 @@ public class TrueFakeAsinMappingService {
         });
     }
 
+    public String getISBN(Order order) {
+        return getISBN(order.sku, order.getASIN());
+    }
+
     @Repeat(expectedExceptions = BusinessException.class)
-    public static String getISBN(String sku, String asin) {
-        ElasticSearchService elasticSearchService = new ElasticSearchService();
+    public String getISBN(String sku, String asin) {
         String isbn = null;
         try {
             isbn = elasticSearchService.searchISBN(asin);
