@@ -31,9 +31,11 @@ public class ConfigurationPanel extends JPanel {
     @Getter
     private final Country country;
 
-    public ConfigurationPanel(Country country) {
+    public ConfigurationPanel(Country country, Configuration cfg) {
         this.country = country;
+        this.cfg = cfg;
         this.initComponents();
+        this.loadData();
     }
 
     private void initComponents() {
@@ -51,9 +53,9 @@ public class ConfigurationPanel extends JPanel {
 
         final JLabel userCodeLbl = new JLabel("User Code:");
         final JLabel primeBuyerLbl = new JLabel("Book Prime Buyer:");
-        final JLabel buyerLbl = new JLabel("Book Buyer:");
+        final JLabel buyerLbl = new JLabel("Book Pt Buyer:");
         final JLabel prodPrimeBuyerLbl = new JLabel("Product Prime Buyer:");
-        final JLabel prodBuyerLbl = new JLabel("Product Buyer:");
+        final JLabel prodBuyerLbl = new JLabel("Product Pt Buyer:");
 
         final JLabel ebatesBuyerLbl = new JLabel("Ebates Buyer:");
 
@@ -100,7 +102,6 @@ public class ConfigurationPanel extends JPanel {
                 }
             }
         }).start());
-
 
 
         GroupLayout layout = new GroupLayout(this);
@@ -213,9 +214,6 @@ public class ConfigurationPanel extends JPanel {
     }
 
 
-
-
-
     private JTextField sellerFld = new JTextField();
     private JTextField sellerEmailFld = new JTextField();
     private JTextField storeNameFld = new JTextField();
@@ -282,8 +280,8 @@ public class ConfigurationPanel extends JPanel {
         return cfg;
     }
 
-    public void load(@Nullable Configuration cfg) {
-        this.cfg = cfg;
+    public void loadData() {
+
         if (cfg == null) {
             userCodeFld.setText(FinderCodeUtils.generate());
             return;
@@ -339,7 +337,7 @@ public class ConfigurationPanel extends JPanel {
             bookBuyerJCombox.setSelectedItem(cfg.getBuyer());
             bookPrimeBuyerJCombox.setSelectedItem(cfg.getPrimeBuyer());
             prodBuyerJCombox.setSelectedItem(cfg.getProdBuyer());
-            prodPrimeBuyerJCombox.setSelectedItem(cfg.getBuyer());
+            prodPrimeBuyerJCombox.setSelectedItem(cfg.getProdPrimeBuyer());
         }
     }
 
@@ -352,7 +350,7 @@ public class ConfigurationPanel extends JPanel {
         JFrame frame = new JFrame();
         frame.setTitle("US Marketplace Configuration");
         frame.setSize(600, 480);
-        frame.getContentPane().add(new ConfigurationPanel(Country.US));
+        frame.getContentPane().add(new ConfigurationPanel(Country.US, null));
         frame.setVisible(true);
     }
 }
