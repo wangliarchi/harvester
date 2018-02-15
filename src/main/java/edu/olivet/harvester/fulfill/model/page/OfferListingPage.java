@@ -7,7 +7,8 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
-import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
+import edu.olivet.harvester.fulfill.exception.Exceptions.SellerNotFoundException;
+import edu.olivet.harvester.fulfill.exception.Exceptions.SellerPriceRiseTooHighException;
 import edu.olivet.harvester.hunt.model.Seller;
 import edu.olivet.harvester.hunt.model.SellerEnums;
 import edu.olivet.harvester.hunt.service.SellerService;
@@ -60,7 +61,7 @@ public class OfferListingPage extends FulfillmentPage {
         if (OrderValidator.needCheck(order, OrderValidator.SkipValidation.SellerPrice)) {
             String result = OrderValidator.sellerPriceChangeNotExceedConfiguration(order, seller);
             if (StringUtils.isNotBlank(result)) {
-                throw new OrderSubmissionException(result);
+                throw new SellerPriceRiseTooHighException(result);
             }
 
         }
@@ -119,7 +120,7 @@ public class OfferListingPage extends FulfillmentPage {
         }
 
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
-        throw new OrderSubmissionException(String.format(Remark.SELLER_DISAPPEAR.text2Write(), order.seller, order.character));
+        throw new SellerNotFoundException(String.format(Remark.SELLER_DISAPPEAR.text2Write(), order.seller, order.character));
     }
 
     @Repeat(expectedExceptions = BusinessException.class)
