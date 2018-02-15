@@ -1,15 +1,27 @@
 package edu.olivet.harvester.fulfill.service.flowcontrol;
 
 import com.google.inject.Inject;
+import edu.olivet.foundations.amazon.Account;
+import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
+import edu.olivet.harvester.fulfill.exception.Exceptions.SellerEddTooLongException;
+import edu.olivet.harvester.fulfill.exception.Exceptions.SellerNotFoundException;
+import edu.olivet.harvester.fulfill.exception.Exceptions.SellerPriceRiseTooHighException;
+import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
+import edu.olivet.harvester.fulfill.service.OrderSubmissionTaskService;
 import edu.olivet.harvester.fulfill.service.SheetService;
 import edu.olivet.harvester.fulfill.service.steps.ClearShoppingCart;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.fulfill.service.steps.EbatesTransfer;
+import edu.olivet.harvester.fulfill.utils.OrderBuyerUtils;
+import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
+import edu.olivet.harvester.hunt.model.Seller;
+import edu.olivet.harvester.hunt.service.HuntService;
+import edu.olivet.harvester.hunt.utils.SellerHuntUtils;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.ui.panel.TabbedBuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
@@ -25,12 +37,12 @@ public class OrderFlowEngine extends FlowParent {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderFlowEngine.class);
 
     @Inject private EbatesTransfer ebatesTransfer;
-
     @Inject private ClearShoppingCart clearShoppingCart;
-
     @Inject private MessageListener messageListener;
-
     @Inject private SheetService sheetService;
+    @Inject private HuntService huntService;
+    @Inject private edu.olivet.harvester.hunt.service.SheetService huntSheetService;
+    @Inject private OrderSubmissionTaskService orderSubmissionTaskService;
 
     @SuppressWarnings("UnusedReturnValue")
     public FlowState process(Order order, BuyerPanel buyerPanel) {
@@ -51,30 +63,54 @@ public class OrderFlowEngine extends FlowParent {
             try {
                 processSteps(step, state);
                 return state;
+            } catch (SellerNotFoundException | SellerPriceRiseTooHighException | SellerEddTooLongException e) {
+                LOGGER.error("", e);
+                String msg = Strings.getExceptionMsg(e);
+                findNewSeller(state, msg);
             } catch (OrderSubmissionException e) {
                 clearShoppingCart.processStep(state);
                 throw e;
             } catch (Exception e) {
                 LOGGER.error("", e);
+
                 if (Strings.containsAnyIgnoreCase(e.getMessage(), JXBrowserHelper.CHANNEL_CLOSED_MESSAGE)) {
                     buyerPanel = TabbedBuyerPanel.getInstance().reInitTabForOrder(order, buyerPanel.getBuyer());
                     state.setBuyerPanel(buyerPanel);
                     WaitTime.Short.execute();
                 }
+
                 //noinspection UnusedAssignment
                 order = sheetService.reloadOrder(order);
                 state.setOrder(order);
-
                 exception = e;
-
-                //throw
             }
-
-
         }
 
         throw new BusinessException(exception);
     }
 
+
+    public void findNewSeller(FlowState state, String msg) {
+        //try to find another seller
+        messageListener.addMsg(state.getOrder(), msg + ", trying to find another seller...");
+        try {
+            Seller seller = huntService.huntForOrder(state.getOrder());
+            SellerHuntUtils.setSellerDataForOrder(state.getOrder(), seller);
+            huntSheetService.fillSellerInfo(state.getOrder());
+        } catch (Exception ee) {
+            throw new SellerNotFoundException(msg + ", No new seller found.");
+        }
+
+        Account buyerAccount = OrderBuyerUtils.getBuyer(state.getOrder());
+        Country fulfillmentCountry = OrderCountryUtils.getFulfillmentCountry(state.getOrder());
+        //if it's not on the same BuyerPanel, need to retry
+        if (!state.getBuyerPanel().getBuyer().getEmail().equalsIgnoreCase(buyerAccount.getEmail()) ||
+                state.getBuyerPanel().getCountry() != fulfillmentCountry) {
+            OrderSubmissionTask task = state.getOrder().getTask();
+            task.setRetryRequired();
+            orderSubmissionTaskService.saveTask(task);
+            throw new SellerNotFoundException(msg + ". New seller found");
+        }
+    }
 
 }
