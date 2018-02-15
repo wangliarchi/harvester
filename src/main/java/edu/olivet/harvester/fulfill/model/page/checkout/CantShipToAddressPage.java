@@ -2,6 +2,7 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.utils.Strings;
+import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.model.page.FulfillmentPage;
 import edu.olivet.harvester.fulfill.utils.OrderAddressUtils;
@@ -22,12 +23,9 @@ public class CantShipToAddressPage extends FulfillmentPage {
     public void execute(Order order) {
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
 
-
         String errorMsg = JXBrowserHelper.text(browser,
                 "#changeQuantityFormId .alertMessage,#changeQuantityFormId .lineitem-error-message");
-        if (StringUtils.isNotBlank(errorMsg)) {
-            throw new OrderSubmissionException(errorMsg);
-        }
+
 
         //if no error message, try to change to one address mode
         DOMElement shipToOneAddressLink = JXBrowserHelper.selectElementByCssSelector(browser, "#changeQuantityFormId a.pipeline-link");
@@ -36,17 +34,24 @@ public class CantShipToAddressPage extends FulfillmentPage {
         if (shipToOneAddressLink != null) {
             String currentAddress = JXBrowserHelper.text(browser, "#changeQuantityFormId .address-dropdown .a-dropdown-prompt").trim();
             if (StringUtils.isNotBlank(currentAddress) &&
-                    Strings.containsAnyIgnoreCase(currentAddress, OrderAddressUtils.orderShippingAddress(order).getName()) &&
                     useThisAddressBtn != null) {
+                if (StringUtils.isNotBlank(errorMsg) &&
+                        Strings.containsAnyIgnoreCase(currentAddress, OrderAddressUtils.orderShippingAddress(order).getName())) {
+                    throw new OrderSubmissionException(errorMsg);
+                }
                 useThisAddressBtn.click();
             } else {
                 shipToOneAddressLink.click();
             }
 
             JXBrowserHelper.waitUntilNotFound(shipToOneAddressLink);
+            WaitTime.Short.execute();
             return;
         }
 
+        if (StringUtils.isNotBlank(errorMsg)) {
+            throw new OrderSubmissionException(errorMsg);
+        }
         //try to process anyway. address will be validated before placing the order
         if (useThisAddressBtn != null) {
             useThisAddressBtn.click();
@@ -57,8 +62,6 @@ public class CantShipToAddressPage extends FulfillmentPage {
         //no use this address button?
         errorMsg = "Sorry, this item can't be shipped to selected address.";
         throw new OrderSubmissionException(errorMsg);
-
-
     }
 
 

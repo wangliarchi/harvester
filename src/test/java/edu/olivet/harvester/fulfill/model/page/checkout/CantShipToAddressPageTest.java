@@ -6,6 +6,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.BaseTest;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import org.testng.annotations.Test;
@@ -36,6 +37,18 @@ public class CantShipToAddressPageTest extends BaseTest {
         WaitTime.Short.execute();
 
         cantShipToAddressPage.execute(null);
+    }
+
+    @Test(expectedExceptions = OrderSubmissionException.class)
+    public void executeSelectBox() {
+        prepareBrowser();
+        String pageUrl = "CantShip.html";
+        Browser browser = buyerPanel.getBrowserView().getBrowser();
+        browser.loadHTML(Tools.readFileToString(new File(TEST_DATA_ROOT + File.separator + "pages" + File.separator + pageUrl)));
+        WaitTime.Short.execute();
+        Order order = prepareOrder();
+        order.recipient_name = "valerie lippincott";
+        cantShipToAddressPage.execute(order);
     }
 
 }
