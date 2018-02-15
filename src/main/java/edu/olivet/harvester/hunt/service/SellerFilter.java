@@ -8,8 +8,10 @@ import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.common.model.OrderEnums.OrderItemType;
 import edu.olivet.harvester.common.service.OrderItemTypeHelper;
+import edu.olivet.harvester.fulfill.service.ProfitLostControl;
 import edu.olivet.harvester.fulfill.utils.ConditionUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
+import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.hunt.model.HuntStandard;
 import edu.olivet.harvester.hunt.model.HuntStandardSettings;
 import edu.olivet.harvester.hunt.model.Rating.RatingType;
@@ -131,7 +133,8 @@ public class SellerFilter {
     }
 
     public boolean profitQualified(Seller seller, Order order) {
-        Float maxLoss = HuntStandardSettings.load().getMaxProfitLoss();
+        float maxLoss = HuntStandardSettings.load().getMaxProfitLoss();
+        //float maxLoss = ProfitLostControl.getLostLimit(order, seller.getTotalPriceInUSD().floatValue());
         Float profit = seller.profit(order);
         boolean result = profit > maxLoss;
 
@@ -147,8 +150,14 @@ public class SellerFilter {
      * for exporting orders, seller edd must before 10 days from order edd
      */
     public boolean eddQualified(Seller seller, Order order) {
-        int days = seller.canDirectShip(order.ship_country, orderItemTypeHelper.getItemType(order)) ? 0 : 10;
+        if (OrderValidator.skipCheck(order, OrderValidator.SkipValidation.EDD)) {
+            return true;
+        }
+
+        int days = seller.canDirectShip(order.ship_country, orderItemTypeHelper.getItemType(order)) ? -7 : 7;
         Date latestAllowableEdd = DateUtils.addDays(order.latestEdd(), -days);
+
+
         boolean result = seller.getLatestDeliveryDate() == null ||
                 seller.getLatestDeliveryDate().before(latestAllowableEdd);
 
