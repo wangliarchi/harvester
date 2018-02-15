@@ -114,7 +114,7 @@ public class OrderSubmissionTask extends PrimaryKey implements ArrayConvertable 
         if ((skipValidation == null || skipValidation == SkipValidation.None) && StringUtils.isNotBlank(skipValidationCol)) {
             try {
                 skipValidation = SkipValidation.fromLabel(skipValidationCol);
-            }catch (Exception e) {
+            } catch (Exception e) {
                 //skipValidation = SkipValidation.valueOf(skipValidationCol);
             }
         }
@@ -149,6 +149,15 @@ public class OrderSubmissionTask extends PrimaryKey implements ArrayConvertable 
 
     public boolean stopped() {
         return taskStatus() == OrderTaskStatus.Stopped || taskStatus() == OrderTaskStatus.Deleted;
+    }
+
+    public void setRetryRequired() {
+        summary = "Retry required";
+    }
+
+    public boolean retryRequired() {
+        return edu.olivet.foundations.utils.Strings.containsAnyIgnoreCase(summary, "Retry required") &&
+                taskStatus() == OrderTaskStatus.Completed;
     }
 
     public RuntimeSettings convertToRuntimeSettings() {
