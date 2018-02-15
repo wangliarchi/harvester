@@ -95,10 +95,10 @@ public class Exceptions {
     /**
      * 提交结果未知异常，发生场景：在Place your order发生异常，但是订单有可能已经真实提交了。为安全起见先将其标灰。
      */
-    public static class SubmitResultUnknownException extends RuntimeException {
+    public static class SubmitUnknownException extends RuntimeException {
         private static final long serialVersionUID = 158762956501444267L;
 
-        public SubmitResultUnknownException(String errorMsg) {
+        public SubmitUnknownException(String errorMsg) {
             super(errorMsg);
         }
     }
@@ -186,7 +186,7 @@ public class Exceptions {
     /**
      * Seller无法找到异常定义
      */
-    public static class SellerNotFoundException extends RuntimeException {
+    public static class SellerNotFoundException extends OrderSubmissionException {
         private static final long serialVersionUID = 4834678253258681291L;
 
         public SellerNotFoundException(String message) {
@@ -195,9 +195,20 @@ public class Exceptions {
     }
 
     /**
+     * Seller无法找到异常定义
+     */
+    public static class SellerEddTooLongException extends OrderSubmissionException {
+        private static final long serialVersionUID = 4834678253258681291L;
+
+        public SellerEddTooLongException(String message) {
+            super(message);
+        }
+    }
+
+    /**
      * Seller已经找到，但是价格涨得太厉害，超过可以接受上限
      */
-    public static class SellerPriceRiseTooHighException extends RuntimeException {
+    public static class SellerPriceRiseTooHighException extends OrderSubmissionException {
         private static final long serialVersionUID = -79978374204763171L;
 
         public SellerPriceRiseTooHighException(String message) {
