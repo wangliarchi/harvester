@@ -6,6 +6,8 @@ import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.*;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.ui.dialog.AddBuyerTabDialog;
+import edu.olivet.harvester.ui.utils.JTabbedPaneCloseButton;
 import edu.olivet.harvester.utils.Settings;
 import edu.olivet.harvester.utils.Settings.Configuration;
 import org.apache.commons.lang3.StringUtils;
@@ -13,16 +15,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ContainerEvent;
+import java.awt.event.ContainerListener;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 10/30/17 9:14 AM
  */
-public class TabbedBuyerPanel extends JTabbedPane {
+public class TabbedBuyerPanel extends JTabbedPaneCloseButton {
     private static final Logger LOGGER = LoggerFactory.getLogger(TabbedBuyerPanel.class);
 
-    private static TabbedBuyerPanel instance = new TabbedBuyerPanel(-1);
+    private static TabbedBuyerPanel instance = null;
 
     private final Map<String, BuyerPanel> buyerPanels = new HashMap<>();
     private final Map<Integer, String> buyerPanelIndexes = new HashMap<>();
@@ -30,17 +39,14 @@ public class TabbedBuyerPanel extends JTabbedPane {
     private double zoomLevel;
 
     public static TabbedBuyerPanel getInstance() {
+        if (instance == null) {
+            instance = new TabbedBuyerPanel(-1);
+        }
         return instance;
     }
 
     private TabbedBuyerPanel(double zoomLevel) {
         this.zoomLevel = zoomLevel;
-    }
-
-    public TabbedBuyerPanel(Country country, Account buyer, double zoomLevel) {
-        this(zoomLevel);
-        this.setVisible(true);
-        this.addTab(country, buyer);
     }
 
     public void addFirstBuyerAccountTab() {
@@ -162,15 +168,26 @@ public class TabbedBuyerPanel extends JTabbedPane {
     }
 
     public void setRunningIcon(BuyerPanel buyerPanel) {
-        setIconAt(buyerPanel.getId(), UITools.getIcon("loading.gif"));
+        setIconAt(getBuyerPanelIndex(buyerPanel), UITools.getIcon("loading.gif"));
     }
 
     public void setNormalIcon(BuyerPanel buyerPanel) {
-        setIconAt(buyerPanel.getId(), UITools.getIcon(buyerPanel.getCountry().name().toLowerCase() + "Flag.png"));
+        setIconAt(getBuyerPanelIndex(buyerPanel), UITools.getIcon(buyerPanel.getCountry().name().toLowerCase() + "Flag.png"));
+    }
+
+    public int getBuyerPanelIndex(BuyerPanel buyerPanel) {
+        String key = getTabKey(buyerPanel.getCountry(), buyerPanel.getBuyer());
+        for (int i = 0; i < getTabCount(); i++) {
+            if (key.equalsIgnoreCase(getTitleAt(i))) {
+                return i;
+            }
+        }
+
+        return buyerPanel.getId();
     }
 
     public void highlight(BuyerPanel buyerPanel) {
-        highlight(buyerPanel.getId());
+        highlight(getBuyerPanelIndex(buyerPanel));
     }
 
     private void highlight(int index) {
@@ -181,14 +198,56 @@ public class TabbedBuyerPanel extends JTabbedPane {
         }
     }
 
-    public void resetZoomLevel() {
-        zoomLevel = (getWidth() - 1000) > 0 ? 1 : -1;
-        //zoomLevel = -1;
-        buyerPanels.forEach((index, buyerPanel) -> buyerPanel.getBrowserView().getBrowser().setZoomLevel(zoomLevel));
-    }
 
     private String getTabKey(Country country, Account account) {
         return country.name() + "-" + account.getEmail();
+    }
+
+    @Override
+    public void addNewTab() {
+        if (this.getTabCount() == 1) {
+            return;
+        }
+
+        AddBuyerTabDialog dialog = UITools.setDialogAttr(new AddBuyerTabDialog());
+        if (dialog.isOk()) {
+            Country country = dialog.getSelectedCountry();
+            Account buyer = dialog.getSelectedAccount();
+
+            String tabKey = getTabKey(country, buyer);
+            if (buyerPanels.containsKey(tabKey)) {
+                this.highlight(buyerPanels.get(tabKey));
+                return;
+            }
+
+            BuyerPanel buyerPanel = addTab(country, buyer);
+            //buyerPanel.toHomePage();
+            new Thread(() -> buyerPanel.toHomePage()).start();
+        }
+    }
+
+    @Override
+    public boolean beforeTabRemoved(Component tab) {
+        if (this.getTabCount() == 2) {
+            return false;
+        }
+        BuyerPanel buyerPanel = (BuyerPanel) tab;
+        if (buyerPanel.running()) {
+            UITools.error("Task is running on this tab. Stop task before closing the tab.");
+            return false;
+        }
+        String tabKey = getTabKey(buyerPanel.getCountry(), buyerPanel.getBuyer());
+        try {
+            buyerPanel.killBrowser();
+        } catch (Exception e) {
+            LOGGER.error("", e);
+        }
+
+        int index = buyerPanel.getId();
+        buyerPanels.remove(tabKey);
+        buyerPanelIndexes.remove(index);
+
+        return true;
     }
 
     public static void main(String[] args) {
