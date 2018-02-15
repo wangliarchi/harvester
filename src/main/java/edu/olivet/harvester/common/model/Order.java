@@ -274,6 +274,11 @@ public class Order implements Keyable {
                         Strings.containsAnyIgnoreCase(this.account, FORWARDED));
     }
 
+    @JSONField(serialize = false)
+    public boolean fulfillable() {
+        return !fulfilled() && !"n".equalsIgnoreCase(status);
+    }
+
     private static final String[] FORWARDED = {"yizhuan", "已转", "已移表"};
 
     /**
@@ -474,7 +479,8 @@ public class Order implements Keyable {
     public boolean selfBuy() {
         return StringUtils.isBlank(quantity_purchased) ||
                 "0".equals(quantity_purchased) ||
-                Remark.SELF_ORDER.isContainedBy(remark);
+                Remark.SELF_ORDER.isContainedBy(remark) ||
+                "null".equalsIgnoreCase(quantity_purchased);
     }
 
     /**
@@ -688,6 +694,16 @@ public class Order implements Keyable {
     }
 
     @JSONField(serialize = false)
+    public boolean stdShipping() {
+        return Remark.stdShipping(remark);
+    }
+
+    @JSONField(serialize = false)
+    public boolean buyerExpeditedShipping() {
+        return StringUtils.isNotBlank(shipping_service) && StringUtils.containsIgnoreCase(shipping_service, "Expedited");
+    }
+
+    @JSONField(serialize = false)
     public String getASIN() {
         return RegexUtils.getMatched(sku_address, RegexUtils.Regex.ASIN);
     }
@@ -749,6 +765,23 @@ public class Order implements Keyable {
                 //Objects.equal(seller_id, order.seller_id) &&
                 Objects.equal(condition, order.condition) &&
                 Objects.equal(character, order.character);
+    }
+
+
+    @JSONField(serialize = false)
+    public boolean equalsSuperLite(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Order order = (Order) o;
+        return Objects.equal(order_id, order.order_id) &&
+                Objects.equal(sku, order.sku) &&
+                Objects.equal(recipient_name, order.recipient_name) &&
+                Objects.equal(quantity_purchased, order.quantity_purchased) &&
+                Objects.equal(StringUtils.stripStart(isbn, "0"), StringUtils.stripStart(order.isbn, "0"));
     }
 
     @Override
