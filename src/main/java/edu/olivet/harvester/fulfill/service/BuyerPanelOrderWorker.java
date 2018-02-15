@@ -8,6 +8,8 @@ import edu.olivet.harvester.fulfill.exception.Exceptions.*;
 import edu.olivet.harvester.fulfill.model.FulfillmentEnum;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionBuyerAccountTask;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
+import edu.olivet.harvester.fulfill.model.SubmitResult;
+import edu.olivet.harvester.fulfill.model.SubmitResult.ReturnCode;
 import edu.olivet.harvester.fulfill.service.flowcontrol.OrderFlowEngine;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.common.model.Order;
@@ -31,7 +33,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 1/9/18 3:15 PM
  */
-class BuyerPanelOrderWorker extends SwingWorker<Void, String> {
+class BuyerPanelOrderWorker extends SwingWorker<Void, SubmitResult> {
     private static final Logger LOGGER = LoggerFactory.getLogger(BuyerPanelOrderWorker.class);
     private final BuyerPanel buyerPanel;
     private final OrderSubmissionBuyerTaskService orderSubmissionBuyerTaskService;
@@ -83,10 +85,13 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, String> {
         }
     }
 
-    private boolean running = false;
-
     @Override
-    protected void process(final List<String> chunks) {
+    protected void process(final List<SubmitResult> chunks) {
+        chunks.forEach(result -> {
+            if (result.getOrder() != null) {
+                messageListener.addMsg(result.getOrder(), result.getResult(), result.getCode() == ReturnCode.SUCCESS ? null : InformationLevel.Negative);
+            }
+        });
         TasksAndProgressPanel.getInstance().loadTasksToTable();
     }
 
@@ -128,10 +133,10 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, String> {
             }
 
             orderSubmissionBuyerTaskService.startTask(buyerAccountTask);
-            publish("Task " + buyerAccountTask.getId() + "started");
+            publish(new SubmitResult(null, "Task " + buyerAccountTask.getId() + "started", ReturnCode.SUCCESS));
+
             TabbedBuyerPanel.getInstance().setRunningIcon(buyerPanel);
 
-            running = true;
             try {
                 submitOrders(buyerAccountTask);
             } catch (Exception e) {
@@ -139,7 +144,6 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, String> {
             }
             TabbedBuyerPanel.getInstance().setNormalIcon(buyerPanel);
             taskDone();
-            running = false;
         }
     }
 
@@ -158,14 +162,14 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, String> {
             if (PSEventListener.stopped()) {
                 buyerPanel.stop();
                 orderSubmissionBuyerTaskService.stopTask(buyerAccountTask);
-                publish("Task stopped");
+                publish(new SubmitResult(null, "Task " + buyerAccountTask.getId() + " stopped", ReturnCode.FAILURE));
                 break;
             }
 
             if (task.stopped()) {
                 orderSubmissionBuyerTaskService.stopTask(buyerAccountTask);
                 buyerPanel.taskStopped();
-                publish("Task stopped");
+                publish(new SubmitResult(null, "Task " + buyerAccountTask.getId() + " stopped", ReturnCode.FAILURE));
                 break;
             }
 
@@ -184,7 +188,7 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, String> {
 
                 String msg = Strings.parseErrorMsg(e.getMessage());
                 try {
-                    messageListener.addMsg(order, msg + " - took " + Strings.formatElapsedTime(start), InformationLevel.Negative);
+                    publish(new SubmitResult(order, msg + " - took " + Strings.formatElapsedTime(start), ReturnCode.FAILURE));
                     sheetService.fillUnsuccessfulMsg(order.spreadsheetId, order, msg);
                 } catch (Exception ex) {
                     LOGGER.error("Fail to update error message for {} {} {} {}", order.spreadsheetId, order.order_id, order.row, msg);
@@ -192,23 +196,21 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, String> {
 
                 if (e instanceof OutOfBudgetException) {
                     //UITools.error("No more money to spend :(");
-                    messageListener.addMsg(order, "No more money to spend :(", InformationLevel.Negative);
+                    //messageListener.addMsg(order, "No more money to spend :(", InformationLevel.Negative);
                     orderSubmissionBuyerTaskService.stopTask(buyerAccountTask);
                     break;
                 } else if (e instanceof BuyerAccountAuthenticationException) {
-                    messageListener.addMsg(order, e.getMessage(), InformationLevel.Negative);
+                    //messageListener.addMsg(order, e.getMessage(), InformationLevel.Negative);
                     orderSubmissionBuyerTaskService.stopTask(buyerAccountTask);
                     break;
                 }
             } finally {
                 if (StringUtils.isNotBlank(order.order_number)) {
                     orderSubmissionBuyerTaskService.saveSuccess(buyerAccountTask);
-                    messageListener.addMsg(order,
-                            "order fulfilled successfully. " + order.basicSuccessRecord() + ", took " + Strings.formatElapsedTime(start));
+                    publish(new SubmitResult(order, "order fulfilled successfully. " + order.basicSuccessRecord() + ", took " + Strings.formatElapsedTime(start), ReturnCode.SUCCESS));
                 } else {
                     orderSubmissionBuyerTaskService.saveFailed(buyerAccountTask);
                 }
-                publish(order.order_id + " - " + order.sheetName + " " + order.row + " done");
             }
         }
     }
