@@ -211,11 +211,7 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
                     orderSubmissionTaskService.saveTask(task);
                     break;
                 case Completed:
-                    task.setTaskStatus(OrderTaskStatus.Retried);
-                    orderSubmissionTaskService.saveTask(task);
-
-                    OrderSubmissionTask newTask = task.copy();
-                    orderSubmissionTaskService.saveTask(newTask);
+                    orderSubmissionTaskService.retryTask(task);
                     break;
                 case Scheduled:
                     if (UITools.confirmed("Please confirm that you want to delete this task.")) {
