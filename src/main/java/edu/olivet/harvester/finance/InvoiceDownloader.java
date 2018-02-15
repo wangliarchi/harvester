@@ -35,11 +35,8 @@ public class InvoiceDownloader {
     @Inject
     MessageListener messageListener;
 
+    final int JOB_NUMBER = 1;
 
-    @Inject
-    public void init() {
-
-    }
 
     public void execute() {
         DownloadParams downloadParams = new DownloadParams();
@@ -50,7 +47,6 @@ public class InvoiceDownloader {
     }
 
     public void download(DownloadParams downloadParams) {
-        final int JOB_NUMBER = 2;
         List<InvoiceDownloadWorker> jobs = new ArrayList<>(JOB_NUMBER);
         final CountDownLatch latch = new CountDownLatch(JOB_NUMBER);
         List<List<Account>> list = ThreadHelper.assign(downloadParams.getBuyerAccounts(), JOB_NUMBER);
@@ -69,7 +65,6 @@ public class InvoiceDownloader {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
     }
 
 
