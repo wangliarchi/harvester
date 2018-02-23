@@ -131,6 +131,20 @@ public class UIHarvester extends AbstractApplicationUI {
         listOrderSubmissionTasks.execute();
     }
 
+    @Inject AsyncASINsEvent asyncASINsEvent;
+
+    @UIEvent
+    public void syncASINs() {
+        asyncASINsEvent.execute();
+    }
+
+    @Inject DownloadInventoryEvent downloadInventoryEvent;
+
+    @UIEvent
+    public void downloadInventory() {
+        downloadInventoryEvent.execute();
+    }
+
     @Inject private
     SettingEvent settingEvent;
 
@@ -193,6 +207,7 @@ public class UIHarvester extends AbstractApplicationUI {
     }
 
     @Inject OrderInfoCheckerEvent orderInfoCheckerEvent;
+
     @UIEvent
     public void orderChecker() {
         orderInfoCheckerEvent.execute();
@@ -207,6 +222,7 @@ public class UIHarvester extends AbstractApplicationUI {
     }
 
     @Inject DownloadInvoiceEvent downloadInvoiceEvent;
+
     @UIEvent
     public void downloadInvoice() {
         downloadInvoiceEvent.execute();

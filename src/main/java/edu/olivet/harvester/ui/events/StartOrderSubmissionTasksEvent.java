@@ -36,7 +36,7 @@ public class StartOrderSubmissionTasksEvent implements HarvesterUIEvent {
             PSEventListener.reset(tasksAndProgressPanel);
             //PSEventListener.start();
             //stay listening until it's stopped by user
-            while (!PSEventListener.stopped()) {
+            while (!PSEventListener.stopped() || orderDispatcher.hasJobRunning()) {
                 try {
                     List<OrderSubmissionTask> scheduledTasks = orderSubmissionTaskService.todayScheduledTasks();
                     if (CollectionUtils.isNotEmpty(scheduledTasks)) {

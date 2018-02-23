@@ -9,6 +9,7 @@ import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.common.model.OrderEnums;
+import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.OrderHelper;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.spreadsheet.utils.SheetUtils;
@@ -48,6 +49,11 @@ public class OrderService {
 
     public List<Order> fetchOrders(String spreadsheetId, String sheetName) {
         return fetchOrders(spreadsheetId, Lists.newArrayList(sheetName + "!A1:AZ"));
+    }
+
+    public List<Order> fetchOrders(List<Worksheet> worksheets) {
+        return fetchOrders(worksheets.get(0).getSpreadsheet().getSpreadsheetId(),
+                worksheets.stream().map(it -> it.getSheetName() + "!A1:AZ").collect(Collectors.toList()));
     }
 
     public List<Order> fetchOrders(String spreadsheetId, List<String> ranges) {

@@ -13,6 +13,7 @@ import edu.olivet.harvester.export.model.OrderExportParams;
 import edu.olivet.harvester.export.service.ExportOrderService;
 import edu.olivet.harvester.export.service.ExportStatService;
 import edu.olivet.harvester.export.service.SheetService;
+import edu.olivet.harvester.hunt.Hunter;
 import edu.olivet.harvester.message.ErrorAlertService;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.ui.Actions;
@@ -45,6 +46,7 @@ public class OrderExporter {
     @Setter
     private MessagePanel messagePanel = new VirtualMessagePanel();
 
+    @Inject Hunter hunter;
 
     /**
      * triggered by cronjob
@@ -61,6 +63,14 @@ public class OrderExporter {
         }
 
         marketplaces.forEach(it -> exportOrdersForMarketplace(it, null, null));
+
+        settings.listAllSpreadsheets().forEach(it -> {
+            try {
+                hunter.execute(it);
+            } catch (Exception e) {
+                LOGGER.error("", e);
+            }
+        });
     }
 
     /**
@@ -77,6 +87,19 @@ public class OrderExporter {
                 exportOrdersForMarketplace(marketplace, params.getFromDate(), params.getToDate());
                 messagePanel.displayMsg(String.format("Finish exporting orders from %s in %s.",
                         marketplace, Strings.formatElapsedTime(start)), LOGGER);
+
+                //hunt sellers
+                messagePanel.addMsgSeparator();
+                messagePanel.displayMsg("Starting to hunt sellers");
+                List<String> spreadsheetIds = Settings.load().getConfigByCountry(marketplace).listSpreadsheetIds();
+                for (String spreadsheetId : spreadsheetIds) {
+                    try {
+                        hunter.execute(spreadsheetId);
+                    } catch (Exception e) {
+                        messagePanel.displayMsg("Error while hunting sellers: " + Strings.getExceptionMsg(e));
+                    }
+                }
+
             } catch (Exception e) {
                 messagePanel.displayMsg(String.format("Error exporting orders from %s - %s. ",
                         marketplace, e.getMessage()), InformationLevel.Negative);
@@ -99,14 +122,14 @@ public class OrderExporter {
         }
 
         //check if exporting service is running, load last updated date.
-        Date lastExportedDate = DateUtils.addHours(now.get(), 36);
-        try {
-            lastExportedDate = exportStatService.getOrderExportFromDate(country);
-            lastExportedDate = DateUtils.addHours(lastExportedDate, -1);
-        } catch (Exception e) {
-            LOGGER.error("", e);
-            //messagePanel.displayMsg(e.getMessage(), LOGGER, InformationLevel.Negative);
-        }
+        Date lastExportedDate = DateUtils.addHours(now.get(), 26);
+        //try {
+        //lastExportedDate = exportStatService.lastOrderDate(country);
+        //lastExportedDate = DateUtils.addHours(lastExportedDate, -1);
+        //} catch (Exception e) {
+        //LOGGER.error("", e);
+        //messagePanel.displayMsg(e.getMessage(), LOGGER, InformationLevel.Negative);
+        //}
 
         //if not manually set from date, use the date from init service
         if (fromDate != null) {

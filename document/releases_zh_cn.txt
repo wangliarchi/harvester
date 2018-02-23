@@ -621,3 +621,23 @@ b. check if order sheet data is unbroken - columns deleted etc.
 1. try to find new seller if seller disappeared or price raised.
 2. use single worker to download invoice
 3. bug fixes
+
+======================================================================
+版本：1.0-2018-02-15.1-GA,1.0-2018-02-16.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. order fulfillment with amazon warehouse
+
+======================================================================
+版本：1.0-2018-02-16.1-GA,1.0-2018-02-22.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. limit max running tabs for order submission
+2. Sync ASINs
+3. bug fixes

@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
@@ -47,14 +48,14 @@ import java.util.Map.Entry;
 @Singleton
 public class AppScript {
     private static final Logger LOGGER = LoggerFactory.getLogger(AppScript.class);
-    private static final String APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3oR8IH5Z7uaTi-i_GPUfWeeFV96ejxfyo3dlq8tXZivpW51F0/exec";
-    private static final String SUCCESS = "Success";
-    private static final String PARAM_SHEET_NAME = "sn";
-    private static final String PARAM_SPREAD_ID = "s";
-    private static final String PARAM_METHOD = "method";
-    private static final String PARAM_ROW = "row";
+    protected static final String APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3oR8IH5Z7uaTi-i_GPUfWeeFV96ejxfyo3dlq8tXZivpW51F0/exec";
+    protected static final String SUCCESS = "Success";
+    protected static final String PARAM_SHEET_NAME = "sn";
+    protected static final String PARAM_SPREAD_ID = "s";
+    protected static final String PARAM_METHOD = "method";
+    protected static final String PARAM_ROW = "row";
 
-    private static Map<String, Spreadsheet> SPREADSHEET_CLIENT_CACHE = new HashMap<>();
+    protected static Map<String, Spreadsheet> SPREADSHEET_CLIENT_CACHE = new HashMap<>();
 
     @Repeat(expectedExceptions = {BusinessException.class, JSONException.class})
     public Spreadsheet getSpreadsheet(String spreadId) {
@@ -324,9 +325,13 @@ public class AppScript {
         return orders;
     }
 
+    protected String getBaseUrl() {
+        return APP_SCRIPT_URL;
+    }
+
     protected String get(Map<String, String> params) {
         String params4Url = this.params2Url(params);
-        String url = APP_SCRIPT_URL + params4Url;
+        String url = getBaseUrl() + params4Url;
         try {
             return Jsoup.connect(url).timeout(WaitTime.Longer.valInMS()).ignoreContentType(true).execute().body();
         } catch (IOException e) {
@@ -374,5 +379,20 @@ public class AppScript {
         }
 
         return orders;
+    }
+
+
+    protected String exec(Map<String, String> params) {
+        String json = null;
+        for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
+            json = this.processResult(this.get(params));
+            if (SUCCESS.equals(json)) {
+                return json;
+            } else if (params.get("method").equals("READSYNCREPORT") || params.get("method").equals("READWATCHDOGACCOUNTLIST")) {
+                return json;
+            }
+        }
+        String method = StringUtils.defaultString(params.get(PARAM_METHOD));
+        throw new BusinessException(String.format("Failed to invoke method '%s' after %s attempts. Error detail: %s.", method, Constants.MAX_REPEAT_TIMES, StringUtils.defaultString(json)));
     }
 }

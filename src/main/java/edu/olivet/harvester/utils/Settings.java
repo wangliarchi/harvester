@@ -84,6 +84,10 @@ public class Settings {
 
     private List<Configuration> configs;
 
+    public String getContext(Country country) {
+        return sid + country.name();
+    }
+
     public List<Country> listAllCountries() {
         return configs.stream().map(Configuration::getCountry).collect(Collectors.toList());
     }

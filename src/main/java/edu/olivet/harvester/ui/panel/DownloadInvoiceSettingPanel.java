@@ -57,7 +57,7 @@ public class DownloadInvoiceSettingPanel extends JPanel {
                                 .addContainerGap()
                                 .addComponent(enableAutoExportLabel, labelWidth, labelWidth, labelWidth)
                                 .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(enableAutoDownloadComboBox)
+                                .addComponent(enableAutoDownloadComboBox, 100, 100, 100)
                                 .addContainerGap()
 
                         )

@@ -2,12 +2,12 @@ package edu.olivet.harvester.fulfill.utils;
 
 import com.google.inject.Singleton;
 import edu.olivet.foundations.amazon.Country;
-import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.utils.Configs;
 import edu.olivet.harvester.utils.Config;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,6 +19,7 @@ public class CountryStateUtils {
     private Map<String, String> countryNames;
     private Map<String, String> usStates;
     private Map<String, String> caStates;
+    private List<String> euCountries;
     private static final CountryStateUtils instance = new CountryStateUtils();
 
     public static CountryStateUtils getInstance() {
@@ -30,6 +31,7 @@ public class CountryStateUtils {
         countryNames = Configs.load(Config.CountryName.fileName());
         usStates = Configs.load(Config.USStates.fileName(), Configs.KeyCase.UpperCase);
         caStates = Configs.load(Config.CAProvinces.fileName(), Configs.KeyCase.UpperCase);
+        euCountries = Configs.readLines(Config.EUCountry.fileName());
     }
 
 
@@ -53,6 +55,11 @@ public class CountryStateUtils {
         return shippingCountry;
     }
 
+
+    public boolean isEUCountry(String country) {
+        String code = getCountryCode(country);
+        return euCountries.contains(code);
+    }
 
     /**
      * 根据国家代码获取对应国家完整名称
@@ -107,5 +114,10 @@ public class CountryStateUtils {
         }
 
         return MapUtils.invertMap(caStates).get(stateAbbr.toUpperCase());
+    }
+
+    public static void main(String[] args) {
+        List<String> countries = Configs.readLines(Config.EUCountry.fileName());
+        System.out.println(countries);
     }
 }

@@ -6,7 +6,7 @@ import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.export.OrderExporter;
 import edu.olivet.harvester.export.model.OrderExportParams;
 import edu.olivet.harvester.ui.Actions;
-import edu.olivet.harvester.ui.dialog.ChooseMarketplaceDialog;
+import edu.olivet.harvester.ui.dialog.OrderExportSettingDialog;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/4/17 10:59 AM
@@ -21,7 +21,7 @@ public class ExportOrderEvent implements HarvesterUIEvent {
 
 
     public void execute() {
-        ChooseMarketplaceDialog dialog = UITools.setDialogAttr(new ChooseMarketplaceDialog());
+        OrderExportSettingDialog dialog = UITools.setDialogAttr(new OrderExportSettingDialog());
 
         if (dialog.isOk()) {
             OrderExportParams orderExportParams  = dialog.getOrderExportParams();

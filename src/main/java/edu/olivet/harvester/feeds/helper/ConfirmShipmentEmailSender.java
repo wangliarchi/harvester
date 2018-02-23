@@ -6,6 +6,7 @@ import edu.olivet.foundations.google.EmailContentType;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Dates;
+import edu.olivet.harvester.feeds.helper.FeedGenerator.BatchFileType;
 import edu.olivet.harvester.message.EmailService;
 import edu.olivet.harvester.utils.ServiceUtils;
 import edu.olivet.harvester.utils.Settings;
@@ -66,7 +67,6 @@ public class ConfirmShipmentEmailSender extends EmailService {
         if (!StringUtils.containsIgnoreCase(destination.toString(), config.getSellerEmail().getEmail())) {
             destination.withCcAddresses(config.getSellerEmail().getEmail());
         }
-
 
         String title = String.format("%s %s Confirm Shipment Batch File Report: Total %s, Succeed %s, Failed %s",
                 config.getAccountCode(), Dates.today(), counts[0], counts[1], counts[2]);

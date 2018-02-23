@@ -21,6 +21,8 @@ public enum BackgroundJob {
     OrderExporting("0 30 7 ? * MON,TUE,WED,THU,FRI,SAT *", OrderExportingJob.class),
 
     InvoiceDownloading("0 0 3 ? * MON,TUE,WED,THU,FRI,SAT *", DownloadInvoiceJob.class),
+
+    SyncASIN("0 0 3 ? * MON,TUE,WED,THU,FRI,SAT *", SyncASINJob.class),
     /**
      * check unshipped orders, and send notification to account owner
      * run all weekdays and Saturday. random time between 17:00-18:00pm
@@ -60,6 +62,13 @@ public enum BackgroundJob {
             LocalTime orderExportTime = systemSettings.getOrderExportTime();
             int allowedRange = systemSettings.getOrderExportAllowedRange();
             LocalTime scheduledTime = DatetimeHelper.randomTimeBetween(orderExportTime, allowedRange);
+            return String.format("%d %d %d ? * MON,TUE,WED,THU,FRI,SAT *", scheduledTime.getSecond(), scheduledTime.getMinute(), scheduledTime.getHour());
+        }
+
+        if (this == SyncASIN) {
+            LocalTime syncTime = systemSettings.getAsinSyncTime();
+            int allowedRange = systemSettings.getAsinSyncAllowedRange();
+            LocalTime scheduledTime = DatetimeHelper.randomTimeBetween(syncTime, allowedRange);
             return String.format("%d %d %d ? * MON,TUE,WED,THU,FRI,SAT *", scheduledTime.getSecond(), scheduledTime.getMinute(), scheduledTime.getHour());
         }
 

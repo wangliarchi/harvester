@@ -15,13 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ContainerEvent;
-import java.awt.event.ContainerListener;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -222,7 +216,7 @@ public class TabbedBuyerPanel extends JTabbedPaneCloseButton {
 
             BuyerPanel buyerPanel = addTab(country, buyer);
             //buyerPanel.toHomePage();
-            new Thread(() -> buyerPanel.toHomePage()).start();
+            new Thread(buyerPanel::toHomePage).start();
         }
     }
 

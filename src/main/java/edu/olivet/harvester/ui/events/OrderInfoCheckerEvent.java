@@ -9,7 +9,6 @@ import edu.olivet.foundations.ui.MessagePanel;
 import edu.olivet.foundations.ui.ProgressDetail;
 import edu.olivet.foundations.ui.UITools;
 
-import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.common.service.OrderService;
@@ -21,6 +20,7 @@ import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.ui.Actions;
 import edu.olivet.harvester.ui.dialog.ChooseMarketplaceDialog;
 
+import edu.olivet.harvester.ui.dialog.OrderExportSettingDialog;
 import edu.olivet.harvester.utils.Settings;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -47,7 +47,7 @@ public class OrderInfoCheckerEvent implements HarvesterUIEvent {
 
     public void execute() {
 
-        ChooseMarketplaceDialog dialog = new ChooseMarketplaceDialog();
+        OrderExportSettingDialog dialog = new OrderExportSettingDialog();
         final LocalDate today = LocalDate.now();
         dialog.getFromDateTimePicker().datePicker.setDate(today.minusDays(45));
         dialog.getFromDateTimePicker().timePicker.setTime(LocalTime.of(0, 0));
@@ -125,6 +125,7 @@ public class OrderInfoCheckerEvent implements HarvesterUIEvent {
         }
     }
 
+    @SuppressWarnings("SimplifiableIfStatement")
     public boolean fulfillmentInfoCorrupted(Order order) {
         if (order.colorIsGray()) {
             return false;

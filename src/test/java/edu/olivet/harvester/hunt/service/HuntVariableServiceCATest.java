@@ -82,6 +82,7 @@ public class HuntVariableServiceCATest extends BaseTest {
 
         Seller seller = new Seller();
         seller.setOfferListingCountry(Country.US);
+        seller.setShipFromCountry(Country.US);
         seller.setPrice(new Money(10, Country.US));
         seller.setShippingFee(new Money(0, Country.US));
         seller.setCondition(Condition.New);
@@ -199,6 +200,7 @@ public class HuntVariableServiceCATest extends BaseTest {
 
         Seller seller = new Seller();
         seller.setOfferListingCountry(Country.US);
+        seller.setShipFromCountry(Country.US);
         seller.setPrice(new Money(10, Country.US));
         seller.setShippingFee(new Money(0, Country.US));
         seller.setCondition(Condition.New);

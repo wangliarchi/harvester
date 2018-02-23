@@ -21,13 +21,13 @@ import static org.testng.Assert.assertEquals;
 public class ShipDateUtilsTest extends BaseTest {
     @Inject private ShipDateUtils shipDateUtils;
 
-    private Spreadsheet spreadsheet;
+    //private Spreadsheet spreadsheet;
 
     @BeforeClass
     public void init() {
-        String spreadsheetId = "1qxcCkAPvvBaR3KHa2MZv1V39m2E1IMytVDn1yXDaVEM";
-        spreadsheet = appScript.getSpreadsheet(spreadsheetId);
-        spreadsheet.setSpreadsheetCountry(Country.US);
+//        String spreadsheetId = "1IMbmaLUjqvZ7w8OdPd59fpTuad8U__5PAyKg3yR0DjY";
+//        spreadsheet = appScript.getSpreadsheet(spreadsheetId);
+//        spreadsheet.setSpreadsheetCountry(Country.US);
     }
 
     @Test
@@ -58,11 +58,12 @@ public class ShipDateUtilsTest extends BaseTest {
         order.purchase_date = "2018-01-07T18:41:02+00:00";
         order.expected_ship_date = "2018-01-11 2018-01-13";
         order.sheetName = "01/08";
-        Worksheet worksheet = new Worksheet(spreadsheet, order.sheetName);
+        Worksheet worksheet = new Worksheet(null, order.sheetName);
         String defaultDate = worksheet.getOrderConfirmationDate();
-        assertEquals(shipDateUtils.getShipDateString(order, Dates.parseDate(defaultDate)),"2018-01-08T05:00:00Z");
+        assertEquals(shipDateUtils.getShipDateString(order, Dates.parseDate(defaultDate)), "2018-01-08T05:00:00Z");
 
     }
+
     @Test
     public void testGetShipDate() {
 
@@ -72,34 +73,49 @@ public class ShipDateUtilsTest extends BaseTest {
         order.purchase_date = "2018-01-07T18:41:02+00:00";
         order.expected_ship_date = "2018-01-11 2018-01-13";
         order.sheetName = "01/08";
-        Worksheet worksheet = new Worksheet(spreadsheet, order.sheetName);
+        Worksheet worksheet = new Worksheet(null, order.sheetName);
         String defaultDate = worksheet.getOrderConfirmationDate();
 
-        assertEquals(shipDateUtils.getShipDate(order,Dates.parseDate(defaultDate)),Dates.parseDate("01/08/2018"));
-
+        assertEquals(shipDateUtils.getShipDate(order, Dates.parseDate(defaultDate)), Dates.parseDate("01/08/2018"));
 
 
         order.expected_ship_date = "2017-11-22 2017-11-25";
         order.purchase_date = "2017-11-20T03:47:42+00:00";
         order.sheetName = "11/21";
-        worksheet = new Worksheet(spreadsheet, order.sheetName);
+        worksheet = new Worksheet(null, order.sheetName);
         defaultDate = worksheet.getOrderConfirmationDate();
 
-        assertEquals(shipDateUtils.getShipDate(order,Dates.parseDate(defaultDate)),Dates.parseDate("11/21/2017"));
+        assertEquals(shipDateUtils.getShipDate(order, Dates.parseDate(defaultDate)), Dates.parseDate("11/21/2017"));
 
         //如果sheet date 比latest expected shipping date 晚，使用 earliest expected shipping date
         order.sheetName = "11/25";
         order.expected_ship_date = "2017-11-22 2017-11-25";
-        worksheet = new Worksheet(spreadsheet, order.sheetName);
+        worksheet = new Worksheet(null, order.sheetName);
         defaultDate = worksheet.getOrderConfirmationDate();
-        assertEquals(shipDateUtils.getShipDate(order,Dates.parseDate(defaultDate)),Dates.parseDate("11/22/2017"));
+        assertEquals(shipDateUtils.getShipDate(order, Dates.parseDate(defaultDate)), Dates.parseDate("11/22/2017"));
 
         //如果purchase date 比sheet date 晚， 使用purchase date
         order.sheetName = "11/21";
         order.expected_ship_date = "2017-11-22 2017-11-25";
         order.purchase_date = "2017-11-22T08:47:42+00:00";
-        worksheet = new Worksheet(spreadsheet, order.sheetName);
+        worksheet = new Worksheet(null, order.sheetName);
         defaultDate = worksheet.getOrderConfirmationDate();
-        assertEquals(shipDateUtils.getShipDate(order,Dates.parseDate(defaultDate)),Dates.parseDate("11/22/2017"));
+        assertEquals(shipDateUtils.getShipDate(order, Dates.parseDate(defaultDate)), Dates.parseDate("11/22/2017"));
     }
+
+    @Test
+    public void testGetShipDatePST() {
+        Order order = prepareOrder();
+        now.set(new Date());
+
+        order.purchase_date = "2018-02-19T18:15:33+00:00";
+        order.expected_ship_date = "2018-02-20 2018-02-26";
+        order.sheetName = "02/19";
+
+        Worksheet worksheet = new Worksheet(null, order.sheetName);
+        String defaultDate = worksheet.getOrderConfirmationDate();
+
+        shipDateUtils.getShipDate(order, Dates.parseDate(defaultDate));
+    }
+
 }

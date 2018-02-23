@@ -1,6 +1,8 @@
 package edu.olivet.harvester.fulfill.service;
 
 
+import edu.olivet.foundations.amazon.Account;
+import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.WaitTime;
@@ -13,6 +15,7 @@ import edu.olivet.harvester.fulfill.model.SubmitResult.ReturnCode;
 import edu.olivet.harvester.fulfill.service.flowcontrol.OrderFlowEngine;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.ui.panel.TabbedBuyerPanel;
 import edu.olivet.harvester.ui.panel.TasksAndProgressPanel;
@@ -35,7 +38,7 @@ import java.util.concurrent.LinkedBlockingDeque;
  */
 class BuyerPanelOrderWorker extends SwingWorker<Void, SubmitResult> {
     private static final Logger LOGGER = LoggerFactory.getLogger(BuyerPanelOrderWorker.class);
-    private final BuyerPanel buyerPanel;
+    private BuyerPanel buyerPanel = null;
     private final OrderSubmissionBuyerTaskService orderSubmissionBuyerTaskService;
     private final OrderSubmissionTaskService orderSubmissionTaskService;
     private final MessageListener messageListener;
@@ -44,16 +47,21 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, SubmitResult> {
     private final SheetService sheetService;
     private final BlockingQueue<OrderSubmissionBuyerAccountTask> tasks;
     private final List<CountDownLatch> latches;
+    private final Country country;
+    private final Account buyer;
+    private final DailyBudgetHelper dailyBudgetHelper;
 
-    public BuyerPanelOrderWorker(BuyerPanel buyerPanel) {
+    public BuyerPanelOrderWorker(Country country, Account buyer) {
         super();
-        this.buyerPanel = buyerPanel;
+        this.country = country;
+        this.buyer = buyer;
         orderSubmissionBuyerTaskService = ApplicationContext.getBean(OrderSubmissionBuyerTaskService.class);
         orderSubmissionTaskService = ApplicationContext.getBean(OrderSubmissionTaskService.class);
         messageListener = ApplicationContext.getBean(MessageListener.class);
         orderValidator = ApplicationContext.getBean(OrderValidator.class);
         orderFlowEngine = ApplicationContext.getBean(OrderFlowEngine.class);
         sheetService = ApplicationContext.getBean(SheetService.class);
+        dailyBudgetHelper = ApplicationContext.getBean(DailyBudgetHelper.class);
         tasks = new LinkedBlockingDeque<>();
         latches = new ArrayList<>();
     }
@@ -77,7 +85,9 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, SubmitResult> {
         try {
             tasks.add(buyerAccountTask);
             latches.add(latch);
-            buyerPanel.updateTasksInfo(status());
+            if (buyerPanel != null) {
+                buyerPanel.updateTasksInfo(status());
+            }
         } catch (Exception e) {
             //UITools.error("加入任务队列过程中出现其他异常: " + e.getMessage());
             LOGGER.warn("加入任务队列过程中出现其他异常:{}", e);
@@ -90,11 +100,19 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, SubmitResult> {
         chunks.forEach(result -> {
             if (result.getOrder() != null) {
                 messageListener.addMsg(result.getOrder(), result.getResult(), result.getCode() == ReturnCode.SUCCESS ? null : InformationLevel.Negative);
+                if (result.getCode() == ReturnCode.SUCCESS) {
+                    orderSubmissionTaskService.saveSuccess(result.getOrder().getTask());
+                } else {
+                    orderSubmissionTaskService.saveFailed(result.getOrder().getTask());
+                }
             }
         });
         TasksAndProgressPanel.getInstance().loadTasksToTable();
     }
 
+    protected void done() {
+        //
+    }
 
     protected void taskDone() {
         Iterator<CountDownLatch> i = latches.iterator();
@@ -107,10 +125,19 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, SubmitResult> {
 
     @Override
     protected Void doInBackground() {
+        if (buyerPanel == null) {
+            buyerPanel = TabbedBuyerPanel.getInstance().getOrAddTab(country, buyer);
+        }
+
         Thread.currentThread().setName("ProcessingOrderWithBuyerPanel" + buyerPanel.getKey());
+
+
         //noinspection InfiniteLoopStatement
         while (true) {
             WaitTime.Short.execute();
+            if (tasks.isEmpty()) {
+                return null;
+            }
 
             OrderSubmissionBuyerAccountTask buyerAccountTask;
             try {
@@ -123,8 +150,9 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, SubmitResult> {
 
             buyerPanel.updateTasksInfo(status());
 
-            OrderSubmissionTask task = orderSubmissionTaskService.get(buyerAccountTask.getTaskId());
 
+            OrderSubmissionTask task = orderSubmissionTaskService.get(buyerAccountTask.getTaskId());
+            dailyBudgetHelper.addRuntimePanelObserver(task.getSpreadsheetId(), buyerPanel);
             //if task stopped
             if (task.stopped() || PSEventListener.stopped()) {
                 LOGGER.error("Task stopped");
@@ -136,6 +164,9 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, SubmitResult> {
             publish(new SubmitResult(null, "Task " + buyerAccountTask.getId() + "started", ReturnCode.SUCCESS));
 
             TabbedBuyerPanel.getInstance().setRunningIcon(buyerPanel);
+            if (!PSEventListener.isRunning()) {
+                PSEventListener.start();
+            }
 
             try {
                 submitOrders(buyerAccountTask);
@@ -194,6 +225,7 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, SubmitResult> {
                     LOGGER.error("Fail to update error message for {} {} {} {}", order.spreadsheetId, order.order_id, order.row, msg);
                 }
 
+
                 if (e instanceof OutOfBudgetException) {
                     //UITools.error("No more money to spend :(");
                     //messageListener.addMsg(order, "No more money to spend :(", InformationLevel.Negative);
@@ -206,10 +238,7 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, SubmitResult> {
                 }
             } finally {
                 if (StringUtils.isNotBlank(order.order_number)) {
-                    orderSubmissionBuyerTaskService.saveSuccess(buyerAccountTask);
                     publish(new SubmitResult(order, "order fulfilled successfully. " + order.basicSuccessRecord() + ", took " + Strings.formatElapsedTime(start), ReturnCode.SUCCESS));
-                } else {
-                    orderSubmissionBuyerTaskService.saveFailed(buyerAccountTask);
                 }
             }
         }

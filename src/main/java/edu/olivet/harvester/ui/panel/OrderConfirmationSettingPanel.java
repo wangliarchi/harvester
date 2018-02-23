@@ -57,7 +57,7 @@ public class OrderConfirmationSettingPanel extends JPanel {
                                 .addContainerGap()
                                 .addComponent(enableAutoExportLabel, labelWidth, labelWidth, labelWidth)
                                 .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(enableAutoConfirmationComboBox)
+                                .addComponent(enableAutoConfirmationComboBox, 100, 100, 100)
                                 .addContainerGap()
 
                         )

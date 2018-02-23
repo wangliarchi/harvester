@@ -10,6 +10,7 @@ import edu.olivet.harvester.fulfill.utils.ConditionUtils.Condition;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.hunt.model.Rating.RatingType;
 import edu.olivet.harvester.hunt.model.SellerEnums.*;
+import edu.olivet.harvester.utils.CurrencyConverter;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
@@ -228,9 +229,17 @@ public class Seller {
 
     //todo  shipFromCountry or offerListingCountry?
     public boolean canDirectShip(String shipToCountry, OrderItemType type) {
-        if (type == OrderItemType.BOOK && (isPrime())) {
-            return true;
+        if (type == OrderItemType.BOOK) {
+            if (isPrime()) {
+                return true;
+            }
+
+            //UK Book seller default to have intl shipping available
+            if (offerListingCountry == Country.UK) {
+                return true;
+            }
         }
+
 
         return offerListingCountry.code().equalsIgnoreCase(CountryStateUtils.getInstance().getCountryCode(shipToCountry))
                 || isIntlShippingAvailable();
@@ -241,6 +250,7 @@ public class Seller {
      * 如果seller offer listing 所在国家 和 订单 邮寄国家 不一致，
      * 视为国际 seller，计算的时候 要加国际邮费
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isIntlSeller(Order order) {
         return !CountryStateUtils.getInstance().getCountryCode(order.ship_country)
                 .equalsIgnoreCase(offerListingCountry.code());
@@ -303,11 +313,11 @@ public class Seller {
     private float estimatedProfit = 0.0f;
 
     /**
-     * in USD
+     * in local currency
      */
     public float profit(Order order) {
-        estimatedProfit = order.getAmazonPayout().toUSDAmount().floatValue() - getTotalForCalculation();
-        return estimatedProfit;
+        estimatedProfit = order.getAmazonPayout().toUSDAmount().floatValue() - getTotalPriceInUSD() - shippingVariable - taxVariable;
+        return (float) CurrencyConverter.getInstance().convertAmount(Country.US, offerListingCountry, estimatedProfit);
     }
 
     /**

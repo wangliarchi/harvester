@@ -28,6 +28,13 @@ public class SystemSettings {
     private LocalTime invoiceDownloadTime = LocalTime.of(3, 0);
     private Integer invoiceDownloadingAllowedRange = 15;
 
+
+    private boolean enableASINsSyncing = false;
+    private LocalTime asinSyncTime = LocalTime.of(22, 0);
+    private Integer asinSyncAllowedRange = 60;
+
+    private int maxOrderProcessingThread = 5;
+
     public static final String SYSTEM_SETTINGS_FILE_PATH = Directory.Customize.path() + "/system-settings.json";
     public static final String TEST_SYSTEM_SETTINGS_FILE_PATH = "src/test/resources/conf/system-settings.json";
 
@@ -45,14 +52,19 @@ public class SystemSettings {
 
     }
 
+    public static SystemSettings reload() {
+        File file = new File(getConfigPath());
+        if (file.exists() && file.isFile()) {
+            instance = JSON.parseObject(Tools.readFileToString(file), SystemSettings.class);
+        } else {
+            instance = new SystemSettings();
+        }
+        return instance;
+    }
+
     public static SystemSettings load() {
         if (instance == null) {
-            File file = new File(getConfigPath());
-            if (file.exists() && file.isFile()) {
-                instance = JSON.parseObject(Tools.readFileToString(file), SystemSettings.class);
-            } else {
-                instance = new SystemSettings();
-            }
+            return reload();
         }
 
         return instance;

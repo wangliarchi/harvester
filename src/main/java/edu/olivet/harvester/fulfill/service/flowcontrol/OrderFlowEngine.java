@@ -8,7 +8,6 @@ import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
-import edu.olivet.harvester.fulfill.exception.Exceptions.SellerEddTooLongException;
 import edu.olivet.harvester.fulfill.exception.Exceptions.SellerNotFoundException;
 import edu.olivet.harvester.fulfill.exception.Exceptions.SellerPriceRiseTooHighException;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
@@ -63,7 +62,7 @@ public class OrderFlowEngine extends FlowParent {
             try {
                 processSteps(step, state);
                 return state;
-            } catch (SellerNotFoundException | SellerPriceRiseTooHighException | SellerEddTooLongException e) {
+            } catch (SellerNotFoundException | SellerPriceRiseTooHighException e) {
                 LOGGER.error("", e);
                 String msg = Strings.getExceptionMsg(e);
                 findNewSeller(state, msg);
@@ -111,6 +110,8 @@ public class OrderFlowEngine extends FlowParent {
             orderSubmissionTaskService.saveTask(task);
             throw new SellerNotFoundException(msg + ". New seller found");
         }
+
+        state.setOrder(sheetService.reloadOrder(state.getOrder()));
     }
 
 }

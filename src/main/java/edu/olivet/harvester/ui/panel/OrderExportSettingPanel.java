@@ -57,7 +57,7 @@ public class OrderExportSettingPanel extends JPanel {
                                 .addContainerGap()
                                 .addComponent(enableAutoExportLabel, labelWidth, labelWidth, labelWidth)
                                 .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(enableAutoExportComboBox)
+                                .addComponent(enableAutoExportComboBox,100,100,100)
                                 .addContainerGap()
 
                         )

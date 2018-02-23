@@ -1,6 +1,5 @@
 package edu.olivet.harvester.hunt.service;
 
-import edu.olivet.harvester.hunt.model.Rating;
 import edu.olivet.harvester.hunt.model.Rating.RatingType;
 import edu.olivet.harvester.hunt.model.Seller;
 

@@ -241,3 +241,11 @@ CREATE TABLE IF NOT EXISTS buyer_invoices (
   PRIMARY KEY (orderId)
     ON CONFLICT IGNORE
 );
+
+/* order_inventory_loader */
+CREATE TABLE IF NOT EXISTS order_inventory_loader (
+  id         VARCHAR(120) PRIMARY KEY NOT NULL,
+  orderId				VARCHAR(25)  NOT NULL,
+  sku 				VARCHAR(100) 	NOT NULL,
+  updateType			VARCHAR(50) 	NOT NULL
+)

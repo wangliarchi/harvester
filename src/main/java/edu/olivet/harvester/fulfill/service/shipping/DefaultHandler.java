@@ -58,6 +58,7 @@ public class DefaultHandler implements ShippingHandler {
     }
 
 
+    @SuppressWarnings("SimplifiableIfStatement")
     @Override
     public List<ShippingOption> getValidateOptions(Order order, List<ShippingOption> shippingOptions) {
 

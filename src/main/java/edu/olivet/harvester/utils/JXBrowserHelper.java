@@ -128,12 +128,30 @@ public class JXBrowserHelper {
      * @return 初始化好的BrowserView实例
      */
     public static BrowserView init(String profileDirName, double zoomLevel) {
+        return init(profileDirName, zoomLevel, null);
+    }
+
+
+    /**
+     * 初始化一个JXBrowser View
+     *
+     * @param profileDirName 该BrowserView对应Profile路径名称，需要注意：一个路径同一时间只能一个Browser使用
+     * @param zoomLevel 缩放级别，100%常规模式可设定为1，放大或缩小可以设置其他值
+     * @return 初始化好的BrowserView实例
+     */
+    public static BrowserView init(String profileDirName, double zoomLevel, CustomProxyConfig proxyConfig) {
         String dataDir = Directory.Tmp.path() + File.separator + profileDirName;
 
         BrowserContextParams params = new BrowserContextParams(dataDir);
+        if (proxyConfig != null) {
+            params.setProxyConfig(proxyConfig);
+        }
+
         BrowserContext context = new BrowserContext(params);
+
         Browser browser = new Browser(BrowserType.LIGHTWEIGHT, context);
         browser.setZoomEnabled(true);
+
 
         BrowserPreferences preferences = browser.getPreferences();
         preferences.setImagesEnabled(true);
@@ -565,8 +583,6 @@ public class JXBrowserHelper {
     }
 
 
-
-
     @Repeat
     public static void click(DOMElement element) {
         element.click();
@@ -580,8 +596,6 @@ public class JXBrowserHelper {
         loadPage(browser, url);
         loginGoogleAccount(browser, account.getEmail(), account.getPassword());
     }
-
-
 
 
     public static void loginGoogleAccount(Browser browser, String email, String password) {

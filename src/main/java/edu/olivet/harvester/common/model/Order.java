@@ -18,8 +18,7 @@ import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.OrderSubmissionTaskService;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
-import edu.olivet.harvester.hunt.model.Seller;
-import edu.olivet.harvester.hunt.utils.SellerHuntUtils;
+import edu.olivet.harvester.hunt.model.SellerEnums.SellerType;
 import edu.olivet.harvester.spreadsheet.utils.SheetUtils;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Data;
@@ -32,6 +31,7 @@ import org.apache.commons.lang3.time.FastDateFormat;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.Math.toIntExact;
@@ -284,6 +284,7 @@ public class Order implements Keyable {
     /**
      * Determine whether current order has been canceled by seller
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     @JSONField(serialize = false)
     public boolean canceledBySeller() {
         return Remark.SELLER_CANCELED.isContainedByAny(cost, order_number);
@@ -294,7 +295,7 @@ public class Order implements Keyable {
      */
     @JSONField(serialize = false)
     public boolean buyerCanceled() {
-        return Remark.CANCELLED.isContainedBy(this.order_number);
+        return Remark.BUYER_CANCELLED.isContainedBy(this.order_number);
     }
 
     /**
@@ -311,6 +312,13 @@ public class Order implements Keyable {
         // 产品目前默认都是US买回转运，Remark 没有标记。产品单如果不是直寄或UK FWD，都是US FWD
         return (type() == OrderEnums.OrderItemType.PRODUCT && !isDirectShip() && !isUKForward());
 
+    }
+
+    /**
+     * 根据订单批注判定对应的ASIN是否需要删除
+     */
+    public boolean asinMarkDelete() {
+        return Remark.needASINDeletion(this.remark);
     }
 
     /**
@@ -505,7 +513,22 @@ public class Order implements Keyable {
      */
     @JSONField(serialize = false)
     public boolean sellerIsAPWarehouse() {
-        return OrderEnums.SellerType.APWareHouse.abbrev().equalsIgnoreCase(this.character);
+        if (SellerType.APWareHouse == SellerType.getByCharacter(this.character)) {
+            return true;
+        }
+
+        if (StringUtils.isBlank(seller_id)) {
+            return false;
+        }
+
+        Map<String, String> wareHouseIds = Configs.load("wrsellerids.properties");
+        for (Map.Entry<String, String> entry : wareHouseIds.entrySet()) {
+            if (seller_id.equalsIgnoreCase(entry.getValue())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -513,8 +536,7 @@ public class Order implements Keyable {
      */
     @JSONField(serialize = false)
     public boolean sellerIsPt() {
-        return OrderEnums.SellerType.Pt.abbrev().equalsIgnoreCase(this.character) ||
-                OrderEnums.SellerType.ImagePt.abbrev().equalsIgnoreCase(this.character);
+        return SellerType.Pt == SellerType.getByCharacter(this.character);
     }
 
     /**
@@ -531,15 +553,14 @@ public class Order implements Keyable {
      */
     @JSONField(serialize = false)
     public boolean sellerIsPrime() {
-        return OrderEnums.SellerType.Prime.abbrev().equalsIgnoreCase(this.character) ||
-                OrderEnums.SellerType.ImagePrime.abbrev().equalsIgnoreCase(this.character) ||
+        return SellerType.Prime == SellerType.getByCharacter(this.character) ||
                 sellerIsAP() ||
                 sellerIsAPWarehouse();
     }
 
     @JSONField(serialize = false)
     public boolean sellerIsAP() {
-        return OrderEnums.SellerType.AP.name().equalsIgnoreCase(this.seller) || OrderEnums.SellerType.AP.abbrev().equalsIgnoreCase(this.character);
+        return SellerType.AP.name().equalsIgnoreCase(this.seller) || SellerType.AP == SellerType.getByCharacter(this.character);
     }
 
     @JSONField(serialize = false)

@@ -11,6 +11,7 @@ import edu.olivet.harvester.hunt.service.HuntWorker;
 import edu.olivet.harvester.hunt.service.SheetService;
 import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
+import edu.olivet.harvester.spreadsheet.utils.SheetUtils;
 import edu.olivet.harvester.utils.MessageListener;
 import edu.olivet.harvester.utils.common.ThreadHelper;
 import org.apache.commons.collections4.CollectionUtils;
@@ -34,6 +35,13 @@ public class Hunter {
     @Inject private MessageListener messageListener;
 
     private static final int HUNTER_JOB_NUMBER = 2;
+
+
+    public void execute(String spreadsheetId) {
+        String sheetName = SheetUtils.getTodaySheetName();
+        List<Order> orders = appScript.readOrders(spreadsheetId, sheetName);
+        huntForOrders(orders);
+    }
 
     public void execute(RuntimeSettings runtimeSettings) {
         messageListener.addMsg("Reading orders from order update sheet " + runtimeSettings.getSpreadsheetName() + " " + runtimeSettings.getAdvancedSubmitSetting().toString());
@@ -70,7 +78,7 @@ public class Hunter {
     }
 
     public void huntForOrders(List<Order> orders) {
-        messageListener.empty();
+        //messageListener.empty();
 
         //remove invalid orders
         orders.removeIf(order -> order.sellerHunted() || order.colorIsGray() || order.buyerCanceled());
@@ -123,7 +131,6 @@ public class Hunter {
                 PSEventListener.end();
             }
         }.execute();
-
     }
 
 }

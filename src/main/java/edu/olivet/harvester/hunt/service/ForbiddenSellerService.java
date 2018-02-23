@@ -20,6 +20,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,12 +51,24 @@ public class ForbiddenSellerService extends AppScript {
     private List<String> load(Country country) {
         List<String> forbiddenSellers = new ArrayList<>();
         File localFile = new File(Directory.Customize.path() + File.separator + Config.ForbiddenSellers.fileName());
-        String json;
-        if (!localFile.exists()) {
+        String json = null;
+
+        //local cache for 2 hours
+        if (localFile.exists()) {
+            try {
+                Path p = Paths.get(localFile.getAbsolutePath());
+                BasicFileAttributes attr = Files.readAttributes(p, BasicFileAttributes.class);
+                if (System.currentTimeMillis() - attr.lastModifiedTime().toMillis() < 2 * 60 * 60 * 1000) {
+                    json = Tools.readFileToString(localFile);
+                }
+            } catch (Exception e) {
+                //
+            }
+        }
+
+        if (json == null) {
             json = processResult(get());
             Tools.writeStringToFile(localFile, json);
-        } else {
-            json = Tools.readFileToString(localFile);
         }
 
         List<JSONObject> regions = JSON.parseArray(json, JSONObject.class);

@@ -38,11 +38,9 @@ public class SellerHuntUtilsTest extends BaseTest {
 
         Map<Country, Set<SellerFullType>> countries = new HashMap<>();
 
-        sellerHuntUtils.addCountry(countries, Country.US, SellerFullType.APDirect, SellerFullType.PrimeDirect, SellerFullType.PtDirect,
-                SellerFullType.APExport, SellerFullType.PrimeExport, SellerFullType.PtExport);
+        sellerHuntUtils.addCountry(countries, Country.US, SellerFullType.APDirect, SellerFullType.PrimeDirect, SellerFullType.PtExport);
         sellerHuntUtils.addCountry(countries, Country.FR, SellerFullType.APDirect, SellerFullType.PrimeDirect, SellerFullType.PtDirect);
-        sellerHuntUtils.addCountry(countries, Country.UK, SellerFullType.APDirect, SellerFullType.PrimeDirect,
-                SellerFullType.APExport, SellerFullType.PrimeExport, SellerFullType.PtExport);
+        sellerHuntUtils.addCountry(countries, Country.UK, SellerFullType.APDirect, SellerFullType.PrimeDirect, SellerFullType.PtDirect );
         sellerHuntUtils.addCountry(countries, Country.CA, SellerFullType.APDirect, SellerFullType.PrimeDirect);
 
         assertEquals(sellerHuntUtils.countriesToHunt(order), countries);
@@ -90,7 +88,7 @@ public class SellerHuntUtilsTest extends BaseTest {
         Map<Country, Set<SellerFullType>> countries = new HashMap<>();
 
         sellerHuntUtils.addCountry(countries, Country.US, SellerFullType.APDirect, SellerFullType.PrimeDirect, SellerFullType.PtDirect);
-        sellerHuntUtils.addCountry(countries, Country.UK, SellerFullType.APExport, SellerFullType.PrimeExport, SellerFullType.PtExport);
+        sellerHuntUtils.addCountry(countries, Country.UK, SellerFullType.APDirect, SellerFullType.PrimeDirect, SellerFullType.PtDirect);
         assertEquals(sellerHuntUtils.countriesToHunt(order), countries);
     }
 
@@ -118,6 +116,7 @@ public class SellerHuntUtilsTest extends BaseTest {
 
         assertEquals(sellerHuntUtils.countriesToHunt(order), countries);
     }
+
 
     @Test
     public void determineRemarkAppendixUSBookLocal() {
@@ -206,7 +205,7 @@ public class SellerHuntUtilsTest extends BaseTest {
         seller.setOfferListingCountry(Country.UK);
         seller.setType(SellerType.Prime);
 
-        assertEquals(SellerHuntUtils.determineRemarkAppendix(seller, order), "UK FWD");
+        assertEquals(SellerHuntUtils.determineRemarkAppendix(seller, order), "UK Shipment");
     }
 
     @Test
@@ -317,20 +316,20 @@ public class SellerHuntUtilsTest extends BaseTest {
         seller.setType(SellerType.Pt);
         assertEquals(SellerHuntUtils.determineRemarkAppendix(seller, order), "");
 
-//        seller = new Seller();
-//        seller.setOfferListingCountry(Country.US);
-//        seller.setType(SellerType.AP);
-//        assertEquals(SellerHuntUtils.determineRemarkAppendix(seller, order), "US Shipment");
-//
-//        seller = new Seller();
-//        seller.setOfferListingCountry(Country.UK);
-//        seller.setType(SellerType.Pt);
-//        assertEquals(SellerHuntUtils.determineRemarkAppendix(seller, order), "UK FWD");
-//
-//        seller = new Seller();
-//        seller.setOfferListingCountry(Country.UK);
-//        seller.setType(SellerType.AP);
-//        assertEquals(SellerHuntUtils.determineRemarkAppendix(seller, order), "UK Shipment");
+        seller = new Seller();
+        seller.setOfferListingCountry(Country.US);
+        seller.setType(SellerType.AP);
+        assertEquals(SellerHuntUtils.determineRemarkAppendix(seller, order), "US Shipment");
+
+        seller = new Seller();
+        seller.setOfferListingCountry(Country.UK);
+        seller.setType(SellerType.Pt);
+        assertEquals(SellerHuntUtils.determineRemarkAppendix(seller, order), "UK Shipment");
+
+        seller = new Seller();
+        seller.setOfferListingCountry(Country.UK);
+        seller.setType(SellerType.AP);
+        assertEquals(SellerHuntUtils.determineRemarkAppendix(seller, order), "UK Shipment");
     }
 
 }

@@ -23,6 +23,7 @@ public class UIElements extends AbstractUIContainer {
     private final Menu harvester = new Menu("Harvester", "H");
     private final Menu submitOrder = new Menu("Submit Order", "O");
     private final Menu confirmShipment = new Menu("Confirm Shipment", "C");
+
     //private final Menu finance = new Menu("Finance", "F");
     @Override
     public Menu[] getMenus() {
@@ -72,7 +73,10 @@ public class UIElements extends AbstractUIContainer {
                 Action.Separator,
                 Actions.OrderFulfillmentChecker,
                 Action.Separator,
-                Actions.DownloadInvoice
+                Actions.DownloadInvoice,
+                Action.Separator,
+                Actions.DownloadInventory,
+                Actions.SyncASINs
         });
 
 

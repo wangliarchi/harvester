@@ -4,6 +4,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.utils.Constants;
+import edu.olivet.harvester.common.model.SystemSettings;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionBuyerAccountTask;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.utils.OrderBuyerUtils;
@@ -11,6 +13,7 @@ import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.ui.panel.TabbedBuyerPanel;
+import org.nutz.aop.interceptor.async.Async;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -18,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 1/8/18 4:13 PM
@@ -29,21 +34,30 @@ public class OrderDispatcher {
     private static Map<String, CountDownLatch> latches = new HashMap<>();
 
     @Inject private OrderSubmissionBuyerTaskService orderSubmissionBuyerTaskService;
-    @Inject private DailyBudgetHelper dailyBudgetHelper;
 
+    //private final static int MAX_WORKER_NUM = 3;
+    private ExecutorService threadPool;
+
+    @Inject
+    public void init() {
+        threadPool = Executors.newFixedThreadPool(SystemSettings.reload().getMaxOrderProcessingThread());
+    }
 
     private List<BuyerPanelOrderWorker> listJobs() {
         return new ArrayList<>(jobs.values());
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    @Async
     public boolean hasJobRunning() {
         for (BuyerPanelOrderWorker job : listJobs()) {
-            if (job.isRunning()) {
+            if (!job.isDone()) {
                 return true;
             }
         }
         return false;
     }
+
 
     public void dispatch(List<Order> orders, OrderSubmissionTask task) {
         //按照账号/国家 分配订单
@@ -51,17 +65,25 @@ public class OrderDispatcher {
 
         map.forEach((buyer, countryListMap) -> countryListMap.forEach((country, orderList) -> {
             OrderSubmissionBuyerAccountTask buyerTask = orderSubmissionBuyerTaskService.create(country, buyer, task, orderList);
-            BuyerPanel buyerPanel = TabbedBuyerPanel.getInstance().getOrAddTab(country, buyer);
-            String key = buyerPanel.getKey();
-            dailyBudgetHelper.addRuntimePanelObserver(task.getSpreadsheetId(), buyerPanel);
+            String key = buyer.getEmail() + Constants.HYPHEN + country.name();
             CountDownLatch latch = getLatch(key);
-            BuyerPanelOrderWorker job = jobs.computeIfAbsent(key, k -> new BuyerPanelOrderWorker(buyerPanel));
 
-            job.addTask(buyerTask, latch);
+            //BuyerPanelOrderWorker job = jobs.computeIfAbsent(key, k -> new BuyerPanelOrderWorker(country, buyer));
+            //job.addTask(buyerTask, latch);
+            //if (job.getState() == SwingWorker.StateValue.PENDING) {
+            //    job.execute();
+            //}
 
-            if (job.getState() == SwingWorker.StateValue.PENDING) {
-                job.execute();
+            if (!jobs.containsKey(key) || jobs.get(key).isDone()) {
+                BuyerPanelOrderWorker job = new BuyerPanelOrderWorker(country, buyer);
+                job.addTask(buyerTask, latch);
+                threadPool.submit(job);
+                jobs.put(key,job);
+            } else {
+                BuyerPanelOrderWorker job = jobs.get(key);
+                job.addTask(buyerTask, latch);
             }
+
         }));
 
         if (!PSEventListener.isRunning()) {
@@ -100,9 +122,9 @@ public class OrderDispatcher {
     }
 
     private BuyerPanelOrderWorker getJob(String key, BuyerPanel buyerPanel, CountDownLatch latch) {
-        BuyerPanelOrderWorker job = jobs.computeIfAbsent(key, k -> new BuyerPanelOrderWorker(buyerPanel));
+        BuyerPanelOrderWorker job = jobs.computeIfAbsent(key, k -> new BuyerPanelOrderWorker(buyerPanel.getCountry(), buyerPanel.getBuyer()));
         if (job.isDone()) {
-            job = new BuyerPanelOrderWorker(buyerPanel);
+            job = new BuyerPanelOrderWorker(buyerPanel.getCountry(), buyerPanel.getBuyer());
         }
 
         return job;

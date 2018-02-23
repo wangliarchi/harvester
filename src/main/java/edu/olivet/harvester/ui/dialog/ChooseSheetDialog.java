@@ -195,7 +195,7 @@ public class ChooseSheetDialog extends BaseDialog {
 
         OrderSubmissionSettings orderSubmissionSettings = OrderSubmissionSettings.load();
         if (StringUtils.isNotBlank(orderSubmissionSettings.getSpreadsheetName()) &&
-                spreadsheets.stream().map(it -> it.getTitle()).collect(Collectors.toList())
+                spreadsheets.stream().map(Spreadsheet::getTitle).collect(Collectors.toList())
                         .contains(orderSubmissionSettings.getSpreadsheetName())) {
             this.spreadList.setSelectedValue(orderSubmissionSettings.getSpreadsheetName(), true);
         } else {

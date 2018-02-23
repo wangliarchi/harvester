@@ -2,9 +2,7 @@ package edu.olivet.harvester.hunt.service;
 
 import com.google.inject.Inject;
 import com.teamdev.jxbrowser.chromium.Browser;
-import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.amazon.Country;
-import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.*;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.harvester.common.model.Money;

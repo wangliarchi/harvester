@@ -74,7 +74,7 @@ public class LoginVerificationService {
         BrowserView browserView = JXBrowserHelper.init(buyer.key() + "-gmail", -1);
         Browser browser = browserView.getBrowser();
         frame.getContentPane().add(browserView);
-        UITools.setDialogAttr(frame, true);
+        UITools.setDialogAttr(frame, false);
 
         JXBrowserHelper.loadPage(browser, "https://mail.google.com");
         WaitTime.Short.execute();

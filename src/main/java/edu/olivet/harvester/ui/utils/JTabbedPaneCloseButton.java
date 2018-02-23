@@ -1,16 +1,10 @@
 package edu.olivet.harvester.ui.utils;
 
-/**
- * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 2/9/2018 4:30 PM
- */
-
 import edu.olivet.foundations.ui.UITools;
 import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -96,14 +90,7 @@ public abstract class JTabbedPaneCloseButton extends JTabbedPane {
         pnlTab.add(addTab);
         pnlTab.setName(" + ");
         this.add(pnlTab, 0);
-        ActionListener listener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println(e);
-            }
-        };
         addTab.setFocusable(false);
-        addTab.addActionListener(listener);
         this.setVisible(true);
     }
 

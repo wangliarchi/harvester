@@ -40,6 +40,7 @@ public class SellerFilter {
                 conditionQualified(seller, order);
     }
 
+    @SuppressWarnings("SimplifiableIfStatement")
     public boolean isPreliminaryQualified(Seller seller, Order order) {
 
         if (!shipFromCountryValid(seller, order)) {
@@ -49,6 +50,7 @@ public class SellerFilter {
         if (!sellerOverallRatingQualified(seller, order)) {
             return false;
         }
+
         if (!notOutOfStock(seller, order)) {
             return false;
         }
@@ -90,9 +92,14 @@ public class SellerFilter {
 
             //欧洲书
             if (saleChannelCountry.europe()) {
-                if (seller.getShipFromCountry() == Country.UK && seller.getTotalPrice() <= 50) {
-                    return true;
-                }
+                //if (seller.getShipFromCountry() == Country.UK && seller.getTotalPrice() <= 50) {
+                return true;
+                //}
+            }
+
+            // AU 书
+            if (saleChannelCountry == Country.AU) {
+                return true;
             }
         }
 
@@ -188,7 +195,8 @@ public class SellerFilter {
     }
 
     public boolean sellerRatingQualified(Seller seller, Order order) {
-        HuntStandard huntStandard = HuntStandardSettings.load().getHuntStandard(order);
+        HuntStandard huntStandard = huntVariableService.getHuntStandard(seller, order);
+        //HuntStandard huntStandard = HuntStandardSettings.load().getHuntStandard(order);
 
         if (!huntStandard.monthlyRatingQualified(seller.getRatingByType(RatingType.Last30Days))) {
             LOGGER.setOrder(order).getLogger().info("Seller [{}] not qualified as its monthly rating {} is lower than standard {}, full info {}",

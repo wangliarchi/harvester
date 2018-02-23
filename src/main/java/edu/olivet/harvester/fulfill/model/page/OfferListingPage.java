@@ -10,7 +10,7 @@ import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.fulfill.exception.Exceptions.SellerNotFoundException;
 import edu.olivet.harvester.fulfill.exception.Exceptions.SellerPriceRiseTooHighException;
 import edu.olivet.harvester.hunt.model.Seller;
-import edu.olivet.harvester.hunt.model.SellerEnums;
+import edu.olivet.harvester.hunt.model.SellerEnums.SellerType;
 import edu.olivet.harvester.hunt.service.SellerService;
 import edu.olivet.harvester.fulfill.utils.ConditionUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
@@ -76,37 +76,20 @@ public class OfferListingPage extends FulfillmentPage {
     }
 
     public Seller findSeller(Order order) {
-
         LOGGER.info("Finding seller for order {}", order.order_id);
-
         Country currentCountry = OrderCountryUtils.getFulfillmentCountry(order);
-
         while (true) {
             List<Seller> sellers = sellerService.parseSellers(browser, currentCountry);
-
             if (CollectionUtils.isEmpty(sellers)) {
                 break;
             }
             //List<Seller> results = new ArrayList<>();
             for (Seller seller : sellers) {
-                String sellerName = seller.getName();
-                boolean sellerEq = (StringUtils.isNotBlank(seller.getUuid()) && StringUtils.isNotBlank(order.seller_id) &&
-                        seller.getUuid().equalsIgnoreCase(order.seller_id) &&
-                        seller.getType().abbrev().equalsIgnoreCase(order.character)) ||
-                        (StringUtils.isNotBlank(sellerName) && StringUtils.isNotBlank(order.seller) &&
-                                sellerName.equalsIgnoreCase(order.seller) &&
-                                seller.getType().abbrev().equalsIgnoreCase(order.character)) ||
-                        (seller.getType() == SellerEnums.SellerType.AP && order.sellerIsAP()) ||
-                        (seller.getType() == SellerEnums.SellerType.APWareHouse && order.sellerIsAPWarehouse());
-
-                //ConditionUtils
-                if (sellerEq && ConditionUtils.goodToGo(order.condition(), seller.getCondition())) {
+                if (rightSeller(seller, order)) {
                     return seller;
                 }
             }
-
             //to next page
-
             DOMElement nextPageLink = JXBrowserHelper.selectElementByCssSelector(browser, "#olpOfferListColumn .a-pagination li.a-last a");
             if (nextPageLink != null) {
                 JXBrowserHelper.insertChecker(browser);
@@ -115,12 +98,41 @@ public class OfferListingPage extends FulfillmentPage {
             } else {
                 break;
             }
-
-
         }
 
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
         throw new SellerNotFoundException(String.format(Remark.SELLER_DISAPPEAR.text2Write(), order.seller, order.character));
+    }
+
+
+    @SuppressWarnings("RedundantIfStatement")
+    public boolean rightSeller(Seller seller, Order order) {
+        //compare condition first;
+        if (!ConditionUtils.goodToGo(order.condition(), seller.getCondition())) {
+            return false;
+        }
+
+
+        //compare by uuid
+        if (StringUtils.isNotBlank(order.seller_id) && order.seller_id.equalsIgnoreCase(seller.getUuid()) &&
+                seller.getType() == SellerType.getByCharacter(order.character)) {
+            return true;
+        }
+        //compare by name
+        if (StringUtils.isNotBlank(order.seller) && order.seller.equalsIgnoreCase(seller.getName()) &&
+                seller.getType() == SellerType.getByCharacter(order.character)) {
+            return true;
+        }
+
+        if ((seller.getType() == SellerType.AP && order.sellerIsAP())) {
+            return true;
+        }
+
+        if (seller.getType() == SellerType.APWareHouse && order.sellerIsAPWarehouse()) {
+            return true;
+        }
+
+        return false;
     }
 
     @Repeat(expectedExceptions = BusinessException.class)

@@ -303,7 +303,9 @@ public class OrderValidator {
     public String isSupplierHunted(Order order) {
         //no seller or seller price info
         String errorMsg = "Order supplier has not been hunted yet.";
-        if (StringUtils.isBlank(order.seller) || StringUtils.isBlank(order.seller_price)) {
+        if ((StringUtils.isBlank(order.seller) && StringUtils.isBlank(order.seller_id)) ||
+                StringUtils.isBlank(order.seller_price) ||
+                StringUtils.isBlank(order.character)) {
             return errorMsg;
         }
 

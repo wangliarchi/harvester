@@ -23,7 +23,8 @@ public class PageUtils {
     public static String getSellerUUID(String url) {
         if (url.contains("/shops/")) {
             //eg:http://www.amazon.com/shops/A2RGW401VKH294/ref=olp_merch_name_3
-            return url.replaceAll("http://www[.].*/shops/", StringUtils.EMPTY).replaceAll("/ref=.*", StringUtils.EMPTY);
+            //eg:https://www.amazon.com/shops/A2RGW401VKH294/ref=olp_merch_name_3
+            return url.replaceAll("https?://www[.].*/shops/", StringUtils.EMPTY).replaceAll("/ref=.*", StringUtils.EMPTY);
         } else {
             //eg:gp/aag/main/ref=olp_merch_name_1?ie=UTF8&asin=0718015592&isAmazonFulfilled=0&seller=A1MIVE4G63176B
             return getParameters(url).get("seller");

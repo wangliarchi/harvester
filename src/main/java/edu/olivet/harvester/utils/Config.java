@@ -9,6 +9,7 @@ public enum Config {
     CountryName("country-names", "国家"),
     USStates("us-states", "US States"),
     CAProvinces("ca-provinces", "CA Provinces"),
+    EUCountry("eu-countries", "欧盟国家"),
     AmazonAddressRule("addressrule", "亚马逊地址转换规则"),
     ConditionLevel("condition-level", "产品新旧等级设定"),
     ProfileList("profileList.properties", "性能监控列表"),
@@ -19,7 +20,8 @@ public enum Config {
     UKForwardAddress("ukTransAddr.json", "UK FWD Address"),
     ShippingFeeLimit("shipping-limit.json", "Shipping Fee Limit"),
     Names("names", "Common used name list"),
-    Translation("translations.properties", ""),;
+    Translation("translations.properties", ""),
+    Stock("stock.json", "库存检查规则");
 
     private String fileName;
     private String desc;

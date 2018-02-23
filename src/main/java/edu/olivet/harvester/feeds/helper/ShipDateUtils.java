@@ -12,6 +12,7 @@ import org.joda.time.DateTime;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -65,7 +66,8 @@ public class ShipDateUtils {
             if (purchaseDate.after(shipDate)) {
                 //shipDate = DateUtils.addHours(purchaseDate, 12);
                 shipDate = Dates.beginOfDay(new DateTime(purchaseDate)).toDate();
-                shipDate = DateUtils.addHours(shipDate, 8);
+                //shipDate = DateUtils.addHours(shipDate, 8);
+                shipDate = DateUtils.addHours(shipDate, Dates.getField(purchaseDate, Calendar.HOUR_OF_DAY) + 1);
             }
         } catch (Exception e) {
             //
@@ -75,8 +77,8 @@ public class ShipDateUtils {
         Date nowDate = now.get();
         if (shipDate.after(nowDate)) {
             //shipDate = DateUtils.addHours(nowDate, -3);
-            shipDate = Dates.beginOfDay(new DateTime(nowDate)).toDate();
-            shipDate = DateUtils.addHours(shipDate, 8);
+            //shipDate = Dates.beginOfDay(new DateTime(nowDate)).toDate();
+            shipDate = DateUtils.addMinutes(nowDate, -Dates.getField(nowDate, Calendar.MINUTE));
         }
         return shipDate;
     }

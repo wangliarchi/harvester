@@ -164,10 +164,16 @@ public class LoginPage extends FulfillmentPage implements PageObject {
             LOGGER.error("Failed to fetch verification code.", e);
             UITools.info("Please enter login verification code.");
             WaitTime.Short.execute();
+            int times = 0;
             while (true) {
                 String enteredCode = codeField.getAttribute("value");
                 if (StringUtils.length(enteredCode) >= 6) {
                     break;
+                }
+                times++;
+                WaitTime.Normal.execute();
+                if (times > 5) {
+                    throw new BuyerAccountAuthenticationException("Fail to enter verification code");
                 }
             }
         }

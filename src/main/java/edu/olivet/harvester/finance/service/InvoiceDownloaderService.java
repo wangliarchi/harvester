@@ -304,7 +304,7 @@ public class InvoiceDownloaderService {
 
 
         List<String> patterns = Lists.newArrayList("MMMMM dd yyyy", "dd MMMMM yyyy");
-        Date date = null;
+        Date date;
         for (String pattern : patterns) {
             SimpleDateFormat dateFormat = new SimpleDateFormat(pattern, country.locale());
             try {
@@ -333,7 +333,7 @@ public class InvoiceDownloaderService {
             }
         }
 
-        return date;
+        return null;
     }
 
 
@@ -342,7 +342,7 @@ public class InvoiceDownloaderService {
         Country country = buyerPanel.getCountry();
         String url = country.baseUrl() + "/gp/your-account/order-history?opt=ab&digitalOrders=1&unifiedOrders=1&returnTo=&orderFilter=";
         //default to last 6 month
-        int totalDays = 0;
+        int totalDays;
         if (fromDate.after(DateUtils.addMonths(now.get(), -6))) {
             url += "months-6";
             totalDays = 180;
@@ -419,7 +419,7 @@ public class InvoiceDownloaderService {
                 break;
             }
 
-            int newPage = page;
+            int newPage;
             if (lastType == 2) {
                 //lastPageNo
                 newPage = page + Math.abs(page - lastPageNo) / 2;

@@ -6,6 +6,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.BaseDialog;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
+import edu.olivet.harvester.common.model.BuyerAccountSetting;
 import edu.olivet.harvester.common.model.BuyerAccountSettingUtils;
 import lombok.Getter;
 
@@ -40,7 +41,7 @@ public class AddBuyerTabDialog extends BaseDialog {
 
 
         BuyerAccountSettingUtils buyerAccountSettingUtils = BuyerAccountSettingUtils.load();
-        List<Account> buyers = buyerAccountSettingUtils.getAccountSettings().stream().map(it -> it.getBuyerAccount()).collect(Collectors.toList());
+        List<Account> buyers = buyerAccountSettingUtils.getAccountSettings().stream().map(BuyerAccountSetting::getBuyerAccount).collect(Collectors.toList());
 
         JLabel buyerLabel = new JLabel("Buyer Account");
         buyerJComboBox = new JComboBox<>();

@@ -4,9 +4,7 @@ import edu.olivet.deploy.Language;
 import edu.olivet.foundations.ui.BaseDialog;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
-import edu.olivet.harvester.ui.panel.DownloadInvoiceSettingPanel;
-import edu.olivet.harvester.ui.panel.OrderConfirmationSettingPanel;
-import edu.olivet.harvester.ui.panel.OrderExportSettingPanel;
+import edu.olivet.harvester.ui.panel.*;
 
 import javax.swing.*;
 import javax.swing.LayoutStyle.ComponentPlacement;
@@ -20,11 +18,8 @@ public class SystemSettingsDialog  extends BaseDialog {
 
     public SystemSettingsDialog() {
         super(null, true);
-
         initComponents();
     }
-
-
 
     private void initComponents() {
         String title = "System Settings";
@@ -35,12 +30,18 @@ public class SystemSettingsDialog  extends BaseDialog {
         aboutBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         JTabbedPane tabbedPane = new JTabbedPane();
+
+        orderSubmissionSettingPanel = new OrderSubmissionSettingPanel();
+        tabbedPane.addTab("Order Submission",orderSubmissionSettingPanel);
         orderExportSettingPanel = new OrderExportSettingPanel();
         tabbedPane.addTab("Order Export",orderExportSettingPanel);
         orderConfirmationSettingPanel = new OrderConfirmationSettingPanel();
         tabbedPane.addTab("Order Confirmation",orderConfirmationSettingPanel);
         downloadInvoiceSettingPanel = new DownloadInvoiceSettingPanel();
         tabbedPane.addTab("Download Invoices",downloadInvoiceSettingPanel);
+
+        syncASINsSettingPanel = new SyncASINsSettingPanel();
+        tabbedPane.addTab("Sync ASINs",syncASINsSettingPanel);
 
 
 
@@ -52,7 +53,7 @@ public class SystemSettingsDialog  extends BaseDialog {
 
         layout.setHorizontalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(tabbedPane, 400, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(tabbedPane, 500, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                         .addGroup(GroupLayout.Alignment.LEADING, layout.createSequentialGroup().addGap(20).addComponent(aboutBtn))
                         .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addComponent(okBtn, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH)
@@ -79,14 +80,18 @@ public class SystemSettingsDialog  extends BaseDialog {
 
     }
 
+    private OrderSubmissionSettingPanel orderSubmissionSettingPanel;
     private OrderExportSettingPanel orderExportSettingPanel;
     private OrderConfirmationSettingPanel orderConfirmationSettingPanel;
     private DownloadInvoiceSettingPanel downloadInvoiceSettingPanel;
+    private SyncASINsSettingPanel syncASINsSettingPanel;
     @Override
     public void ok() {
         orderExportSettingPanel.collectData();
         orderConfirmationSettingPanel.collectData();
         downloadInvoiceSettingPanel.collectData();
+        syncASINsSettingPanel.collectData();
+        orderSubmissionSettingPanel.collectData();
         UITools.info("System settings have been saved successfully.");
         ok = true;
         doClose();

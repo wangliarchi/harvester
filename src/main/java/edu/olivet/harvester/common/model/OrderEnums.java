@@ -278,57 +278,6 @@ public class OrderEnums {
         }
     }
 
-    /**
-     * Seller类型枚举，包括Amazon和Amazon以外的Seller类型
-     *
-     * @author <a href="mailto:rnd@olivetuniversity.edu">RnD</a> 09/19/2017 09:00:00
-     */
-    public enum SellerType {
-        AP("AP"),
-        ImagePrime("tp_Pr"),
-        Prime("Pr"),
-        APWareHouse("Wr"),
-        ImagePt("tp_pt"),
-        Pt("pt"),
-        BetterWorld("bw"),
-        Half("h"),
-        Ingram("in");
-
-        private final String abbrev;
-
-        public String abbrev() {
-            return abbrev;
-        }
-
-        SellerType(String abbrev) {
-            this.abbrev = abbrev;
-        }
-
-        /**
-         * 判定当前Seller类型是否为Prime
-         */
-        public boolean isPrime() {
-            return SellerType.isPrime(this);
-        }
-
-        /**
-         * 判定给出的Seller类型是否为Prime
-         *
-         * @param type Seller类型
-         */
-        public static boolean isPrime(SellerType type) {
-            return type == AP || type == Prime || type == ImagePrime || type == APWareHouse;
-        }
-
-        /**
-         * 判定当前Seller类型是否为普通Seller
-         */
-        public boolean isPt() {
-            return this == Pt || this == ImagePt;
-        }
-    }
-
-
     public enum OrderItemType {
         BOOK,
         PRODUCT

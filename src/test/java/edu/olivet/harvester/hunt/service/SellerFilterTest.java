@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.fulfill.utils.ConditionUtils.Condition;
-import edu.olivet.harvester.hunt.model.HuntStandard;
 import edu.olivet.harvester.hunt.model.Rating;
 import edu.olivet.harvester.hunt.model.Rating.RatingType;
 import edu.olivet.harvester.hunt.model.Seller;
@@ -84,4 +83,21 @@ public class SellerFilterTest extends BaseTest {
         assertTrue(sellerFilter.eddQualified(seller, order));
     }
 
+    @Test
+    public void notForbiddenSellerTest() {
+        order = prepareOrder();
+        order.shipping_fee = "3.99";
+        order.purchase_date = "2018-02-07T20:46:24+00:00";
+        order.estimated_delivery_date = "2018-03-01 2018-03-23";
+        order.ship_country = "United Kingdom";
+        order.sales_chanel = "Amazon.co.uk";
+
+        Seller seller = new Seller();
+        seller.setOfferListingCountry(Country.UK);
+        seller.setShipFromCountry(Country.UK);
+        seller.setType(SellerType.Pt);
+        seller.setUuid("A2WMHBKABXRCB5");
+        seller.setName("moviemars-uk");
+        assertFalse(sellerFilter.notForbiddenSeller(seller, order));
+    }
 }

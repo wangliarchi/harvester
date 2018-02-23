@@ -1,9 +1,8 @@
 package edu.olivet.harvester.hunt.model;
 
+import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.UIText;
-import edu.olivet.foundations.utils.BusinessException;
-import edu.olivet.foundations.utils.Constants;
-import edu.olivet.foundations.utils.Strings;
+import edu.olivet.foundations.utils.*;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -85,7 +84,9 @@ public class SellerEnums {
     public enum SellerType {
         AP("AP"),
         Prime("Pr"),
+        ImagePrime("tp_Pr"),
         Pt("pt"),
+        ImagePt("tp_pt"),
         APWareHouse("Wr");
 
         private String abbrev;
@@ -111,14 +112,23 @@ public class SellerEnums {
          * @param type Seller类型
          */
         public static boolean isPrime(SellerType type) {
-            return type == AP || type == Prime || type == APWareHouse;
+            return type == AP || type == Prime || type == ImagePrime || type == APWareHouse;
+        }
+
+        /**
+         * 判定给出的Seller类型是否为Prime
+         *
+         * @param type Seller类型
+         */
+        public static boolean isPt(SellerType type) {
+            return type == Pt || type == ImagePt;
         }
 
         /**
          * 判定当前Seller类型是否为普通Seller
          */
         public boolean isPt() {
-            return this == Pt;
+            return isPt(this);
         }
 
         public boolean isAP() {
@@ -143,7 +153,7 @@ public class SellerEnums {
          */
         public static SellerType getByCharacter(String character) {
             for (SellerType sellerType : SellerType.values()) {
-                if (sellerType.abbrev().equalsIgnoreCase(character)) {
+                if (StringUtils.equalsAnyIgnoreCase(character, StringUtils.split(sellerType.abbrev(), ","))) {
                     return sellerType;
                 }
             }
@@ -217,12 +227,33 @@ public class SellerEnums {
          */
         WontBeInStockSoon;
 
-        static final  String[] outOfStockKeywords = new String[] {"out of stock"};
-        static final  String[] backOrderKeywords = new String[] {"Back-ordered"};
+        static final String[] outOfStockKeywords = new String[] {"out of stock", "Due in stock", "Derzeit nicht auf Lager", "En rupture de stock temporaire", "Temporalmente agotado", "Temporaneamente non disponibile"};
+        static final String[] backOrderKeywords = new String[] {"Back-ordered"};
+        static final String[] outOfStockPatterns = new String[] {"delivery time of [0-9]{1,2}-[0-9]{2} days",
+                "Usually ships in [0-9]{1,2} (to|-) [0-9]{2} days",
+                "Usually ships in [0-9]{1} (to|-) [0-9]{1} weeks",
+                "within [0-9]{1,2} (to|-) [0-9]{2} business days",
+                "Habituellement expédié sous [0-9]{1} à [0-9]{1} (semaines|mois)",
+                "En général, expédié en [0-9]{1} - [0-9]{1} (semaines|mois)",
+                "In stock but may require delivery up to [0-9]{1} weeks",
+                "Envío estimado en [0-9]{1} a [0-9]{1,2} semanas",
+                "Dieser Artikel ist noch nicht erschienen",
+                "En stock, mais la livraison peut nécessiter jusqu'à [0-9]{1} jours supplémentaires",
+                "Temporaneamente non disponibile",
+                "This item has not yet been released",
+                "Pre-order now",
+                "Usually dispatched within [0-9]{1,2} (to|-) [0-9]{1,2} weeks",
+                "Normalmente los envíos se realizan de [0-9]{1,2} a [0-9]{2} días laborables"};
 
         public static StockStatus parseFromText(String deliveryText) {
             if (Strings.containsAnyIgnoreCase(deliveryText, outOfStockKeywords)) {
                 return OutOfStock;
+            }
+
+            for (String regex : outOfStockPatterns) {
+                if (RegexUtils.containsRegex(deliveryText, regex)) {
+                    return OutOfStock;
+                }
             }
 
             if (Strings.containsAllIgnoreCase(deliveryText, backOrderKeywords)) {
@@ -231,9 +262,5 @@ public class SellerEnums {
 
             return InStock;
         }
-
-
     }
-
-
 }

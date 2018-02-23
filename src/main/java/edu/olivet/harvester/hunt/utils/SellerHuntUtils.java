@@ -30,16 +30,29 @@ public class SellerHuntUtils {
         Map<Country, Set<SellerFullType>> countries = new HashMap<>();
 
         Country saleChannelCountry = OrderCountryUtils.getMarketplaceCountry(order);
+        String shipToCountryCode = CountryStateUtils.getInstance().getCountryCode(order.ship_country);
+
+        // EU BOOK
+        // 收件人地址国为俄罗斯，南非，印度，只在us uk de 的亚马逊 找AP直寄，对比选择利润最高者
+        if (saleChannelCountry.europe() && StringUtils.equalsAnyIgnoreCase(shipToCountryCode, "RU", "ZA", "IN")) {
+            addCountry(countries, Country.US, SellerFullType.APDirect);
+            addCountry(countries, Country.DE, SellerFullType.APDirect);
+            addCountry(countries, Country.UK, SellerFullType.APDirect);
+            return countries;
+        }
+
 
         //add order marketplace country if supported
         if (countriesToHunt().contains(saleChannelCountry)) {
-            addCountry(countries, saleChannelCountry, SellerFullType.APDirect, SellerFullType.PrimeDirect, SellerFullType.PtDirect);
+            if (order.isDomesticOrder()) {
+                addCountry(countries, saleChannelCountry, SellerFullType.APDirect, SellerFullType.PrimeDirect, SellerFullType.PtDirect);
+            }
         }
 
         //国际单
         if (!order.isDomesticOrder()) {
             try {
-                Country shipToCountry = Country.fromCode(CountryStateUtils.getInstance().getCountryCode(order.ship_country));
+                Country shipToCountry = Country.fromCode(shipToCountryCode);
                 if (countriesToHunt().contains(shipToCountry)) {
                     addCountry(countries, shipToCountry, SellerFullType.APDirect, SellerFullType.PrimeDirect, SellerFullType.PtDirect);
                 }
@@ -47,7 +60,19 @@ public class SellerHuntUtils {
                 //
             }
 
-            huntVariableService.supportedIntlTypes(order).forEach((country, types) -> addCountry(countries, country, types.toArray(new SellerFullType[types.size()])));
+            //huntVariableService.supportedIntlTypes(order).forEach((country, types) -> addCountry(countries, country, types.toArray(new SellerFullType[types.size()])));
+
+
+            if (orderItemTypeHelper.getItemType(order) == OrderItemType.BOOK) {
+                if (countriesToHunt().contains(saleChannelCountry)) {
+                    addCountry(countries, saleChannelCountry, SellerFullType.APDirect);
+                    addCountry(countries, saleChannelCountry, SellerFullType.PrimeDirect);
+                }
+
+                addCountry(countries, Country.CA, SellerFullType.APDirect);
+                addCountry(countries, Country.CA, SellerFullType.PrimeDirect);
+            }
+
         }
 
         addUKFwd(countries, order);
@@ -204,7 +229,6 @@ public class SellerHuntUtils {
         order.seller_price = seller.getPrice().getAmount().toPlainString();
         order.character = seller.getType().abbrev();
         order.condition = seller.getCondition().text();
-
 
         if (seller.isAddOn()) {
             order.remark = Remark.ADD_ON.appendTo(order.remark);
