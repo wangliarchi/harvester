@@ -7,6 +7,7 @@ import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/2/17 3:44 PM
@@ -25,11 +26,20 @@ public class PaymentMethodMultiPage extends PaymentMethodAbstractPage {
         JXBrowserHelper.wait(browser, By.cssSelector("#new-payment-methods"));
 
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
-        //
-        selectCreditCard(order);
 
+        if (StringUtils.isNotBlank(order.promotionCode)) {
+            enterPromoCode(order);
+            WaitTime.Short.execute();
+        }
+
+        //existing-balance radio-col pm_promo
+        DOMElement existingBalanceRadioElement = JXBrowserHelper.selectVisibleElement(browser, "#existing-balance input[type='radio']#pm_promo");
+        if (existingBalanceRadioElement != null) {
+            existingBalanceRadioElement.click();
+        } else {
+            selectCreditCard(order);
+        }
         click();
-
     }
 
     @Repeat

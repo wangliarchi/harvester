@@ -48,6 +48,14 @@ public class ProgressUpdater {
         update();
     }
 
+    public static synchronized void setTotal(int total) {
+        if (progressBar != null) {
+            progressBar.setMaximum(total);
+        }
+
+        update();
+    }
+
     public static synchronized void success() {
         successCount++;
         update();
@@ -75,5 +83,13 @@ public class ProgressUpdater {
 
     public static String toTable() {
         return String.format("%s\t%s\t%s", successCount + failedCount, successCount, failedCount);
+    }
+
+    public static synchronized String progress() {
+        return String.format("%s/%s", successCount + failedCount, progressBar.getMaximum());
+    }
+
+    public static synchronized String timeSpent() {
+        return Strings.formatElapsedTime(start);
     }
 }

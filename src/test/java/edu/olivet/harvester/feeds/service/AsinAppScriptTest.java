@@ -4,8 +4,6 @@ import com.google.inject.Inject;
 import edu.olivet.harvester.common.BaseTest;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
-
 public class AsinAppScriptTest extends BaseTest {
 
 

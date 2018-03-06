@@ -72,7 +72,7 @@ public class OrderExportSettingDialog extends BaseDialog {
         spreadPane.setBorder(BorderFactory.createTitledBorder(UIText.title("Select Marketplaces")));
         this.marketplaceList.setListData(countries);
         this.marketplaceList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        //this.marketplaceList.setSelectedIndices(indexes);
+        this.marketplaceList.setSelectedIndices(indexes);
 
         JLabel fromLabel = new JLabel();
         fromLabel.setText("From Date");

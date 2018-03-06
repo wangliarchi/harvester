@@ -49,11 +49,9 @@ public class ChooseMarketplaceDialog extends BaseDialog {
         setTitle(UIText.title("Select Marketplace"));
 
         Country[] countries = new Country[Settings.load().listAllCountries().size()];
-        int[] indexes = new int[countries.length];
         for (int i = 0; i < Settings.load().listAllCountries().size(); i++) {
             Country country = Settings.load().listAllCountries().get(i);
             countries[i] = country;
-            indexes[i] = i;
         }
 
         spreadPane.setBorder(BorderFactory.createTitledBorder(UIText.title("Select Marketplaces")));

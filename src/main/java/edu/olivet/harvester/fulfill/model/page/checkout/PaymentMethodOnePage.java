@@ -1,12 +1,13 @@
 package edu.olivet.harvester.fulfill.model.page.checkout;
 
-import com.teamdev.jxbrowser.chromium.dom.By;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.WaitTime;
+import edu.olivet.harvester.common.model.Money;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,24 +25,37 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
     }
 
     public void execute(Order order) {
+        //enter promo code if any
+        if (StringUtils.isNotBlank(order.promotionCode)) {
+            enterPromoCode(order);
+        }
 
-        //wait until it's loaded
-        JXBrowserHelper.wait(browser, By.cssSelector(CONTINUE_BTN_SELECTOR));
+        String grandTotalText = JXBrowserHelper.text(browser, "#subtotals-marketplace-table .grand-total-price");
+        try {
+            Money total = Money.fromText(grandTotalText, buyerPanel.getCountry());
+            if (total.getAmount().floatValue() == 0) {
+                click(order);
+                return;
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error reading grand total. ", e);
+        }
 
-        DOMElement changePaymentLink = JXBrowserHelper.selectElementByCssSelector(browser, CHANGE_PAYMENT_METHOD_BTN_SELECTOR);
+        DOMElement changePaymentLink = JXBrowserHelper.selectVisibleElement(browser, CHANGE_PAYMENT_METHOD_BTN_SELECTOR);
         if (changePaymentLink != null) {
-            changePaymentLink.click();
-            JXBrowserHelper.waitUntilNotFound(browser, CHANGE_PAYMENT_METHOD_BTN_SELECTOR);
-            WaitTime.Shortest.execute();
+            JXBrowserHelper.clickJS(browser, CHANGE_PAYMENT_METHOD_BTN_SELECTOR);
+        }
+
+        DOMElement continueBtn = JXBrowserHelper.selectElementByCssSelector(browser, CONTINUE_BTN_SELECTOR);
+        if (continueBtn == null) {
+            return;
         }
 
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
 
-        //
         selectCreditCard(order);
 
         click(order);
-
     }
 
     @Repeat
@@ -57,8 +71,26 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
         } else {
             LOGGER.error("Continue Btn not found on PaymentMethodOnePage");
         }
+    }
 
-
+    public void enterPromoCode(Order order) {
+        try {
+            String grandTotalText = JXBrowserHelper.text(browser, "#subtotals-marketplace-table .grand-total-price");
+            Money total = Money.fromText(grandTotalText, buyerPanel.getCountry());
+            //DOMElement checkbox = JXBrowserHelper.selectVisibleElement(browser, "#pm_promo");
+            if (total.getAmount().floatValue() > 1) {
+                JXBrowserHelper.waitUntilVisible(browser, "#spc-gcpromoinput,#gcpromoinput");
+                JXBrowserHelper.fillValueForFormField(browser, "#spc-gcpromoinput,#gcpromoinput", order.promotionCode);
+                WaitTime.Shortest.execute();
+                JXBrowserHelper.selectVisibleElement(browser, "#gcApplyButtonId .a-button-inner,#new-giftcard-promotion .a-button-inner").click();
+                WaitTime.Shortest.execute();
+                JXBrowserHelper.waitUntilVisible(browser, "#gcApplyButtonId .a-button-inner,#new-giftcard-promotion .a-button-inner");
+                WaitTime.Short.execute();
+            }
+        } catch (Exception e) {
+            //
+            LOGGER.error("", e);
+        }
     }
 
 

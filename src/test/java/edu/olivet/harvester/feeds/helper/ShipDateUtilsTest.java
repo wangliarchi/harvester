@@ -1,12 +1,10 @@
 package edu.olivet.harvester.feeds.helper;
 
 import com.google.inject.Inject;
-import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Now;
 import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.common.model.Order;
-import edu.olivet.harvester.spreadsheet.model.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;

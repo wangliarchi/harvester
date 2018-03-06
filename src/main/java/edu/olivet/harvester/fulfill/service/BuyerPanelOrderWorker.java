@@ -15,7 +15,6 @@ import edu.olivet.harvester.fulfill.model.SubmitResult.ReturnCode;
 import edu.olivet.harvester.fulfill.service.flowcontrol.OrderFlowEngine;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.common.model.Order;
-import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.ui.panel.TabbedBuyerPanel;
 import edu.olivet.harvester.ui.panel.TasksAndProgressPanel;
@@ -214,31 +213,28 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, SubmitResult> {
             order.setTask(task);
             try {
                 submit(order);
+
+                if (StringUtils.isNotBlank(order.order_number)) {
+                    publish(new SubmitResult(order, "order fulfilled successfully. " + order.basicSuccessRecord() + ", took " + Strings.formatElapsedTime(start), ReturnCode.SUCCESS));
+                } else {
+                    publish(new SubmitResult(order, "order submission failed. " + " - took " + Strings.formatElapsedTime(start), ReturnCode.FAILURE));
+                }
+
             } catch (Exception e) {
                 LOGGER.error("Error submit order {}", order.order_id, e);
-
                 String msg = Strings.parseErrorMsg(e.getMessage());
+                publish(new SubmitResult(order, msg + " - took " + Strings.formatElapsedTime(start), ReturnCode.FAILURE));
                 try {
-                    publish(new SubmitResult(order, msg + " - took " + Strings.formatElapsedTime(start), ReturnCode.FAILURE));
                     sheetService.fillUnsuccessfulMsg(order.spreadsheetId, order, msg);
                 } catch (Exception ex) {
                     LOGGER.error("Fail to update error message for {} {} {} {}", order.spreadsheetId, order.order_id, order.row, msg);
                 }
 
-
-                if (e instanceof OutOfBudgetException) {
+                if (e instanceof OutOfBudgetException || e instanceof BuyerAccountAuthenticationException) {
                     //UITools.error("No more money to spend :(");
                     //messageListener.addMsg(order, "No more money to spend :(", InformationLevel.Negative);
                     orderSubmissionBuyerTaskService.stopTask(buyerAccountTask);
                     break;
-                } else if (e instanceof BuyerAccountAuthenticationException) {
-                    //messageListener.addMsg(order, e.getMessage(), InformationLevel.Negative);
-                    orderSubmissionBuyerTaskService.stopTask(buyerAccountTask);
-                    break;
-                }
-            } finally {
-                if (StringUtils.isNotBlank(order.order_number)) {
-                    publish(new SubmitResult(order, "order fulfilled successfully. " + order.basicSuccessRecord() + ", took " + Strings.formatElapsedTime(start), ReturnCode.SUCCESS));
                 }
             }
         }
@@ -270,6 +266,9 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, SubmitResult> {
             orderFlowEngine.process(order, buyerPanel);
 
 
+        } catch (Exception e) {
+            LOGGER.error("", e);
+            throw e;
         } finally {
             if (StringUtils.isNotBlank(order.order_number)) {
                 ProgressUpdater.success();

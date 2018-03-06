@@ -83,19 +83,21 @@ public class TabbedBuyerPanel extends JTabbedPaneCloseButton {
     public void removeTab(BuyerPanel buyerPanel) {
         String tabKey = getTabKey(buyerPanel.getCountry(), buyerPanel.getBuyer());
         try {
-            buyerPanel.getBrowserView().getBrowser().dispose();
+            buyerPanel.killBrowser();
         } catch (Exception e) {
             //
         }
         for (int i = 0; i < getTabCount(); i++) {
             if (getTitleAt(i).equalsIgnoreCase(tabKey)) {
                 this.remove(i);
+                break;
             }
             //other stuff
         }
         int index = buyerPanel.getId();
         buyerPanels.remove(tabKey);
         buyerPanelIndexes.remove(index);
+        buyerPanel.setBrowserView(null);
     }
 
     private BuyerPanel addTab(Country country, Account account) {

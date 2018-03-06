@@ -11,6 +11,8 @@ import edu.olivet.harvester.fulfill.service.addressvalidator.OrderManAddressVali
 import edu.olivet.harvester.fulfill.service.addressvalidator.USPSAddressValidator;
 import edu.olivet.harvester.utils.Settings;
 import org.jsoup.Jsoup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -21,7 +23,7 @@ public class AddressValidatorService implements AddressValidator {
     @Inject private GoogleAddressValidator googleAddressValidator;
     @Inject private USPSAddressValidator uspsAddressValidator;
     @Inject private OrderManAddressValidator orderManAddressValidator;
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(AddressValidatorService.class);
     private static final String FAILED_LOG_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbytuV7WRhq5aWNf0vQ4PIf1iCE4rkdgchlC23GvojlDxJVLZNk/exec";
 
     @SuppressWarnings("SimplifiableIfStatement")
@@ -48,7 +50,9 @@ public class AddressValidatorService implements AddressValidator {
         try {
             Jsoup.connect(url).ignoreContentType(true).timeout(12000).execute();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("", e);
+            //throw new BusinessException(e);
+            //e.printStackTrace();
         }
     }
 

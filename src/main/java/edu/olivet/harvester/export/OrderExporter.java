@@ -6,6 +6,7 @@ import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.MessagePanel;
 import edu.olivet.foundations.ui.ProgressDetail;
 import edu.olivet.foundations.ui.VirtualMessagePanel;
+import edu.olivet.foundations.utils.DateFormat;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Now;
 import edu.olivet.foundations.utils.Strings;
@@ -24,6 +25,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -52,8 +54,8 @@ public class OrderExporter {
      * triggered by cronjob
      */
     public void execute() {
-        //this method is for cronjob, keep silent.
         setMessagePanel(new ProgressDetail(Actions.ExportOrders));
+        long start = System.currentTimeMillis();
         //list all marketplaces
         Settings settings = Settings.load();
         List<Country> marketplaces = settings.listAllCountries();
@@ -61,36 +63,47 @@ public class OrderExporter {
             messagePanel.displayMsg("No marketplace found. please check if you have correct settings.", LOGGER, InformationLevel.Negative);
             return;
         }
-
-        marketplaces.forEach(it -> exportOrdersForMarketplace(it, null, null));
-
-        settings.listAllSpreadsheets().forEach(it -> {
-            try {
-                hunter.execute(it);
-            } catch (Exception e) {
-                LOGGER.error("", e);
-            }
-        });
+        exportOrdersForMarketplaces(marketplaces, null, null);
+        messagePanel.addMsgSeparator();
+        messagePanel.displayMsg("Done in "+Strings.formatElapsedTime(start), InformationLevel.Information);
     }
 
     /**
      * triggered by export orders button
      */
     public void exportOrders(OrderExportParams params) {
-        for (Country marketplace : params.getMarketplaces()) {
-            long start = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
+        messagePanel.displayMsg(String.format("Exporting orders from %s between %s and %s",
+                params.getMarketplaces(), params.getFromDate(), params.getToDate()), LOGGER, InformationLevel.Information);
+        exportOrdersForMarketplaces(params.getMarketplaces(), params.getFromDate(), params.getToDate());
+        messagePanel.addMsgSeparator();
+        messagePanel.displayMsg("Done in "+Strings.formatElapsedTime(start), InformationLevel.Information);
+    }
 
-            messagePanel.wrapLineMsg(String.format("Starting exporting orders from %s at %s.",
-                    marketplace, Dates.toDateTime(start)), LOGGER);
 
+    public void exportOrdersForMarketplaces(List<Country> marketplaces, Date fromDate, Date toDate) {
+        List<Country> marketplacesExportedOrders = new ArrayList<>();
+        for (Country marketplace : marketplaces) {
             try {
-                exportOrdersForMarketplace(marketplace, params.getFromDate(), params.getToDate());
-                messagePanel.displayMsg(String.format("Finish exporting orders from %s in %s.",
-                        marketplace, Strings.formatElapsedTime(start)), LOGGER);
+                boolean result = exportOrdersForMarketplace(marketplace, fromDate, toDate);
+                if (result) {
+                    marketplacesExportedOrders.add(marketplace);
+                }
+            } catch (Exception e) {
+                messagePanel.displayMsg(String.format("Error exporting orders from %s - %s. ",
+                        marketplace, Strings.getExceptionMsg(e)), InformationLevel.Negative);
+                errorAlertService.sendMessage("Error exporting orders from " + marketplace, e.getMessage(), marketplace);
+                LOGGER.info("Error exporting orders from {}. ", marketplace, e);
+            }
+        }
 
-                //hunt sellers
-                messagePanel.addMsgSeparator();
-                messagePanel.displayMsg("Starting to hunt sellers");
+
+        //hunt sellers
+        if (CollectionUtils.isNotEmpty(marketplacesExportedOrders)) {
+            messagePanel.addMsgSeparator();
+            messagePanel.displayMsg("Starting to hunt sellers");
+            hunter.setMessagePanel(messagePanel);
+            for (Country marketplace : marketplacesExportedOrders) {
                 List<String> spreadsheetIds = Settings.load().getConfigByCountry(marketplace).listSpreadsheetIds();
                 for (String spreadsheetId : spreadsheetIds) {
                     try {
@@ -99,66 +112,67 @@ public class OrderExporter {
                         messagePanel.displayMsg("Error while hunting sellers: " + Strings.getExceptionMsg(e));
                     }
                 }
-
-            } catch (Exception e) {
-                messagePanel.displayMsg(String.format("Error exporting orders from %s - %s. ",
-                        marketplace, e.getMessage()), InformationLevel.Negative);
-                LOGGER.info("Error exporting orders from {}. ", marketplace, e);
-
-                errorAlertService.sendMessage("Error exporting orders from " + marketplace,
-                        e.getMessage(), marketplace);
             }
-
         }
     }
 
-
-    public void exportOrdersForMarketplace(Country country, Date fromDate, Date toDate) {
-        messagePanel.wrapLineMsg("Exporting orders from " + country + "...");
+    public boolean exportOrdersForMarketplace(Country country, Date fromDate, Date toDate) {
+        long start = System.currentTimeMillis();
+        messagePanel.addMsgSeparator();
+        messagePanel.displayMsg(String.format("Exporting orders from %s at %s.",
+                country, Dates.toDateTime(start)), LOGGER);
         List<String> spreadsheetIds = Settings.load().getConfigByCountry(country).listSpreadsheetIds();
         if (CollectionUtils.isEmpty(spreadsheetIds)) {
             messagePanel.displayMsg("No spreadsheet configuration found.", LOGGER, InformationLevel.Negative);
-            return;
+            return false;
         }
 
         //check if exporting service is running, load last updated date.
-        Date lastExportedDate = DateUtils.addHours(now.get(), 26);
-        //try {
-        //lastExportedDate = exportStatService.lastOrderDate(country);
-        //lastExportedDate = DateUtils.addHours(lastExportedDate, -1);
-        //} catch (Exception e) {
-        //LOGGER.error("", e);
-        //messagePanel.displayMsg(e.getMessage(), LOGGER, InformationLevel.Negative);
-        //}
-
-        //if not manually set from date, use the date from init service
-        if (fromDate != null) {
-            lastExportedDate = fromDate;
+        if (fromDate == null) {
+            Date lastExportedDate;
+            try {
+                lastExportedDate = exportStatService.lastOrderDate(country);
+                lastExportedDate = DateUtils.addHours(lastExportedDate, -1);
+                if (lastExportedDate.after(DateUtils.addHours(now.get(), -26))) {
+                    fromDate = DateUtils.addHours(now.get(), -26);
+                } else {
+                    fromDate = lastExportedDate;
+                }
+            } catch (Exception e) {
+                LOGGER.error("", e);
+                messagePanel.displayMsg(Strings.getExceptionMsg(e), LOGGER, InformationLevel.Negative);
+                return false;
+            }
         }
+
 
         //if not manually set to date, set to 5 mins before now.
         if (toDate == null || toDate.after(now.get())) {
             toDate = DateUtils.addMinutes(now.get(), -5);
         }
 
-        messagePanel.displayMsg("Exporting orders updated between " + lastExportedDate + " and " + toDate, LOGGER);
+        if (fromDate.after(toDate)) {
+            fromDate = DateUtils.addHours(toDate, -26);
+        }
+
+        messagePanel.displayMsg("Fetching orders updated between " + DateFormat.DATE_TIME.format(fromDate) + " and " + DateFormat.DATE_TIME.format(toDate), LOGGER);
 
         //list all unexported orders
         List<Order> orders;
         try {
             exportOrderService.setMessagePanel(messagePanel);
-            orders = exportOrderService.listUnexportedOrders(lastExportedDate, toDate, country);
+            orders = exportOrderService.listUnexportedOrders(fromDate, toDate, country);
         } catch (Exception e) {
             LOGGER.error("", e);
-            messagePanel.displayMsg("Error fetch orders from amazon for " + country + ", " + e.getMessage(), InformationLevel.Negative);
-            exportStatService.updateStat(country, lastExportedDate, 0);
-            return;
+            messagePanel.displayMsg("Error fetch orders from amazon for " + country + ", " + Strings.getExceptionMsg(e), InformationLevel.Negative);
+            exportStatService.updateStat(country, fromDate, 0);
+            return false;
         }
 
         if (CollectionUtils.isEmpty(orders)) {
             messagePanel.displayMsg("No new order(s) found from " + country, LOGGER, InformationLevel.Negative);
-            exportStatService.updateStat(country, lastExportedDate, 0);
-            return;
+            exportStatService.updateStat(country, fromDate, 0);
+            return false;
         }
 
         messagePanel.displayMsg("Totally " + orders.size() + " row records found from " + country, LOGGER);
@@ -167,7 +181,7 @@ public class OrderExporter {
         try {
             sheetService.fillOrders(country, orders, messagePanel);
         } catch (Exception e) {
-            messagePanel.displayMsg("Error export orders " + e.getMessage(), LOGGER, InformationLevel.Negative);
+            messagePanel.displayMsg("Error export orders " + Strings.getExceptionMsg(e), LOGGER, InformationLevel.Negative);
             errorAlertService.sendMessage("Error export orders", e.getMessage());
         }
 
@@ -176,7 +190,9 @@ public class OrderExporter {
         } catch (Exception e) {
             LOGGER.error("", e);
         }
+
+        messagePanel.displayMsg(String.format("Finish exporting orders from %s in %s.",
+                country, Strings.formatElapsedTime(start)), LOGGER);
+        return true;
     }
-
-
 }

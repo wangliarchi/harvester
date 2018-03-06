@@ -79,11 +79,10 @@ public class UIElements extends AbstractUIContainer {
                 Actions.SyncASINs
         });
 
-
         map.put(Menu.Settings, new Action[] {
                 Action.Settings,
-                Actions.BuyerAccountSettings,
                 Actions.SystemSettings,
+                Actions.BuyerAccountSettings,
                 Actions.ConfigBankCard,
                 Action.Separator,
                 Action.CreateAutoStartTask,
@@ -110,7 +109,9 @@ public class UIElements extends AbstractUIContainer {
                 Actions.SubmitOrder,
                 Actions.FindSupplier,
                 Actions.ConfirmShipment,
+                Actions.SubmitSelfOrders,
                 Action.Settings,
+                Actions.SystemSettings,
                 Actions.ReportBug
         };
     }

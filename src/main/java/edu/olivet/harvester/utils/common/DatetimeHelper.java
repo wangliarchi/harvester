@@ -13,7 +13,10 @@ import org.apache.commons.lang3.StringUtils;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.*;
 
 import static java.time.temporal.ChronoField.SECOND_OF_DAY;
@@ -65,14 +68,16 @@ public class DatetimeHelper {
     public static LocalTime randomTimeBetween(LocalTime from, LocalTime to) {
 
         int maxAllowed = to.get(SECOND_OF_DAY) - from.get(SECOND_OF_DAY);
-
+        if (maxAllowed <= 0) {
+            maxAllowed = 5;
+        }
         //noinspection ConstantConditions
         int randSeconds = new Random().ints(1, 0, maxAllowed).findFirst().getAsInt();
         return from.plusSeconds(randSeconds);
     }
 
     public static Date parseEdd(String eddText, Country country, Date now) {
-        List<String> formatPatterns = Lists.newArrayList("MMM dd", "dd MMM","MMMMM dd", "dd MMMMM");
+        List<String> formatPatterns = Lists.newArrayList("MMM dd", "dd MMM", "MMMMM dd", "dd MMMMM");
         String[] eddParts = StringUtils.split(eddText, ",");
         ArrayUtils.reverse(eddParts);
 
@@ -123,7 +128,7 @@ public class DatetimeHelper {
                 }
             }
 
-            if (Strings.containsAnyIgnoreCase(part.toLowerCase(), "days", "Werktage", "lavorativi", "ouvrés", "días", "jours", "Tage", "dias", "giorni")) {
+            if (Strings.containsAnyIgnoreCase(part.toLowerCase(), "day", "Werktage", "lavorativi", "ouvrés", "días", "jour", "Tage", "dias", "giorni")) {
                 try {
                     String[] dayParts = StringUtils.split(part, "-");
                     String daysString = dayParts[dayParts.length - 1].trim();
@@ -163,10 +168,32 @@ public class DatetimeHelper {
         return calendar.getTime();
     }
 
+    public static Date getEndOfDay(Date date) {
+        LocalDateTime localDateTime = dateToLocalDateTime(date);
+        LocalDateTime endOfDay = localDateTime.with(LocalTime.MAX);
+        return localDateTimeToDate(endOfDay);
+    }
+
+    public static Date getStartOfDay(Date date) {
+        LocalDateTime localDateTime = dateToLocalDateTime(date);
+        LocalDateTime startOfDay = localDateTime.with(LocalTime.MIN);
+        //LocalDateTime startOfDay = localDateTime.atStartOfDay();
+        return localDateTimeToDate(startOfDay);
+    }
+
+    private static Date localDateTimeToDate(LocalDateTime startOfDay) {
+        return Date.from(startOfDay.atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    private static LocalDateTime dateToLocalDateTime(Date date) {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), ZoneId.systemDefault());
+    }
+
     public static void main(String[] args) {
         LocalTime from = LocalTime.of(12, 0);
         LocalTime to = LocalTime.of(12, 10);
         LocalTime rand = DatetimeHelper.randomTimeBetween(from, to);
         System.out.println(rand);
+        System.out.println(DatetimeHelper.parseEdd("1 business day", Country.US, new Date()));
     }
 }

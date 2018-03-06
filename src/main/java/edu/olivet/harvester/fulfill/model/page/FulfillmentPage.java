@@ -3,6 +3,7 @@ package edu.olivet.harvester.fulfill.model.page;
 import com.teamdev.jxbrowser.chromium.Browser;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.harvester.common.model.BuyerAccountSettingUtils;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import lombok.Getter;
 
@@ -19,7 +20,7 @@ public abstract class FulfillmentPage implements PageObject {
     public FulfillmentPage(BuyerPanel buyerPanel) {
         this.buyerPanel = buyerPanel;
         this.browser = buyerPanel.getBrowserView().getBrowser();
-        this.buyer = buyerPanel.getBuyer();
+        this.buyer = BuyerAccountSettingUtils.load().getByEmail(buyerPanel.getBuyer().getEmail()).getBuyerAccount();
         this.country = buyerPanel.getCountry();
     }
 }

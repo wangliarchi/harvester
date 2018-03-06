@@ -14,7 +14,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Singleton
 public class FeedGenerator {
@@ -88,12 +91,17 @@ public class FeedGenerator {
 
     //
     public File generateQtyUpdateFeedFromRows(List<InventoryUpdateRecord> records, Country country, OrderEnums.OrderItemType type) {
-        List<String> contents = new ArrayList<>(records.size() + 1);
+        List<String> contents = new ArrayList<>();
         contents.add(BatchFileType.ReQuantity.headers());
 
         //skuquantityhandling-time
+        Set<String> skus = new HashSet<>();
         for (InventoryUpdateRecord row : records) {
+            if (skus.contains(row.getSku())) {
+                continue;
+            }
             contents.add(String.format("%s\t%s\t%s", row.getSku(), row.getQty(), row.getLeadTime(country)));
+            skus.add(row.getSku());
         }
 
         File file;
@@ -109,12 +117,14 @@ public class FeedGenerator {
 
 
     public File generateASINRemovalFeedFromRows(List<InventoryUpdateRecord> records, Country country, OrderEnums.OrderItemType type) {
-        List<String> contents = new ArrayList<>(records.size() + 1);
+
+        Set<String> skus = records.stream().map(InventoryUpdateRecord::getSku).collect(Collectors.toSet());
+        List<String> contents = new ArrayList<>(skus.size() + 1);
         contents.add(BatchFileType.ListingDeletion.headers());
 
         //skuadd-delete
-        for (InventoryUpdateRecord row : records) {
-            contents.add(String.format("%s\t%s", row.getSku(), "d"));
+        for (String sku : skus) {
+            contents.add(String.format("%s\t%s", sku, "x"));
         }
 
         File file;

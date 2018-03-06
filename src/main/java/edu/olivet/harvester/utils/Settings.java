@@ -80,7 +80,7 @@ public class Settings {
         reload();
     }
 
-    private String sid;
+    private String sid = "";
 
     private List<Configuration> configs;
 

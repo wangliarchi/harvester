@@ -4,8 +4,6 @@ import com.amazonaws.mws.model.FeedSubmissionInfo;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import edu.olivet.foundations.amazon.Country;
-import edu.olivet.foundations.amazon.FeedUploader;
-import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.InformationLevel;

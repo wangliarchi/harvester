@@ -5,8 +5,6 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.harvester.common.BaseTest;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
-
 public class StockUpdatorTest extends BaseTest {
     @Inject StockUpdator stockUpdator;
 

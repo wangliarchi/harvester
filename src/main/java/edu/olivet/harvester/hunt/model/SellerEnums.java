@@ -1,6 +1,5 @@
 package edu.olivet.harvester.hunt.model;
 
-import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.utils.*;
 import org.apache.commons.lang3.StringUtils;

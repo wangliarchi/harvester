@@ -6,7 +6,6 @@ import edu.olivet.foundations.google.EmailContentType;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Dates;
-import edu.olivet.harvester.feeds.helper.FeedGenerator.BatchFileType;
 import edu.olivet.harvester.message.EmailService;
 import edu.olivet.harvester.utils.ServiceUtils;
 import edu.olivet.harvester.utils.Settings;

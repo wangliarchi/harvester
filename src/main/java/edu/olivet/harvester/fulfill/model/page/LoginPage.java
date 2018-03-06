@@ -75,9 +75,14 @@ public class LoginPage extends FulfillmentPage implements PageObject {
 
     @Repeat(expectedExceptions = BusinessException.class)
     public void login() {
-
         if (order != null) {
             JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "0");
+        }
+        //
+        DOMElement selectAccount = JXBrowserHelper.selectElementByCssSelector(browser, ".cvf-account-switcher-profile-details-after-account-removed");
+        if (selectAccount != null) {
+            selectAccount.click();
+            JXBrowserHelper.waitUntilNotFound(selectAccount);
         }
 
         DOMElement email = JXBrowserHelper.selectElementByCssSelector(browser, EMAIL_SELECTOR);

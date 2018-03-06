@@ -6,11 +6,8 @@ import com.alibaba.fastjson.JSONException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import edu.olivet.foundations.aop.Repeat;
-import edu.olivet.foundations.utils.BusinessException;
-import edu.olivet.foundations.utils.Constants;
+import edu.olivet.foundations.utils.*;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
-import edu.olivet.foundations.utils.Strings;
-import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.setting.AdvancedSubmitSetting;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
@@ -54,6 +51,7 @@ public class AppScript {
     protected static final String PARAM_SPREAD_ID = "s";
     protected static final String PARAM_METHOD = "method";
     protected static final String PARAM_ROW = "row";
+    public static final String AUTHORIZED_EMAIL = "ordermanibport@gmail.com";
 
     protected static Map<String, Spreadsheet> SPREADSHEET_CLIENT_CACHE = new HashMap<>();
 
@@ -78,6 +76,10 @@ public class AppScript {
         try {
             spreadsheet = JSON.parseObject(json, Spreadsheet.class);
         } catch (Exception e) {
+            if (StringUtils.containsIgnoreCase(json, "is missing")) {
+                SheetAPI sheetAPI = ApplicationContext.getBean(SheetAPI.class);
+                sheetAPI.sharePermissions(spreadId, AUTHORIZED_EMAIL);
+            }
             throw new BusinessException(json);
         }
         SPREADSHEET_CLIENT_CACHE.put(spreadId, spreadsheet);
@@ -231,12 +233,12 @@ public class AppScript {
     public List<Order> readOrders(String spreadId, String sheetName) {
         final long start = System.currentTimeMillis();
         List<Order> orders;
+        //try {
+        //    orders = orderService.fetchOrders(spreadId, sheetName);
+        //    LOGGER.info("Read {} orders from sheet {} via sheet api in {}", orders.size(), sheetName, Strings.formatElapsedTime(start));
+        //} catch (Exception e) {
+        //    LOGGER.error("Fail to read orders via sheet api for {} {}", spreadId, sheetName, e);
         try {
-            orders = orderService.fetchOrders(spreadId, sheetName);
-            LOGGER.info("Read {} orders from sheet {} via sheet api in {}", orders.size(), sheetName, Strings.formatElapsedTime(start));
-        } catch (Exception e) {
-            LOGGER.error("Fail to read orders via sheet api for {} {}", spreadId, sheetName, e);
-
             Map<String, String> params = new HashMap<>();
             params.put(PARAM_SPREAD_ID, getSpreadId(spreadId));
             params.put(PARAM_SHEET_NAME, sheetName);
@@ -245,6 +247,9 @@ public class AppScript {
             String json = this.processResult(this.get(params));
             orders = this.parse(json);
             LOGGER.info("Read {} orders from sheet {} via app script in {}", orders.size(), sheetName, Strings.formatElapsedTime(start));
+        } catch (Exception e) {
+            orders = orderService.fetchOrders(spreadId, sheetName);
+            LOGGER.info("Read {} orders from sheet {} via sheet api in {}", orders.size(), sheetName, Strings.formatElapsedTime(start));
         }
 
         orders.forEach(it -> {

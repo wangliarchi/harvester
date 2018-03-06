@@ -136,7 +136,6 @@ public class AmazonOrder extends PrimaryKey {
         }
 
 
-
         order.seller = order.seller_id = order.seller_price = StringUtils.EMPTY;
         order.url = StringUtils.EMPTY;
 

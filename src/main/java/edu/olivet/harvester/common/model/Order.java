@@ -147,6 +147,31 @@ public class Order implements Keyable {
     public String sheetName;
 
     /**
+     * 做单用promo code
+     */
+    @JSONField(serialize = false)
+    public String promotionCode = "";
+
+    /**
+     * 做单用, 是否直选free shipping listing
+     */
+    @JSONField(serialize = false)
+    public boolean seller_free_shipping = false;
+
+
+    /**
+     * 做单用, 是否是刷单
+     */
+    @JSONField(serialize = false)
+    public boolean selfOrder = false;
+
+    /**
+     * 做单用, 是否重新找seller
+     */
+    @JSONField(serialize = false)
+    public boolean findNewSellerIfDisappeared = true;
+
+    /**
      * 做单时的上下文：账号-国家-sheet名称
      */
     private String context;
@@ -427,6 +452,10 @@ public class Order implements Keyable {
 
     @JSONField(serialize = false)
     public Date latestEdd() {
+        if (selfOrder) {
+            return DateUtils.addDays(new Date(), 60);
+        }
+
         String estimatedDeliveryDateString;
         if (Strings.containsAnyIgnoreCase(estimated_delivery_date, " - ")) {
             estimatedDeliveryDateString = estimated_delivery_date.split("\\s-\\s")[1];
@@ -573,7 +602,11 @@ public class Order implements Keyable {
 
     @JSONField(serialize = false)
     public Condition condition() {
-        return Condition.parseFromText(condition);
+        try {
+            return Condition.parseFromText(condition);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @JSONField(serialize = false)
@@ -601,8 +634,24 @@ public class Order implements Keyable {
 
         //type from sku
         if (type == null) {
-            type = OrderItemTypeHelper.getItemTypeBySku(this);
+            try {
+                type = OrderItemTypeHelper.getItemTypeBySku(this);
+            } catch (Exception e) {
+                //
+            }
+
         }
+
+        //type from sku
+        if (type == null) {
+            try {
+                type = OrderItemTypeHelper.getItemTypeByASIN(this);
+            } catch (Exception e) {
+                //
+            }
+
+        }
+
         return type;
     }
 

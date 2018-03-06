@@ -69,9 +69,9 @@ public abstract class ShippingAddressAbstract extends FulfillmentPage {
             LOGGER.info("can not fill ship address form", e);
             throw new BusinessException("can not fill ship address form, " + e.getMessage());
         }
-
-
     }
+
+
 
 
 }

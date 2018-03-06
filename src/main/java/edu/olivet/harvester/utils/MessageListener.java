@@ -29,8 +29,9 @@ import java.util.concurrent.BlockingQueue;
  * @author <a href="mailto:nathanael4ever@gmail.com">Nathanael Yang</a> 2015年9月11日 下午5:00:12
  */
 @Singleton
-public class MessageListener implements MessageQueue {
+public class MessageListener implements MessageQueue, MessagePanel {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageListener.class);
+
 
     /**
      * 消息文本显示位置，目前实际只用到左侧面板(显示较短的消息文本)和右侧面板(显示较长的消息文本)
@@ -217,5 +218,35 @@ public class MessageListener implements MessageQueue {
 
         WaitTime.Long.execute();
         System.exit(0);
+    }
+
+    @Override
+    public void clearPrevious() {
+
+    }
+
+    @Override
+    public void displayMsg(String msg, InformationLevel... infoLevels) {
+        panel.displayMsg(msg, infoLevels);
+    }
+
+    @Override
+    public void displayMsg(String msg, Logger logger, InformationLevel... infoLevels) {
+        panel.displayMsg(msg, logger, infoLevels);
+    }
+
+    @Override
+    public void addMsgSeparator() {
+        panel.addMsgSeparator();
+    }
+
+    @Override
+    public void wrapLineMsg(String msg, InformationLevel... infoLevels) {
+        panel.wrapLineMsg(msg, infoLevels);
+    }
+
+    @Override
+    public void wrapLineMsg(String msg, Logger logger, InformationLevel... infoLevels) {
+        panel.wrapLineMsg(msg, logger, infoLevels);
     }
 }

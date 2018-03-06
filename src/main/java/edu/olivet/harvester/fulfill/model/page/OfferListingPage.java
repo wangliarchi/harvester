@@ -7,6 +7,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
+import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.exception.Exceptions.SellerNotFoundException;
 import edu.olivet.harvester.fulfill.exception.Exceptions.SellerPriceRiseTooHighException;
 import edu.olivet.harvester.hunt.model.Seller;
@@ -43,10 +44,18 @@ public class OfferListingPage extends FulfillmentPage {
     }
 
     public void enter(Order order) {
-        String url = OrderCountryUtils.getOfferListingUrl(order);
+
+        //FR
+        if (country == Country.FR && order.selfOrder) {
+            setPostalCodeForFR();
+        }
+
+        String url = OrderCountryUtils.getOfferListingUrl(order) + "&" + System.currentTimeMillis();
         LOGGER.info("Offer listing page {}", url);
         JXBrowserHelper.loadPage(browser, url);
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
+
+
     }
 
     public void addToCart(Order order) {
@@ -107,11 +116,15 @@ public class OfferListingPage extends FulfillmentPage {
 
     @SuppressWarnings("RedundantIfStatement")
     public boolean rightSeller(Seller seller, Order order) {
-        //compare condition first;
-        if (!ConditionUtils.goodToGo(order.condition(), seller.getCondition())) {
+
+        if (order.seller_free_shipping && seller.getShippingFee().getAmount().floatValue() > 0) {
             return false;
         }
 
+        //compare condition first;
+        if (!order.selfOrder && !ConditionUtils.goodToGo(order.condition(), seller.getCondition())) {
+            return false;
+        }
 
         //compare by uuid
         if (StringUtils.isNotBlank(order.seller_id) && order.seller_id.equalsIgnoreCase(seller.getUuid()) &&
@@ -143,14 +156,31 @@ public class OfferListingPage extends FulfillmentPage {
         DOMElement addToCartBtn = JXBrowserHelper.selectElementByCssSelector(sellerRow, ".olpBuyColumn .a-button-input");
         JXBrowserHelper.insertChecker(browser);
         addToCartBtn.click();
+        checkPopovers();
         JXBrowserHelper.waitUntilNewPageLoaded(browser);
         //wait until new page loaded
         //JXBrowserHelper.wait(browser, By.cssSelector("#hlb-ptc-btn-native"));
     }
 
+
+    private void checkPopovers() {
+        //Protection Plan popup
+        try {
+            WaitTime.Shortest.execute();
+            JXBrowserHelper.selectVisibleElement(browser, ".a-popover");
+            WaitTime.Shortest.execute();
+            DOMElement popoverElement = JXBrowserHelper.selectVisibleElement(browser, ".a-popover");
+            if (popoverElement != null) {
+                DOMElement closeBtn = JXBrowserHelper.selectElementByCssSelector(popoverElement, ".a-button-close.a-declarative");
+                JXBrowserHelper.click(closeBtn);
+                WaitTime.Short.execute();
+            }
+        } catch (Exception e) {
+            //
+        }
+    }
+
     public static void main(String[] args) {
-
-
         Account buyer = new Account("jxiang@olivetuniversity.edu/q1w2e3AA", Account.AccountType.Buyer);
         BuyerPanel buyerPanel = new BuyerPanel(0, Country.US, buyer, 1);
         OfferListingPage offerListingPage = new OfferListingPage(buyerPanel, null);
@@ -159,7 +189,6 @@ public class OfferListingPage extends FulfillmentPage {
         frame.getContentPane().add(buyerPanel);
         frame.setVisible(true);
         frame.setSize(new Dimension(1260, 736));
-
 
         Browser browser = buyerPanel.getBrowserView().getBrowser();
         String offerListingURL = "https://www.amazon.com//gp/offer-listing/0545521378/ref=olp_prime_new?ie=UTF8&condition=new&shipPromoFilter=1";
@@ -171,6 +200,28 @@ public class OfferListingPage extends FulfillmentPage {
 
     public void execute(Order order) {
 
+    }
+
+    public void setPostalCodeForFR() {
+        try {
+            //75008 FR zip code
+            DOMElement trigger = JXBrowserHelper.selectVisibleElement(browser, "#nav-global-location-slot .a-popover-trigger");
+            trigger.click();
+            JXBrowserHelper.waitUntilVisible(browser, ".a-popover-wrapper input[type='text']");
+            JXBrowserHelper.fillValueForFormField(browser, ".a-popover-wrapper input[type='text']", "75008");
+
+            WaitTime.Short.execute();
+
+            JXBrowserHelper.selectVisibleElement(browser, ".a-button .a-button-inner.a-declarative").click();
+            JXBrowserHelper.waitUntilVisible(browser, ".a-button-inner .a-declarative");
+            DOMElement closeBtn = JXBrowserHelper.selectVisibleElement(browser, ".a-popover-footer .a-button-inner.a-declarative");
+            if (closeBtn != null) {
+                JXBrowserHelper.click(closeBtn);
+                WaitTime.Short.execute();
+            }
+        } catch (Exception e) {
+            //
+        }
     }
 
 

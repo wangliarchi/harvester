@@ -5,7 +5,6 @@ import edu.olivet.harvester.feeds.helper.InventoryUpdateTypeHelper.UpdateType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.elasticsearch.common.recycler.Recycler.C;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 2/21/2018 1:56 PM
@@ -16,9 +15,9 @@ import org.elasticsearch.common.recycler.Recycler.C;
 public class InventoryUpdateRecord {
 
     private String sku;
-    private String asin;
+    private String asin = "";
     private UpdateType type;
-    private String orderId;
+    private String orderId = "";
 
     /**
      * 订单利润较好，补点数量: {@value}

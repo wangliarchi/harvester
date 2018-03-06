@@ -95,6 +95,12 @@ public class BuyerAccountSettingUtils {
         return null;
     }
 
+    public List<Account> getAccounts(Country country) {
+        return accountSettings.stream().filter(it ->
+                StringUtils.equalsAnyIgnoreCase(it.getCountryName(), country.name(), "all"))
+                .map(BuyerAccountSetting::getBuyerAccount)
+                .collect(Collectors.toList());
+    }
 
     public List<Account> getAccounts(Country country, OrderEnums.OrderItemType type, boolean primeBuyer) {
 

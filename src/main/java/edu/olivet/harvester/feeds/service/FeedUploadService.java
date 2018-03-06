@@ -4,8 +4,6 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.FeedUploader;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
 import edu.olivet.foundations.ui.InformationLevel;
-import edu.olivet.foundations.ui.MessagePanel;
-import edu.olivet.foundations.ui.VirtualMessagePanel;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.feeds.helper.FeedGenerator.BatchFileType;

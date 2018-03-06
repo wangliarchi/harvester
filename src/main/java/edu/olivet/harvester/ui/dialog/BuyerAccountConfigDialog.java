@@ -204,6 +204,9 @@ public class BuyerAccountConfigDialog extends BaseDialog {
         for (BuyerAccountPanel buyerAccountPanel : buyerAccountPanels) {
             BuyerAccountSetting buyerAccountSetting = buyerAccountPanel.collect();
             if (buyerAccountSetting != null && buyerAccountSetting.getBuyerAccount() != null) {
+                if (StringUtils.isBlank(buyerAccountSetting.getBuyerAccount().getEmail())) {
+                    continue;
+                }
                 if (!buyerAccountSetting.getBuyerAccount().valid()) {
                     UITools.error("Buyer account " + buyerAccountSetting.getBuyerAccount().getEmail() + " is not valid. " +
                             "Please enter both email address and password.");

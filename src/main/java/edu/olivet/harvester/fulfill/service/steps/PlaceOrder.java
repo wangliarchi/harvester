@@ -2,6 +2,7 @@ package edu.olivet.harvester.fulfill.service.steps;
 
 import com.google.inject.Inject;
 import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.common.model.SystemSettings;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.model.page.checkout.CheckoutEnum;
 import edu.olivet.harvester.fulfill.model.page.checkout.OrderReviewMultiPage;
@@ -24,11 +25,16 @@ public class PlaceOrder extends Step {
     //dispatcher method
     protected void process(FlowState state) {
         //
-        Order order = sheetService.reloadOrder(state.getOrder());
-        if (!order.fulfillable()) {
-            throw new OrderSubmissionException("Order status [" + order.status + "] is not marked for fulfillment.");
+        if (!state.getOrder().selfOrder) {
+            Order order = sheetService.reloadOrder(state.getOrder());
+            if (!order.fulfillable()) {
+                throw new OrderSubmissionException("Order status [" + order.status + "] is not marked for fulfillment.");
+            }
         }
 
+        if (SystemSettings.reload().isOrderSubmissionDebugModel()) {
+            return;
+        }
         if (stepHelper.detectCurrentPage(state) == CheckoutEnum.CheckoutPage.ShippingMethodOnePage) {
             OrderReviewOnePage orderReviewOnePage = new OrderReviewOnePage(state.getBuyerPanel());
             orderReviewOnePage.placeOrder(state.getOrder());
@@ -37,14 +43,16 @@ public class PlaceOrder extends Step {
 
         OrderReviewMultiPage orderReviewMultiPage = new OrderReviewMultiPage(state.getBuyerPanel());
         orderReviewMultiPage.placeOrder(state.getOrder());
-
-        //
     }
 
-    @Inject private
-    StepHelper stepHelper;
+    @Inject private StepHelper stepHelper;
+
+    @Inject private AfterOrderPlaced afterOrderPlaced;
 
     public Step createDynamicInstance(FlowState state) {
+        if (SystemSettings.load().isOrderSubmissionDebugModel()) {
+            return afterOrderPlaced;
+        }
         return stepHelper.detectStep(state);
     }
 }

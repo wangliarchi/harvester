@@ -2,13 +2,11 @@ package edu.olivet.harvester.fulfill.service;
 
 import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.AtomicDouble;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.mchange.lang.FloatUtils;
-import edu.olivet.foundations.utils.ApplicationContext;
-import edu.olivet.foundations.utils.BusinessException;
-import edu.olivet.foundations.utils.Dates;
-import edu.olivet.foundations.utils.Now;
+import edu.olivet.foundations.utils.*;
 import edu.olivet.harvester.fulfill.exception.Exceptions.NoBudgetException;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OutOfBudgetException;
 import edu.olivet.harvester.utils.common.NumberUtils;
@@ -20,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/10/17 11:33 AM
@@ -33,11 +32,11 @@ public class DailyBudgetHelper {
     @Inject private
     Now now;
 
-    private Map<String, Float> budgetMap = new HashMap<>();
-    private Map<String, Float> spendingMap = new HashMap<>();
+    private Map<String, Float> budgetMap = new ConcurrentHashMap<>();
+    private Map<String, Float> spendingMap = new ConcurrentHashMap<>();
 
-    private Map<String, List<RuntimePanelObserver>> runtimePanelObservers = new HashMap<>();
-
+    private Map<String, List<RuntimePanelObserver>> runtimePanelObservers = new ConcurrentHashMap<>();
+    private Map<String, AtomicDouble> costBuffer = new ConcurrentHashMap<>();
 
     public void addRuntimePanelObserver(String spreadsheetId, RuntimePanelObserver runtimePanelObserver) {
         List<RuntimePanelObserver> observers = runtimePanelObservers.getOrDefault(spreadsheetId, new ArrayList<>());
@@ -52,44 +51,56 @@ public class DailyBudgetHelper {
     private static final Map<String, Integer> BUDGET_ROW_CACHE = new HashMap<>();
 
     public Float checkBudget(String spreadsheetId) {
-        return getRemainingBudget(spreadsheetId, now.get());
+        return getRemainingBudget(spreadsheetId, now.get(), 0);
     }
 
-    public Float getRemainingBudget(String spreadsheetId, Date date) {
-        Map<String, Float> budgetData = getData(spreadsheetId, date);
-        Float remaining = budgetData.get("budget") - budgetData.get("cost");
+    public synchronized Float getRemainingBudget(String spreadsheetId, Date date, float costToSpend) {
+        //Map<String, Float> budgetData = getData(spreadsheetId, date);
+        Map<DataType, Float> budgetData = getData(spreadsheetId, date);
 
-        if (budgetData.get("budget") <= 0) {
+        if (budgetData.get(DataType.Budget) <= 0) {
             throw new NoBudgetException("Today's budget has not been entered yet. Please fill in 'Daily Cost' sheet.");
         }
+
+        float costInBuffer = 0;
+        if (costBuffer.containsKey(spreadsheetId)) {
+            costInBuffer = costBuffer.get(spreadsheetId).floatValue();
+        }
+
+        Float remaining = budgetData.get(DataType.Budget) - budgetData.get(DataType.Cost) - costInBuffer;
+
 
         if (remaining <= 0) {
             throw new OutOfBudgetException("You have exceed today's budget limit. ");
         }
 
+        if (remaining < costToSpend) {
+            throw new OutOfBudgetException("You don't have enough fund to process this order. Need $" +
+                    costToSpend + ", only have $" + String.format("%.2f", remaining));
+        }
 
+        costBuffer.put(spreadsheetId, new AtomicDouble(costToSpend + costInBuffer));
         return remaining;
     }
 
 
-    public Map<String, Float> getData(String spreadsheetId, Date date) {
-        List<String> ranges = com.google.common.collect.Lists.newArrayList("Daily Cost");
+    public synchronized Map<DataType, Float> getData(String spreadsheetId, Date date) {
+        List<String> ranges = Lists.newArrayList("Daily Cost");
         List<ValueRange> valueRanges = sheetService.batchGetSpreadsheetValues(spreadsheetId, ranges);
         int rowNo = 2;
 
-        Map<String, Float> budgetData = new HashMap<>();
-        budgetData.put("budget", 0f);
-        budgetData.put("cost", 0f);
+        Map<DataType, Float> budgetData = new HashMap<>();
+        budgetData.put(DataType.Budget, 0f);
+        budgetData.put(DataType.Cost, 0f);
         for (ValueRange valueRange : valueRanges) {
             if (valueRange.getValues() == null) {
                 continue;
             }
-            List<List<Object>> data = com.google.common.collect.Lists.reverse(valueRange.getValues());
+            List<List<Object>> data = Lists.reverse(valueRange.getValues());
             rowNo = data.size();
             for (List<Object> rowData : data) {
                 if (CollectionUtils.isNotEmpty(rowData) && rowData.size() > 0) {
                     String dateStr = rowData.get(0).toString();
-
                     if (StringUtils.isNotBlank(dateStr) && !"Date".equalsIgnoreCase(dateStr)) {
                         try {
                             Date rowDate = Dates.parseDate(rowData.get(0).toString());
@@ -97,9 +108,10 @@ public class DailyBudgetHelper {
                                 BUDGET_ROW_CACHE.put(spreadsheetId + dateToGoogleSheetName(date), rowNo);
                                 float totalCost = FloatUtils.parseFloat(rowData.get(1).toString(), 0);
                                 float budget = FloatUtils.parseFloat(rowData.get(2).toString(), 0);
-
-                                budgetData.put("budget", budget);
-                                budgetData.put("cost", totalCost);
+                                budgetData.put(DataType.Budget, budget);
+                                budgetData.put(DataType.Cost, totalCost);
+                                budgetMap.put(spreadsheetId, budget);
+                                spendingMap.put(spreadsheetId, totalCost);
 
                                 if (runtimePanelObservers.containsKey(spreadsheetId)) {
                                     runtimePanelObservers.get(spreadsheetId).forEach(runtimePanelObserver -> {
@@ -109,11 +121,6 @@ public class DailyBudgetHelper {
                                         }
                                     });
                                 }
-
-
-                                budgetMap.put(spreadsheetId, budgetData.get("budget"));
-                                spendingMap.put(spreadsheetId, budgetData.get("cost"));
-
                                 return budgetData;
                             }
                         } catch (Exception e) {
@@ -121,10 +128,8 @@ public class DailyBudgetHelper {
                         }
                     }
                 }
-
                 rowNo--;
             }
-
             rowNo = data.size();
         }
 
@@ -134,39 +139,35 @@ public class DailyBudgetHelper {
         return budgetData;
     }
 
-    private float totalSpent = 0f;
-
     public Float getCost(String spreadsheetId, String date) {
         return getCost(spreadsheetId, Dates.parseDate(date));
     }
 
+    public enum DataType {
+        Cost,
+        Budget
+    }
+
     public Float getCost(String spreadsheetId, Date date) {
-
-        int row = BUDGET_ROW_CACHE.getOrDefault(spreadsheetId + dateToGoogleSheetName(date), 2);
-
-        List<String> ranges = com.google.common.collect.Lists.newArrayList("Daily Cost!B" + row);
-
-        try {
-            List<ValueRange> valueRanges = sheetService.batchGetSpreadsheetValues(spreadsheetId, ranges);
-            return FloatUtils.parseFloat(valueRanges.get(0).getValues().get(0).get(0).toString(), 0);
-        } catch (Exception e) {
-            return 0f;
-        }
+        Map<DataType, Float> budgetData = getData(spreadsheetId, date);
+        return budgetData.get(DataType.Cost);
+//        String key = spreadsheetId + dateToGoogleSheetName(date);
+//        if (!BUDGET_ROW_CACHE.containsKey(key)) {
+//            getData(spreadsheetId, date);
+//        }
+//
+//        int row = BUDGET_ROW_CACHE.getOrDefault(spreadsheetId + dateToGoogleSheetName(date), 2);
+//
+//        List<String> ranges = com.google.common.collect.Lists.newArrayList("Daily Cost!B" + row);
+//
+//        try {
+//            List<ValueRange> valueRanges = sheetService.batchGetSpreadsheetValues(spreadsheetId, ranges);
+//            return FloatUtils.parseFloat(valueRanges.get(0).getValues().get(0).get(0).toString(), 0);
+//        } catch (Exception e) {
+//            return 0f;
+//        }
     }
 
-    public Float getBudget(String spreadsheetId, Date date) {
-
-        int row = BUDGET_ROW_CACHE.getOrDefault(spreadsheetId + dateToGoogleSheetName(date), 2);
-
-        List<String> ranges = com.google.common.collect.Lists.newArrayList("Daily Cost!C" + row);
-
-        try {
-            List<ValueRange> valueRanges = sheetService.batchGetSpreadsheetValues(spreadsheetId, ranges);
-            return FloatUtils.parseFloat(valueRanges.get(0).getValues().get(0).get(0).toString(), 0);
-        } catch (Exception e) {
-            return 0f;
-        }
-    }
 
     public void createBudgetRow(String spreadsheetId, Date date) {
         String dateString = dateToGoogleSheetName(date);
@@ -191,10 +192,14 @@ public class DailyBudgetHelper {
         addSpending(spreadsheetId, Dates.parseDate(date), spending);
     }
 
-    public void addSpending(String spreadsheetId, Date date, float spending) {
+
+    @Inject OrderFulfillmentRecordService orderFulfillmentRecordService;
+
+    public synchronized void addSpending(String spreadsheetId, Date date, float spending) {
         float cost = getCost(spreadsheetId, date);
         cost += spending;
 
+        float localTotalCost = orderFulfillmentRecordService.totalCost(spreadsheetId, date);
 
         DecimalFormat df = new DecimalFormat("#.##");
         df.setRoundingMode(RoundingMode.CEILING);
@@ -208,8 +213,6 @@ public class DailyBudgetHelper {
             });
         }
 
-
-        totalSpent = cost;
         int row = BUDGET_ROW_CACHE.getOrDefault(spreadsheetId + dateToGoogleSheetName(date), 2);
 
         List<ValueRange> dateToUpdate = new ArrayList<>();
@@ -220,13 +223,15 @@ public class DailyBudgetHelper {
 
         try {
             sheetService.batchUpdateValues(spreadsheetId, dateToUpdate);
-            LOGGER.info("Successfully updated spending {}， now total spent {}", df.format(spending), df.format(cost));
+            LOGGER.info("Successfully updated spending {}， now total spent {}, local total {}", df.format(spending), df.format(cost), df.format(localTotalCost));
+            AtomicDouble costInBuffer = costBuffer.getOrDefault(spreadsheetId, null);
+            if (costInBuffer != null) {
+                costBuffer.put(spreadsheetId, new AtomicDouble(costInBuffer.floatValue() - spending));
+            }
         } catch (BusinessException e) {
             LOGGER.error("Fail to update cost error msg {} - {}", spreadsheetId, e);
             throw new BusinessException(e);
         }
-
-
     }
 
 
@@ -251,31 +256,105 @@ public class DailyBudgetHelper {
         }
     }
 
-
-    //Budget($)
-
     public static String dateToGoogleSheetName(Date date) {
         return Dates.format(date, "MM/dd");
     }
 
     public static void main(String[] args) {
-        String spreadsheetId = "1Kn8PgppidUuOwYfayR5lc2lPtQihB1a-If_YaKU1Ofs";
         DailyBudgetHelper dailyBudgetHelper = ApplicationContext.getBean(DailyBudgetHelper.class);
-        float remainingBudget = dailyBudgetHelper.getRemainingBudget(spreadsheetId, Dates.parseDate("08/10/2017"));
-        System.out.println(remainingBudget);
 
-        remainingBudget = dailyBudgetHelper.getRemainingBudget(spreadsheetId, Dates.parseDate("11/10"));
-        System.out.println(remainingBudget);
+        String[] sheetIds = new String[] {
+                "1wRtULwAq5sNRzPI9Zi-eEJnlLHpsbK2i2uvpCiDg010",
+                "1JTotAIBXQGWFkT0lnMZ_Rrbmr5Nn5zrF9VxLlLKDG94",
+                "1QQxg-h_Z7y7JFrA1jqgt96INMyFLdXQ9bnxteE3Rd5w",
+                "1J6CqNKoSfw3ERNWTLXVYh3R37a11kB4nBEzySIypV68",
+                "1i-3FSFOFZ5mNP87Lz4YX4W3QIUILQNLguc0itldR0kc",
+                "1ra4jDYLcvedRqA-oP0sStVvQm9dwDrMXts3z0FfGgmA",
+                "1tP6pGFZLB5Q1PtpBokxXB8gQdd8T8Z4Z-PKnbeMfT78",
+                "1Kn8PgppidUuOwYfayR5lc2lPtQihB1a-If_YaKU1Ofs",
+                "1wRtULwAq5sNRzPI9Zi-eEJnlLHpsbK2i2uvpCiDg010",
+                "1JTotAIBXQGWFkT0lnMZ_Rrbmr5Nn5zrF9VxLlLKDG94",
+                "1QQxg-h_Z7y7JFrA1jqgt96INMyFLdXQ9bnxteE3Rd5w",
+                "1J6CqNKoSfw3ERNWTLXVYh3R37a11kB4nBEzySIypV68",
+                "1i-3FSFOFZ5mNP87Lz4YX4W3QIUILQNLguc0itldR0kc",
+                "1ra4jDYLcvedRqA-oP0sStVvQm9dwDrMXts3z0FfGgmA",
+                "1tP6pGFZLB5Q1PtpBokxXB8gQdd8T8Z4Z-PKnbeMfT78",
+                "1Kn8PgppidUuOwYfayR5lc2lPtQihB1a-If_YaKU1Ofs",
+                "1wRtULwAq5sNRzPI9Zi-eEJnlLHpsbK2i2uvpCiDg010",
+                "1JTotAIBXQGWFkT0lnMZ_Rrbmr5Nn5zrF9VxLlLKDG94",
+                "1QQxg-h_Z7y7JFrA1jqgt96INMyFLdXQ9bnxteE3Rd5w",
+                "1J6CqNKoSfw3ERNWTLXVYh3R37a11kB4nBEzySIypV68",
+                "1i-3FSFOFZ5mNP87Lz4YX4W3QIUILQNLguc0itldR0kc",
+                "1ra4jDYLcvedRqA-oP0sStVvQm9dwDrMXts3z0FfGgmA",
+                "1tP6pGFZLB5Q1PtpBokxXB8gQdd8T8Z4Z-PKnbeMfT78",
+                "1Kn8PgppidUuOwYfayR5lc2lPtQihB1a-If_YaKU1Ofs",
+                "1wRtULwAq5sNRzPI9Zi-eEJnlLHpsbK2i2uvpCiDg010",
+                "1JTotAIBXQGWFkT0lnMZ_Rrbmr5Nn5zrF9VxLlLKDG94",
+                "1QQxg-h_Z7y7JFrA1jqgt96INMyFLdXQ9bnxteE3Rd5w",
+                "1J6CqNKoSfw3ERNWTLXVYh3R37a11kB4nBEzySIypV68",
+                "1i-3FSFOFZ5mNP87Lz4YX4W3QIUILQNLguc0itldR0kc",
+                "1ra4jDYLcvedRqA-oP0sStVvQm9dwDrMXts3z0FfGgmA",
+                "1tP6pGFZLB5Q1PtpBokxXB8gQdd8T8Z4Z-PKnbeMfT78",
+                "1Kn8PgppidUuOwYfayR5lc2lPtQihB1a-If_YaKU1Ofs"
+        };
 
-        float cost = dailyBudgetHelper.getCost(spreadsheetId, "11/10");
-        System.out.println(cost);
+        Map<String, Float> spendings = new HashMap<>();
+        for (String sheetId : sheetIds) {
+            spendings.put(sheetId, 0f);
+        }
+        for (int i = 0; i < 32; i++) {
+            int finalI = i;
+            new Thread(() -> {
+                LOGGER.info("Thread " + finalI + " started");
+                String sheetId = sheetIds[finalI];
+                while (true) {
+                    try {
+                        dailyBudgetHelper.checkBudget(sheetId);
+                        WaitTime.Shorter.execute();
+                        float cost = (float) (10.1f + 0.1 * finalI);
+                        float remainingBudget = dailyBudgetHelper.getRemainingBudget(sheetId, new Date(), cost);
+                        LOGGER.info("{} remains {}", finalI, remainingBudget);
+                        WaitTime.Shorter.execute();
+                        if (remainingBudget < cost) {
+                            throw new BusinessException("remaining budget not enough " + remainingBudget);
+                        }
+                        dailyBudgetHelper.addSpending(sheetId, new Date(), cost);
+                        spendings.put(sheetId, spendings.get(sheetId) + cost);
+                        LOGGER.info("{} total local spendings {}", finalI, spendings.get(sheetId));
+                    } catch (Exception e) {
+                        LOGGER.error("", e);
+                        break;
+                    }
+                }
+            }).start();
+        }
 
-        dailyBudgetHelper.addSpending(spreadsheetId, "11/10", 50);
-        cost = dailyBudgetHelper.getCost(spreadsheetId, "11/10");
-        System.out.println(cost);
 
-        cost = dailyBudgetHelper.getCost(spreadsheetId, "11/02");
-        System.out.println(cost);
+//        String spreadsheetId = "1Kn8PgppidUuOwYfayR5lc2lPtQihB1a-If_YaKU1Ofs";
+//        DailyBudgetHelper dailyBudgetHelper = ApplicationContext.getBean(DailyBudgetHelper.class);
+//        float remainingBudget = dailyBudgetHelper.getRemainingBudget(spreadsheetId, Dates.parseDate("08/10/2017"));
+//        System.out.println(remainingBudget);
+//
+//        remainingBudget = dailyBudgetHelper.getRemainingBudget(spreadsheetId, Dates.parseDate("11/10"));
+//        System.out.println(remainingBudget);
+//
+//        float cost = dailyBudgetHelper.getCost(spreadsheetId, "11/10");
+//        System.out.println(cost);
+//
+//        dailyBudgetHelper.addSpending(spreadsheetId, "11/10", 50);
+//        cost = dailyBudgetHelper.getCost(spreadsheetId, "11/10");
+//        System.out.println(cost);
+//
+//        cost = dailyBudgetHelper.getCost(spreadsheetId, "11/02");
+//        System.out.println(cost);
+//
+//        for (int i = 1; i < 20; i++) {
+//            int finalI = i;
+//            new Thread(() -> {
+//                LOGGER.info("Thread " + finalI + " started");
+//                dailyBudgetHelper.addSpending(spreadsheetId, new Date(), 10 * finalI);
+//            }).start();
+//        }
     }
 
 }

@@ -63,15 +63,22 @@ public class OrderCountryUtils {
     private static final String PRIME_URL_PATTERN =
             "/gp/offer-listing/${ISBN}/ref=olp_prime_${CONDITION}?ie=UTF8&condition=${CONDITION}&shipPromoFilter=1";
     private static final String PT_URL_PATTERN = "/gp/offer-listing/${ISBN}/ref=olp_tab_${CONDITION}?ie=UTF8&condition=${CONDITION}";
+    private static final String NO_CONDITION_URL_PATTERN = "/gp/offer-listing/${ISBN}/?ie=UTF8";
     private static final int MIN_SELLERID_LENGTH = 10;
 
     public static String getOfferListingUrl(Order order) {
-        String condition = ConditionUtils.getMasterCondition(order.condition);
-        order.isbn = Strings.fillMissingZero(order.isbn);
-        String urlTemplate = order.sellerIsPrime() ? PRIME_URL_PATTERN : PT_URL_PATTERN;
+        String urlTemplate;
+        String result;
+        if (StringUtils.isBlank(order.condition)) {
+            urlTemplate = NO_CONDITION_URL_PATTERN;
+            result = urlTemplate.replace("${ISBN}", order.isbn)+"&f_freeShipping=true";
+        } else {
+            String condition = ConditionUtils.getMasterCondition(order.condition);
+            order.isbn = Strings.fillMissingZero(order.isbn);
+            urlTemplate = order.sellerIsPrime() ? PRIME_URL_PATTERN : PT_URL_PATTERN;
+            result = urlTemplate.replace("${ISBN}", order.isbn).replace("${CONDITION}", condition);
+        }
 
-
-        String result = urlTemplate.replace("${ISBN}", order.isbn).replace("${CONDITION}", condition);
         if (StringUtils.isNotBlank(order.seller_id) && order.seller_id.length() >= MIN_SELLERID_LENGTH) {
             result += "&seller=" + order.seller_id;
         }

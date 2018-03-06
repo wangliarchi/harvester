@@ -42,8 +42,8 @@ public class StepHelper {
 
     @Inject private
     ReviewOrderMultiPage reviewOrderMultiPage;
-    @Inject
-    PlaceOrder placeOrder;
+
+    @Inject PlaceOrder placeOrder;
 
     @Inject private
     CantShipToAddress cantShipToAddress;

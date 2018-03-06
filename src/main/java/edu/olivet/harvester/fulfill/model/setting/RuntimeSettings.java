@@ -57,6 +57,9 @@ public class RuntimeSettings {
             }
         }
 
+        if (instance == null) {
+            instance = new RuntimeSettings();
+        }
         return instance;
     }
 

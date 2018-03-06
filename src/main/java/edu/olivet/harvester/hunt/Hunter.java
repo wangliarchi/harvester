@@ -3,6 +3,11 @@ package edu.olivet.harvester.hunt;
 
 import com.google.inject.Inject;
 import edu.olivet.foundations.ui.InformationLevel;
+import edu.olivet.foundations.ui.MessagePanel;
+import edu.olivet.foundations.ui.ProgressDetail;
+import edu.olivet.foundations.ui.VirtualMessagePanel;
+import edu.olivet.foundations.utils.Strings;
+import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
@@ -12,8 +17,11 @@ import edu.olivet.harvester.hunt.service.SheetService;
 import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.utils.SheetUtils;
+import edu.olivet.harvester.ui.Actions;
+import edu.olivet.harvester.ui.panel.SimpleOrderSubmissionRuntimePanel;
 import edu.olivet.harvester.utils.MessageListener;
 import edu.olivet.harvester.utils.common.ThreadHelper;
+import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.nutz.aop.interceptor.async.Async;
 import org.slf4j.Logger;
@@ -32,23 +40,30 @@ public class Hunter {
 
     @Inject AppScript appScript;
     @Inject SheetService sheetService;
-    @Inject private MessageListener messageListener;
+    @Inject MessageListener messageListener;
+    @Setter
+    private MessagePanel messagePanel = new VirtualMessagePanel();
+
 
     private static final int HUNTER_JOB_NUMBER = 2;
 
 
     public void execute(String spreadsheetId) {
+        if (messagePanel == null) {
+            messagePanel = messageListener;
+        }
         String sheetName = SheetUtils.getTodaySheetName();
         List<Order> orders = appScript.readOrders(spreadsheetId, sheetName);
         huntForOrders(orders);
     }
 
     public void execute(RuntimeSettings runtimeSettings) {
-        messageListener.addMsg("Reading orders from order update sheet " + runtimeSettings.getSpreadsheetName() + " " + runtimeSettings.getAdvancedSubmitSetting().toString());
+        messagePanel = messageListener;
+        messagePanel.displayMsg("Reading orders from order update sheet " + runtimeSettings.getSpreadsheetName() + " " + runtimeSettings.getAdvancedSubmitSetting().toString());
         List<Order> orders = appScript.readOrders(runtimeSettings);
 
         if (CollectionUtils.isEmpty(orders)) {
-            messageListener.addMsg("No orders found for  " + runtimeSettings.getAdvancedSubmitSetting().toString(), InformationLevel.Negative);
+            messagePanel.displayMsg("No orders found for  " + runtimeSettings.getAdvancedSubmitSetting().toString(), InformationLevel.Negative);
             return;
         }
 
@@ -56,8 +71,12 @@ public class Hunter {
     }
 
     public void huntForWorksheets(List<Worksheet> worksheets) {
+        messagePanel = new ProgressDetail(Actions.FindSupplier);
         for (Worksheet worksheet : worksheets) {
             try {
+                while (PSEventListener.isRunning()) {
+                    WaitTime.Short.execute();
+                }
                 huntForWorksheet(worksheet);
             } catch (Exception e) {
                 LOGGER.error("Error when hunting sellers for {} - ", worksheet, e);
@@ -66,35 +85,40 @@ public class Hunter {
     }
 
     public void huntForWorksheet(Worksheet worksheet) {
+        messagePanel.addMsgSeparator();
+        messagePanel.displayMsg("Finding suppliers for " + worksheet);
         List<Order> orders = appScript.readOrders(worksheet.getSpreadsheet().getSpreadsheetId(), worksheet.getSheetName());
 
         if (CollectionUtils.isEmpty(orders)) {
-            messageListener.addMsg("No orders found for worksheet " + worksheet, InformationLevel.Negative);
+            messagePanel.displayMsg("No orders found.", InformationLevel.Negative);
             return;
         }
-
 
         huntForOrders(orders);
     }
 
     public void huntForOrders(List<Order> orders) {
-        //messageListener.empty();
-
+        while (PSEventListener.isRunning()) {
+            WaitTime.Short.execute();
+        }
         //remove invalid orders
         orders.removeIf(order -> order.sellerHunted() || order.colorIsGray() || order.buyerCanceled());
 
         if (CollectionUtils.isEmpty(orders)) {
-            messageListener.addMsg("No orders to hunt", InformationLevel.Negative);
+            messagePanel.displayMsg("No orders to hunt", InformationLevel.Negative);
             return;
         }
 
+        messagePanel.displayMsg(orders.size() + " order(s) to find suppliers.");
         try {
             sheetService.updateLastCode(orders.get(0).getSpreadsheetId(), orders);
         } catch (Exception e) {
             //
         }
 
-        ProgressUpdater.updateTotal(orders.size());
+        ProgressUpdater.setProgressBarComponent(SimpleOrderSubmissionRuntimePanel.getInstance());
+        ProgressUpdater.setTotal(orders.size());
+        PSEventListener.reset(SimpleOrderSubmissionRuntimePanel.getInstance());
         PSEventListener.start();
 
         // 定长swingworker list
@@ -107,9 +131,10 @@ public class Hunter {
 
         // 把order list分配给几个SwingWorker
         for (List<Order> assignedOrders : list) {
-            jobs.add(new HuntWorker(assignedOrders, latch, messageListener));
+            jobs.add(new HuntWorker(assignedOrders, latch, messagePanel));
         }
 
+        long start = System.currentTimeMillis();
         // SwingWorker线程执行
         for (HuntWorker job : jobs) {
             job.execute();
@@ -129,6 +154,7 @@ public class Hunter {
             @Async
             protected void done() {
                 PSEventListener.end();
+                messagePanel.displayMsg("Done, took " + Strings.formatElapsedTime(start), InformationLevel.Information);
             }
         }.execute();
     }

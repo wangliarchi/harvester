@@ -269,6 +269,13 @@ public class UIHarvester extends AbstractApplicationUI {
         orderFulfillmentCheckerEvent.execute();
     }
 
+    @Inject SubmitSelfOrdersEvent submitSelfOrdersEvent;
+
+    @UIEvent
+    public void submitSelfOrders() {
+        submitSelfOrdersEvent.execute();
+    }
+
     @Override
     public String getApplication() {
         return Harvester.APP_NAME;
@@ -280,6 +287,7 @@ public class UIHarvester extends AbstractApplicationUI {
     public void cleanUp() {
         orderSubmissionTaskService.cleanUp();
     }
+
 
     @Inject
     private TaskScheduler taskScheduler;

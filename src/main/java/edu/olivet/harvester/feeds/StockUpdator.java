@@ -3,7 +3,6 @@ package edu.olivet.harvester.feeds;
 import com.google.api.services.sheets.v4.model.Spreadsheet;
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
-import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.MessagePanel;
 import edu.olivet.foundations.ui.VirtualMessagePanel;
@@ -14,7 +13,6 @@ import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.common.model.OrderEnums.OrderItemType;
 import edu.olivet.harvester.common.service.OrderService;
-import edu.olivet.harvester.feeds.helper.ConfirmShipmentEmailSender;
 import edu.olivet.harvester.feeds.helper.FeedGenerator;
 import edu.olivet.harvester.feeds.helper.FeedGenerator.BatchFileType;
 import edu.olivet.harvester.feeds.helper.FeedSubmissionEmailSender;
@@ -26,7 +24,6 @@ import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Getter;
-import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -137,7 +134,7 @@ public class StockUpdator {
 
         List<InventoryUpdateRecord> toBeRemoved = records.stream().filter(it -> it.getType().deleteASIN()).collect(Collectors.toList());
         List<String> asinsToAsync = toBeRemoved.stream().filter(it -> it.getType() == UpdateType.DeleteASINSYNC)
-                .map(it -> it.getAsin()).collect(Collectors.toList());
+                .map(InventoryUpdateRecord::getAsin).collect(Collectors.toList());
 
         //load asins to be removed from other accounts
         List<String> skus = getSyncSkus(country);
@@ -171,7 +168,9 @@ public class StockUpdator {
 
                 for (String invFilePath : invFilePaths) {
                     List<String> list = InventoryReportManager.getSKUs(asins, invFilePath);
-                    skus.addAll(list);
+                    if (CollectionUtils.isNotEmpty(list)) {
+                        skus.addAll(list);
+                    }
                 }
 
                 messagePanel.displayMsg(skus.size() + " skus found to be removed from sync database.\n" + skus);

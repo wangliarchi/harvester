@@ -7,6 +7,7 @@ import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
+import edu.olivet.harvester.common.model.SystemSettings;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OutOfBudgetException;
 import edu.olivet.harvester.fulfill.model.Address;
@@ -45,15 +46,23 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
     public void checkTotalCost(Order order) {
         Money grandTotal = parseTotal();
 
-        if (!ProfitLostControl.canPlaceOrder(order, grandTotal.toUSDAmount().floatValue())) {
-            throw new OrderSubmissionException("Order cost " + grandTotal.usdText() + " exceed maximum limit");
-        }
+        if (order.selfOrder) {
+            if (grandTotal.toUSDAmount().floatValue() > SystemSettings.load().getSelfOrderCostLimit()) {
+                throw new OrderSubmissionException("Order cost " + grandTotal.usdText() + " exceed maximum limit");
+            }
+        } else {
 
-        float remainingBudget = ApplicationContext.getBean(DailyBudgetHelper.class)
-                .getRemainingBudget(order.getSpreadsheetId(), new Date());
-        if (remainingBudget < grandTotal.toUSDAmount().floatValue()) {
-            throw new OutOfBudgetException("You don't have enough fund to process this order. Need $" +
-                    grandTotal.toUSDAmount() + ", only have $" + String.format("%.2f", remainingBudget));
+            if (!ProfitLostControl.canPlaceOrder(order, grandTotal.toUSDAmount().floatValue())) {
+                throw new OrderSubmissionException("Order cost " + grandTotal.usdText() + " exceed maximum limit");
+            }
+
+            float remainingBudget = ApplicationContext.getBean(DailyBudgetHelper.class)
+                    .getRemainingBudget(order.getSpreadsheetId(), new Date(), grandTotal.toUSDAmount().floatValue());
+
+            if (remainingBudget < grandTotal.toUSDAmount().floatValue()) {
+                throw new OutOfBudgetException("You don't have enough fund to process this order. Need $" +
+                        grandTotal.toUSDAmount() + ", only have $" + String.format("%.2f", remainingBudget));
+            }
         }
 
         order.orderTotalCost = grandTotal;

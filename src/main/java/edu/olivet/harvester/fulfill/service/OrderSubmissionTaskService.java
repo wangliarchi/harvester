@@ -120,25 +120,29 @@ public class OrderSubmissionTaskService {
         return orderSubmissionTask;
     }
 
-    public void saveSuccess(OrderSubmissionTask task) {
+    public synchronized void saveSuccess(OrderSubmissionTask task) {
         task = get(task.getId());
         task.setSuccess(task.getSuccess() + 1);
         saveTask(task);
+        LOGGER.info("{} {} saved success record. {} {} {}", task.getMarketplaceName(), task.getSpreadsheetName(),
+                task.getSuccess(), task.getFailed(), task.getTotalOrders());
     }
 
-    public void saveSuccess(String id) {
+    public synchronized void saveSuccess(String id) {
         OrderSubmissionTask task = get(id);
         task.setSuccess(task.getSuccess() + 1);
         saveTask(task);
+        LOGGER.info("{} {} saved failed record. {} {} {}", task.getMarketplaceName(), task.getSpreadsheetName(),
+                task.getSuccess(), task.getFailed(), task.getTotalOrders());
     }
 
-    public void saveFailed(OrderSubmissionTask task) {
+    public synchronized void saveFailed(OrderSubmissionTask task) {
         task = get(task.getId());
         task.setFailed(task.getFailed() + 1);
         saveTask(task);
     }
 
-    public void saveFailed(String id) {
+    public synchronized void saveFailed(String id) {
         OrderSubmissionTask task = get(id);
         task.setFailed(task.getFailed() + 1);
         saveTask(task);
@@ -153,7 +157,7 @@ public class OrderSubmissionTaskService {
     }
 
 
-    public OrderSubmissionTask saveTask(OrderSubmissionTask task) {
+    public synchronized OrderSubmissionTask saveTask(OrderSubmissionTask task) {
         //if new, generate id
         if (StringUtils.isBlank(task.getId())) {
             task.setDateCreated(new Date());
@@ -191,13 +195,13 @@ public class OrderSubmissionTaskService {
         task.setTaskStatus(OrderTaskStatus.Deleted);
         saveTask(task);
         //delete buyer tasks as well
-        orderSubmissionBuyerTaskService.deleteByTaskId(task.getId());
+        //orderSubmissionBuyerTaskService.deleteByTaskId(task.getId());
     }
 
     public void hardDeleteTask(OrderSubmissionTask task) {
         dbManager.deleteById(task.getId(), OrderSubmissionTask.class);
         //delete buyer tasks as well
-        orderSubmissionBuyerTaskService.deleteByTaskId(task.getId());
+        //orderSubmissionBuyerTaskService.deleteByTaskId(task.getId());
     }
 
     public void startTask(String id) {
@@ -221,7 +225,7 @@ public class OrderSubmissionTaskService {
         task.setDateEnded(new Date());
         saveTask(task);
 
-        orderSubmissionBuyerTaskService.stopByTaskId(task.getId());
+        //orderSubmissionBuyerTaskService.stopByTaskId(task.getId());
     }
 
     public void completed(OrderSubmissionTask task) {

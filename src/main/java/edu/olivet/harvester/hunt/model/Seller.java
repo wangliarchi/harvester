@@ -241,8 +241,8 @@ public class Seller {
         }
 
 
-        return offerListingCountry.code().equalsIgnoreCase(CountryStateUtils.getInstance().getCountryCode(shipToCountry))
-                || isIntlShippingAvailable();
+        return offerListingCountry.code().equalsIgnoreCase(CountryStateUtils.getInstance().getCountryCode(shipToCountry)) ||
+                isIntlShippingAvailable();
 
     }
 

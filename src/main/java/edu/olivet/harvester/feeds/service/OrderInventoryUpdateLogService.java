@@ -5,7 +5,6 @@ import edu.olivet.foundations.db.DBManager;
 import edu.olivet.harvester.feeds.helper.InventoryUpdateTypeHelper.UpdateType;
 import edu.olivet.harvester.feeds.model.InventoryUpdateRecord;
 import edu.olivet.harvester.feeds.model.OrderInventoryUpdateLog;
-import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.nutz.dao.Cnd;

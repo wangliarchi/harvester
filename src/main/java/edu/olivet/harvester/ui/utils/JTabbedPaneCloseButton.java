@@ -10,7 +10,6 @@ import java.awt.event.MouseListener;
 
 /**
  * @author 6dc
- *
  * A class which creates a JTabbedPane and auto sets a close button when you add a tab
  */
 public abstract class JTabbedPaneCloseButton extends JTabbedPane {
@@ -98,7 +97,7 @@ public abstract class JTabbedPaneCloseButton extends JTabbedPane {
     public void setIconAt(int index, Icon icon) {
         Component component = this.getTabComponentAt(index);
         if (component instanceof CloseButtonTab) {
-            ((CloseButtonTab)component).jLabel.setIcon(icon);
+            ((CloseButtonTab) component).jLabel.setIcon(icon);
         }
         super.setIconAt(index, icon);
     }

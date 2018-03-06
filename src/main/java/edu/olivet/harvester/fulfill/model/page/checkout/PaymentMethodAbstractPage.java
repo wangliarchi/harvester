@@ -11,6 +11,7 @@ import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +29,25 @@ abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract {
         super(buyerPanel);
     }
 
+
+    public void enterPromoCode(Order order) {
+        if (StringUtils.isBlank(order.promotionCode)) {
+            return;
+        }
+
+        DOMElement giftCardLink = JXBrowserHelper.selectVisibleElement(browser, "#wrapper-new-gc #gc-link-expander");
+        if (giftCardLink != null) {
+            giftCardLink.click();
+            JXBrowserHelper.waitUntilVisible(browser, "#gcpromoinput");
+            JXBrowserHelper.fillValueForFormField(browser, "#gcpromoinput", order.promotionCode);
+            DOMElement giftCardButton = JXBrowserHelper.selectElementByCssSelector(browser, "#button-add-gcpromo");
+            if (giftCardButton != null) {
+                giftCardButton.click();
+                WaitTime.Shortest.execute();
+                JXBrowserHelper.waitUntilNotFound(giftCardButton);
+            }
+        }
+    }
 
     public void selectCreditCard(Order order) {
 

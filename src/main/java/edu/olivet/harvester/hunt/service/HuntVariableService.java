@@ -384,7 +384,7 @@ public class HuntVariableService extends AppScript {
         seller.setShippingVariable(0);
     }
 
-    private final static Map<String, Map<String, Map<String, Float>>> SHIPPING_MAP = new HashMap<>();
+    private static final Map<String, Map<String, Map<String, Float>>> SHIPPING_MAP = new HashMap<>();
 
     public Map<String, Map<String, Map<String, Float>>> getIntlShippingVariable(Country country, OrderItemType orderItemType) {
         if (SHIPPING_MAP.size() > 0) {

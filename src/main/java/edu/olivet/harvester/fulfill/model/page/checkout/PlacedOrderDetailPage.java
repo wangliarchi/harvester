@@ -85,14 +85,18 @@ public class PlacedOrderDetailPage extends FulfillmentPage {
 
 
         String cityStateZip = JXBrowserHelper.text(browser, ".displayAddressCityStateOrRegionPostalCode");
-        String[] parts = StringUtils.split(cityStateZip, ",");
-        String city = parts[0].trim();
-        String[] regionZip = StringUtils.split(parts[1].trim(), " ");
-        String zip = regionZip[regionZip.length - 1];
-        String state = StringUtils.join(Arrays.copyOf(regionZip, regionZip.length - 1), " ");
-        address.setCity(city);
-        address.setState(state);
-        address.setZip(zip);
+        try {
+            String[] parts = StringUtils.split(cityStateZip, ",");
+            String city = parts[0].trim();
+            String[] regionZip = StringUtils.split(parts[1].trim(), " ");
+            String zip = regionZip[regionZip.length - 1];
+            String state = StringUtils.join(Arrays.copyOf(regionZip, regionZip.length - 1), " ");
+            address.setCity(city);
+            address.setState(state);
+            address.setZip(zip);
+        } catch (Exception e) {
+            LOGGER.error("", e);
+        }
         address.setCountry(JXBrowserHelper.text(browser, ".displayAddressCountryName"));
         address.setNoInvoiceText(buyerPanel.getOrder().getRuntimeSettings().getNoInvoiceText());
         return address;

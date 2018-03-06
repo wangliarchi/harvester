@@ -41,7 +41,7 @@ public class ViaHTTP {
 
             Thread.sleep(1000);
 
-            int value = 0;
+            int value;
             if (std.available() > 0) {
                 System.out.println("STD:");
                 value = std.read();

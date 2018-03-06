@@ -16,10 +16,10 @@ import org.nutz.dao.entity.annotation.Table;
 @Table(value = "order_inventory_loader")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class OrderInventoryUpdateLog  extends PrimaryKey implements ArrayConvertable {
+public class OrderInventoryUpdateLog extends PrimaryKey implements ArrayConvertable {
 
     @Name private String id;
-    @Column private String orderId;
+    @Column private String orderId = "";
     @Column private String sku;
     @Column private String updateType;
 

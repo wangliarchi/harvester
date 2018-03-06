@@ -63,9 +63,9 @@ public class OrderFulfillmentRecord extends PrimaryKey implements ArrayConvertab
     @Column
     private String shippingAddress;
     @Column
-    private String fulfilledAddress;
+    private String fulfilledAddress = "";
     @Column
-    private String fulfilledASIN;
+    private String fulfilledASIN = "";
 
 
     @Override

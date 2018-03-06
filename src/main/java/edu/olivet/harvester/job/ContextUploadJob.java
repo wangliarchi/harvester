@@ -1,7 +1,6 @@
 package edu.olivet.harvester.job;
 
 import com.alibaba.fastjson.JSON;
-import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.job.AbstractBackgroundJob;
 import edu.olivet.foundations.release.Version;
 import edu.olivet.foundations.release.VersionManager;
@@ -10,12 +9,18 @@ import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.TeamViewerFetcher;
 import edu.olivet.harvester.ui.Harvester;
+import edu.olivet.harvester.utils.AnyDeskFetcher;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.jsoup.Jsoup;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -30,11 +35,14 @@ public class ContextUploadJob extends AbstractBackgroundJob {
         private String os;
         private String jvm;
         private String teamviewerId;
+        private String anyDeskId = "";
         private String checkTime;
         private String marketPlaces;
         private String timeZone;
+        private String freePhysicalMemorySize;
+        private String totalPhysicalMemorySize;
+        private String systemCpuLoad;
     }
-
 
     private static final String APPS_URL = "https://script.google.com/macros/s/AKfycbxdEFwL8oO7ahkB0ICe7Wf0TuMaYG01ntQrm3zXWWFVfVJNtcgo/exec";
 
@@ -66,28 +74,80 @@ public class ContextUploadJob extends AbstractBackgroundJob {
         context.setOs(SystemUtils.OS_NAME);
         context.setJvm(String.format("%s:%s", SystemUtils.JAVA_VERSION, SystemUtils.JAVA_VM_NAME));
         context.setTeamviewerId(new TeamViewerFetcher().execute());
+        context.setAnyDeskId(new AnyDeskFetcher().execute());
         context.setCheckTime("");
 
         StringBuilder sb = new StringBuilder();
-        settings.getConfigs().forEach(config -> {
-            Account seller = config.getSeller();
-            sb.append(Constants.COMMA_WHITESPACE).append(config.getCountry().name());
-        });
+        settings.getConfigs().forEach(config -> sb.append(Constants.COMMA_WHITESPACE).append(config.getCountry().name()));
         context.setMarketPlaces(sb.toString().replaceFirst(Constants.COMMA, StringUtils.EMPTY).trim());
 
         context.setTimeZone(TimeZone.getDefault().getDisplayName(Locale.US));
 
+        getMemoryAndCPUInfo(context);
         return context;
     }
 
-    public static void main(String[] args) {
+    public static String humanReadableByteCount(long bytes) {
+        int unit = 1024;
+        if (bytes < unit) {
+            return bytes + " B";
+        }
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = "" + ("KMGTPE").charAt(exp - 1);
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+    }
 
+
+    public void getMemoryAndCPUInfo(InstallationContext context) {
+        //FreePhysicalMemorySize
+        //TotalPhysicalMemorySize
+        //SystemCpuLoad
+        OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
+
+        for (Method method : operatingSystemMXBean.getClass().getDeclaredMethods()) {
+            method.setAccessible(true);
+            if (method.getName().startsWith("get") && Modifier.isPublic(method.getModifiers())) {
+                Object value;
+                try {
+                    value = method.invoke(operatingSystemMXBean);
+                } catch (Exception e) {
+                    value = e;
+                }
+
+                if ("getFreePhysicalMemorySize".equalsIgnoreCase(method.getName())) {
+                    try {
+                        float v = Float.parseFloat(value.toString());
+                        context.setFreePhysicalMemorySize(humanReadableByteCount((long) v));
+                    } catch (Exception e) {
+                        //
+                    }
+                }
+
+                if ("getTotalPhysicalMemorySize".equalsIgnoreCase(method.getName())) {
+                    try {
+                        float v = Float.parseFloat(value.toString());
+                        context.setTotalPhysicalMemorySize(humanReadableByteCount((long) v));
+                    } catch (Exception e) {
+                        //
+                    }
+                }
+
+                if ("getProcessCpuLoad".equalsIgnoreCase(method.getName())) {
+                    try {
+                        float v = Float.parseFloat(value.toString());
+                        context.setSystemCpuLoad(Float.toString(v * 100) + "%");
+                    } catch (Exception e) {
+                        //
+                    }
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) {
         ContextUploadJob bean = ApplicationContext.getBean(ContextUploadJob.class);
         InstallationContext ctx = bean.buildContext();
-
         System.out.println(Strings.encode(JSON.toJSONString(JSON.toJSONString(ctx, true))));
-
-        bean.execute();
         System.exit(0);
     }
 }

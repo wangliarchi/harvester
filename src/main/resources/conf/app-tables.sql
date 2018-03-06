@@ -245,7 +245,25 @@ CREATE TABLE IF NOT EXISTS buyer_invoices (
 /* order_inventory_loader */
 CREATE TABLE IF NOT EXISTS order_inventory_loader (
   id         VARCHAR(120) PRIMARY KEY NOT NULL,
-  orderId				VARCHAR(25)  NOT NULL,
-  sku 				VARCHAR(100) 	NOT NULL,
-  updateType			VARCHAR(50) 	NOT NULL
-)
+  orderId    VARCHAR(25)              NOT NULL,
+  sku        VARCHAR(100)             NOT NULL,
+  updateType VARCHAR(50)              NOT NULL
+);
+
+/* self_orders */
+CREATE TABLE IF NOT EXISTS self_orders (
+  id               VARCHAR(40) PRIMARY KEY NOT NULL,
+  sheetName        VARCHAR(25)             NOT NULL DEFAULT '',
+  spreadsheetId    VARCHAR(100)            NOT NULL DEFAULT '',
+  sellerCode       VARCHAR(100)            NOT NULL DEFAULT '',
+  seller           VARCHAR(100)            NOT NULL DEFAULT '',
+  sellerId         VARCHAR(30)             NOT NULL DEFAULT '',
+  primoCode        VARCHAR(100)            NOT NULL DEFAULT '',
+  country          VARCHAR(30)             NOT NULL DEFAULT '',
+  asin             VARCHAR(10)             NOT NULL DEFAULT '',
+  cost             VARCHAR(10)             NOT NULL DEFAULT '',
+  orderNumber      VARCHAR(25)             NOT NULL DEFAULT '',
+  buyerAccount     VARCHAR(100)            NOT NULL DEFAULT '',
+  fulfilledAddress TEXT                    NOT NULL DEFAULT '',
+  fulfillDate      DATETIME                NOT NULL
+);

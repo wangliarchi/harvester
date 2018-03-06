@@ -30,6 +30,7 @@ import java.lang.reflect.Modifier;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.teamdev.jxbrowser.chromium.BrowserKeyEvent.KeyEventType.*;
 
@@ -39,8 +40,9 @@ import static com.teamdev.jxbrowser.chromium.BrowserKeyEvent.KeyEventType.*;
  */
 public class JXBrowserHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(JXBrowserHelper.class);
-    private static final int TIME_OUT_SECONDS = 20;
+    private static final int TIME_OUT_SECONDS = 10;
     public static final String CHANNEL_CLOSED_MESSAGE = "Failed to send message. Channel is already closed";
+    private static final Map<String, BrowserContext> BrowserContextMap = new ConcurrentHashMap<>();
 
     static {
         try {
@@ -140,18 +142,18 @@ public class JXBrowserHelper {
      * @return 初始化好的BrowserView实例
      */
     public static BrowserView init(String profileDirName, double zoomLevel, CustomProxyConfig proxyConfig) {
-        String dataDir = Directory.Tmp.path() + File.separator + profileDirName;
+        BrowserContext context = BrowserContextMap.computeIfAbsent(profileDirName, k -> {
+            String dataDir = Directory.Tmp.path() + File.separator + profileDirName;
+            BrowserContextParams params = new BrowserContextParams(dataDir);
+            if (proxyConfig != null) {
+                params.setProxyConfig(proxyConfig);
+            }
+            return new BrowserContext(params);
+        });
 
-        BrowserContextParams params = new BrowserContextParams(dataDir);
-        if (proxyConfig != null) {
-            params.setProxyConfig(proxyConfig);
-        }
-
-        BrowserContext context = new BrowserContext(params);
 
         Browser browser = new Browser(BrowserType.LIGHTWEIGHT, context);
         browser.setZoomEnabled(true);
-
 
         BrowserPreferences preferences = browser.getPreferences();
         preferences.setImagesEnabled(true);
@@ -187,10 +189,14 @@ public class JXBrowserHelper {
     @InvokedExternally
     public static void wait(Browser browser, By by) {
         for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
-            if (browser.getDocument().findElement(by) == null) {
+            try {
+                if (browser.getDocument().findElement(by) == null) {
+                    WaitTime.Shorter.execute();
+                } else {
+                    break;
+                }
+            } catch (Exception e) {
                 WaitTime.Shorter.execute();
-            } else {
-                break;
             }
         }
 
@@ -536,6 +542,17 @@ public class JXBrowserHelper {
         }
     }
 
+    public static String getValueFromFormField(Browser browser, String selector) {
+        try {
+            DOMElement element = JXBrowserHelper.selectElementByCssSelector(browser, selector);
+            assert element != null;
+            return ((DOMFormControlElement) element).getValue();
+        } catch (Exception e) {
+            LOGGER.error("Error get value from {}", selector);
+        }
+        return "";
+    }
+
     public static void fillValueForFormField(DOMElement parentElement, String selector, String value) {
         try {
             DOMElement element = JXBrowserHelper.selectElementByCssSelector(parentElement, selector);
@@ -588,6 +605,13 @@ public class JXBrowserHelper {
         element.click();
         WaitTime.Shortest.execute();
         waitUntilNotFound(element);
+    }
+
+    @Repeat
+    public static void clickJS(Browser browser, String selector) {
+        browser.executeJavaScript("document.querySelector('" + selector + "').click()");
+        WaitTime.Shortest.execute();
+        //waitUntilNotFound(browser, selector);
     }
 
 

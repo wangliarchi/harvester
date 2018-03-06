@@ -2,7 +2,6 @@ package edu.olivet.harvester.feeds.helper;
 
 import edu.olivet.harvester.common.model.Order;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.cluster.metadata.AliasAction.Add;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 2/21/2018 1:09 PM
@@ -65,13 +64,6 @@ public class InventoryUpdateTypeHelper {
     }
 
     public static UpdateType getUpdateType(Order order) {
-        /**
-         * 包含buyer 或者cancel，cancelled，canceled 都返回null
-         */
-        if (order.buyerCanceled()) {
-            return null;
-        }
-
         //黑名单删点
         if (order.asinMarkDelete()) {
             return UpdateType.DeleteASINSYNC;
@@ -79,6 +71,11 @@ public class InventoryUpdateTypeHelper {
 
         if (StringUtils.isBlank(order.sku)) {
             return null;
+        }
+
+        //包含buyer 或者cancel，cancelled，canceled 补点
+        if (order.buyerCanceled()) {
+            return UpdateType.AddQuantity;
         }
 
         //灰条删点

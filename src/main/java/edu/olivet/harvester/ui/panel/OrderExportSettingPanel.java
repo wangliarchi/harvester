@@ -65,11 +65,11 @@ public class OrderExportSettingPanel extends JPanel {
                                 .addContainerGap()
                                 .addComponent(autoExportTimeLabel, labelWidth, labelWidth, labelWidth)
                                 .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(exportTimePicker)
+                                .addComponent(exportTimePicker, 100, 100, 100)
                                 .addPreferredGap(ComponentPlacement.RELATED)
                                 .addComponent(rangeLabel)
                                 .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(allowedRangeComBox)
+                                .addComponent(allowedRangeComBox, 100, 100, 100)
                                 .addPreferredGap(ComponentPlacement.RELATED)
                                 .addComponent(unitLabel)
                                 .addContainerGap()
@@ -99,7 +99,7 @@ public class OrderExportSettingPanel extends JPanel {
 
 
     public void collectData() {
-        SystemSettings systemSettings = SystemSettings.load();
+        SystemSettings systemSettings = SystemSettings.reload();
         boolean oldData = systemSettings.isEnableOrderExport();
         //noinspection ConstantConditions
         if ("Yes".equalsIgnoreCase(enableAutoExportComboBox.getSelectedItem().toString())) {

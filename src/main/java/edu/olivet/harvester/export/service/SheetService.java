@@ -104,7 +104,7 @@ public class SheetService extends SheetAPI {
         String sheetName = sheetProperties.getTitle();
 
         //lock sheet
-        int protectedId = lockSheet(spreadsheetId, sheetProperties.getSheetId(), "Order exporting process is running.");
+        //int protectedId = lockSheet(spreadsheetId, sheetProperties.getSheetId(), "Order exporting process is running.");
         int lastRow = getLastRow(spreadsheetId, sheetName);
         try {
             String range = String.format("%s!A%d:AW%d", sheetName, lastRow + 1, lastRow + orders.size() + 1);
@@ -114,8 +114,6 @@ public class SheetService extends SheetAPI {
             this.spreadsheetValuesAppend(spreadsheetId, range, new ValueRange().setValues(values));
         } catch (Exception e) {
             throw new BusinessException(e);
-        } finally {
-            unlockSheet(spreadsheetId, protectedId);
         }
 
         //trouble maker...

@@ -62,6 +62,10 @@ public class DefaultHandler implements ShippingHandler {
     @Override
     public List<ShippingOption> getValidateOptions(Order order, List<ShippingOption> shippingOptions) {
 
+        if (CollectionUtils.isEmpty(shippingOptions)) {
+            throw new SellerEddTooLongException("No shipping option available.");
+        }
+
         Date orderEdd = order.latestEdd();
         int maxDays = order.buyerExpeditedShipping() ? 3 : IntegerUtils.parseInt(order.getRuntimeSettings().getEddLimit(), 7);
 
@@ -71,11 +75,6 @@ public class DefaultHandler implements ShippingHandler {
             if (Strings.containsAnyIgnoreCase(it.getFullText().toLowerCase(), "trial", "prueba", "Kostenlose Testphase", "l'essai")) {
                 return false;
             }
-
-            Date latestDate = it.getLatestDeliveryDate();
-            DateTime end = new DateTime(latestDate.getTime());
-            int daysExceedOrderEdd = Days.daysBetween(start, end).getDays();
-
             //Expedited Shipping requested
             if (order.expeditedShipping() && !it.isExpedited()) {
                 return false;
@@ -85,6 +84,11 @@ public class DefaultHandler implements ShippingHandler {
                 return false;
             }
 
+            Date latestDate = it.getLatestDeliveryDate();
+            DateTime end = new DateTime(latestDate.getTime());
+            int daysExceedOrderEdd = Days.daysBetween(start, end).getDays();
+
+
             return (OrderValidator.skipCheck(order, OrderValidator.SkipValidation.EDD) ||
                     Remark.isDN(order.remark) ||
                     latestDate.before(orderEdd) ||
@@ -93,6 +97,7 @@ public class DefaultHandler implements ShippingHandler {
 
 
         if (CollectionUtils.isEmpty(validShippingOptions)) {
+
             Date latestDate = shippingOptions.get(0).getLatestDeliveryDate();
             int days = Math.abs(Dates.daysBetween(latestDate, orderEdd));
             throw new SellerEddTooLongException("No shipping option available. Earliest EDD is " +

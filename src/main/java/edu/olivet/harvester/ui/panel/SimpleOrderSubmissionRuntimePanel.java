@@ -9,6 +9,7 @@ import edu.olivet.foundations.utils.Constants;
 import edu.olivet.harvester.fulfill.model.setting.AdvancedSubmitSetting;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.*;
+import edu.olivet.harvester.fulfill.service.DailyBudgetHelper.DataType;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.common.model.BuyerAccountSettingUtils;
 import edu.olivet.harvester.common.model.OrderEnums;
@@ -65,16 +66,33 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
 
     private SimpleOrderSubmissionRuntimePanel() {
         initComponents();
-        initData();
-        initEvents();
+
+        //RuntimeSettings
+        settings = RuntimeSettings.load();
+
+        try {
+            initData();
+        } catch (Exception e) {
+            //
+            LOGGER.error("fail to init data ", e);
+        }
+
+        try {
+            initEvents();
+        } catch (Exception e) {
+            //
+            LOGGER.error("fail to init event ", e);
+        }
+
     }
 
 
     private void initData() {
-
-        //RuntimeSettings
-        settings = RuntimeSettings.load();
         Settings systemSettings = Settings.load();
+        if (systemSettings == null) {
+            return;
+        }
+
         List<Country> countries = systemSettings.listAllCountries();
         settings.setSid(systemSettings.getSid());
 
@@ -152,13 +170,11 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
 
     public void loadBudget() {
         if (StringUtils.isNotBlank(settings.getSpreadsheetId())) {
-            Map<String, Float> budgets = ApplicationContext.getBean(DailyBudgetHelper.class)
+            Map<DataType, Float> budgets = ApplicationContext.getBean(DailyBudgetHelper.class)
                     .getData(settings.getSpreadsheetId(), new Date());
-            todayBudgetTextField.setText(budgets.get("budget").toString());
-            todayUsedTextField.setText(budgets.get("cost").toString());
+            todayBudgetTextField.setText(budgets.get(DataType.Budget).toString());
+            todayUsedTextField.setText(budgets.get(DataType.Cost).toString());
         }
-
-
     }
 
     private void initEvents() {
@@ -487,7 +503,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
 
     private void selectRange() {
         //spreadsheet should be selected first.
-        if (StringUtils.isBlank(settings.getSheetName())) {
+        if (settings == null || StringUtils.isBlank(settings.getSheetName())) {
             return;
         }
         SelectRangeDialog dialog = UITools.setDialogAttr(new SelectRangeDialog(null, true, settings.getAdvancedSubmitSetting()));

@@ -11,6 +11,7 @@ import edu.olivet.harvester.common.model.OrderEnums.*;
 import edu.olivet.harvester.common.service.mws.ProductAttributesHelper;
 import edu.olivet.harvester.common.service.mws.ProductClient;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,20 +41,33 @@ public class OrderItemTypeHelper {
     }
 
     public static OrderItemType getItemTypeBySku(Order order) {
-        String sku = order.getSku();
+        try {
+            String sku = order.getSku();
 
-        if (sku.isEmpty()) {
-            throw new BusinessException("No valid SKU found for order " + order.order_id);
+            if (sku.isEmpty()) {
+                throw new BusinessException("No valid SKU found for order " + order.order_id);
+            }
+
+            String[] productKeywords = {"ART", "AUTO", "pro", "jewel", "shoe", "cloth", "watch", "BABY",
+                    "BEAU", "ELEC", "FOOD", "HARDWARE", "HEAL", "HOME", "MEASURE", "OFFICE", "PET",
+                    "SAFETY", "SPOR", "TOOL", "TOY", "access", "guowai", "bady", "kit", "out", "uban"};
+
+            if (Strings.containsAnyIgnoreCase(sku, productKeywords)) {
+                return OrderItemType.PRODUCT;
+            }
+        } catch (Exception e) {
+            //
         }
 
-        String[] productKeywords = {"ART", "AUTO", "pro", "jewel", "shoe", "cloth", "watch", "BABY",
-                "BEAU", "ELEC", "FOOD", "HARDWARE", "HEAL", "HOME", "MEASURE", "OFFICE", "PET",
-                "SAFETY", "SPOR", "TOOL", "TOY", "access", "guowai", "bady", "kit", "out", "uban"};
+        return OrderItemType.BOOK;
+    }
 
-        if (Strings.containsAnyIgnoreCase(sku, productKeywords)) {
+    public static OrderItemType getItemTypeByASIN(Order order) {
+        String asin = order.isbn;
+
+        if (StringUtils.startsWithIgnoreCase(asin, "B")) {
             return OrderItemType.PRODUCT;
         }
-
         return OrderItemType.BOOK;
     }
 

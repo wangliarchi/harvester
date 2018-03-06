@@ -34,12 +34,16 @@ public class SystemSettings {
     private Integer asinSyncAllowedRange = 60;
 
     private int maxOrderProcessingThread = 5;
+    private boolean orderSubmissionDebugModel = false;
+
+    private String selfOrderSpreadsheetId = "";
+    private float selfOrderCostLimit = 1f;
 
     public static final String SYSTEM_SETTINGS_FILE_PATH = Directory.Customize.path() + "/system-settings.json";
     public static final String TEST_SYSTEM_SETTINGS_FILE_PATH = "src/test/resources/conf/system-settings.json";
 
 
-    public void save() {
+    public synchronized void save() {
         File file = new File(getConfigPath());
         Tools.writeStringToFile(file, JSON.toJSONString(this, true));
         //clear cache
@@ -52,7 +56,7 @@ public class SystemSettings {
 
     }
 
-    public static SystemSettings reload() {
+    public synchronized static SystemSettings reload() {
         File file = new File(getConfigPath());
         if (file.exists() && file.isFile()) {
             instance = JSON.parseObject(Tools.readFileToString(file), SystemSettings.class);

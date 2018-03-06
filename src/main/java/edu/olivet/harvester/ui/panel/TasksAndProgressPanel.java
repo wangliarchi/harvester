@@ -112,6 +112,7 @@ public class TasksAndProgressPanel extends JPanel implements PSEventHandler {
         stopButton.setEnabled(false);
         pauseButton.setEnabled(false);
     }
+
     // Variables declaration - do not modify
     private JButton addTaskButton;
     private JButton startButton;

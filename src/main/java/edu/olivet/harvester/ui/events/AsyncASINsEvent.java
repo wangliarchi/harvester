@@ -1,14 +1,11 @@
 package edu.olivet.harvester.ui.events;
 
-import com.amazonaws.mws.model.FeedSubmissionInfo;
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.ProgressDetail;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.Constants;
-import edu.olivet.foundations.utils.Strings;
-import edu.olivet.harvester.feeds.ConfirmShipments;
 import edu.olivet.harvester.feeds.StockUpdator;
 import edu.olivet.harvester.spreadsheet.model.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.model.Worksheet;

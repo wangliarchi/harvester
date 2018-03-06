@@ -9,6 +9,7 @@ import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.MessagePanel;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Now;
+import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.export.model.AmazonOrder;
 import edu.olivet.harvester.export.utils.SelfOrderChecker;
@@ -153,7 +154,7 @@ public class ExportOrderService extends OrderClient {
         } catch (Exception e) {
             LOGGER.error("Error fetching orders from amazon {} to {}", dateMap.get(OrderFetcher.DateRangeType.LastUpdatedAfter), dateMap.get(OrderFetcher.DateRangeType.LastUpdatedBefore), e);
             if (StringUtils.containsIgnoreCase(e.getMessage(), "access denied")) {
-                throw new BusinessException(e.getMessage() + " Please check if the account is still ACTIVE");
+                throw new BusinessException(Strings.getExceptionMsg(e) + " Please check if the account is still ACTIVE");
             }
             throw new BusinessException(e);
         }

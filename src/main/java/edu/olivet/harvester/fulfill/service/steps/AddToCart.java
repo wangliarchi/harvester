@@ -18,6 +18,11 @@ public class AddToCart extends Step {
 
     @Inject private SellerService sellerService;
     protected void process(FlowState state) {
+        //if(StringUtils.isBlank(state.getOrder().recipient_name)) {
+        //    AddressesPage addressesPage = new AddressesPage(state.getBuyerPanel());
+        //    addressesPage.execute(state.getOrder());
+        //}
+
         OfferListingPage offerListingPage = new OfferListingPage(state.getBuyerPanel(), sellerService);
         offerListingPage.addToCart(state.getOrder());
     }

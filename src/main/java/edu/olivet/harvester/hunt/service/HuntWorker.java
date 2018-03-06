@@ -1,15 +1,17 @@
 package edu.olivet.harvester.hunt.service;
 
+import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.InformationLevel;
+import edu.olivet.foundations.ui.MessagePanel;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.service.ProgressUpdater;
+import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.hunt.model.HuntResult;
 import edu.olivet.harvester.hunt.model.Seller;
 import edu.olivet.harvester.hunt.utils.SellerHuntUtils;
-import edu.olivet.harvester.utils.MessageListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,10 +30,10 @@ public class HuntWorker extends SwingWorker<Void, HuntResult> {
     private final HuntService huntService;
     private final List<Order> orders;
     private final SheetService sheetService;
-    private final MessageListener messageListener;
+    private final MessagePanel messageListener;
     private final CountDownLatch latch;
 
-    public HuntWorker(List<Order> orders, CountDownLatch latch, MessageListener messageListener) {
+    public HuntWorker(List<Order> orders, CountDownLatch latch, MessagePanel messageListener) {
         this.huntService = ApplicationContext.getBean(HuntService.class);
         this.orders = orders;
         this.latch = latch;
@@ -50,7 +52,7 @@ public class HuntWorker extends SwingWorker<Void, HuntResult> {
                 huntForOrder(order);
             } catch (Exception e) {
                 LOGGER.error("", e);
-                publish(new HuntResult(order, "Failed to find seller - " + Strings.getExceptionMsg(e), ReturnCode.FAILURE));
+                publish(new HuntResult(order, "failed to find seller - " + Strings.getExceptionMsg(e), ReturnCode.FAILURE));
             }
         }
 
@@ -59,24 +61,23 @@ public class HuntWorker extends SwingWorker<Void, HuntResult> {
 
 
     public void huntForOrder(Order order) {
-
         //find seller
         Seller seller;
         try {
             seller = huntService.huntForOrder(order);
         } catch (Exception e) {
             LOGGER.error("", e);
-            publish(new HuntResult(order, "Failed to find seller - " + Strings.getExceptionMsg(e), ReturnCode.FAILURE));
+            publish(new HuntResult(order, "failed to find seller - " + Strings.getExceptionMsg(e), ReturnCode.FAILURE));
             return;
         }
 
         try {
             SellerHuntUtils.setSellerDataForOrder(order, seller);
             sheetService.fillSellerInfo(order);
-            publish(new HuntResult(order, "Find seller  - " + seller.toSimpleString(), ReturnCode.SUCCESS));
+            publish(new HuntResult(order, "find seller  - " + seller.toSimpleString(), ReturnCode.SUCCESS));
         } catch (Exception e) {
             LOGGER.error("", e);
-            publish(new HuntResult(order, "Failed to write seller info to sheet - " + Strings.getExceptionMsg(e), ReturnCode.SUCCESS));
+            publish(new HuntResult(order, "failed to write seller info to sheet - " + Strings.getExceptionMsg(e), ReturnCode.SUCCESS));
         }
     }
 
@@ -88,12 +89,16 @@ public class HuntWorker extends SwingWorker<Void, HuntResult> {
     @Override
     protected void process(final List<HuntResult> chunks) {
         for (HuntResult huntResult : chunks) {
+            Country country = OrderCountryUtils.getMarketplaceCountry(huntResult.getOrder());
+            String msg = String.format("%s %s %s row %d - %s %s %s",
+                    country != null ? (country.europe() ? "EU" : country.name()) : huntResult.getOrder().getSpreadsheetId(), huntResult.getOrder().type().name().toLowerCase(),
+                    huntResult.getOrder().sheetName, huntResult.getOrder().row, huntResult.getOrder().order_id, huntResult.getResult(), ProgressUpdater.timeSpent());
             if (huntResult.getCode() == ReturnCode.SUCCESS) {
-                messageListener.addMsg(huntResult.getOrder(), huntResult.getResult(), InformationLevel.Positive);
                 ProgressUpdater.success();
+                messageListener.displayMsg(ProgressUpdater.progress() + " - " + msg);
             } else {
-                messageListener.addMsg(huntResult.getOrder(), huntResult.getResult(), InformationLevel.Negative);
                 ProgressUpdater.failed();
+                messageListener.displayMsg(ProgressUpdater.progress() + " - " + msg, InformationLevel.Negative);
             }
         }
     }

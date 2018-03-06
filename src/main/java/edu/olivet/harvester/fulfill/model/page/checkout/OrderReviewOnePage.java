@@ -1,10 +1,12 @@
 package edu.olivet.harvester.fulfill.model.page.checkout;
 
+import edu.olivet.harvester.common.model.Money;
 import edu.olivet.harvester.fulfill.utils.CreditCardUtils;
 import edu.olivet.harvester.common.model.CreditCard;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +22,12 @@ public class OrderReviewOnePage extends OrderReviewAbstractPage {
 
 
     public boolean reviewPaymentMethod() {
+        if (StringUtils.isNotBlank(buyerPanel.getOrder().promotionCode)) {
+            Money total = parseTotal();
+            if (total.getAmount().floatValue() > 1) {
+                return false;
+            }
+        }
         String lastDigits = JXBrowserHelper.text(browser, "#payment-information .a-color-secondary span");
         CreditCard creditCard = CreditCardUtils.getCreditCard(buyerPanel.getBuyer());
         return creditCard.getCardNo().endsWith(lastDigits);

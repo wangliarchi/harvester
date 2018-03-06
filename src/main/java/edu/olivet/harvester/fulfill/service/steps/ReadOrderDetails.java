@@ -7,6 +7,7 @@ import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.harvester.common.model.SystemSettings;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.model.OrderFulfillmentRecord;
 import edu.olivet.harvester.fulfill.model.page.LoginPage;
@@ -20,6 +21,7 @@ import edu.olivet.harvester.logger.SuccessLogger;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.common.model.Remark;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +46,9 @@ public class ReadOrderDetails extends Step {
             //return;
         }
 
+        if (order.selfOrder) {
+            return;
+        }
 
         try {
             saveToDB(order);
@@ -57,16 +62,11 @@ public class ReadOrderDetails extends Step {
             //ignore
         }
 
-
-        new Thread(() -> {
-            try {
-                updateSpending(order.getSpreadsheetId(), order);
-            } catch (Exception e) {
-                LOGGER.error("Failed to update spending.", e);
-            }
-        }).start();
-
-
+        try {
+            updateSpending(order.getSpreadsheetId(), order);
+        } catch (Exception e) {
+            LOGGER.error("Failed to update spending.", e);
+        }
     }
 
     @Inject private
@@ -74,6 +74,11 @@ public class ReadOrderDetails extends Step {
 
     @Repeat(expectedExceptions = BusinessException.class)
     private void readOrderInfo(FlowState state) {
+
+        if (SystemSettings.load().isOrderSubmissionDebugModel()) {
+            return;
+        }
+
         if (stepHelper.detectCurrentPage(state) == CheckoutPage.LoginPage) {
             LoginPage loginPage = new LoginPage(state.getBuyerPanel());
             loginPage.execute(state.getOrder());
@@ -102,7 +107,7 @@ public class ReadOrderDetails extends Step {
         record.setCondition(order.condition);
         record.setCharacter(order.character);
         if (order.orderTotalCost != null) {
-            record.setCost(order.orderTotalCost.getAmount().toPlainString());
+            record.setCost(order.orderTotalCost.toUSDAmount().toPlainString());
         } else {
             record.setCost(order.cost);
         }
@@ -113,8 +118,16 @@ public class ReadOrderDetails extends Step {
         record.setQuantityPurchased(IntegerUtils.parseInt(order.quantity_purchased, 1));
         record.setQuantityBought(IntegerUtils.parseInt(order.quantity_fulfilled, 1));
         record.setShippingAddress(Address.loadFromOrder(order).toString());
-        record.setFulfilledAddress(order.getFulfilledAddress().toString());
-        record.setFulfilledASIN(order.getFulfilledASIN());
+        try {
+            record.setFulfilledAddress(order.getFulfilledAddress().toString());
+        } catch (Exception e) {
+            record.setFulfilledAddress("");
+        }
+        if (StringUtils.isNotBlank(order.getFulfilledASIN())) {
+            record.setFulfilledASIN(order.getFulfilledASIN());
+        } else {
+            record.setFulfilledASIN("");
+        }
         record.setFulfillDate(new Date());
 
         DBManager dbManager = ApplicationContext.getBean(DBManager.class);

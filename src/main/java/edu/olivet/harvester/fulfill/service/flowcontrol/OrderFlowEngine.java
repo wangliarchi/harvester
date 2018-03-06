@@ -64,8 +64,12 @@ public class OrderFlowEngine extends FlowParent {
                 return state;
             } catch (SellerNotFoundException | SellerPriceRiseTooHighException e) {
                 LOGGER.error("", e);
-                String msg = Strings.getExceptionMsg(e);
-                findNewSeller(state, msg);
+                if (state.getOrder().findNewSellerIfDisappeared) {
+                    String msg = Strings.getExceptionMsg(e);
+                    findNewSeller(state, msg);
+                } else {
+                    throw e;
+                }
             } catch (OrderSubmissionException e) {
                 clearShoppingCart.processStep(state);
                 throw e;
@@ -79,8 +83,10 @@ public class OrderFlowEngine extends FlowParent {
                 }
 
                 //noinspection UnusedAssignment
-                order = sheetService.reloadOrder(order);
-                state.setOrder(order);
+                if (!order.selfOrder) {
+                    order = sheetService.reloadOrder(order);
+                    state.setOrder(order);
+                }
                 exception = e;
             }
         }
@@ -111,7 +117,9 @@ public class OrderFlowEngine extends FlowParent {
             throw new SellerNotFoundException(msg + ". New seller found");
         }
 
-        state.setOrder(sheetService.reloadOrder(state.getOrder()));
+
+        sheetService.reloadOrder(state.getOrder());
+        messageListener.addMsg(state.getOrder(), "new seller found, resubmit again...");
     }
 
 }

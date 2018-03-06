@@ -23,7 +23,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
-import java.util.Map.Entry;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 2/21/2018 2:52 PM
@@ -92,6 +91,7 @@ public class InventoryReportManager {
             reportDownloader.execute(ReportType.INVENTORY, credential, file);
         } catch (Exception e) {
             LOGGER.error("", e);
+            //noinspection ResultOfMethodCallIgnored
             file.delete();
             throw e;
         }
@@ -199,13 +199,7 @@ public class InventoryReportManager {
         }
 
         // 移除空白记录
-        Iterator<Entry<String, Set<String>>> it = result.entrySet().iterator();
-        while (it.hasNext()) {
-            Entry<String, Set<String>> item = it.next();
-            if (CollectionUtils.isEmpty(item.getValue())) {
-                it.remove();
-            }
-        }
+        result.entrySet().removeIf(item -> CollectionUtils.isEmpty(item.getValue()));
         return result;
     }
 
@@ -253,7 +247,7 @@ public class InventoryReportManager {
                     }
                     skus.add(sku);
                 } catch (Exception e) {
-                    continue;
+                    //
                 }
             }
             LOGGER.info("从库存报表文件中寻找{}个ASIN对应的SKU {}条记录完成。耗时{}", asins.size(), skus.size(), Strings.formatElapsedTime(start));

@@ -47,5 +47,8 @@ public class Actions {
     public static final Action DownloadInvoice = new Action("DownloadInvoice", "Download Order Invoices", null, "invoice.png");
 
     public static final Action SyncASINs = new Action("SyncASINs", "Sync ASINs", null, null);
+
     public static final Action DownloadInventory = new Action("DownloadInventory", "Download Inventory", null, null);
+
+    public static final Action SubmitSelfOrders = new Action("SubmitSelfOrders", "Submit Self Orders", null, "start.png");
 }

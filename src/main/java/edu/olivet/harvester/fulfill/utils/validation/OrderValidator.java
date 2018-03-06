@@ -3,6 +3,7 @@ package edu.olivet.harvester.fulfill.utils.validation;
 import com.amazonservices.mws.orders._2013_09_01.model.OrderItem;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
+import com.mchange.lang.FloatUtils;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.amazon.MarketWebServiceIdentity;
@@ -240,7 +241,7 @@ public class OrderValidator {
     }
 
 
-    public String StatusMarkedCorrectForSubmit(Order order) {
+    public String statusMarkedCorrectForSubmit(Order order) {
         String status = OrderStatusUtils.determineStatus(order);
         if (order.status.equals(status)) {
             return "";
@@ -575,7 +576,7 @@ public class OrderValidator {
     public String hasEnoughBudgetToFulfill(Order order) {
         try {
             String spreadsheetId = order.getSpreadsheetId();
-            dailyBudgetHelper.getRemainingBudget(spreadsheetId, new Date());
+            dailyBudgetHelper.getRemainingBudget(spreadsheetId, new Date(), FloatUtils.parseFloat(order.cost, 0));
             return "";
         } catch (Exception e) {
             return e.getMessage();
@@ -687,7 +688,9 @@ public class OrderValidator {
 
 
     public static String sellerPriceChangeNotExceedConfiguration(Order order, Seller seller) {
-
+        if (order.getSellerPrice().toUSDAmount().floatValue() == 0) {
+            return "";
+        }
         float maxAllowed = Float.parseFloat(order.getRuntimeSettings().getPriceLimit());
         float priceRaised = seller.getPrice().toUSDAmount().floatValue() - order.getSellerPrice().toUSDAmount().floatValue();
         if (maxAllowed < priceRaised) {

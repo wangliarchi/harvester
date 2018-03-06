@@ -17,6 +17,7 @@ import edu.olivet.harvester.ui.ProgressBarComponent;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +44,7 @@ public class BuyerPanel extends JPanel implements RuntimePanelObserver, Progress
     private final Account buyer;
 
     @Getter
+    @Setter
     private BrowserView browserView;
 
     private double zoomLevel;

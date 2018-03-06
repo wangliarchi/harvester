@@ -13,11 +13,9 @@ import org.slf4j.LoggerFactory;
 public class ReviewOrderChangePaymentMethod extends Step {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReviewOrderChangePaymentMethod.class);
 
-
-
     //dispatcher method
     protected void process(FlowState state) {
-        LOGGER.info("Change shipping address");
+        LOGGER.info("Change payment method");
         OrderReviewMultiPage orderReviewMultiPage = new OrderReviewMultiPage(state.getBuyerPanel());
         orderReviewMultiPage.changePaymentMethod();
     }

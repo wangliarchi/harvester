@@ -93,7 +93,7 @@ public class OrderSubmitter {
             }
 
             if (StringUtils.isBlank(error)) {
-                error = orderValidator.StatusMarkedCorrectForSubmit(order);
+                error = orderValidator.statusMarkedCorrectForSubmit(order);
             }
 
             if (StringUtils.isNotBlank(error)) {
