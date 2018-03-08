@@ -80,11 +80,12 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
     }
 
 
-    private Money parseShippingFee() {
+    public Money parseShippingFee() {
         List<DOMElement> trs = JXBrowserHelper.selectElementsByCssSelector(browser, "#subtotals-marketplace-table tr");
         Money shippingCost = null;
+
         for (DOMElement tr : trs) {
-            if (Strings.containsAnyIgnoreCase(tr.getInnerText(), SHIPPING_KEYWORDS.toArray(new String[SHIPPING_KEYWORDS.size()]))) {
+            if (Strings.containsAnyIgnoreCase(JXBrowserHelper.textFromElement(tr), SHIPPING_KEYWORDS.toArray(new String[SHIPPING_KEYWORDS.size()]))) {
                 try {
                     String shippingCostString = JXBrowserHelper.text(tr, ".a-text-right");
                     if (StringUtils.isNotBlank(shippingCostString)) {
@@ -98,6 +99,9 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
             }
         }
 
+        if (shippingCost == null) {
+            throw new BusinessException("Cant read shipping cost.");
+        }
         return shippingCost;
     }
 

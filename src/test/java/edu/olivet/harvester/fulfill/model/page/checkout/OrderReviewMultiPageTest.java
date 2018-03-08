@@ -22,7 +22,7 @@ public class OrderReviewMultiPageTest extends BaseTest {
 
     private void prepareBrowser() {
 
-        Account buyer = new Account("abc@test.com/q1w2e3AA", Account.AccountType.Buyer);
+        Account buyer = new Account("olivetrnd153.2@gmail.com/q1w2e3AA", Account.AccountType.Buyer);
         BuyerPanel buyerPanel = new BuyerPanel(0, Country.US, buyer, 1);
         orderReviewMultiPage = new OrderReviewMultiPage(buyerPanel);
 
@@ -82,6 +82,16 @@ public class OrderReviewMultiPageTest extends BaseTest {
         WaitTime.Short.execute();
 
         orderReviewMultiPage.checkShippingCost(order);
+    }
+
+    @Test
+    public void testParseShippingFee() {
+        prepareBrowser();
+
+        browser.loadHTML(Tools.readFileToString(new File(TEST_DATA_ROOT + File.separator + "pages" + File.separator + "OrderReview.html")));
+        WaitTime.Short.execute();
+
+        orderReviewMultiPage.parseShippingFee();
     }
 
     @Test

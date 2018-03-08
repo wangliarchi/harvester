@@ -25,6 +25,7 @@ public class DownloadInventoryEvent implements HarvesterUIEvent {
     private InventoryReportManager inventoryReportManager;
 
 
+
     public void execute() {
         ChooseMarketplaceDialog dialog = UITools.setDialogAttr(new ChooseMarketplaceDialog());
         MessagePanel messagePanel = new ProgressDetail(Actions.DownloadInventory);

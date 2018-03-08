@@ -65,7 +65,7 @@ public class OrderExporter {
         }
         exportOrdersForMarketplaces(marketplaces, null, null);
         messagePanel.addMsgSeparator();
-        messagePanel.displayMsg("Done in "+Strings.formatElapsedTime(start), InformationLevel.Information);
+        messagePanel.displayMsg("Done in " + Strings.formatElapsedTime(start), InformationLevel.Information);
     }
 
     /**
@@ -77,7 +77,7 @@ public class OrderExporter {
                 params.getMarketplaces(), params.getFromDate(), params.getToDate()), LOGGER, InformationLevel.Information);
         exportOrdersForMarketplaces(params.getMarketplaces(), params.getFromDate(), params.getToDate());
         messagePanel.addMsgSeparator();
-        messagePanel.displayMsg("Done in "+Strings.formatElapsedTime(start), InformationLevel.Information);
+        messagePanel.displayMsg("Done in " + Strings.formatElapsedTime(start), InformationLevel.Information);
     }
 
 
@@ -99,7 +99,7 @@ public class OrderExporter {
 
 
         //hunt sellers
-        if (CollectionUtils.isNotEmpty(marketplacesExportedOrders)) {
+        if (CollectionUtils.isNotEmpty(marketplacesExportedOrders) && fromDate != null) {
             messagePanel.addMsgSeparator();
             messagePanel.displayMsg("Starting to hunt sellers");
             hunter.setMessagePanel(messagePanel);

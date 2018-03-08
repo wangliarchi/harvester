@@ -139,7 +139,7 @@ public class OrderSubmitter {
 
         orders = sheetService.reloadOrders(orders);
 
-        String resultSummary = String.format("Finished loading orders to submit for %s, %d orders found, took %s",
+        String resultSummary = String.format("Finished loading orders for %s, %d orders found, took %s",
                 task.convertToRuntimeSettings().toString(), orders.size(), Strings.formatElapsedTime(start));
         LOGGER.info(resultSummary);
         messageListener.addLongMsg(resultSummary, orders.size() > 0 ? InformationLevel.Information : InformationLevel.Negative);
@@ -158,7 +158,7 @@ public class OrderSubmitter {
 
         resultSummary = String.format("%d order(s) to be submitted.", validOrders.size());
         LOGGER.info(resultSummary);
-        messageListener.addMsg(resultSummary, validOrders.size() > 0 ? InformationLevel.Information : InformationLevel.Negative);
+        //messageListener.addMsg(resultSummary, validOrders.size() > 0 ? InformationLevel.Information : InformationLevel.Negative);
 
         return validOrders;
     }

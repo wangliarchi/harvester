@@ -9,12 +9,15 @@ import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.WaitTime;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.nutz.lang.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,23 +35,64 @@ public class ElasticSearchService {
     public static final int MAX_ASIN_COUNT_PER_REQUEST = 15;
 
     public String searchISBN(String asin) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("q", "asin:" + "\"" + StringUtils.strip(asin) + "\"");
-        params.put("pretty", "true");
-        params.put("size", 1);
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put("q", "asin:" + "\"" + StringUtils.strip(asin) + "\"");
+            params.put("pretty", "true");
+            params.put("size", 1);
 
-        String json = request(LISTING_MAPPING_INDEX, params);
-        JSONObject response = JSON.parseObject(json);
-        int total = response.getJSONObject("hits").getInteger("total");
-        if (total > 0) {
-            JSONArray hits = response.getJSONObject("hits").getJSONArray("hits");
-            if (hits.size() > 0) {
-                return ((JSONObject) hits.get(0)).getJSONObject("_source").getString("isbn");
+            String json = request(LISTING_MAPPING_INDEX, params);
+            JSONObject response = JSON.parseObject(json);
+            int total = response.getJSONObject("hits").getInteger("total");
+            if (total > 0) {
+                JSONArray hits = response.getJSONObject("hits").getJSONArray("hits");
+                if (hits.size() > 0) {
+                    return ((JSONObject) hits.get(0)).getJSONObject("_source").getString("isbn");
+                }
+
             }
-
+        } catch (Exception e) {
+            LOGGER.error("", e);
+            //
         }
 
+        if (isTrueASIN(asin)) {
+            return asin;
+        }
         return null;
+    }
+
+    public List<String> searchASINs(String isbn) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("q", "isbn:" + "\"" + StringUtils.strip(isbn) + "\"");
+        params.put("pretty", "true");
+
+        List<String> results = new ArrayList<>();
+
+        try {
+            String json = request(LISTING_MAPPING_INDEX, params);
+            JSONObject response = JSON.parseObject(json);
+            int total = response.getJSONObject("hits").getInteger("total");
+            if (total > 0) {
+                JSONArray hits = response.getJSONObject("hits").getJSONArray("hits");
+                if (hits.size() > 0) {
+                    for (Object hit : hits) {
+                        String asin = ((JSONObject) hit).getJSONObject("_source").getString("asin");
+                        results.add(asin);
+                    }
+                }
+
+            }
+        } catch (Exception e) {
+            //
+        }
+
+        return results;
+    }
+
+    public boolean isTrueASIN(String asin) {
+        List<String> asins = searchASINs(asin);
+        return CollectionUtils.isNotEmpty(asins);
     }
 
     public Map<String, String> searchISBNs(List<String> asins) {
@@ -133,9 +177,18 @@ public class ElasticSearchService {
         String params4Url = params2Url(params);
         String url = ELASTIC_SEARCH_ADDRESS + "/" + index + "/_search" + params4Url;
         try {
-            return Jsoup.connect(url).timeout(WaitTime.Longer.valInMS())
-                    .ignoreContentType(true).execute().body();
+            Connection conn = Jsoup.connect(url);
+            //conn.header("Accept", "text/html,application/xhtml+xml,application/xml,application/json;q=0.9,image/webp,*/*;q=0.8");
+            //conn.header("Accept-Encoding", "gzip, deflate");
+            //conn.header("Connection", "keep-alive");
+            conn.validateTLSCertificates(false);
+            conn.header("Content-Type", "application/json");
+            conn.ignoreContentType(true);
+
+            return conn.timeout(WaitTime.SuperLong.valInMS()).maxBodySize(0)
+                    .execute().body();
         } catch (Exception e) {
+            LOGGER.error("{} - ", url, e);
             throw new BusinessException(e);
         }
     }
@@ -176,7 +229,7 @@ public class ElasticSearchService {
     public static void main(String[] args) {
         ElasticSearchService elasticSearchService = ApplicationContext.getBean(ElasticSearchService.class);
         List<String> asins = Lists.newArrayList("1423221656", "158901698X", "1586484230");
-        Map<String, String> results = elasticSearchService.searchTitle(asins);
+        Map<String, String> results = elasticSearchService.searchISBNs(asins);
         System.out.println(results);
         //elasticSearchService.addProductIndex("B00006IJSG", "Bruder - MAN Garbage Truck Orange - 3+", "Bruder Toys", Country.US);
     }

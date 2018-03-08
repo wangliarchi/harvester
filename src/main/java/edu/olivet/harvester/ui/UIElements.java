@@ -74,6 +74,8 @@ public class UIElements extends AbstractUIContainer {
                 Actions.OrderFulfillmentChecker,
                 Action.Separator,
                 Actions.DownloadInvoice,
+                Actions.RunDownloadInvoiceTask,
+                Actions.InvoiceTasks,
                 Action.Separator,
                 Actions.DownloadInventory,
                 Actions.SyncASINs

@@ -18,4 +18,5 @@ public class DownloadParams {
     List<Account> buyerAccounts;
     Date fromDate;
     Date toDate;
+    boolean taskMode = false;
 }

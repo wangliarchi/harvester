@@ -7,6 +7,7 @@ import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.exception.Exceptions.*;
 import edu.olivet.harvester.fulfill.model.page.checkout.OrderReviewMultiPage;
+import edu.olivet.harvester.fulfill.model.page.checkout.PaymentMethodMultiPage;
 import edu.olivet.harvester.fulfill.service.AddressValidatorService;
 import edu.olivet.harvester.fulfill.service.flowcontrol.FlowState;
 import edu.olivet.harvester.fulfill.service.flowcontrol.Step;
@@ -90,6 +91,9 @@ public class ReviewOrderMultiPage extends Step {
                 LOGGER.info("Payment did not pass review");
                 orderReviewMultiPage.changePaymentMethod();
                 WaitTime.Shortest.execute();
+
+                PaymentMethodMultiPage paymentMethodMultiPage = new PaymentMethodMultiPage(state.getBuyerPanel());
+                paymentMethodMultiPage.execute(state.getOrder());
             }
         }
 

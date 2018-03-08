@@ -46,6 +46,7 @@ public class DownloadInvoiceDialog extends BaseDialog {
 
     private DatePicker fromDatePicker;
     private DatePicker toDatePicker;
+    private JComboBox<String> taskModeCombox;
 
     private void initComponents() {
 
@@ -92,6 +93,14 @@ public class DownloadInvoiceDialog extends BaseDialog {
 
         spreadScrollPane.setViewportView(buyerList);
 
+
+        final JLabel taskModeLabel = new JLabel("Task Mode?");
+        taskModeCombox = new JComboBox<>();
+        taskModeCombox.setModel(new DefaultComboBoxModel<>(new String[] {"No", "Yes"}));
+
+        taskModeCombox.setSelectedItem("Yes");
+
+
         GroupLayout spreadLayout = new GroupLayout(spreadPane);
         spreadPane.setLayout(spreadLayout);
         spreadLayout.setHorizontalGroup(
@@ -119,6 +128,13 @@ public class DownloadInvoiceDialog extends BaseDialog {
                         .addComponent(toDatePicker, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
                         .addContainerGap()
                 )
+                .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(taskModeLabel, 120, 120, Short.MAX_VALUE)
+                        .addComponent(taskModeCombox, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                        .addContainerGap()
+                )
+
                 .addGroup(Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(cancelBtn, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH)
                         .addPreferredGap(ComponentPlacement.RELATED)
@@ -140,6 +156,11 @@ public class DownloadInvoiceDialog extends BaseDialog {
                         .addGroup(layout.createParallelGroup(Alignment.BASELINE)
                                 .addComponent(toLabel)
                                 .addComponent(toDatePicker)
+                        )
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(Alignment.BASELINE)
+                                .addComponent(taskModeLabel)
+                                .addComponent(taskModeCombox)
                         )
                         .addPreferredGap(ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(Alignment.BASELINE)
@@ -170,7 +191,6 @@ public class DownloadInvoiceDialog extends BaseDialog {
         };
 
         buyerList.addMouseListener(mouseListener);
-
     }
 
     @Getter
@@ -225,6 +245,13 @@ public class DownloadInvoiceDialog extends BaseDialog {
         }
         downloadParams.setFromDate(from);
         downloadParams.setToDate(to);
+
+
+        if ("Yes".equalsIgnoreCase(taskModeCombox.getSelectedItem().toString())) {
+            downloadParams.setTaskMode(true);
+        } else {
+            downloadParams.setTaskMode(false);
+        }
 
 
         this.setVisible(false);

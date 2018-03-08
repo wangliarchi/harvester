@@ -48,6 +48,8 @@ public class OfferListingPage extends FulfillmentPage {
         //FR
         if (country == Country.FR && order.selfOrder) {
             setPostalCodeForFR();
+        } else if (country == Country.CA && order.selfOrder) {
+            setPostalCodeForCA();
         }
 
         String url = OrderCountryUtils.getOfferListingUrl(order) + "&" + System.currentTimeMillis();
@@ -202,6 +204,7 @@ public class OfferListingPage extends FulfillmentPage {
 
     }
 
+
     public void setPostalCodeForFR() {
         try {
             //75008 FR zip code
@@ -210,6 +213,28 @@ public class OfferListingPage extends FulfillmentPage {
             JXBrowserHelper.waitUntilVisible(browser, ".a-popover-wrapper input[type='text']");
             JXBrowserHelper.fillValueForFormField(browser, ".a-popover-wrapper input[type='text']", "75008");
 
+            WaitTime.Short.execute();
+
+            JXBrowserHelper.selectVisibleElement(browser, ".a-button .a-button-inner.a-declarative").click();
+            JXBrowserHelper.waitUntilVisible(browser, ".a-button-inner .a-declarative");
+            DOMElement closeBtn = JXBrowserHelper.selectVisibleElement(browser, ".a-popover-footer .a-button-inner.a-declarative");
+            if (closeBtn != null) {
+                JXBrowserHelper.click(closeBtn);
+                WaitTime.Short.execute();
+            }
+        } catch (Exception e) {
+            //
+        }
+    }
+
+    public void setPostalCodeForCA() {
+        try {
+            //M1R
+            DOMElement trigger = JXBrowserHelper.selectVisibleElement(browser, "#nav-global-location-slot .a-popover-trigger");
+            trigger.click();
+            JXBrowserHelper.waitUntilVisible(browser, "#GLUXZipUpdateInput_0");
+            JXBrowserHelper.fillValueForFormField(browser, ".#GLUXZipUpdateInput_0", "M1R");
+            JXBrowserHelper.fillValueForFormField(browser, ".#GLUXZipUpdateInput_1", "0E9");
             WaitTime.Short.execute();
 
             JXBrowserHelper.selectVisibleElement(browser, ".a-button .a-button-inner.a-declarative").click();

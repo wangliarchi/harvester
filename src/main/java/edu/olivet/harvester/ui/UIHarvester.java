@@ -26,6 +26,7 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 9/20/2017 11:59 AM
@@ -143,6 +144,16 @@ public class UIHarvester extends AbstractApplicationUI {
     @UIEvent
     public void downloadInventory() {
         downloadInventoryEvent.execute();
+    }
+
+    @UIEvent
+    public void runDownloadInvoiceTask() {
+        downloadInvoiceEvent.runTasks();
+    }
+
+    @UIEvent
+    public  void invoiceTasks() {
+       downloadInvoiceEvent.list();
     }
 
     @Inject private

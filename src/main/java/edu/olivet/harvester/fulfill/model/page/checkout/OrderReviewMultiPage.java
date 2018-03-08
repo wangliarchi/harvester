@@ -11,6 +11,7 @@ import edu.olivet.harvester.common.model.CreditCard;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,10 +60,12 @@ public class OrderReviewMultiPage extends OrderReviewAbstractPage {
 
 
     public boolean reviewPaymentMethod() {
-        String lastDigits = JXBrowserHelper.text(browser, "#payment-information");
+        String lastDigits = JXBrowserHelper.textFromElement(browser, "#payment-information");
         lastDigits = lastDigits.replaceAll(RegexUtils.Regex.NON_DIGITS.val(), "");
         CreditCard creditCard = CreditCardUtils.getCreditCard(buyerPanel.getBuyer());
-        return creditCard.getCardNo().endsWith(lastDigits);
+        String creditCardLastDigits =  creditCard.getCardNo().substring(creditCard.getCardNo().length() - 4);
+        LOGGER.info("Last digits {} - {}",lastDigits,creditCardLastDigits);
+        return StringUtils.containsIgnoreCase(lastDigits,creditCardLastDigits);
     }
 
 

@@ -22,6 +22,8 @@ public enum BackgroundJob {
 
     InvoiceDownloading("0 0 3 ? * MON,TUE,WED,THU,FRI,SAT *", DownloadInvoiceJob.class),
 
+    InvoiceDownloadingTask("0 0 21 ? * * *", DownloadInvoiceTaskJob.class),
+
     SyncASIN("0 0 3 ? * MON,TUE,WED,THU,FRI,SAT *", SyncASINJob.class),
     /**
      * check unshipped orders, and send notification to account owner

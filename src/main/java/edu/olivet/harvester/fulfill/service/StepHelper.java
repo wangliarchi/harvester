@@ -140,10 +140,7 @@ public class StepHelper {
                 return giftOption;
             default:
                 return null;
-
         }
-
-
     }
 
     public CheckoutPage detectCurrentPage(FlowState state) {
@@ -156,16 +153,14 @@ public class StepHelper {
                 if (page != null) {
                     return page;
                 }
-                WaitTime.Short.execute();
+                WaitTime.Shorter.execute();
             } catch (Exception e) {
                 //
             }
 
         }
 
-
         throw new BusinessException("Cant identify page " + browser.getTitle() + " - " + browser.getURL());
-
     }
 
 }

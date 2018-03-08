@@ -3,12 +3,20 @@ package edu.olivet.harvester.finance;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import edu.olivet.foundations.amazon.Account;
+import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.MessagePanel;
+import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.ui.VirtualMessagePanel;
+import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.model.BuyerAccountSetting;
 import edu.olivet.harvester.common.model.BuyerAccountSettingUtils;
 import edu.olivet.harvester.finance.model.DownloadParams;
+import edu.olivet.harvester.finance.model.InvoiceTask;
+import edu.olivet.harvester.finance.service.InvoiceDownloaderService;
 import edu.olivet.harvester.finance.worker.InvoiceDownloadWorker;
+import edu.olivet.harvester.fulfill.service.PSEventListener;
+import edu.olivet.harvester.fulfill.service.ProgressUpdater;
+import edu.olivet.harvester.ui.panel.SimpleOrderSubmissionRuntimePanel;
 import edu.olivet.harvester.utils.MessageListener;
 import edu.olivet.harvester.utils.common.ThreadHelper;
 import lombok.Setter;
@@ -34,8 +42,9 @@ public class InvoiceDownloader {
     private MessagePanel messagePanel = new VirtualMessagePanel();
     @Inject
     MessageListener messageListener;
+    @Inject InvoiceDownloaderService invoiceDownloaderService;
 
-    final int JOB_NUMBER = 1;
+    final int JOB_NUMBER = 2;
 
 
     public void execute() {
@@ -46,10 +55,56 @@ public class InvoiceDownloader {
         download(downloadParams);
     }
 
+
+    public void download(List<InvoiceTask> tasks) {
+        if (PSEventListener.isRunning()) {
+            UITools.error("Other tasks are running, please try later");
+            return;
+        }
+
+        ProgressUpdater.setProgressBarComponent(SimpleOrderSubmissionRuntimePanel.getInstance());
+        ProgressUpdater.setTotal(tasks.size());
+        PSEventListener.reset(SimpleOrderSubmissionRuntimePanel.getInstance());
+        PSEventListener.start();
+
+        for (InvoiceTask task : tasks) {
+            if (PSEventListener.stopped()) {
+                break;
+            }
+            try {
+                Account buyer = BuyerAccountSettingUtils.load().getByEmail(task.getBuyerAccount()).getBuyerAccount();
+                Date fromDate = task.getFromDate();
+                Date toDate = task.getLastDownloadDate();
+                //if (toDate.equals(fromDate)) {
+                //    toDate = task.getToDate();
+                //}
+                invoiceDownloaderService.downloadByCountry(Country.fromCode(task.getCountry()), buyer, fromDate, toDate, task);
+                ProgressUpdater.success();
+            } catch (Exception e) {
+                LOGGER.error("", e);
+                ProgressUpdater.failed();
+            }
+        }
+
+        PSEventListener.end();
+    }
+
     public void download(DownloadParams downloadParams) {
+        if (PSEventListener.isRunning()) {
+            UITools.error("Other tasks are running, please try later");
+            return;
+        }
+
+        PSEventListener.reset(SimpleOrderSubmissionRuntimePanel.getInstance());
+        PSEventListener.start();
+
         List<InvoiceDownloadWorker> jobs = new ArrayList<>(JOB_NUMBER);
         final CountDownLatch latch = new CountDownLatch(JOB_NUMBER);
         List<List<Account>> list = ThreadHelper.assign(downloadParams.getBuyerAccounts(), JOB_NUMBER);
+
+
+        ProgressUpdater.setProgressBarComponent(SimpleOrderSubmissionRuntimePanel.getInstance());
+        ProgressUpdater.setTotal(downloadParams.getBuyerAccounts().size());
 
         for (List<Account> accounts : list) {
             jobs.add(new InvoiceDownloadWorker(accounts, downloadParams.getFromDate(), downloadParams.getToDate(), messageListener, latch));
@@ -65,6 +120,8 @@ public class InvoiceDownloader {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        PSEventListener.end();
     }
 
 

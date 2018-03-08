@@ -10,12 +10,15 @@ import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.deploy.DropboxAssistant;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.utils.*;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.harvester.common.model.BuyerAccountSettingUtils;
 import edu.olivet.harvester.finance.model.BuyerOrderInvoice;
+import edu.olivet.harvester.finance.model.InvoiceTask;
 import edu.olivet.harvester.fulfill.model.page.LoginPage;
+import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.ui.panel.TabbedBuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
@@ -48,6 +51,7 @@ public class InvoiceDownloaderService {
 
     @Inject
     MessageListener messageListener;
+    @Inject DBManager dbManager;
     @Inject
     Now now;
 
@@ -56,8 +60,14 @@ public class InvoiceDownloaderService {
         dropboxAssistant = new DropboxAssistant("HarvesterFinanceApp", DROPBOX_TOKEN, false, "/");
     }
 
-
     public void downloadByCountry(Country country, Account buyer, Date fromDate, Date toDate) {
+        downloadByCountry(country, buyer, fromDate, toDate, null);
+    }
+
+    public void downloadByCountry(Country country, Account buyer, Date fromDate, Date toDate, InvoiceTask task) {
+
+        messageListener.displayMsg(String.format("Starting downloading invoice  from %s between %s and %s.", buyer.getEmail(), fromDate, toDate));
+        //messageListener.addMsgSeparator();
         long start = System.currentTimeMillis();
         BuyerPanel buyerPanel = TabbedBuyerPanel.getInstance().getOrAddTab(country, buyer);
         TabbedBuyerPanel.getInstance().setRunningIcon(buyerPanel);
@@ -67,21 +77,39 @@ public class InvoiceDownloaderService {
             login(buyerPanel);
         } catch (Exception e) {
             LOGGER.error(Strings.getExceptionMsg(e));
+            TabbedBuyerPanel.getInstance().setNormalIcon(buyerPanel);
             return;
         }
 
-        goToTheRightPage(buyerPanel, fromDate, toDate);
+        int lastPage = 0;
+        if (task != null) {
+            lastPage = task.getLastDownloadPage();
+        }
+
+        goToTheRightPage(buyerPanel, fromDate, toDate, lastPage);
 
 
         int totalDownloaded = 0;
+        int pageNo = lastPage;
+        Date lastDownloadedDate = null;
+        boolean pageEnd = false;
         outerloop:
         while (true) {
+            if (PSEventListener.stopped()) {
+                break;
+            }
+
+            while (PSEventListener.paused()) {
+                WaitTime.Short.execute();
+            }
+
             if (LoginPage.needLoggedIn(browser)) {
                 try {
                     login(buyerPanel);
                     WaitTime.Normal.execute();
                 } catch (Exception e) {
                     LOGGER.error(Strings.getExceptionMsg(e));
+                    TabbedBuyerPanel.getInstance().setNormalIcon(buyerPanel);
                     return;
                 }
             }
@@ -102,7 +130,8 @@ public class InvoiceDownloaderService {
                 orderBoxes = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-box-group.order");
             }
 
-            LOGGER.info("\n{} - {} - orders {}", buyer.getEmail(), pageUrl, orderBoxes.size());
+            pageNo = IntegerUtils.parseInt(JXBrowserHelper.text(browser, ".a-pagination a-selected"), pageNo);
+            LOGGER.info("\n{} - {} - {} - orders {}", buyer.getEmail(), pageNo, pageUrl, orderBoxes.size());
             for (DOMElement orderElement : orderBoxes) {
                 String dateString = JXBrowserHelper.text(orderElement, ".order-info .a-col-left .a-span3 .value,.order-info .a-col-left .a-span4 .value");
                 if (StringUtils.isBlank(dateString)) {
@@ -123,6 +152,8 @@ public class InvoiceDownloaderService {
                     continue;
                 }
 
+                lastDownloadedDate = date;
+
                 if (date.before(fromDate)) {
                     LOGGER.error("{} before date {}", date, fromDate);
                     JXBrowserHelper.loadPage(browser, pageUrl);
@@ -133,6 +164,7 @@ public class InvoiceDownloaderService {
                     LOGGER.error("{} after date {}", date, toDate);
                     continue;
                 }
+
 
                 try {
                     String orderId = JXBrowserHelper.text(orderElement, ".order-info .a-col-right .a-size-mini .value");
@@ -163,6 +195,14 @@ public class InvoiceDownloaderService {
                 WaitTime.Short.execute();
             }
 
+            if (task != null) {
+                task.setLastDownloadPage(pageNo);
+                if (lastDownloadedDate != null) {
+                    task.setLastDownloadDate(lastDownloadedDate);
+                }
+
+                dbManager.insertOrUpdate(task, InvoiceTask.class);
+            }
 
             //next page
             DOMElement nextPage = JXBrowserHelper.selectElementByCssSelector(browser, ".a-pagination .a-last a");
@@ -173,6 +213,7 @@ public class InvoiceDownloaderService {
                 nextPage = JXBrowserHelper.selectElementByCssSelector(browser, ".a-pagination .a-last a");
                 if (nextPage == null) {
                     LOGGER.info("\n{} - page end", buyer.getEmail());
+                    pageEnd = true;
                     break;
                 }
             }
@@ -197,8 +238,27 @@ public class InvoiceDownloaderService {
             WaitTime.Normal.execute();
         }
 
+
+        //pageNo
+        if (task != null) {
+            task.setLastDownloadPage(pageNo);
+            if (lastDownloadedDate != null) {
+                task.setLastDownloadDate(lastDownloadedDate);
+                if (lastDownloadedDate.before(fromDate)) {
+                    task.setStatus("Done");
+                }
+            }
+
+            if (pageEnd) {
+                task.setStatus("Done");
+            }
+
+            dbManager.insertOrUpdate(task, InvoiceTask.class);
+        }
+
         messageListener.addMsg("Total " + totalDownloaded + " invoices downloaded for " + buyer.getEmail() +
                 " from country " + country + ", took " + Strings.formatElapsedTime(start), InformationLevel.Positive);
+
 
         if (totalDownloaded > 10 || TabbedBuyerPanel.getInstance().getTabCount() <= 3) {
             TabbedBuyerPanel.getInstance().setNormalIcon(buyerPanel);
@@ -210,10 +270,8 @@ public class InvoiceDownloaderService {
 
 
     protected void login(BuyerPanel buyerPanel) {
-
         LoginPage loginPage = new LoginPage(buyerPanel);
         loginPage.execute(null);
-
         while (LoginPage.needLoggedIn(buyerPanel.getBrowserView().getBrowser())) {
             loginPage = new LoginPage(buyerPanel);
             loginPage.execute(null);
@@ -337,7 +395,7 @@ public class InvoiceDownloaderService {
     }
 
 
-    public void goToTheRightPage(BuyerPanel buyerPanel, Date fromDate, Date toDate) {
+    public void goToTheRightPage(BuyerPanel buyerPanel, Date fromDate, Date toDate, int lastDownloadedPage) {
         Browser browser = buyerPanel.getBrowserView().getBrowser();
         Country country = buyerPanel.getCountry();
         String url = country.baseUrl() + "/gp/your-account/order-history?opt=ab&digitalOrders=1&unifiedOrders=1&returnTo=&orderFilter=";
@@ -358,6 +416,7 @@ public class InvoiceDownloaderService {
         JXBrowserHelper.loadPage(browser, url);
         WaitTime.Shortest.execute();
 
+
         //find page numbers
         List<DOMElement> pagination = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-pagination .a-normal a");
 
@@ -367,6 +426,10 @@ public class InvoiceDownloaderService {
         DOMElement lastPage = pagination.get(pagination.size() - 1);
         int pages = IntegerUtils.parseInt(lastPage.getInnerText(), 1);
 
+        if (lastDownloadedPage > 0 && lastDownloadedPage <= pages) {
+            String pageUrl = url + "&startIndex=" + (lastDownloadedPage - 1) * 10;
+            JXBrowserHelper.loadPage(browser, pageUrl);
+        }
 
         //first page
         List<DOMElement> orderBoxes = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-box-group.order");

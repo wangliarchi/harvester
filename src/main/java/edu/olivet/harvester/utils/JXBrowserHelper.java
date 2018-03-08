@@ -514,6 +514,15 @@ public class JXBrowserHelper {
         return StringUtils.EMPTY;
     }
 
+    public static String textFromElement(Browser browser, String selector) {
+        DOMElement element = selectElementByCssSelector(browser, selector);
+        if (element != null) {
+            return textFromHtml(element.getInnerHTML());
+        }
+        return StringUtils.EMPTY;
+    }
+
+
     public static String text(Browser browser, String selector) {
         DOMElement element = selectElementByCssSelector(browser, selector);
         if (element != null) {
@@ -611,7 +620,7 @@ public class JXBrowserHelper {
     public static void clickJS(Browser browser, String selector) {
         browser.executeJavaScript("document.querySelector('" + selector + "').click()");
         WaitTime.Shortest.execute();
-        //waitUntilNotFound(browser, selector);
+        waitUntilNotFound(browser, selector);
     }
 
 

@@ -1,5 +1,6 @@
 package edu.olivet.harvester.fulfill.model.page.checkout;
 
+import com.teamdev.jxbrowser.chromium.dom.By;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.WaitTime;
@@ -28,29 +29,28 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
         //enter promo code if any
         if (StringUtils.isNotBlank(order.promotionCode)) {
             enterPromoCode(order);
+            String grandTotalText = JXBrowserHelper.text(browser, "#subtotals-marketplace-table .grand-total-price");
+            try {
+                Money total = Money.fromText(grandTotalText, buyerPanel.getCountry());
+                if (total.getAmount().floatValue() == 0) {
+                    click(order);
+                    return;
+                }
+            } catch (Exception e) {
+                LOGGER.error("Error reading grand total. ", e);
+            }
         }
 
-        String grandTotalText = JXBrowserHelper.text(browser, "#subtotals-marketplace-table .grand-total-price");
-        try {
-            Money total = Money.fromText(grandTotalText, buyerPanel.getCountry());
-            if (total.getAmount().floatValue() == 0) {
-                click(order);
-                return;
-            }
-        } catch (Exception e) {
-            LOGGER.error("Error reading grand total. ", e);
-        }
+        //wait until it's loaded
+        JXBrowserHelper.wait(browser, By.cssSelector(CONTINUE_BTN_SELECTOR));
 
         DOMElement changePaymentLink = JXBrowserHelper.selectVisibleElement(browser, CHANGE_PAYMENT_METHOD_BTN_SELECTOR);
         if (changePaymentLink != null) {
-            JXBrowserHelper.clickJS(browser, CHANGE_PAYMENT_METHOD_BTN_SELECTOR);
+            changePaymentLink.click();
+            //JXBrowserHelper.clickJS(browser, CHANGE_PAYMENT_METHOD_BTN_SELECTOR);
         }
 
-        DOMElement continueBtn = JXBrowserHelper.selectElementByCssSelector(browser, CONTINUE_BTN_SELECTOR);
-        if (continueBtn == null) {
-            return;
-        }
-
+        WaitTime.Shortest.execute();
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
 
         selectCreditCard(order);

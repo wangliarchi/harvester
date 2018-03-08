@@ -43,6 +43,8 @@ public class TrueFakeAsinMappingService {
         orders.forEach(order -> {
             if (listingMapping.containsKey(order.getAsin())) {
                 order.setIsbn(listingMapping.get(order.getAsin()));
+            } else if (elasticSearchService.isTrueASIN(order.getAsin())) {
+                order.setIsbn(order.getAsin());
             } else if (StringUtils.isBlank(order.getIsbn())) {
                 try {
                     String isbn = HttpUtils.getText(String.format(SERVICE_URL, order.getAsin()));
@@ -89,5 +91,10 @@ public class TrueFakeAsinMappingService {
 
     }
 
+    public static void main(String[] args) {
+        TrueFakeAsinMappingService trueFakeAsinMappingService = ApplicationContext.getBean(TrueFakeAsinMappingService.class);
+        String isbn = trueFakeAsinMappingService.getISBN("XINCAJYLUsFeb12-2018-PYBEYE21864","B003YQW2V2");
+        System.out.println(isbn);
+    }
 
 }

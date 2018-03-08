@@ -188,7 +188,14 @@ public class ExportOrderService extends OrderClient {
         Map<String, edu.olivet.harvester.common.model.Order> allOrders = new HashMap<>();
 
 
-        spreadsheetIds.forEach(it -> orderService.fetchOrders(sheetAPI.getSpreadsheet(it), minDate).forEach(order -> allOrders.put(order.order_id, order)));
+        spreadsheetIds.forEach(it -> {
+            try {
+                orderService.fetchOrders(sheetAPI.getSpreadsheet(it), minDate)
+                        .forEach(order -> allOrders.put(order.order_id, order));
+            } catch (Exception e) {
+                LOGGER.error("", e);
+            }
+        });
 
         orders.removeIf(order -> allOrders.containsKey(order.getAmazonOrderId()));
         return orders;

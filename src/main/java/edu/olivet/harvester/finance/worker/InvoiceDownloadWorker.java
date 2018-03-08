@@ -5,6 +5,8 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.utils.*;
 import edu.olivet.harvester.finance.service.InvoiceDownloaderService;
+import edu.olivet.harvester.fulfill.service.PSEventListener;
+import edu.olivet.harvester.fulfill.service.ProgressUpdater;
 import edu.olivet.harvester.hunt.utils.SellerHuntUtils;
 import edu.olivet.harvester.utils.MessageListener;
 import org.slf4j.Logger;
@@ -40,9 +42,15 @@ public class InvoiceDownloadWorker extends SwingWorker<Void, String> {
     @Override
     protected Void doInBackground() throws Exception {
         for (Account buyer : buyers) {
+            if (PSEventListener.stopped()) {
+                break;
+            }
             long start = System.currentTimeMillis();
             publish(String.format("Starting downloading invoice  from %s at %s.", buyer.getEmail(), Dates.toDateTime(start)));
             for (Country country : SellerHuntUtils.countriesToHunt()) {
+                if (PSEventListener.stopped()) {
+                    break;
+                }
                 try {
                     invoiceDownloaderService.downloadByCountry(country, buyer, fromDate, toDate);
                 } catch (Exception e) {
@@ -50,6 +58,7 @@ public class InvoiceDownloadWorker extends SwingWorker<Void, String> {
                 }
                 WaitTime.Shortest.execute();
             }
+            ProgressUpdater.success();
             publish(String.format("Finished downloading invoice  from %s, took %s.", buyer.getEmail(), Strings.formatElapsedTime(start)));
         }
         return null;

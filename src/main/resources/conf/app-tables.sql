@@ -267,3 +267,17 @@ CREATE TABLE IF NOT EXISTS self_orders (
   fulfilledAddress TEXT                    NOT NULL DEFAULT '',
   fulfillDate      DATETIME                NOT NULL
 );
+
+/* invoice_downloading_tasks */
+CREATE TABLE IF NOT EXISTS invoice_downloading_tasks (
+  id               VARCHAR(40) PRIMARY KEY NOT NULL,
+  country          VARCHAR(30)             NOT NULL DEFAULT '',
+  buyerAccount     VARCHAR(100)            NOT NULL DEFAULT '',
+  fromDate         DATETIME                NOT NULL,
+  toDate           DATETIME                NOT NULL,
+  lastDownloadDate DATETIME                NOT NULL,
+  startPage        INT                     NOT NULL DEFAULT 0,
+  lastDownloadPage INT                     NOT NULL DEFAULT 0,
+  status           VARCHAR(100)            NOT NULL DEFAULT '',
+  dateCreated      DATETIME                NOT NULL
+);

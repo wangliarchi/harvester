@@ -30,7 +30,9 @@ public class OrderReviewOnePage extends OrderReviewAbstractPage {
         }
         String lastDigits = JXBrowserHelper.text(browser, "#payment-information .a-color-secondary span");
         CreditCard creditCard = CreditCardUtils.getCreditCard(buyerPanel.getBuyer());
-        return creditCard.getCardNo().endsWith(lastDigits);
+        String creditCardLastDigits =  creditCard.getCardNo().substring(creditCard.getCardNo().length() - 4);
+        LOGGER.info("Last digits {} - {}",lastDigits,creditCardLastDigits);
+        return StringUtils.containsIgnoreCase(lastDigits,creditCardLastDigits);
     }
 
 

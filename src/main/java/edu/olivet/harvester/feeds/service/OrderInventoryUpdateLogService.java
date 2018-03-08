@@ -7,6 +7,7 @@ import edu.olivet.harvester.feeds.model.InventoryUpdateRecord;
 import edu.olivet.harvester.feeds.model.OrderInventoryUpdateLog;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.nutz.dao.Cnd;
 
 import java.util.List;
@@ -28,7 +29,7 @@ public class OrderInventoryUpdateLogService {
 
     public OrderInventoryUpdateLog saveFromRecord(InventoryUpdateRecord record) {
         OrderInventoryUpdateLog log = new OrderInventoryUpdateLog();
-        log.setOrderId(record.getOrderId());
+        log.setOrderId(StringUtils.isBlank(record.getOrderId()) ? "" : record.getOrderId());
         log.setSku(record.getSku());
         log.setUpdateType(record.getType().name());
         log.setId(DigestUtils.sha256Hex(log.toString()));
