@@ -1,5 +1,6 @@
 package edu.olivet.harvester.fulfill.model.page.checkout;
 
+import edu.olivet.foundations.utils.RegexUtils;
 import edu.olivet.harvester.common.model.Money;
 import edu.olivet.harvester.fulfill.utils.CreditCardUtils;
 import edu.olivet.harvester.common.model.CreditCard;
@@ -24,15 +25,18 @@ public class OrderReviewOnePage extends OrderReviewAbstractPage {
     public boolean reviewPaymentMethod() {
         if (StringUtils.isNotBlank(buyerPanel.getOrder().promotionCode)) {
             Money total = parseTotal();
+            LOGGER.info("{}", total);
             if (total.getAmount().floatValue() > 1) {
                 return false;
             }
         }
-        String lastDigits = JXBrowserHelper.text(browser, "#payment-information .a-color-secondary span");
+        JXBrowserHelper.waitUntilVisible(browser, "#payment-information");
+        String lastDigits = JXBrowserHelper.textFromElement(browser, "#payment-information");
+        lastDigits = lastDigits.replaceAll(RegexUtils.Regex.NON_DIGITS.val(), "");
         CreditCard creditCard = CreditCardUtils.getCreditCard(buyerPanel.getBuyer());
-        String creditCardLastDigits =  creditCard.getCardNo().substring(creditCard.getCardNo().length() - 4);
-        LOGGER.info("Last digits {} - {}",lastDigits,creditCardLastDigits);
-        return StringUtils.containsIgnoreCase(lastDigits,creditCardLastDigits);
+        String creditCardLastDigits = creditCard.getCardNo().substring(creditCard.getCardNo().length() - 4);
+        LOGGER.info("Last digits {} - {}", lastDigits, creditCardLastDigits);
+        return StringUtils.containsIgnoreCase(lastDigits, creditCardLastDigits);
     }
 
 

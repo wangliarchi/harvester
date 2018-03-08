@@ -51,13 +51,14 @@ public class SelfOrderService {
         for (ValueRange valueRange : valueRanges) {
             List<List<Object>> rows = valueRange.getValues();
             String a1Notation = valueRange.getRange();
+            LOGGER.warn("{}->{}", spreadsheetId, StringUtils.defaultString(a1Notation, "!No A1notation!"));
 
             if (CollectionUtils.isEmpty(rows)) {
                 LOGGER.warn("{}->{}读取不到任何有效数据", spreadsheetId, StringUtils.defaultString(a1Notation, "!No A1notation!"));
                 continue;
             }
 
-            String sheetName = a1Notation.substring(1, a1Notation.indexOf("!") - 1);
+            String sheetName = a1Notation.substring(0, a1Notation.indexOf("!"));
             int starRow = 1;
             List<SelfOrder> ordersForSheet = new ArrayList<>();
             int row = 0;

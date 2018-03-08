@@ -4,6 +4,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.common.model.Remark;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +39,14 @@ public class OrderAddressUtils {
         // 如果拼接的姓名超过亚马逊允许上限，且当前价格差异大于20，可以不加上No Invoice，但需要补上Remark
         // 存在Seller为Prime但标识了a的情况，此时仍然需要当做Prime的情况处理Full Name
         if (!order.sellerIsPrime()) {
-            String s = fullName + order.getRuntimeSettings().getNoInvoiceText();
+            String noInvoiceText = order.getRuntimeSettings().getNoInvoiceText();
+            String s;
+            if (StringUtils.containsIgnoreCase(fullName, noInvoiceText)) {
+                s = fullName;
+            } else {
+                s = fullName + order.getRuntimeSettings().getNoInvoiceText();
+            }
+
             int max = maxNameLength(OrderCountryUtils.getFulfillmentCountry(order));
             fullName = s.length() > max ? fullName : s;
 

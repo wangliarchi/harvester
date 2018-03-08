@@ -1,6 +1,5 @@
 package edu.olivet.harvester.fulfill.model.page.checkout;
 
-import com.teamdev.jxbrowser.chromium.dom.By;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.WaitTime;
@@ -42,7 +41,8 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
         }
 
         //wait until it's loaded
-        JXBrowserHelper.wait(browser, By.cssSelector(CONTINUE_BTN_SELECTOR));
+        //JXBrowserHelper.wait(browser, By.cssSelector(CONTINUE_BTN_SELECTOR));
+        JXBrowserHelper.waitUntilVisible(browser, "#spc-gcpromoinput,#gcpromoinput");
 
         DOMElement changePaymentLink = JXBrowserHelper.selectVisibleElement(browser, CHANGE_PAYMENT_METHOD_BTN_SELECTOR);
         if (changePaymentLink != null) {
