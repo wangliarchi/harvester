@@ -168,12 +168,11 @@ public class ISBNUtils {
     public static String getTitleAtESWeb(String isbn) {
         String correctedIsbn = ISBNUtils.correct(isbn);
         try {
-            String json = Jsoup.connect(String.format("http://35.188.127.209/web/product.php?asin=%s", correctedIsbn))
-                    .timeout(WaitTime.Longer.valInMS())
-                    .ignoreContentType(true).execute().body();
+            String url = String.format("http://35.188.127.209/web/product.php?asin=%s", correctedIsbn);
+            String json = HttpUtils.get(url);
             JSONObject response = JSON.parseObject(json);
             return response.getString("title");
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw Lang.wrapThrow(e);
         }
     }

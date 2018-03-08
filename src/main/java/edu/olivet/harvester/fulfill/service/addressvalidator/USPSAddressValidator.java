@@ -10,6 +10,7 @@ import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.service.AddressValidatorService;
 import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.message.ErrorAlertService;
+import edu.olivet.harvester.utils.http.HttpUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.nutz.lang.Lang;
@@ -96,8 +97,8 @@ public class USPSAddressValidator implements AddressValidator {
     public String get(String url) {
         try {
             LOGGER.info(url);
-            return Jsoup.connect(url).timeout(WaitTime.Longer.valInMS()).ignoreContentType(true).execute().body();
-        } catch (IOException e) {
+            return HttpUtils.get(url);
+        } catch (Exception e) {
             LOGGER.error("", e);
             throw Lang.wrapThrow(e);
         }

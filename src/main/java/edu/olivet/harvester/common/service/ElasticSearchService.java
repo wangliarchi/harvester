@@ -9,9 +9,10 @@ import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.WaitTime;
+import edu.olivet.harvester.utils.common.Strings;
+import edu.olivet.harvester.utils.http.HttpUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.nutz.lang.Lang;
 import org.slf4j.Logger;
@@ -177,16 +178,7 @@ public class ElasticSearchService {
         String params4Url = params2Url(params);
         String url = ELASTIC_SEARCH_ADDRESS + "/" + index + "/_search" + params4Url;
         try {
-            Connection conn = Jsoup.connect(url);
-            //conn.header("Accept", "text/html,application/xhtml+xml,application/xml,application/json;q=0.9,image/webp,*/*;q=0.8");
-            //conn.header("Accept-Encoding", "gzip, deflate");
-            //conn.header("Connection", "keep-alive");
-            conn.validateTLSCertificates(false);
-            conn.header("Content-Type", "application/json");
-            conn.ignoreContentType(true);
-
-            return conn.timeout(WaitTime.SuperLong.valInMS()).maxBodySize(0)
-                    .execute().body();
+            return HttpUtils.get(url);
         } catch (Exception e) {
             LOGGER.error("{} - ", url, e);
             throw new BusinessException(e);
@@ -219,7 +211,7 @@ public class ElasticSearchService {
                     sb.append("&");
                 }
                 sb.append(entry.getKey()).append("=");
-                String value = entry.getValue().toString();
+                String value = Strings.encode(entry.getValue().toString());
                 sb.append(value);
             }
         }

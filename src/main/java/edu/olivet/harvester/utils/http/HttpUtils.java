@@ -1,6 +1,8 @@
 package edu.olivet.harvester.utils.http;
 
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.foundations.utils.Strings;
+import edu.olivet.foundations.utils.WaitTime;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -16,6 +18,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
 import org.nutz.lang.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -174,5 +178,18 @@ public class HttpUtils {
             throw Lang.wrapThrow(ex);
         }
         return get;
+    }
+
+    public static String get(String url) {
+        try {
+            return Jsoup.connect(url).timeout(WaitTime.SuperLong.valInMS()).maxBodySize(0).ignoreContentType(true)
+                    .execute().body();
+        } catch (Exception e) {
+            if (Strings.containsAnyIgnoreCase(e.getMessage(), "Unexpected end of ZLIB input stream")) {
+                return HttpUtils.getText(url);
+            }
+            logger.error("{} - ", url, e);
+            throw new BusinessException(e);
+        }
     }
 }
