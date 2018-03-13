@@ -15,4 +15,4 @@ If the above option is unacceptable to you, could you please log in to Amazon ac
 
 I sincerely apologize for all the inconvenience this matter has caused to you. Please accept my apologies and thanks for your understanding.
 
-<#include "../include/footer.ftl">
+<#include "include/footer.ftl">

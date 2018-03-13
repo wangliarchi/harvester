@@ -221,6 +221,13 @@ public class Order implements Keyable {
      */
     @JSONField(serialize = false)
     public void addRemark(String content) {
+        if (StringUtils.isBlank(content)) {
+            return;
+        }
+        if (!".".equalsIgnoreCase(content.substring(content.length() - 1))) {
+            content = content + ".";
+        }
+
         if (StringUtils.isBlank(this.remark)) {
             this.remark = content;
         }

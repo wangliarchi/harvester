@@ -3,6 +3,7 @@ package edu.olivet.harvester.ui.events;
 import com.google.inject.Inject;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
+import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.OrderSubmitter;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
@@ -48,7 +49,7 @@ public class StartOrderSubmissionTasksEvent implements HarvesterUIEvent {
                     WaitTime.Normal.execute();
                 } catch (Exception e) {
                     LOGGER.error("", e);
-                    UITools.error(e.getMessage());
+                    UITools.error(Strings.getExceptionMsg(e));
                     break;
                 }
             }
@@ -56,6 +57,7 @@ public class StartOrderSubmissionTasksEvent implements HarvesterUIEvent {
             if (PSEventListener.stopped()) {
                 orderSubmissionTaskService.cleanUp();
             }
+            WaitTime.Short.execute();
             PSEventListener.end();
         }).start();
     }

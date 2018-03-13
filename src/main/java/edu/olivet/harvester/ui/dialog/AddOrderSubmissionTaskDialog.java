@@ -76,16 +76,18 @@ public class AddOrderSubmissionTaskDialog extends BaseDialog {
     @Override
     public void ok() {
         try {
-
             orderSubmissionTasks = orderSubmissionSettingsPanel.collectData();
             ok = true;
             okBtn.setEnabled(false);
             cancelBtn.setEnabled(false);
-            if (orderSubmissionTaskHandler != null) {
-                orderSubmissionTaskHandler.saveTasks(orderSubmissionTasks);
-            }
+            new Thread(() -> {
+                if (orderSubmissionTaskHandler != null) {
+                    orderSubmissionTaskHandler.saveTasks(orderSubmissionTasks);
+                }
 
-            doClose();
+                doClose();
+            }).start();
+
         } catch (Exception e) {
             UITools.error(e.getMessage());
         }

@@ -3,10 +3,8 @@ package edu.olivet.harvester.fulfill.utils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import edu.olivet.foundations.amazon.Country;
-import edu.olivet.foundations.utils.Configs;
-import edu.olivet.foundations.utils.Constants;
-import edu.olivet.foundations.utils.RegexUtils;
-import edu.olivet.foundations.utils.WaitTime;
+import edu.olivet.foundations.utils.*;
+import edu.olivet.harvester.utils.http.HtmlFetcher;
 import edu.olivet.harvester.utils.http.HtmlParser;
 import edu.olivet.harvester.logger.ISBNLogger;
 import edu.olivet.harvester.common.model.ConfigEnums;
@@ -184,17 +182,9 @@ public class ISBNUtils {
             //
         }
         String correctedIsbn = ISBNUtils.correct(isbn);
-        Connection conn = Jsoup.connect(String.format(PRODUCT_PAGE_URL, baseUrl, correctedIsbn));
-        conn.userAgent("Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36");
-        conn.header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
-        conn.header("Accept-Encoding", "gzip, deflate, sdch");
-        conn.header("Accept-Language", "en-US,en;q=0.8");
-        conn.header("Connection", "keep-alive");
-        String host = new URL(baseUrl).getHost();
-        conn.header("Host", host);
-        conn.timeout(5000);
+        String pageUrl = String.format(PRODUCT_PAGE_URL, baseUrl, correctedIsbn);
 
-        Document doc = conn.get();
+        Document doc = ApplicationContext.getBean(HtmlFetcher.class).getDocument(pageUrl);
         String title = HtmlParser.text(doc, "#productTitle");
         if (StringUtils.isBlank(title)) {
             title = HtmlParser.text(doc, "#btAsinTitle");
@@ -227,7 +217,7 @@ public class ISBNUtils {
     }
 
     public static void main(String[] args) {
-        String title = ISBNUtils.getTitleAtESWeb("B00UIM3TCG");
+        String title = ISBNUtils.getTitle(Country.US, "1401303706");
         System.out.println(title);
     }
 }

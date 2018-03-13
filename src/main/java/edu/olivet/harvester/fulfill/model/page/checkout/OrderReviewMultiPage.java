@@ -2,6 +2,7 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 
 import com.teamdev.jxbrowser.chromium.dom.By;
 import edu.olivet.foundations.utils.RegexUtils;
+import edu.olivet.harvester.common.model.Money;
 import edu.olivet.harvester.fulfill.model.page.AmazonPage;
 import edu.olivet.harvester.fulfill.service.shipping.ShipOptionUtils;
 import edu.olivet.harvester.fulfill.utils.CreditCardUtils;
@@ -59,14 +60,7 @@ public class OrderReviewMultiPage extends OrderReviewAbstractPage {
     }
 
 
-    public boolean reviewPaymentMethod() {
-        String lastDigits = JXBrowserHelper.textFromElement(browser, "#payment-information");
-        lastDigits = lastDigits.replaceAll(RegexUtils.Regex.NON_DIGITS.val(), "");
-        CreditCard creditCard = CreditCardUtils.getCreditCard(buyerPanel.getBuyer());
-        String creditCardLastDigits =  creditCard.getCardNo().substring(creditCard.getCardNo().length() - 4);
-        LOGGER.info("Last digits {} - {}",lastDigits,creditCardLastDigits);
-        return StringUtils.containsIgnoreCase(lastDigits,creditCardLastDigits);
-    }
+
 
 
 }

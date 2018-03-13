@@ -156,6 +156,10 @@ public class OfferListingPage extends FulfillmentPage {
         DOMElement sellerRow = rows.get(sellerIndex);
 
         DOMElement addToCartBtn = JXBrowserHelper.selectElementByCssSelector(sellerRow, ".olpBuyColumn .a-button-input");
+        if (addToCartBtn == null) {
+            //pe-olp-try-prime-buttons
+            throw new BusinessException("Fail to add item to cart.");
+        }
         JXBrowserHelper.insertChecker(browser);
         addToCartBtn.click();
         checkPopovers();
@@ -233,8 +237,8 @@ public class OfferListingPage extends FulfillmentPage {
             DOMElement trigger = JXBrowserHelper.selectVisibleElement(browser, "#nav-global-location-slot .a-popover-trigger");
             trigger.click();
             JXBrowserHelper.waitUntilVisible(browser, "#GLUXZipUpdateInput_0");
-            JXBrowserHelper.fillValueForFormField(browser, ".#GLUXZipUpdateInput_0", "M1R");
-            JXBrowserHelper.fillValueForFormField(browser, ".#GLUXZipUpdateInput_1", "0E9");
+            JXBrowserHelper.fillValueForFormField(browser, "#GLUXZipUpdateInput_0", "M1R");
+            JXBrowserHelper.fillValueForFormField(browser, "#GLUXZipUpdateInput_1", "0E9");
             WaitTime.Short.execute();
 
             JXBrowserHelper.selectVisibleElement(browser, ".a-button .a-button-inner.a-declarative").click();

@@ -13,4 +13,4 @@ I guess you might have received a shipment confirmation letter. This was caused 
 
 I sincerely apologize for any inconvenience this has caused to you. Please accept my apologies and let me know your thoughts.
 
-<#include "../include/footer.ftl">
+<#include "include/footer.ftl">

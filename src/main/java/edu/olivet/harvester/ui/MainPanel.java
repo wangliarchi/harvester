@@ -68,7 +68,7 @@ public class MainPanel extends JPanel {
 
 
         mainWindowPanel.addFirstBuyerAccountTab();
-        mainWindowPanel.getSelectedBuyerPanel().toWelcomePage();
+        mainWindowPanel.getSelectedWebPanel().toWelcomePage();
 
     }
 

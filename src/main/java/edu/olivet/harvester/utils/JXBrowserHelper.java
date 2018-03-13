@@ -58,7 +58,7 @@ public class JXBrowserHelper {
             f.set(null, new BigInteger("1"));
             modifiersField.setAccessible(false);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            //ex.printStackTrace();
         }
     }
 
@@ -176,6 +176,13 @@ public class JXBrowserHelper {
                 Browser browser = event.getBrowser();
                 // Restore Browser instance by loading the same URL
                 browser.loadURL(browser.getURL());
+            }
+        });
+
+        browser.setLoadHandler(new DefaultLoadHandler() {
+            @Override
+            public boolean onCertificateError(CertificateErrorParams params) {
+                return false;
             }
         });
 

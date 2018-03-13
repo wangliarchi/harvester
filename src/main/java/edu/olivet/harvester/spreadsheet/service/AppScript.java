@@ -232,7 +232,7 @@ public class AppScript {
     @Repeat(expectedExceptions = BusinessException.class)
     public List<Order> readOrders(String spreadId, String sheetName) {
         final long start = System.currentTimeMillis();
-        List<Order> orders;
+        List<Order> orders = new ArrayList<>();
         //try {
         //    orders = orderService.fetchOrders(spreadId, sheetName);
         //    LOGGER.info("Read {} orders from sheet {} via sheet api in {}", orders.size(), sheetName, Strings.formatElapsedTime(start));
@@ -248,7 +248,12 @@ public class AppScript {
             orders = this.parse(json);
             LOGGER.info("Read {} orders from sheet {} via app script in {}", orders.size(), sheetName, Strings.formatElapsedTime(start));
         } catch (Exception e) {
-            orders = orderService.fetchOrders(spreadId, sheetName);
+            LOGGER.error("", e);
+            try {
+                orders = orderService.fetchOrders(spreadId, sheetName);
+            } catch (Exception e1) {
+                LOGGER.error("", e1);
+            }
             LOGGER.info("Read {} orders from sheet {} via sheet api in {}", orders.size(), sheetName, Strings.formatElapsedTime(start));
         }
 

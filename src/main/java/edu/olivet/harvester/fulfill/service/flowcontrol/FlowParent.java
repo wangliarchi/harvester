@@ -12,12 +12,12 @@ import edu.olivet.harvester.utils.MessageListener;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 10/27/17 3:47 PM
  */
-abstract class FlowParent {
+public abstract class FlowParent {
     @Inject
     MessageListener messageListener;
 
 
-    void processSteps(Step step, FlowState state) {
+    public void processSteps(Step step, FlowState state) {
 
         while (true) {
             if (step == null) {
@@ -54,14 +54,15 @@ abstract class FlowParent {
     @Inject private OrderSubmissionTaskService orderSubmissionTaskService;
 
     private boolean isStopped(FlowState state) {
-        OrderSubmissionTask task;
+        boolean taskStopped = false;
         try {
-            task = orderSubmissionTaskService.get(state.getOrder().getTask().getId());
+            OrderSubmissionTask task = orderSubmissionTaskService.get(state.getOrder().getTask().getId());
+            taskStopped = task.stopped();
         } catch (Exception e) {
-            return false;
+            //return false;
         }
 
-        return task.stopped() || PSEventListener.stopped() || state.getBuyerPanel().stopped();
+        return taskStopped || PSEventListener.stopped() || state.getBuyerPanel().stopped();
 
     }
 }

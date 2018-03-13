@@ -27,21 +27,33 @@ public class TabbedBuyerPanel extends JTabbedPaneCloseButton {
 
     private static TabbedBuyerPanel instance = null;
 
-    private final Map<String, BuyerPanel> buyerPanels = new HashMap<>();
-    private final Map<Integer, String> buyerPanelIndexes = new HashMap<>();
+    public final Map<String, WebPanel> buyerPanels = new HashMap<>();
 
-    private double zoomLevel;
+    private double zoomLevel = -1;
 
     public static TabbedBuyerPanel getInstance() {
         if (instance == null) {
-            instance = new TabbedBuyerPanel(-1);
+            instance = new TabbedBuyerPanel();
         }
         return instance;
     }
 
-    private TabbedBuyerPanel(double zoomLevel) {
-        this.zoomLevel = zoomLevel;
+    public void addTab(WebPanel webPanel) {
+        String tabKey = webPanel.getKey();
+        this.addTab(tabKey, webPanel.getIcon() == null ? null : UITools.getIcon(webPanel.getIcon()), (Component) webPanel);
+        buyerPanels.put(tabKey, webPanel);
     }
+
+
+    public WebPanel getWebPanel(String tabKey) {
+        if (buyerPanels.containsKey(tabKey)) {
+            WebPanel buyerPanel = buyerPanels.get(tabKey);
+            return buyerPanel;
+        }
+
+        throw new BusinessException("No web panel found for key " + tabKey);
+    }
+
 
     public void addFirstBuyerAccountTab() {
         Settings settings = Settings.load();
@@ -58,67 +70,45 @@ public class TabbedBuyerPanel extends JTabbedPaneCloseButton {
         }
     }
 
-    public BuyerPanel reInitTabForOrder(Order order, Account buyer) {
-        LOGGER.error("JXBrowser crashed, trying to recreate buyer panel");
-        BuyerPanel buyerPanel = initTabForOrder(order, buyer);
-        this.removeTab(buyerPanel);
-        buyerPanel = initTabForOrder(order, buyer);
-
-        buyerPanel.toWelcomePage();
-        return buyerPanel;
-    }
-
-
     private BuyerPanel initTabForOrder(Order order, Account buyer) {
         Country country = OrderCountryUtils.getFulfillmentCountry(order);
         return getOrAddTab(country, buyer);
     }
 
     public BuyerPanel getOrAddTab(Country country, Account account) {
-        //highlight(buyerPanel);
         return addTab(country, account);
     }
 
+    public BuyerPanel getBuyerPanel(String tabKey) {
+        if (buyerPanels.containsKey(tabKey)) {
+            BuyerPanel buyerPanel = (BuyerPanel) buyerPanels.get(tabKey);
+            return buyerPanel;
+        }
 
-    public void removeTab(BuyerPanel buyerPanel) {
-        String tabKey = getTabKey(buyerPanel.getCountry(), buyerPanel.getBuyer());
-        try {
-            buyerPanel.killBrowser();
-        } catch (Exception e) {
-            //
-        }
-        for (int i = 0; i < getTabCount(); i++) {
-            if (getTitleAt(i).equalsIgnoreCase(tabKey)) {
-                this.remove(i);
-                break;
-            }
-            //other stuff
-        }
-        int index = buyerPanel.getId();
-        buyerPanels.remove(tabKey);
-        buyerPanelIndexes.remove(index);
-        buyerPanel.setBrowserView(null);
+        throw new BusinessException("No buyer panel found for buyer account " + tabKey);
+    }
+
+    public BuyerPanel getBuyerPanel(Country country, Account buyer) {
+        String tabKey = getTabKey(country, buyer);
+        return getBuyerPanel(tabKey);
     }
 
     private BuyerPanel addTab(Country country, Account account) {
         String tabKey = getTabKey(country, account);
-        if (buyerPanels.containsKey(tabKey)) {
+        BuyerPanel buyerPanel;
+        try {
+            buyerPanel = getBuyerPanel(tabKey);
             LOGGER.info("Buyer account {} already initialized. ", tabKey);
-            BuyerPanel buyerPanel = buyerPanels.get(tabKey);
             buyerPanel.getBuyer().setPassword(account.getPassword());
             return buyerPanel;
+        } catch (Exception e) {
+            //
         }
 
-        final long start = System.currentTimeMillis();
+        buyerPanel = new BuyerPanel(buyerPanels.size(), country, account, Math.max(-1, zoomLevel));
+        this.addTab(buyerPanel);
 
-        BuyerPanel buyerPanel = new BuyerPanel(buyerPanels.size(), country, account, Math.max(-1, zoomLevel));
-
-        this.addTab(tabKey, UITools.getIcon(country.name().toLowerCase() + "Flag.png"), buyerPanel);
-        buyerPanelIndexes.put(buyerPanels.size(), tabKey);
-        buyerPanels.put(tabKey, buyerPanel);
-
-        LOGGER.info("Finished init buyer {} account {} panel，took{}", country.name(), account.getKey(), Strings.formatElapsedTime(start));
-
+        LOGGER.info("Finished init buyer {} account {} panel", country.name(), account.getKey());
         return buyerPanel;
     }
 
@@ -126,7 +116,7 @@ public class TabbedBuyerPanel extends JTabbedPaneCloseButton {
         String tabKey = country.name() + " Spreadsheet";
         if (buyerPanels.containsKey(tabKey)) {
             LOGGER.info("Buyer account {} already initialized. ", tabKey);
-            return buyerPanels.get(tabKey);
+            return (BuyerPanel) buyerPanels.get(tabKey);
         }
 
         final long start = System.currentTimeMillis();
@@ -134,7 +124,6 @@ public class TabbedBuyerPanel extends JTabbedPaneCloseButton {
         BuyerPanel buyerPanel = new BuyerPanel(buyerPanels.size(), country, account, Math.max(-1, zoomLevel));
 
         this.addTab(tabKey, UITools.getIcon("sheet.png"), buyerPanel);
-        buyerPanelIndexes.put(buyerPanels.size(), tabKey);
         buyerPanels.put(tabKey, buyerPanel);
 
         LOGGER.info("Finished init buyer {} account {} panel，took{}", country.name(), account.getKey(), Strings.formatElapsedTime(start));
@@ -143,47 +132,31 @@ public class TabbedBuyerPanel extends JTabbedPaneCloseButton {
     }
 
 
-    public BuyerPanel getBuyerPanel(Country country, Account buyer) {
-        String tabKey = getTabKey(country, buyer);
-        if (buyerPanels.containsKey(tabKey)) {
-            return buyerPanels.get(tabKey);
-        }
-        throw new BusinessException("No buyer panel found for buyer account " + tabKey);
+    public WebPanel getSelectedWebPanel() {
+        return (WebPanel) getSelectedComponent();
     }
 
-    private BuyerPanel getBuyerPanel(Integer index) {
-        if (buyerPanelIndexes.containsKey(index)) {
-            return buyerPanels.get(buyerPanelIndexes.get(index));
-        }
-
-        throw new BusinessException(String.format("No buyer panel found for index %d", index));
+    public void setRunningIcon(WebPanel webPanel) {
+        setIconAt(getPanelIndex(webPanel), UITools.getIcon("loading.gif"));
     }
 
-    public BuyerPanel getSelectedBuyerPanel() {
-        return getBuyerPanel(getSelectedIndex());
+    public void setNormalIcon(WebPanel webPanel) {
+        setIconAt(getPanelIndex(webPanel), UITools.getIcon(webPanel.getIcon()));
     }
 
-    public void setRunningIcon(BuyerPanel buyerPanel) {
-        setIconAt(getBuyerPanelIndex(buyerPanel), UITools.getIcon("loading.gif"));
-    }
-
-    public void setNormalIcon(BuyerPanel buyerPanel) {
-        setIconAt(getBuyerPanelIndex(buyerPanel), UITools.getIcon(buyerPanel.getCountry().name().toLowerCase() + "Flag.png"));
-    }
-
-    public int getBuyerPanelIndex(BuyerPanel buyerPanel) {
-        String key = getTabKey(buyerPanel.getCountry(), buyerPanel.getBuyer());
+    public int getPanelIndex(WebPanel webPanel) {
+        String key = webPanel.getKey();
         for (int i = 0; i < getTabCount(); i++) {
             if (key.equalsIgnoreCase(getTitleAt(i))) {
                 return i;
             }
         }
 
-        return buyerPanel.getId();
+        throw new BusinessException("Panel not found");
     }
 
-    public void highlight(BuyerPanel buyerPanel) {
-        highlight(getBuyerPanelIndex(buyerPanel));
+    public void highlight(WebPanel webPanel) {
+        highlight(getPanelIndex(webPanel));
     }
 
     private void highlight(int index) {
@@ -197,6 +170,34 @@ public class TabbedBuyerPanel extends JTabbedPaneCloseButton {
 
     private String getTabKey(Country country, Account account) {
         return country.name() + "-" + account.getEmail();
+    }
+
+
+    public void removeTab(WebPanel webPanel) {
+        String tabKey = webPanel.getKey();
+        try {
+            webPanel.killBrowser();
+        } catch (Exception e) {
+            //
+        }
+        for (int i = 0; i < getTabCount(); i++) {
+            if (getTitleAt(i).equalsIgnoreCase(tabKey)) {
+                this.remove(i);
+                break;
+            }
+            //other stuff
+        }
+        removeFromIndex(webPanel);
+    }
+
+    public BuyerPanel reInitTabForOrder(Order order, Account buyer) {
+        LOGGER.error("JXBrowser crashed, trying to recreate buyer panel");
+        BuyerPanel buyerPanel = initTabForOrder(order, buyer);
+        this.removeTab(buyerPanel);
+        buyerPanel = initTabForOrder(order, buyer);
+
+        buyerPanel.toWelcomePage();
+        return buyerPanel;
     }
 
     @Override
@@ -227,57 +228,52 @@ public class TabbedBuyerPanel extends JTabbedPaneCloseButton {
         if (this.getTabCount() == 2) {
             return false;
         }
-        BuyerPanel buyerPanel = (BuyerPanel) tab;
-        if (buyerPanel.running()) {
+        WebPanel webPanel = (WebPanel) tab;
+        if (webPanel.running()) {
             UITools.error("Task is running on this tab. Stop task before closing the tab.");
             return false;
         }
-        String tabKey = getTabKey(buyerPanel.getCountry(), buyerPanel.getBuyer());
+
         try {
-            buyerPanel.killBrowser();
+            webPanel.killBrowser();
         } catch (Exception e) {
             LOGGER.error("", e);
         }
 
-        int index = buyerPanel.getId();
-        buyerPanels.remove(tabKey);
-        buyerPanelIndexes.remove(index);
+        removeFromIndex(webPanel);
 
         return true;
+    }
+
+    public void removeFromIndex(WebPanel webPanel) {
+        String tabKey = webPanel.getKey();
+        buyerPanels.remove(tabKey);
     }
 
     public static void main(String[] args) {
         Tools.switchLogMode(Configs.LogMode.Development);
 
         JFrame frame = new JFrame("TabbedPaneFrame");
-        TabbedBuyerPanel panel = new TabbedBuyerPanel(-1);
+        TabbedBuyerPanel panel = new TabbedBuyerPanel();
 
         Account buyer = Settings.load().getConfigByCountry(Country.US).getBuyer();
         panel.addTab(Country.US, buyer);
 
-        panel.getBuyerPanel(0).toHomePage();
+        panel.getSelectedWebPanel().toHomePage();
 
         panel.setVisible(true);
         frame.getContentPane().add(panel);
-
         frame.setSize(800, 768);
-
         UITools.setDialogAttr(frame, true);
-
 
         WaitTime.Short.execute();
 
-        BuyerPanel buyerPanel = panel.getBuyerPanel(0);
+        WebPanel buyerPanel = panel.getSelectedWebPanel();
         buyerPanel.toHomePage();
 
         buyerPanel.recreateBrowser();
 
-        //panel.removeTab(panel.getBuyerPanel(0));
-
-        //BuyerPanel buyerPanel = panel.addTab(Country.US,buyer);
         buyerPanel.toHomePage();
         WaitTime.Long.execute();
-
-
     }
 }

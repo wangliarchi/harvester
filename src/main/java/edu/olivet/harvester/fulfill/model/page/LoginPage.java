@@ -70,7 +70,6 @@ public class LoginPage extends FulfillmentPage implements PageObject {
         DOMElement email = JXBrowserHelper.selectElementByCssSelector(browser, EMAIL_SELECTOR);
         DOMElement password = JXBrowserHelper.selectElementByCssSelector(browser, PASSWORD_SELECTOR);
         return email != null || password != null;
-
     }
 
     @Repeat(expectedExceptions = BusinessException.class)

@@ -20,7 +20,12 @@ public abstract class FulfillmentPage implements PageObject {
     public FulfillmentPage(BuyerPanel buyerPanel) {
         this.buyerPanel = buyerPanel;
         this.browser = buyerPanel.getBrowserView().getBrowser();
-        this.buyer = BuyerAccountSettingUtils.load().getByEmail(buyerPanel.getBuyer().getEmail()).getBuyerAccount();
+        try {
+            this.buyer = BuyerAccountSettingUtils.load().getByEmail(buyerPanel.getBuyer().getEmail()).getBuyerAccount();
+        } catch (Exception e) {
+            //
+            this.buyer = buyerPanel.getBuyer();
+        }
         this.country = buyerPanel.getCountry();
     }
 }

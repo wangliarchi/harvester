@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.common.model.OrderEnums.OrderColor;
+import edu.olivet.harvester.common.model.OrderEnums.Status;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.utils.common.RandomUtils;
 import org.apache.commons.collections4.CollectionUtils;
@@ -33,6 +34,11 @@ public class SheetService extends edu.olivet.harvester.fulfill.service.SheetServ
                 Lists.newArrayList(order.isbn_address, order.isbn, order.seller, order.seller_id, order.seller_price, order.url, order.condition, order.character, order.remark)))
                 .setRange(range);
         dataToUpdate.add(rowData);
+
+        order.status = Status.Initial.value();
+        ValueRange statusRowData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(order.status)))
+                .setRange(String.format("%s!A%d", order.sheetName, row));
+        dataToUpdate.add(statusRowData);
 
         try {
             this.batchUpdateValues(order.spreadsheetId, dataToUpdate);

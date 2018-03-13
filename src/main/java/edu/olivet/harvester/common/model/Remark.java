@@ -319,6 +319,7 @@ public enum Remark {
             Remark.SELLER_PRICE_RISE
     };
 
+
     /**
      * 从目标文本中移除当前批注
      *
@@ -445,11 +446,44 @@ public enum Remark {
         return result;
     }
 
+
+    /**
+     * 做单成功之后，原先存在的异常提醒批注需要一并清除
+     */
+    private static final String[] NEED_REMOVE_AFTER_SUCCESS_REGEX = {
+            "Order cost ([^<]*) exceed maximum limit",
+            "Wrong address([^<]*)\\.",
+            "No shipping option available([^<]*)days",
+            "No shipping option available.",
+            "Order shipping cost ([^<]*) exceed maximum limit.",
+            "java.lang.NullPointerException",
+            "Sorry, this item can't be sent to your selected([^<]*)another seller.",
+            "Supplier Disappeared([^<]*)\\.",
+            "Item not added to cart successfully.",
+            "Process stopped as requested.",
+            "You don't have enough fund to process this order([^<]*)\\.",
+            "Cant identify page ([^<]*)\\."
+    };
+
     /**
      * 订单提交成功之后，将原先仍残留的失败Remark信息悉数清除
      */
     public static String removeFailedRemark(String target) {
-        return removeAll(target, NEED_REMOVE_AFTER_SUCCESS);
+        if (StringUtils.isBlank(target)) {
+            return StringUtils.EMPTY;
+        }
+
+        String result = target;
+        for (String regex : NEED_REMOVE_AFTER_SUCCESS_REGEX) {
+            result = result.replaceAll(regex, StringUtils.EMPTY).trim();
+        }
+
+        result = removeAll(result, NEED_REMOVE_AFTER_SUCCESS).trim();
+        if (result.length() == 1) {
+            return StringUtils.EMPTY;
+        }
+
+        return result;
     }
 
     /**
@@ -632,6 +666,10 @@ public enum Remark {
     }
 
     public static void main(String[] args) {
+
+        String remark = "US FWD Wrong address Important Message The street name or number appears to be invalid.";
+        System.out.println(Remark.removeFailedRemark(remark));
+
         for (Country country : Country.values()) {
             if (country.ordinal() >= Country.JP.ordinal()) {
                 continue;
@@ -680,4 +718,5 @@ public enum Remark {
             }
         }
     }
+
 }

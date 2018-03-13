@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author <a href="mailto:nathanael4ever@gmail.com">Nathanael Yang</a> 10/19/2017 9:35 AM
  */
-public class SellerPanel extends JPanel {
+public class SellerPanel extends WebPanel {
     private static final Logger LOGGER = LoggerFactory.getLogger(SellerPanel.class);
 
     /**
@@ -56,12 +56,16 @@ public class SellerPanel extends JPanel {
         this.browser = browserView.getBrowser();
     }
 
-    private String profilePathName() {
-        return this.seller.key() + Constants.HYPHEN + this.id;
+    public SellerPanel(Country country, Account seller) {
+        this(0, country, seller, -1);
+    }
+
+    public String profilePathName() {
+        return getKey();
     }
 
     @Repeat(expectedExceptions = RobotFoundException.class)
-    private void loginSellerCentral(final Country country) {
+    public void loginSellerCentral(final Country country) {
 
         //load seller center page
         JXBrowserHelper.loadPage(browser, country.ascBaseUrl());
@@ -221,6 +225,25 @@ public class SellerPanel extends JPanel {
     public void toHomePage() {
         //load seller center page
         JXBrowserHelper.loadPage(browser, country.ascBaseUrl());
+    }
+
+    @Override
+    public String getKey() {
+        return "ASC" + Constants.HYPHEN + this.country.name() + Constants.HYPHEN + this.seller.getEmail();
+    }
+
+    public static String getKey(Country country, Account seller) {
+        return "ASC" + Constants.HYPHEN + country.name() + Constants.HYPHEN + seller.getEmail();
+    }
+
+    @Override
+    public String getIcon() {
+        return getCountry().name().toLowerCase() + "Flag.png";
+    }
+
+    @Override
+    public boolean running() {
+        return false;
     }
 
     public static void main(String[] args) {

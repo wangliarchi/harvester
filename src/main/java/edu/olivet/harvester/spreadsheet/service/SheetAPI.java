@@ -150,13 +150,14 @@ public class SheetAPI {
                     .setFields("id")
                     .queue(batch, callback);
             batch.execute();
+            WaitTime.Short.execute();
         } catch (IOException e) {
             LOGGER.error("", e);
             throw googleAPIHelper.wrapException(e);
         }
     }
 
-    @Repeat(expectedExceptions = BusinessException.class, times = 10)
+    @Repeat(expectedExceptions = BusinessException.class, times = 5)
     public Spreadsheet getSpreadsheet(String spreadsheetId, List<String> ranges) {
         try {
             final long start = System.currentTimeMillis();
@@ -176,12 +177,12 @@ public class SheetAPI {
         }
     }
 
-    @Repeat(expectedExceptions = BusinessException.class, times = 10)
+    @Repeat(expectedExceptions = BusinessException.class, times = 5)
     public List<ValueRange> batchGetSpreadsheetValues(Spreadsheet spreadsheet, List<String> ranges) {
         return batchGetSpreadsheetValues(spreadsheet.getSpreadsheetId(), ranges);
     }
 
-    @Repeat(expectedExceptions = BusinessException.class, times = 10)
+    @Repeat(expectedExceptions = BusinessException.class, times = 5)
     public List<ValueRange> batchGetSpreadsheetValues(String spreadsheetId, List<String> ranges) {
         try {
             Sheets.Spreadsheets.Values.BatchGet request = sheetService.spreadsheets().values().batchGet(spreadsheetId).setRanges(ranges);

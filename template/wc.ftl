@@ -11,4 +11,4 @@ If you would not like to wait for the new stock, can you please log in Amazon, g
 
 I sincerely apologize for any inconvenience this has caused to you. I understand the item is in your urgent need. Please accept my apologies and let me know your thoughts.
 
-<#include "../include/footer.ftl">
+<#include "include/footer.ftl">

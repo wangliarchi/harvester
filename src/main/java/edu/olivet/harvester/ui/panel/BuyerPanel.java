@@ -1,6 +1,7 @@
 package edu.olivet.harvester.ui.panel;
 
 import com.teamdev.jxbrowser.chromium.Browser;
+import com.teamdev.jxbrowser.chromium.CustomProxyConfig;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
@@ -28,45 +29,42 @@ import java.io.IOException;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 10/30/17 9:16 AM
  */
-public class BuyerPanel extends JPanel implements RuntimePanelObserver, ProgressBarComponent {
+public class BuyerPanel extends WebPanel implements RuntimePanelObserver, ProgressBarComponent {
     private static final Logger LOGGER = LoggerFactory.getLogger(BuyerPanel.class);
 
-    /**
-     * 面板显示编号，从1开始
-     */
     @Getter
-    private final int id;
+    protected final Country country;
 
     @Getter
-    private final Country country;
+    protected final Account buyer;
 
     @Getter
-    private final Account buyer;
-
-    @Getter
-    @Setter
-    private BrowserView browserView;
-
-    private double zoomLevel;
-    @Getter
-    private Order order;
+    protected Order order;
 
 
-    public BuyerPanel(int id, Country country, Account buyer, double zoomLevel) {
+    public BuyerPanel(Country country, Account buyer, double zoomLevel, CustomProxyConfig proxyConfig) {
         super(new BorderLayout());
-
-        this.id = id;
         this.country = country;
         this.buyer = buyer;
         this.zoomLevel = zoomLevel;
-        this.browserView = JXBrowserHelper.init(this.profilePathName(), zoomLevel);
-
+        this.browserView = JXBrowserHelper.init(this.profilePathName(), zoomLevel, proxyConfig);
 
         initComponents();
-
     }
 
-    private String profilePathName() {
+    public BuyerPanel(Country country, Account buyer, CustomProxyConfig proxyConfig) {
+        this(country, buyer, -1, proxyConfig);
+    }
+
+    public BuyerPanel(Country country, Account buyer) {
+        this(country, buyer, -1, null);
+    }
+
+    public BuyerPanel(int id, Country country, Account buyer, double zoomLevel) {
+        this(country, buyer, zoomLevel, null);
+    }
+
+    public String profilePathName() {
         return this.buyer.key() + Constants.HYPHEN + this.country.name();
     }
 
@@ -179,53 +177,10 @@ public class BuyerPanel extends JPanel implements RuntimePanelObserver, Progress
         return state == Status.Running;
     }
 
-    public void killBrowser() {
-        try {
-            int pid = (int) browserView.getBrowser().getRenderProcessInfo().getPID();
-            browserView.getBrowser().dispose();
-            killProcess(pid);
-        } catch (Exception e) {
-            //
-            LOGGER.error("", e);
-        }
-    }
-
-    public void recreateBrowser() {
-        killBrowser();
-        this.browserView = JXBrowserHelper.init(this.profilePathName(), zoomLevel);
-        toHomePage();
-        WaitTime.Short.execute();
-    }
-
     public void toHomePage() {
         Browser browser = browserView.getBrowser();
         JXBrowserHelper.loadPage(browser, country.baseUrl());
     }
-
-    public void toWelcomePage() {
-        Browser browser = browserView.getBrowser();
-        String html = Configs.loadByFullPath("/welcome.html");
-        browser.loadHTML(html);
-
-    }
-
-    private void killProcess(int pid) {
-        Runtime rt = Runtime.getRuntime();
-        if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-            try {
-                rt.exec("taskkill " + pid);
-            } catch (IOException e) {
-                LOGGER.error("", e);
-            }
-        } else {
-            try {
-                rt.exec("kill -9 " + pid);
-            } catch (IOException e) {
-                LOGGER.error("", e);
-            }
-        }
-    }
-
 
     private void initComponents() {
         JPanel infoPanel = initInfoPanel();
@@ -390,7 +345,12 @@ public class BuyerPanel extends JPanel implements RuntimePanelObserver, Progress
     private JLabel budgetInfoLabel;
 
     public String getKey() {
-        return this.buyer.getEmail() + Constants.HYPHEN + this.country.name();
+        return this.country.name() + Constants.HYPHEN + this.buyer.getEmail();
+    }
+
+    @Override
+    public String getIcon() {
+        return getCountry().name().toLowerCase() + "Flag.png";
     }
 
     public static void main(String[] args) {

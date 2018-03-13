@@ -1,14 +1,12 @@
 package edu.olivet.harvester.ui.dialog;
 
 import edu.olivet.deploy.Language;
-import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.ui.BaseDialog;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.common.model.BuyerAccountSetting;
 import edu.olivet.harvester.common.model.BuyerAccountSettingUtils;
 import edu.olivet.harvester.ui.panel.BuyerAccountPanel;
-import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +23,6 @@ import java.util.List;
 public class BuyerAccountConfigDialog extends BaseDialog {
     private static final Logger LOGGER = LoggerFactory.getLogger(BuyerAccountConfigDialog.class);
 
-    private Settings settings;
-    private Map<String, Account> buyerAccounts = new HashMap<>();
     private Set<BuyerAccountPanel> buyerAccountPanels = new HashSet<>();
     private BuyerAccountSettingUtils buyerAccountSettingUtils = BuyerAccountSettingUtils.load();
 
@@ -211,6 +207,12 @@ public class BuyerAccountConfigDialog extends BaseDialog {
                     UITools.error("Buyer account " + buyerAccountSetting.getBuyerAccount().getEmail() + " is not valid. " +
                             "Please enter both email address and password.");
                     return;
+                }
+
+                BuyerAccountSetting currentSetting = buyerAccountSettingUtils.getByEmail(buyerAccountSetting.getBuyerAccount().getEmail());
+                if (currentSetting != null) {
+                    buyerAccountSetting.setValidPrime(currentSetting.isValidPrime());
+                    buyerAccountSetting.setLastPrimeCheck(currentSetting.getLastPrimeCheck());
                 }
                 settings.add(buyerAccountSetting);
             }

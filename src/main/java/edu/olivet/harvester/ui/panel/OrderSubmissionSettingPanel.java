@@ -49,14 +49,15 @@ public class OrderSubmissionSettingPanel extends JPanel {
                                 .addComponent(maxThreadsJCombox, 100, 100, 100)
                                 .addContainerGap()
 
-                        ).addGroup(Alignment.LEADING, layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(debugModeLabel, labelWidth, labelWidth, labelWidth)
-                        .addPreferredGap(ComponentPlacement.RELATED)
-                        .addComponent(debugModeComboBox, 100, 100, 100)
-                        .addContainerGap()
+                        )
+                        .addGroup(Alignment.LEADING, layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(debugModeLabel, labelWidth, labelWidth, labelWidth)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(debugModeComboBox, 100, 100, 100)
+                                .addContainerGap()
 
-                ));
+                        ));
 
         layout.setVerticalGroup(
                 layout.createParallelGroup(Alignment.LEADING)

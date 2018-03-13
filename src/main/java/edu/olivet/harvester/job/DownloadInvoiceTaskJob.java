@@ -30,7 +30,6 @@ public class DownloadInvoiceTaskJob extends AbstractBackgroundJob {
 
         List<InvoiceTask> list = dbManager.query(InvoiceTask.class, Cnd.where("status", "!=", "Done"));
         if (CollectionUtils.isEmpty(list)) {
-            UITools.error("No pending tasks found.");
             return;
         }
 

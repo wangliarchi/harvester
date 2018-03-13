@@ -15,6 +15,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.stream.Collectors;
 
 /**
@@ -139,7 +140,26 @@ public class BuyerAccountSettingUtils {
     public void save() {
         File file = new File(getConfigPath());
         Tools.writeStringToFile(file, JSON.toJSONString(this.accountSettings, true));
+    }
 
+    public void save(BuyerAccountSetting buyerAccountSetting) {
+        ListIterator<BuyerAccountSetting> iterator = accountSettings.listIterator();
+        boolean existed = false;
+        while (iterator.hasNext()) {
+            BuyerAccountSetting setting = iterator.next();
+            if (setting.getBuyerAccount().getEmail().equalsIgnoreCase(buyerAccountSetting.getBuyerAccount().getEmail())) {
+                //Replace element
+                iterator.set(buyerAccountSetting);
+                existed = true;
+                break;
+            }
+        }
+
+        if (!existed) {
+            accountSettings.add(buyerAccountSetting);
+        }
+        File file = new File(getConfigPath());
+        Tools.writeStringToFile(file, JSON.toJSONString(this.accountSettings, true));
     }
 
     private static String getConfigPath() {

@@ -3,10 +3,8 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 import com.google.common.collect.Lists;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.amazon.Country;
-import edu.olivet.foundations.utils.ApplicationContext;
-import edu.olivet.foundations.utils.BusinessException;
-import edu.olivet.foundations.utils.Strings;
-import edu.olivet.foundations.utils.WaitTime;
+import edu.olivet.foundations.utils.*;
+import edu.olivet.harvester.common.model.CreditCard;
 import edu.olivet.harvester.common.model.SystemSettings;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OutOfBudgetException;
@@ -17,6 +15,7 @@ import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.service.ProfitLostControl;
 import edu.olivet.harvester.fulfill.service.addressvalidator.AddressValidator;
 import edu.olivet.harvester.fulfill.service.shipping.FeeLimitChecker;
+import edu.olivet.harvester.fulfill.utils.CreditCardUtils;
 import edu.olivet.harvester.fulfill.utils.OrderAddressUtils;
 import edu.olivet.harvester.common.model.Money;
 import edu.olivet.harvester.common.model.Order;
@@ -103,6 +102,26 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
             throw new BusinessException("Cant read shipping cost.");
         }
         return shippingCost;
+    }
+
+    public boolean reviewPaymentMethod() {
+        if (StringUtils.isNotBlank(buyerPanel.getOrder().promotionCode)) {
+            Money total = parseTotal();
+            LOGGER.info("{}", total);
+            if (total.getAmount().floatValue() == 0) {
+                return true;
+            }
+            if (total.getAmount().floatValue() > 1) {
+                return false;
+            }
+        }
+        JXBrowserHelper.waitUntilVisible(browser, "#payment-information");
+        String lastDigits = JXBrowserHelper.textFromElement(browser, "#payment-information");
+        lastDigits = lastDigits.replaceAll(RegexUtils.Regex.NON_DIGITS.val(), "");
+        CreditCard creditCard = CreditCardUtils.getCreditCard(buyerPanel.getBuyer());
+
+        LOGGER.info("Last digits {} - {}", lastDigits, creditCard.lastDigits());
+        return StringUtils.containsIgnoreCase(lastDigits, creditCard.lastDigits());
     }
 
     public Money parseTotal() {

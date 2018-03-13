@@ -24,7 +24,7 @@ public class PreValidator {
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PreValidator.class);
-    private static final int COMPARE_JOB_NUMBER = 2;
+    private static final int COMPARE_JOB_NUMBER = 4;
 
 
     public static List<ItemCompareResult> compareItemNames4Orders(List<Order> orders) {
@@ -48,7 +48,7 @@ public class PreValidator {
 
 
         int jobNumber = 1;
-        if (ordersToCheck.size() > 10) {
+        if (ordersToCheck.size() > COMPARE_JOB_NUMBER) {
             jobNumber = COMPARE_JOB_NUMBER;
         }
 

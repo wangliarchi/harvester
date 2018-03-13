@@ -2,10 +2,7 @@ package edu.olivet.harvester.hunt;
 
 
 import com.google.inject.Inject;
-import edu.olivet.foundations.ui.InformationLevel;
-import edu.olivet.foundations.ui.MessagePanel;
-import edu.olivet.foundations.ui.ProgressDetail;
-import edu.olivet.foundations.ui.VirtualMessagePanel;
+import edu.olivet.foundations.ui.*;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.model.Order;
@@ -49,6 +46,11 @@ public class Hunter {
 
 
     public void execute(String spreadsheetId) {
+        while (PSEventListener.isRunning()) {
+            UITools.error("Other task is running, please try later.");
+            return;
+        }
+
         if (messagePanel == null) {
             messagePanel = messageListener;
         }
@@ -58,6 +60,11 @@ public class Hunter {
     }
 
     public void execute(RuntimeSettings runtimeSettings) {
+        while (PSEventListener.isRunning()) {
+            UITools.error("Other task is running, please try later.");
+            return;
+        }
+
         messagePanel = messageListener;
         messagePanel.displayMsg("Reading orders from order update sheet " + runtimeSettings.getSpreadsheetName() + " " + runtimeSettings.getAdvancedSubmitSetting().toString());
         List<Order> orders = appScript.readOrders(runtimeSettings);
@@ -71,6 +78,11 @@ public class Hunter {
     }
 
     public void huntForWorksheets(List<Worksheet> worksheets) {
+        while (PSEventListener.isRunning()) {
+            UITools.error("Other task is running, please try later.");
+            return;
+        }
+
         messagePanel = new ProgressDetail(Actions.FindSupplier);
         for (Worksheet worksheet : worksheets) {
             try {
@@ -102,7 +114,7 @@ public class Hunter {
             WaitTime.Short.execute();
         }
         //remove invalid orders
-        orders.removeIf(order -> order.sellerHunted() || order.colorIsGray() || order.buyerCanceled());
+        orders.removeIf(order -> order.sellerHunted() || order.colorIsGray() || order.buyerCanceled() || order.selfBuy());
 
         if (CollectionUtils.isEmpty(orders)) {
             messagePanel.displayMsg("No orders to hunt", InformationLevel.Negative);

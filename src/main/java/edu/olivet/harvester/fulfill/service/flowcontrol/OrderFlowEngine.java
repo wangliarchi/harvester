@@ -84,8 +84,7 @@ public class OrderFlowEngine extends FlowParent {
 
                 //noinspection UnusedAssignment
                 if (!order.selfOrder) {
-                    order = sheetService.reloadOrder(order);
-                    state.setOrder(order);
+                    sheetService.reloadOrder(state.getOrder());
                 }
                 exception = e;
             }

@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -55,7 +56,6 @@ public class OrderExporter {
      */
     public void execute() {
         setMessagePanel(new ProgressDetail(Actions.ExportOrders));
-        long start = System.currentTimeMillis();
         //list all marketplaces
         Settings settings = Settings.load();
         List<Country> marketplaces = settings.listAllCountries();
@@ -64,20 +64,15 @@ public class OrderExporter {
             return;
         }
         exportOrdersForMarketplaces(marketplaces, null, null);
-        messagePanel.addMsgSeparator();
-        messagePanel.displayMsg("Done in " + Strings.formatElapsedTime(start), InformationLevel.Information);
     }
 
     /**
      * triggered by export orders button
      */
     public void exportOrders(OrderExportParams params) {
-        long start = System.currentTimeMillis();
         messagePanel.displayMsg(String.format("Exporting orders from %s between %s and %s",
                 params.getMarketplaces(), params.getFromDate(), params.getToDate()), LOGGER, InformationLevel.Information);
         exportOrdersForMarketplaces(params.getMarketplaces(), params.getFromDate(), params.getToDate());
-        messagePanel.addMsgSeparator();
-        messagePanel.displayMsg("Done in " + Strings.formatElapsedTime(start), InformationLevel.Information);
     }
 
 
@@ -99,7 +94,7 @@ public class OrderExporter {
 
 
         //hunt sellers
-        if (CollectionUtils.isNotEmpty(marketplacesExportedOrders) && fromDate != null) {
+        if (CollectionUtils.isNotEmpty(marketplacesExportedOrders)) {
             messagePanel.addMsgSeparator();
             messagePanel.displayMsg("Starting to hunt sellers");
             hunter.setMessagePanel(messagePanel);
@@ -109,7 +104,7 @@ public class OrderExporter {
                     try {
                         hunter.execute(spreadsheetId);
                     } catch (Exception e) {
-                        messagePanel.displayMsg("Error while hunting sellers: " + Strings.getExceptionMsg(e));
+                        //messagePanel.displayMsg("Error while hunting sellers: " + Strings.getExceptionMsg(e));
                     }
                 }
             }
@@ -129,20 +124,22 @@ public class OrderExporter {
 
         //check if exporting service is running, load last updated date.
         if (fromDate == null) {
-            Date lastExportedDate;
-            try {
-                lastExportedDate = exportStatService.lastOrderDate(country);
-                lastExportedDate = DateUtils.addHours(lastExportedDate, -1);
-                if (lastExportedDate.after(DateUtils.addHours(now.get(), -26))) {
-                    fromDate = DateUtils.addHours(now.get(), -26);
-                } else {
-                    fromDate = lastExportedDate;
-                }
-            } catch (Exception e) {
-                LOGGER.error("", e);
-                messagePanel.displayMsg(Strings.getExceptionMsg(e), LOGGER, InformationLevel.Negative);
-                return false;
-            }
+            int hoursBack = (Dates.getDayOfWeek(now.get()) == Calendar.MONDAY) ? -50 : -26;
+            fromDate = DateUtils.addHours(now.get(), hoursBack);
+            //Date lastExportedDate;
+            //try {
+            //    lastExportedDate = exportStatService.lastOrderDate(country);
+            //    lastExportedDate = DateUtils.addHours(lastExportedDate, -1);
+            //    if (lastExportedDate.after(DateUtils.addHours(now.get(), -26))) {
+            //        fromDate = DateUtils.addHours(now.get(), -26);
+            //    } else {
+            //        fromDate = lastExportedDate;
+            //    }
+            //} catch (Exception e) {
+            //    LOGGER.error("", e);
+            //    messagePanel.displayMsg(Strings.getExceptionMsg(e), LOGGER, InformationLevel.Negative);
+            //    return false;
+            //}
         }
 
 

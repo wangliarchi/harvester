@@ -23,8 +23,8 @@ public class UIElements extends AbstractUIContainer {
     private final Menu harvester = new Menu("Harvester", "H");
     private final Menu submitOrder = new Menu("Submit Order", "O");
     private final Menu confirmShipment = new Menu("Confirm Shipment", "C");
+    private final Menu finance = new Menu("Finance", "F");
 
-    //private final Menu finance = new Menu("Finance", "F");
     @Override
     public Menu[] getMenus() {
         return new Menu[] {
@@ -32,6 +32,7 @@ public class UIElements extends AbstractUIContainer {
                 submitOrder,
                 confirmShipment,
                 Menu.Settings,
+                finance,
                 Menu.ToolBox,
                 Menu.Help
         };
@@ -67,18 +68,23 @@ public class UIElements extends AbstractUIContainer {
         });
 
 
+        map.put(finance, new Action[] {
+                Actions.DownloadInvoice,
+                Actions.RunDownloadInvoiceTask,
+                Actions.InvoiceTasks
+
+        });
+
         map.put(Menu.ToolBox, new Action[] {
                 Actions.TitleChecker,
                 Actions.OrderChecker,
                 Action.Separator,
                 Actions.OrderFulfillmentChecker,
                 Action.Separator,
-                Actions.DownloadInvoice,
-                Actions.RunDownloadInvoiceTask,
-                Actions.InvoiceTasks,
-                Action.Separator,
                 Actions.DownloadInventory,
-                Actions.SyncASINs
+                Actions.SyncASINs,
+                Action.Separator,
+                Actions.CheckPrimeBuyerAccount
         });
 
         map.put(Menu.Settings, new Action[] {
@@ -112,6 +118,7 @@ public class UIElements extends AbstractUIContainer {
                 Actions.FindSupplier,
                 Actions.ConfirmShipment,
                 Actions.SubmitSelfOrders,
+                Actions.CommonLetters,
                 Action.Settings,
                 Actions.SystemSettings,
                 Actions.ReportBug

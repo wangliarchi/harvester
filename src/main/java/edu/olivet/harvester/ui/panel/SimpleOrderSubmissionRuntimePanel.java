@@ -301,7 +301,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
             Country country = Country.fromCode(settings.getMarketplaceName());
             Account sellerEmail = Settings.load().getConfigByCountry(country).getSellerEmail();
             BuyerPanel panel = TabbedBuyerPanel.getInstance().addSheetTab(country, sellerEmail);
-            TabbedBuyerPanel.getInstance().setSelectedIndex(panel.getId());
+            TabbedBuyerPanel.getInstance().highlight(panel);
             JXBrowserHelper.loadSpreadsheet(panel.getBrowserView().getBrowser(), sellerEmail, settings.getSpreadsheetId());
         });
 
@@ -493,7 +493,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
             setAccounts4Country();
             loadSheetTabButton.setEnabled(true);
 
-            loadBudget();
+            //loadBudget();
 
             if (dialog.continueToNext) {
                 selectRange();
@@ -991,8 +991,6 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
 
                         )
         );
-
-
     }
 
 

@@ -9,8 +9,10 @@ As we prepared the shipment just now, we found the last item was just taken by a
 
 If you would like to receive a paperback copy, please let me know asap so that we will ship it immediately.
 
-If you would not like to wait for the new stock to come in, can you please log in Amazon, go to 'Your Orders' and click 'Request Cancellation' button? In this way you can get your money back asap so than you can get the book from someone else.
+If you would not like to wait for the new stock to come in, please reply this email and we will issue a full refund to your account.  
 
-I sincerely apologize for any inconvenience this has caused to you. I understand the book is in your urgent need. Please accept my apologies and let me know your thoughts.
+I guess you might have received a shipment confirmation letter. This was caused by the miscommunication between our customer service and warehouse staff. The customer service staff confirmed the shipment in the IT system just moments before the warehouse staff notified them not to do so because the last copy was found to be paperback. 
 
-<#include "../include/footer.ftl">
+I sincerely apologize for any inconvenience this has caused to you. Please accept my apologies and let me know your thoughts.
+
+<#include "include/footer.ftl">

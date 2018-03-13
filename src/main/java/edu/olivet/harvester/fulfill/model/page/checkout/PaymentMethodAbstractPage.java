@@ -52,9 +52,16 @@ abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract {
     public void selectCreditCard(Order order) {
 
         //load all available cards
-        creditCard = CreditCardUtils.getCreditCard(buyerPanel.getBuyer());
+        try {
+            creditCard = CreditCardUtils.getCreditCard(buyerPanel.getBuyer());
+        } catch (Exception e) {
+            creditCard = null;
+        }
 
         if (creditCard == null) {
+            if (StringUtils.isNotBlank(order.promotionCode)) {
+                return;
+            }
             throw new OrderSubmissionException("Credit card for buyer account " + buyer.getEmail() + " not found.");
         }
         JXBrowserHelper.waitUntilVisible(browser, ".payment-row");
@@ -81,7 +88,7 @@ abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract {
 
         //credit card not found
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
-        throw new OrderSubmissionException(String.format("Credit card with no %s not found.", creditCard.getCardNo()));
+        throw new OrderSubmissionException(String.format("Credit card with last digits %s not found.", creditCard.lastDigits()));
 
 
     }
@@ -120,21 +127,20 @@ abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract {
                 JXBrowserHelper.saveOrderScreenshot(buyerPanel.getOrder(), buyerPanel, "1");
                 throw new BusinessException(creditCardErrors.get(0).getInnerText());
             }
+            WaitTime.Shortest.execute();
         }
 
 
     }
 
     public void selectCurrency(DOMElement paymentRow) {
-        DOMElement currencyList = JXBrowserHelper.selectElementByCssSelector(paymentRow, ".a-row.currency-list");
+        DOMElement currencyList = JXBrowserHelper.selectVisibleElement(paymentRow, ".currency-list");
         if (currencyList == null || JXBrowserHelper.isHidden(currencyList)) {
             return;
         }
-
-        DOMElement firstCurrency = JXBrowserHelper.selectElementByCssSelector(paymentRow, ".a-row.currency-list input.a-declarative");
+        WaitTime.Shortest.execute();
+        DOMElement firstCurrency = JXBrowserHelper.selectVisibleElement(paymentRow, ".currency-list input.a-declarative");
         firstCurrency.click();
-
-
     }
 
 }

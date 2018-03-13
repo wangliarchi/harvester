@@ -58,7 +58,8 @@ public class SelfOrderService {
                 continue;
             }
 
-            String sheetName = a1Notation.substring(0, a1Notation.indexOf("!"));
+            int start = a1Notation.contains("'") ? 1 : 0;
+            String sheetName = a1Notation.substring(start, a1Notation.indexOf("!") - start);
             int starRow = 1;
             List<SelfOrder> ordersForSheet = new ArrayList<>();
             int row = 0;

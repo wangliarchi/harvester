@@ -35,57 +35,48 @@ public class ShippingAddressMultiPage extends ShippingAddressAbstract {
     public void execute(Order order) {
         //
         if (StringUtils.isBlank(order.recipient_name) && order.selfOrder) {
-            //find recent address from address book
-            String orderCountryName = CountryStateUtils.getInstance().getCountryName(country.code());
-            String translatedOrderCountryName = I18N_AMAZON.getText(orderCountryName, country);
+            selectAddressForOrder(order);
+            return;
+        }
 
-            List<DOMElement> addressElements = JXBrowserHelper.selectElementsByCssSelector(browser, ".address-book-entry");
-            for (DOMElement addressElement : addressElements) {
-                String countryName = JXBrowserHelper.text(addressElement, ".displayAddressCountryName");
+        //fillAddress
+        fillAddress(order);
 
-                //orderCountryName.equalsIgnoreCase(countryName)
-                if (StringUtils.equalsAnyIgnoreCase(countryName, orderCountryName, translatedOrderCountryName)) {
+        //select original address if amazon recommends address..
+        checkAddressSuggestion();
+    }
 
-                    Address address = parseEnteredAddress(addressElement);
-                    order.recipient_name = address.getName();
-                    order.ship_address_1 = address.getAddress1();
-                    order.ship_address_2 = address.getAddress2();
-                    order.ship_city = address.getCity();
-                    order.ship_state = address.getState();
-                    order.ship_phone_number = address.getPhoneNumber();
-                    order.ship_zip = address.getZip();
-                    order.ship_country = address.getCountry();
 
-                    DOMElement continueBtn = JXBrowserHelper.selectVisibleElement(addressElement, ".ship-to-this-address.a-button .a-button-text");
-                    if (continueBtn != null) {
-                        JXBrowserHelper.insertChecker(browser);
-                        continueBtn.click();
-                        WaitTime.Shortest.execute();
-                        JXBrowserHelper.waitUntilNewPageLoaded(browser);
-                        return;
-                    }
-                }
+    public void fillAddress(Order order) {
+        String errorMsg = "";
+        for (int i = 0; i < 2; i++) {
+            fillNewAddressForm(order);
+
+            //submit
+            DOMElement shipToBtn = JXBrowserHelper.selectElementByName(browser, "shipToThisAddress");
+            if (shipToBtn == null) {
+                throw new BusinessException("Error enter shipping address");
             }
 
-            throw new OrderSubmissionException("No address for country " + orderCountryName + " found.");
+            JXBrowserHelper.insertChecker(browser);
+            shipToBtn.click();
+            JXBrowserHelper.waitUntilNewPageLoaded(browser);
+
+            //check if error occur
+            errorMsg = JXBrowserHelper.textFromElement(browser, "#addressIMB p");
+            if (StringUtils.isNotBlank(errorMsg)) {
+                JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
+                LOGGER.error("Wrong address " + errorMsg);
+                fixOrderAddress(order);
+            } else {
+                return;
+            }
         }
 
-        fillNewAddressForm(order);
+        throw new OrderSubmissionException("Wrong address " + errorMsg);
+    }
 
-        DOMElement shipToBtn = JXBrowserHelper.selectElementByName(browser, "shipToThisAddress");
-        JXBrowserHelper.insertChecker(browser);
-        assert shipToBtn != null;
-        shipToBtn.click();
-        JXBrowserHelper.waitUntilNewPageLoaded(browser);
-
-        //check if error occur
-        DOMElement errorMsg = JXBrowserHelper.selectElementByCssSelector(browser, "#identity-add-new-address #addressIMB");
-        if (errorMsg != null) {
-            JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
-            LOGGER.error("Wrong address " + errorMsg.getInnerText());
-            throw new BusinessException("Wrong address " + errorMsg.getInnerText());
-        }
-
+    public void checkAddressSuggestion() {
         //select original address if amazon recommends address..
         if (JXBrowserHelper.selectElementByCssSelector(browser, "#AVS") != null) {
             DOMInputElement selectOrigin = (DOMInputElement) JXBrowserHelper.selectElementByName(browser, "addr");
@@ -102,6 +93,42 @@ public class ShippingAddressMultiPage extends ShippingAddressAbstract {
             WaitTime.Shortest.execute();
             JXBrowserHelper.waitUntilNewPageLoaded(browser);
         }
+    }
+
+    public void selectAddressForOrder(Order order) {
+        //find recent address from address book
+        String orderCountryName = CountryStateUtils.getInstance().getCountryName(country.code());
+        String translatedOrderCountryName = I18N_AMAZON.getText(orderCountryName, country);
+
+        List<DOMElement> addressElements = JXBrowserHelper.selectElementsByCssSelector(browser, ".address-book-entry");
+        for (DOMElement addressElement : addressElements) {
+            String countryName = JXBrowserHelper.text(addressElement, ".displayAddressCountryName");
+
+            //orderCountryName.equalsIgnoreCase(countryName)
+            if (StringUtils.equalsAnyIgnoreCase(countryName, orderCountryName, translatedOrderCountryName)) {
+
+                Address address = parseEnteredAddress(addressElement);
+                order.recipient_name = address.getName();
+                order.ship_address_1 = address.getAddress1();
+                order.ship_address_2 = address.getAddress2();
+                order.ship_city = address.getCity();
+                order.ship_state = address.getState();
+                order.ship_phone_number = address.getPhoneNumber();
+                order.ship_zip = address.getZip();
+                order.ship_country = address.getCountry();
+
+                DOMElement continueBtn = JXBrowserHelper.selectVisibleElement(addressElement, ".ship-to-this-address.a-button .a-button-text");
+                if (continueBtn != null) {
+                    JXBrowserHelper.insertChecker(browser);
+                    continueBtn.click();
+                    WaitTime.Shortest.execute();
+                    JXBrowserHelper.waitUntilNewPageLoaded(browser);
+                    return;
+                }
+            }
+        }
+
+        throw new OrderSubmissionException("No address for country " + orderCountryName + " found.");
     }
 
     public Address parseEnteredAddress(DOMElement addressElement) {

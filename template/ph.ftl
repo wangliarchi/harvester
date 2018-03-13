@@ -13,4 +13,4 @@ If you would not like to wait for the new stock to come in, can you please log i
 
 I sincerely apologize for any inconvenience this has caused to you. I understand the book is in your urgent need. Please accept my apologies and let me know your thoughts.
 
-<#include "../include/footer.ftl">
+<#include "include/footer.ftl">

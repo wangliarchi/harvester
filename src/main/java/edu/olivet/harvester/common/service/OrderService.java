@@ -69,11 +69,10 @@ public class OrderService {
 
         Map<String, Map<Integer, Color>> colors = new HashMap<>();
         try {
-            List<String> colorRanges = ranges.stream().map(it -> it.substring(0, it.indexOf("!")) + "!B:B").collect(Collectors.toList());
+            List<String> colorRanges = ranges.stream().map(it -> !it.contains("!") ? it : it.substring(0, it.indexOf("!")) + "!B:B").collect(Collectors.toList());
             colors = fetchBackgroundColors(spreadsheetId, colorRanges);
         } catch (Exception e) {
             LOGGER.error("error get batch sheet values for {} ranges {}. {}", spreadsheetId, ranges, e);
-
         }
 
 
@@ -89,7 +88,8 @@ public class OrderService {
             }
 
             String sheetName = a1Notation.substring(1, a1Notation.indexOf("!") - 1);
-
+            //int start = a1Notation.contains("'") ? 1 : 0;
+            //String sheetName = a1Notation.substring(start, a1Notation.indexOf("!") - start);
             //loop for each row
             //first row is header, each row represents an order/orderitem
             List<String> header = new ArrayList<>();
@@ -310,7 +310,7 @@ public class OrderService {
 
     }
 
-    public boolean isOrderSheet(String sheetName, Range<Date> dateRange) {
+    public static boolean isOrderSheet(String sheetName, Range<Date> dateRange) {
         Date minDate = dateRange.getMinimum();
         Date maxDate = DateUtils.addDays(dateRange.getMaximum(), 1);
         return "individual orders".equals(sheetName.toLowerCase()) ||

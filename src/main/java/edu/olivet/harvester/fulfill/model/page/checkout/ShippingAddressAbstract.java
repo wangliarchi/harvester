@@ -37,16 +37,9 @@ public abstract class ShippingAddressAbstract extends FulfillmentPage {
             throw new BusinessException("Order address is not valid");
         }
 
-        for (int i = 0; i < 3; i++) {
-            try {
-                _fillNewAddressForm(address);
-                return;
-            } catch (Exception e) {
-                address.setZip("0" + address.getZip());
-            } finally {
-                JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
-            }
-        }
+
+        _fillNewAddressForm(address);
+
     }
 
     private void _fillNewAddressForm(Address address) {
@@ -71,7 +64,15 @@ public abstract class ShippingAddressAbstract extends FulfillmentPage {
         }
     }
 
-
+    protected void fixOrderAddress(Order order) {
+        if (order.ship_zip.length() < 5) {
+            order.ship_zip = "0" + order.ship_zip;
+        } else {
+            String tmp = order.ship_address_1;
+            order.ship_address_1 = order.ship_address_2;
+            order.ship_address_2 = tmp;
+        }
+    }
 
 
 }

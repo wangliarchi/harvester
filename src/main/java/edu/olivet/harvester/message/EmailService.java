@@ -29,10 +29,17 @@ public class EmailService implements MessageService {
 
     @Inject
     public void init() {
-        senderAccount = Settings.load().getConfigs().get(0).getSellerEmail();
+        try {
+            senderAccount = Settings.load().getConfigs().get(0).getSellerEmail();
+        } catch (Exception e) {
+            //
+        }
     }
 
     public void sendMessage(String subject, String content, Destination destination) {
+        if (senderAccount == null) {
+            return;
+        }
         try {
             if (testMode) {
                 destination = testDestination;
@@ -48,6 +55,10 @@ public class EmailService implements MessageService {
 
     public void sendMessage(Destination destination, String subject, String content,
                             EmailContentType contentType, File... attachments) {
+        if (senderAccount == null) {
+            return;
+        }
+
         try {
             if (testMode) {
                 destination = testDestination;

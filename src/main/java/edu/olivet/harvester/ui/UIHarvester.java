@@ -124,6 +124,21 @@ public class UIHarvester extends AbstractApplicationUI {
         logViewer.displayLogs(ConfigEnums.Log.Statistic);
     }
 
+    @Inject CommonLettersEvent commonLettersEvent;
+
+    @UIEvent
+    public void commonLetters() {
+        commonLettersEvent.execute();
+    }
+
+    @Inject CheckPrimeBuyerAccountEvent checkPrimeBuyerAccountEvent;
+
+    @UIEvent
+    public void checkPrimeBuyerAccount() {
+        checkPrimeBuyerAccountEvent.execute();
+    }
+
+
     @Inject private
     ListOrderSubmissionTasks listOrderSubmissionTasks;
 
@@ -152,8 +167,8 @@ public class UIHarvester extends AbstractApplicationUI {
     }
 
     @UIEvent
-    public  void invoiceTasks() {
-       downloadInvoiceEvent.list();
+    public void invoiceTasks() {
+        downloadInvoiceEvent.list();
     }
 
     @Inject private
@@ -239,14 +254,14 @@ public class UIHarvester extends AbstractApplicationUI {
         downloadInvoiceEvent.execute();
     }
 
-    private void setDefaultSizes() {
+    protected void setDefaultSizes() {
         this.setResizable(true);
         this.setMinimumSize(new Dimension(800, 600));
         //maximized by default
         setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 
-    private void setTitleAndIcon() {
+    protected void setTitleAndIcon() {
         try {
             this.setTitle(String.format(APP_TITLE, Settings.load().getSid()));
         } catch (Exception e) {
@@ -255,7 +270,7 @@ public class UIHarvester extends AbstractApplicationUI {
         UITools.setIcon(this, "harvester.png");
     }
 
-    private void registerCloseEvent() {
+    protected void registerCloseEvent() {
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
