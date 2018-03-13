@@ -6,6 +6,7 @@ import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Constants;
+import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.model.setting.AdvancedSubmitSetting;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.*;
@@ -367,27 +368,33 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
     }
 
     public void showPauseBtn() {
-        pauseButton.setVisible(true);
-        stopButton.setVisible(true);
-        pauseButton.setEnabled(true);
-        stopButton.setEnabled(true);
+        while (!pauseButton.isVisible()) {
+            pauseButton.setVisible(true);
+            stopButton.setVisible(true);
+            pauseButton.setEnabled(true);
+            stopButton.setEnabled(true);
 
-        huntSupplierButton.setVisible(false);
-        markStatusButton.setVisible(false);
-        submitButton.setVisible(false);
+            huntSupplierButton.setVisible(false);
+            markStatusButton.setVisible(false);
+            submitButton.setVisible(false);
 
-        progressTextLabel.setVisible(true);
-        progressLabel.setVisible(true);
-        progressBar.setVisible(true);
+            progressTextLabel.setVisible(true);
+            progressLabel.setVisible(true);
+            progressBar.setVisible(true);
+            WaitTime.Shortest.execute();
+        }
 
     }
 
     public void hidePauseBtn() {
-        pauseButton.setVisible(false);
-        stopButton.setVisible(false);
-        huntSupplierButton.setVisible(true);
-        markStatusButton.setVisible(true);
-        submitButton.setVisible(true);
+        while (pauseButton.isVisible()) {
+            pauseButton.setVisible(false);
+            stopButton.setVisible(false);
+            huntSupplierButton.setVisible(true);
+            markStatusButton.setVisible(true);
+            submitButton.setVisible(true);
+            WaitTime.Shortest.execute();
+        }
     }
 
     public void showProgressBar() {
