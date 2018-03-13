@@ -52,4 +52,7 @@ public class Actions {
     public static final Action DownloadInventory = new Action("DownloadInventory", "Download Inventory", null, null);
 
     public static final Action SubmitSelfOrders = new Action("SubmitSelfOrders", "Submit Self Orders", null, "start.png");
+    public static final Action CheckPrimeBuyerAccount = new Action("CheckPrimeBuyerAccount", "Check Prime Buyer Account", null, "follow.png");
+    public static final Action CommonLetters = new Action("CommonLetters", "Common Letters", null, "csletter.gif");
+
 }
