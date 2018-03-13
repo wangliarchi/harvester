@@ -10,6 +10,7 @@ import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.exception.AuthenticationFailException;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.*;
+import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.fulfill.exception.Exceptions.RobotFoundException;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.Settings;
@@ -186,6 +187,15 @@ public class SellerPanel extends WebPanel {
         return false;
     }
 
+
+    public void sendMessage(Order order, String message) {
+        //https://sellercentral.amazon.com/111-4590317-0870612
+        String url = String.format("%s/gp/help/contact/contact.html?orderID=%s&&marketplaceID=%s", country.ascBaseUrl(), order.order_id, country.marketPlaceId());
+        JXBrowserHelper.loadPage(browser, url);
+        JXBrowserHelper.setValueForFormSelect(browser, "#commMgrCompositionSubject", "6");
+        JXBrowserHelper.fillValueForFormField(browser, "#commMgrCompositionMessage", message);
+        //https://sellercentral.amazon.com
+    }
 
     @SuppressWarnings("ConstantConditions")
     public MarketWebServiceIdentity fetchMWSInfo() {

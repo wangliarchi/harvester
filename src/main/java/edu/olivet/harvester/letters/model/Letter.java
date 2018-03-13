@@ -15,4 +15,8 @@ public class Letter {
     private String subject;
     private String body;
     private Order order;
+
+    public String toMessage() {
+        return subject + "\n\n" + body;
+    }
 }
