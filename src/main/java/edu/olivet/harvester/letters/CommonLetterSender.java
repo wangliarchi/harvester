@@ -25,6 +25,7 @@ import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.utils.MessageListener;
 import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -183,7 +184,7 @@ public class CommonLetterSender {
         }
 
         if (systemSettings.sendGrayLabelLettersViaEmail()) {
-            if (amazonOrder == null) {
+            if (amazonOrder == null && StringUtils.isBlank(order.buyer_email)) {
                 messageListener.addMsg(order, "Cant find order email address", InformationLevel.Negative);
                 return;
             }
