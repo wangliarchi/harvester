@@ -6,7 +6,7 @@ import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.harvester.common.model.CronjobLog;
 import edu.olivet.harvester.common.model.SystemSettings;
-import edu.olivet.harvester.feeds.StockUpdator;
+import edu.olivet.harvester.letters.CommonLetterSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +27,8 @@ public class SendingGrayLabelLetterJob extends AbstractBackgroundJob {
             return;
         }
 
-        ApplicationContext.getBean(StockUpdator.class).execute();
+        ApplicationContext.getBean(CommonLetterSender.class).execute();
+
         CronjobLog log = new CronjobLog();
         log.setId(this.getClass().getName() + Dates.nowAsFileName());
         log.setJobName(this.getClass().getName());

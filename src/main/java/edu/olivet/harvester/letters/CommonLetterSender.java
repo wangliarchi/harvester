@@ -2,8 +2,8 @@ package edu.olivet.harvester.letters;
 
 import com.google.api.services.sheets.v4.model.Spreadsheet;
 import com.google.inject.Inject;
-import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.*;
+import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.model.Order;
@@ -12,7 +12,6 @@ import edu.olivet.harvester.common.service.OrderService;
 import edu.olivet.harvester.export.model.AmazonOrder;
 import edu.olivet.harvester.fulfill.service.AmazonOrderService;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
-import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.hunt.model.Seller;
 import edu.olivet.harvester.hunt.service.HuntService;
 import edu.olivet.harvester.hunt.service.SheetService;
@@ -23,9 +22,8 @@ import edu.olivet.harvester.letters.service.GrayLetterRule.GrayRule;
 import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
-import edu.olivet.harvester.ui.Actions;
 import edu.olivet.harvester.utils.MessageListener;
-import lombok.Setter;
+import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
@@ -38,10 +36,9 @@ import java.util.stream.Collectors;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 3/10/2018 10:08 AM
  */
-public class Mailer {
+public class CommonLetterSender {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Mailer.class);
-    private static final int MAX_DAYS = 7;
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommonLetterSender.class);
 
     @Inject SheetAPI sheetAPI;
     @Inject OrderService orderService;
@@ -53,6 +50,26 @@ public class Mailer {
     @Inject AmazonOrderService amazonOrderService;
 
     @Inject private MessageListener messageListener;
+
+    public void execute() {
+        //get all order update sheets for account
+        List<String> spreadIds;
+        try {
+            spreadIds = Settings.load().listAllSpreadsheets();
+        } catch (BusinessException e) {
+            LOGGER.error("No configuration file found. {}", e);
+            return;
+        }
+
+        //process for each spreadsheet
+        for (String spreadId : spreadIds) {
+            try {
+                execute(spreadId);
+            } catch (Exception e) {
+                LOGGER.error("Error when confirm shipment for sheet {} {}", spreadId, e);
+            }
+        }
+    }
 
     public void execute(String spreadsheetId) {
         Date minDate = DateUtils.addDays(new Date(), SystemSettings.load().getGrayLabelLetterMaxDays());

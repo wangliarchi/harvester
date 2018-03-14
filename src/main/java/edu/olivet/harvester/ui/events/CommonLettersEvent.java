@@ -2,17 +2,11 @@ package edu.olivet.harvester.ui.events;
 
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
-import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Strings;
-import edu.olivet.harvester.fulfill.model.FulfillmentEnum;
-import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
-import edu.olivet.harvester.fulfill.service.ProgressUpdater;
-import edu.olivet.harvester.fulfill.utils.validation.RuntimeSettingsValidator;
-import edu.olivet.harvester.hunt.Hunter;
-import edu.olivet.harvester.letters.Mailer;
+import edu.olivet.harvester.letters.CommonLetterSender;
 import edu.olivet.harvester.spreadsheet.model.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
@@ -20,7 +14,6 @@ import edu.olivet.harvester.ui.dialog.ChooseSheetDialog;
 import edu.olivet.harvester.ui.panel.SimpleOrderSubmissionRuntimePanel;
 import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +28,7 @@ public class CommonLettersEvent extends Observable implements HarvesterUIEvent {
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonLettersEvent.class);
 
     @Inject private
-    Mailer mailer;
+    CommonLetterSender mailer;
 
     @Inject
     private AppScript appScript;
