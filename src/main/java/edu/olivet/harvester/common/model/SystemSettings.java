@@ -44,7 +44,7 @@ public class SystemSettings {
     private LocalTime grayLabelLetterSendingTime = LocalTime.of(20, 0);
     private Integer grayLabelLetterSendingAllowedRange = 15;
     private Integer grayLabelLetterMaxDays = 7;
-    private String grayLabelLetterSendingMethod = "Both";
+    private String grayLabelLetterSendingMethod = "Both ASC and Email";
 
 
     public static final String SYSTEM_SETTINGS_FILE_PATH = Directory.Customize.path() + "/system-settings.json";

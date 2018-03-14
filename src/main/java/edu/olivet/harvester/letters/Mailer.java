@@ -55,7 +55,7 @@ public class Mailer {
     @Inject private MessageListener messageListener;
 
     public void execute(String spreadsheetId) {
-        Date minDate = DateUtils.addDays(new Date(), -MAX_DAYS);
+        Date minDate = DateUtils.addDays(new Date(), SystemSettings.load().getGrayLabelLetterMaxDays());
         Spreadsheet spreadsheet = sheetAPI.getSpreadsheet(spreadsheetId);
 
         List<Order> orders = orderService.fetchOrders(spreadsheet, minDate);
@@ -109,7 +109,7 @@ public class Mailer {
 
         messageListener.displayMsg(orders.size() + " order(s) to be processed.");
 
-        List<Order> ordersToFindSupplier = orders.stream().filter(it -> GrayLetterRule.needFindSupplier(it)).collect(Collectors.toList());
+        List<Order> ordersToFindSupplier = orders.stream().filter(GrayLetterRule::needFindSupplier).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(ordersToFindSupplier)) {
             messageListener.addMsg("Trying to find suppliers for " + ordersToFindSupplier.size() + " order(s).");
             for (Order order : ordersToFindSupplier) {
@@ -122,8 +122,8 @@ public class Mailer {
             messageListener.addMsgSeparator();
         }
 
-        List<Order> ordersToSendLetters = orders.stream().filter(it -> GrayLetterRule.needSendLetter(it)).collect(Collectors.toList());
-        messageListener.addMsg(ordersToSendLetters.size() + " order(s) to send letters.");
+        List<Order> ordersToSendLetters = orders.stream().filter(GrayLetterRule::needSendLetter).collect(Collectors.toList());
+        messageListener.addMsg(ordersToSendLetters.size() + " order(s) to send letters. Messages will be sent via " + SystemSettings.load().getGrayLabelLetterSendingMethod());
         if (CollectionUtils.isNotEmpty(ordersToSendLetters)) {
             for (Order order : ordersToSendLetters) {
                 try {
@@ -167,6 +167,7 @@ public class Mailer {
 
         if (systemSettings.sendGrayLabelLettersViaEmail()) {
             if (amazonOrder == null) {
+                messageListener.addMsg(order, "Cant find order email address", InformationLevel.Negative);
                 return;
             }
 

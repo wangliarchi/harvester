@@ -39,7 +39,7 @@ public class GrayLabelLettersSettingPanel extends JPanel {
 
         final JLabel sendingMethodLabel = new JLabel("Sending Message Via");
         sendingMethodsComBox = new JComboBox<>();
-        sendingMethodsComBox.setModel(new DefaultComboBoxModel<>(new String[] {"Amazon Seller Central", "Email", "Both"}));
+        sendingMethodsComBox.setModel(new DefaultComboBoxModel<>(new String[] {"Amazon Seller Central", "Email", "Both ASC and Email"}));
         sendingMethodsComBox.setSelectedItem(systemSettings.getGrayLabelLetterSendingMethod());
 
 
