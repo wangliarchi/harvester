@@ -3,6 +3,7 @@ package edu.olivet.harvester.common.model;
 import com.alibaba.fastjson.JSON;
 import com.google.inject.Singleton;
 import edu.olivet.foundations.utils.Directory;
+import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.ui.Harvester;
 import lombok.Data;
@@ -39,6 +40,13 @@ public class SystemSettings {
     private String selfOrderSpreadsheetId = "";
     private float selfOrderCostLimit = 1f;
 
+    private boolean enableAutoSendGrayLabelLetters = false;
+    private LocalTime grayLabelLetterSendingTime = LocalTime.of(20, 0);
+    private Integer grayLabelLetterSendingAllowedRange = 15;
+    private Integer grayLabelLetterMaxDays = 7;
+    private String grayLabelLetterSendingMethod = "Both";
+
+
     public static final String SYSTEM_SETTINGS_FILE_PATH = Directory.Customize.path() + "/system-settings.json";
     public static final String TEST_SYSTEM_SETTINGS_FILE_PATH = "src/test/resources/conf/system-settings.json";
 
@@ -54,6 +62,14 @@ public class SystemSettings {
 
     private SystemSettings() {
 
+    }
+
+    public boolean sendGrayLabelLettersViaASC() {
+        return Strings.containsAnyIgnoreCase(grayLabelLetterSendingMethod, "both", "amazon");
+    }
+
+    public boolean sendGrayLabelLettersViaEmail() {
+        return Strings.containsAnyIgnoreCase(grayLabelLetterSendingMethod, "both", "mail");
     }
 
     public synchronized static SystemSettings reload() {

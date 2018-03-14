@@ -146,6 +146,8 @@ public class Order implements Keyable {
 
     public String sheetName;
 
+    public String buyer_email = "";
+
     /**
      * 做单用promo code
      */

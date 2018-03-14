@@ -66,7 +66,7 @@ public class AmazonOrderService {
         throw new BusinessException("fail to load order " + order.order_id + " from  " + country);
     }
 
-    private AmazonOrder loadFromLocal(String amazonOrderId, String sku) {
+    public AmazonOrder loadFromLocal(String amazonOrderId, String sku) {
         List<AmazonOrder> orders = dbManager.query(AmazonOrder.class, Cnd.where("orderId", "=", amazonOrderId)
                 .and("sku", "=", sku));
         if (CollectionUtils.isEmpty(orders)) {

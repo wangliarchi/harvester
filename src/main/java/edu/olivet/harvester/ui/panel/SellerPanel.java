@@ -188,14 +188,25 @@ public class SellerPanel extends WebPanel {
     }
 
 
-    public void sendMessage(Order order, String message) {
+    public boolean sendMessage(Order order, String message) {
         //https://sellercentral.amazon.com/111-4590317-0870612
         String url = String.format("%s/gp/help/contact/contact.html?orderID=%s&&marketplaceID=%s", country.ascBaseUrl(), order.order_id, country.marketPlaceId());
         JXBrowserHelper.loadPage(browser, url);
+        WaitTime.Shortest.execute();
         JXBrowserHelper.setValueForFormSelect(browser, "#commMgrCompositionSubject", "6");
+        WaitTime.Shortest.execute();
         JXBrowserHelper.fillValueForFormField(browser, "#commMgrCompositionMessage", message);
+        WaitTime.Short.execute();
+
+        JXBrowserHelper.insertChecker(browser);
+        JXBrowserHelper.selectVisibleElement(browser, "#sendemail").click();
+        JXBrowserHelper.waitUntilNewPageLoaded(browser);
+
+        String msg = JXBrowserHelper.textFromElement(browser, "table");
+        return Strings.containsAnyIgnoreCase(msg, "Your mail has been sent");
         //https://sellercentral.amazon.com
     }
+
 
     @SuppressWarnings("ConstantConditions")
     public MarketWebServiceIdentity fetchMWSInfo() {

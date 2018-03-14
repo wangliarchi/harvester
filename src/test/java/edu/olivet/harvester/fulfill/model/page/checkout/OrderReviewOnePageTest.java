@@ -80,8 +80,8 @@ public class OrderReviewOnePageTest extends BaseTest {
                     buyerPanel.setOrder(order);
                     browser.loadHTML(Tools.readFileToString(file));
                     WaitTime.Short.execute();
-                    Address address = orderReviewOnePage.parseEnteredAddress();
                     try {
+                        Address address = orderReviewOnePage.parseEnteredAddress();
                         if (!addressValidatorService.verify(Address.loadFromOrder(order), address)) {
                             LOGGER.error("Address failed verification. " + dir.getName() + "/" + file.getName() + " Entered " + address + ", original " + Address.loadFromOrder(order));
                         }

@@ -156,11 +156,13 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
 
     public Address parseEnteredAddress() {
         try {
-            String name = JXBrowserHelper.text(browser, ".displayAddressUL .displayAddressFullName");
-            String addressLine1 = JXBrowserHelper.text(browser, ".displayAddressUL .displayAddressAddressLine1");
-            String addressLine2 = JXBrowserHelper.text(browser, ".displayAddressUL .displayAddressAddressLine2");
-            String cityStateZip = JXBrowserHelper.text(browser, ".displayAddressUL .displayAddressCityStateOrRegionPostalCode");
-            String country = JXBrowserHelper.text(browser, ".displayAddressUL .displayAddressCountryName");
+            //
+            DOMElement shippingAddressDiv = JXBrowserHelper.selectVisibleElement(browser, "#desktop-shipping-address-div,#shipaddress");
+            String name = JXBrowserHelper.text(shippingAddressDiv, ".displayAddressUL .displayAddressFullName");
+            String addressLine1 = JXBrowserHelper.text(shippingAddressDiv, ".displayAddressUL .displayAddressAddressLine1");
+            String addressLine2 = JXBrowserHelper.text(shippingAddressDiv, ".displayAddressUL .displayAddressAddressLine2");
+            String cityStateZip = JXBrowserHelper.text(shippingAddressDiv, ".displayAddressUL .displayAddressCityStateOrRegionPostalCode");
+            String country = JXBrowserHelper.text(shippingAddressDiv, ".displayAddressUL .displayAddressCountryName");
             String[] parts = StringUtils.split(cityStateZip, ",");
             String city = parts[0].trim();
             String[] regionZip = StringUtils.split(parts[1].trim(), " ");

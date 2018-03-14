@@ -25,6 +25,8 @@ public enum BackgroundJob {
     InvoiceDownloadingTask("0 0 21 ? * * *", DownloadInvoiceTaskJob.class),
 
     SyncASIN("0 0 3 ? * MON,TUE,WED,THU,FRI,SAT *", SyncASINJob.class),
+
+    SendingGrayLabelLetter("0 0 20 ? * MON,TUE,WED,THU,FRI,SAT *", SendingGrayLabelLetterJob.class),
     /**
      * check unshipped orders, and send notification to account owner
      * run all weekdays and Saturday. random time between 17:00-18:00pm
@@ -70,6 +72,13 @@ public enum BackgroundJob {
         if (this == SyncASIN) {
             LocalTime syncTime = systemSettings.getAsinSyncTime();
             int allowedRange = systemSettings.getAsinSyncAllowedRange();
+            LocalTime scheduledTime = DatetimeHelper.randomTimeBetween(syncTime, allowedRange);
+            return String.format("%d %d %d ? * MON,TUE,WED,THU,FRI,SAT *", scheduledTime.getSecond(), scheduledTime.getMinute(), scheduledTime.getHour());
+        }
+
+        if (this == SendingGrayLabelLetter) {
+            LocalTime syncTime = systemSettings.getGrayLabelLetterSendingTime();
+            int allowedRange = systemSettings.getGrayLabelLetterSendingAllowedRange();
             LocalTime scheduledTime = DatetimeHelper.randomTimeBetween(syncTime, allowedRange);
             return String.format("%d %d %d ? * MON,TUE,WED,THU,FRI,SAT *", scheduledTime.getSecond(), scheduledTime.getMinute(), scheduledTime.getHour());
         }

@@ -1,8 +1,8 @@
 package edu.olivet.harvester.letters.service;
 
-import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
@@ -19,18 +19,20 @@ import org.slf4j.LoggerFactory;
 public class ASCLetterSender {
     private static final Logger LOGGER = LoggerFactory.getLogger(ASCLetterSender.class);
 
-    @Inject LetterTemplateService letterTemplateService;
 
-    public void sendForOrder(Order order) {
+    public void sendForOrder(Order order, Letter letter) {
         Country marketplaceCountry = OrderCountryUtils.getMarketplaceCountry(order);
         Country settingCountry = marketplaceCountry.europe() ? Country.UK : marketplaceCountry;
         Account seller = Settings.load().getConfigByCountry(settingCountry).getSeller();
         SellerPanel sellerPanel = addTab(seller, settingCountry);
         sellerPanel.loginSellerCentral(marketplaceCountry);
 
-        Letter letter = letterTemplateService.getLetter(order);
+        boolean result = sellerPanel.sendMessage(order, letter.toMessage());
 
-        sellerPanel.sendMessage(order, letter.toMessage());
+        if (!result) {
+            throw new BusinessException("Fail to send gray letter via asc");
+        }
+
     }
 
 

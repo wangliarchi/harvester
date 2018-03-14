@@ -39,6 +39,10 @@ public class GrayLetterRule {
             return GrayRule.None;
         }
 
+        if (order.buyerCanceled()) {
+            return GrayRule.None;
+        }
+
         if (needFindSupplier(order)) {
             return GrayRule.FindSupplier;
         }

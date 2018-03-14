@@ -50,7 +50,7 @@ public class AddressValidatorService implements AddressValidator {
         try {
             Jsoup.connect(url).ignoreContentType(true).timeout(12000).execute();
         } catch (IOException e) {
-            LOGGER.error("", e);
+            LOGGER.error("{} - ", url, e);
             //throw new BusinessException(e);
             //e.printStackTrace();
         }

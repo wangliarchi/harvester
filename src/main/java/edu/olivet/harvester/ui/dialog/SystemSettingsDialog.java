@@ -38,6 +38,9 @@ public class SystemSettingsDialog extends BaseDialog {
         orderConfirmationSettingPanel = new OrderConfirmationSettingPanel();
         tabbedPane.addTab("Order Confirmation", orderConfirmationSettingPanel);
 
+        grayLabelLettersSettingPanel = new GrayLabelLettersSettingPanel();
+        tabbedPane.addTab("Common Letters", grayLabelLettersSettingPanel);
+
         selfOrderSettingPanel = new SelfOrderSettingPanel();
         tabbedPane.addTab("Self Orders", selfOrderSettingPanel);
 
@@ -56,7 +59,7 @@ public class SystemSettingsDialog extends BaseDialog {
 
         layout.setHorizontalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(tabbedPane, 600, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                        .addComponent(tabbedPane, 670, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
                         .addGroup(GroupLayout.Alignment.LEADING, layout.createSequentialGroup().addGap(20).addComponent(aboutBtn))
                         .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addComponent(okBtn, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH, UITools.BUTTON_WIDTH)
@@ -89,7 +92,7 @@ public class SystemSettingsDialog extends BaseDialog {
     private DownloadInvoiceSettingPanel downloadInvoiceSettingPanel;
     private SyncASINsSettingPanel syncASINsSettingPanel;
     private SelfOrderSettingPanel selfOrderSettingPanel;
-
+    private GrayLabelLettersSettingPanel grayLabelLettersSettingPanel;
     @Override
     public void ok() {
         orderExportSettingPanel.collectData();
