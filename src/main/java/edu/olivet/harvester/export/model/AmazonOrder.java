@@ -181,6 +181,19 @@ public class AmazonOrder extends PrimaryKey {
         return order;
     }
 
+    public String getEmail() {
+        if (StringUtils.isBlank(email)) {
+            try {
+                Order amazonOrder = MWSUtils.buildMwsObject(this.xml, Order.class);
+                email = amazonOrder.getBuyerEmail();
+            } catch (Exception e) {
+                //
+            }
+        }
+
+        return email;
+    }
+
     @Override
     public String getPK() {
         return orderItemId;
