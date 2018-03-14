@@ -10,6 +10,7 @@ import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.exception.AuthenticationFailException;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.*;
+import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.fulfill.exception.Exceptions.RobotFoundException;
 import edu.olivet.harvester.utils.JXBrowserHelper;
@@ -198,6 +199,16 @@ public class SellerPanel extends WebPanel {
         JXBrowserHelper.fillValueForFormField(browser, "#commMgrCompositionMessage", message);
         WaitTime.Short.execute();
 
+        //
+        //fetch buyer email address, vl0d7jmvtf30k52@marketplace.amazon.com)
+
+        List<DOMElement> lists = JXBrowserHelper.selectElementsByCssSelector(browser, "#toFromBox .tiny");
+        for (DOMElement element : lists) {
+            String text = JXBrowserHelper.textFromElement(element);
+            String emailAddress = fetchAmazonEmailAddress(text);
+            order.buyer_email = emailAddress;
+        }
+
         JXBrowserHelper.insertChecker(browser);
         JXBrowserHelper.selectVisibleElement(browser, "#sendemail").click();
         JXBrowserHelper.waitUntilNewPageLoaded(browser);
@@ -207,6 +218,17 @@ public class SellerPanel extends WebPanel {
         //https://sellercentral.amazon.com
     }
 
+    public static String fetchAmazonEmailAddress(String text) {
+        String regex = "[\\w.]+@[\\w.]+";
+        String email = RegexUtils.getMatched(text, regex, false);
+        if (StringUtils.isNotBlank(email)) {
+            if (Strings.containsAnyIgnoreCase(email, "amazon")) {
+                return email;
+            }
+        }
+
+        return null;
+    }
 
     @SuppressWarnings("ConstantConditions")
     public MarketWebServiceIdentity fetchMWSInfo() {
@@ -268,6 +290,9 @@ public class SellerPanel extends WebPanel {
     }
 
     public static void main(String[] args) {
+
+        //String email = SellerPanel.fetchAmazonEmailAddress(" (vl0d7jmvtf30k52@marketplace.amazon.com)");
+
         JFrame frame = new JFrame();
         frame.setMinimumSize(new Dimension(1400, 900));
         frame.setTitle("Seller Panel Demo");

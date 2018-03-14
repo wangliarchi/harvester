@@ -162,7 +162,7 @@ public class CommonLetterSender {
                 return;
             }
         } catch (Exception e) {
-            LOGGER.error("Failed to load order info from Amazon via API.");
+            LOGGER.error("Failed to load order info from Amazon via API.", e);
             amazonOrder = amazonOrderService.loadFromLocal(order.order_id, order.sku);
         }
 
@@ -177,7 +177,7 @@ public class CommonLetterSender {
                 ascLetterSender.sendForOrder(order, letter);
                 finished = true;
             } catch (Exception e) {
-                LOGGER.error("", e);
+                LOGGER.error("Failed sending message via ASC ", e);
                 letterSheetService.fillFailedInfo(order, "Failed via ASC");
             }
         }
