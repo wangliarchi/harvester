@@ -18,7 +18,7 @@ import edu.olivet.harvester.common.model.OrderEnums.OrderItemType;
 import edu.olivet.harvester.spreadsheet.model.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
-import edu.olivet.harvester.ui.ProgressBarComponent;
+import edu.olivet.harvester.ui.utils.ProgressBarComponent;
 import edu.olivet.harvester.ui.dialog.ChooseSheetDialog;
 import edu.olivet.harvester.ui.dialog.SelectRangeDialog;
 import edu.olivet.harvester.ui.events.HuntSuppliersEvent;

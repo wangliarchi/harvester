@@ -3,8 +3,10 @@ package edu.olivet.harvester.letters.service;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.common.model.SystemSettings;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.letters.model.Letter;
 import edu.olivet.harvester.ui.panel.GmailWebPanel;
@@ -30,13 +32,26 @@ public class GmailLetterSender {
         Account sellerEmailAccount = Settings.load().getConfigByCountry(settingCountry).getSellerEmail();
         GmailWebPanel webPanel = addTab(sellerEmailAccount);
 
+        if (SystemSettings.load().isOrderSubmissionDebugModel()) {
+            order.buyer_email = Constants.RND_EMAIL;
+        }
         webPanel.sendMessage(order.buyer_email, letter.getSubject(), letter.getBody());
+
+    }
+
+    public void sendMessageToCS(Order order, Letter letter) {
+        Country marketplaceCountry = OrderCountryUtils.getMarketplaceCountry(order);
+        Country settingCountry = marketplaceCountry.europe() ? Country.UK : marketplaceCountry;
+        Account sellerEmailAccount = Settings.load().getConfigByCountry(settingCountry).getSellerEmail();
+        GmailWebPanel webPanel = addTab(sellerEmailAccount);
+
+        webPanel.sendMessage(sellerEmailAccount.getEmail(), letter.getSubject(), letter.getBody());
 
     }
 
     public GmailWebPanel addTab(Account emailAccount) {
         final long start = System.currentTimeMillis();
-        String tabKey = "Email-" + emailAccount.getKey();
+        String tabKey = GmailWebPanel.getKey(emailAccount);
         GmailWebPanel webPanel;
         try {
             webPanel = (GmailWebPanel) TabbedBuyerPanel.getInstance().getWebPanel(tabKey);

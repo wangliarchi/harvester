@@ -1,4 +1,4 @@
-package edu.olivet.harvester.ui;
+package edu.olivet.harvester.ui.menu;
 
 import edu.olivet.foundations.ui.Action;
 
@@ -40,7 +40,7 @@ public class Actions {
 
     public static final Action TitleChecker = new Action("TitleChecker", "Product Title Checker", null, null);
 
-    public static final Action OrderChecker = new Action("OrderChecker", "Order Data Checker", null, null);
+    //public static final Action OrderChecker = new Action("OrderChecker", "Order Fulfillment Data Checker", null, null);
 
     public static final Action OrderFulfillmentChecker = new Action("OrderFulfillmentChecker", "Order Fulfillment Checker", null, null);
 
@@ -54,5 +54,6 @@ public class Actions {
     public static final Action SubmitSelfOrders = new Action("SubmitSelfOrders", "Submit Self Orders", null, "start.png");
     public static final Action CheckPrimeBuyerAccount = new Action("CheckPrimeBuyerAccount", "Check Prime Buyer Account", null, "follow.png");
     public static final Action CommonLetters = new Action("CommonLetters", "Common Letters", null, "csletter.gif");
+    public static final Action CheckStoreName = new Action("CheckStoreName", "Check & Fix Store Names", null, null);
 
 }

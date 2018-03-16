@@ -15,7 +15,6 @@ import edu.olivet.harvester.fulfill.exception.Exceptions.*;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.service.ProgressUpdater;
 import edu.olivet.harvester.fulfill.service.flowcontrol.OrderFlowEngine;
-import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.selforder.model.SelfOrder;
 import edu.olivet.harvester.selforder.service.OrderFulfillmentRecordService;
 import edu.olivet.harvester.selforder.service.SelfOrderService;
@@ -149,8 +148,6 @@ public class OrderSubmitter {
             } else {
                 messageListener.addMsg("Row " + order.row + " submission failed. " + " - took " + Strings.formatElapsedTime(start), InformationLevel.Negative);
             }
-        } catch (Exception e) {
-            throw e;
         } finally {
             TabbedBuyerPanel.getInstance().setNormalIcon(buyerPanel);
         }

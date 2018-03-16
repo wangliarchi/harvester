@@ -10,7 +10,6 @@ import edu.olivet.harvester.ui.panel.SelfOrderRecordPanel;
 import lombok.Getter;
 
 import javax.swing.*;
-import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.TitledBorder;
 import java.awt.*;

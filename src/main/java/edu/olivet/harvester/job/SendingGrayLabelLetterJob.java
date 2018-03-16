@@ -7,6 +7,7 @@ import edu.olivet.foundations.utils.Dates;
 import edu.olivet.harvester.common.model.CronjobLog;
 import edu.olivet.harvester.common.model.SystemSettings;
 import edu.olivet.harvester.letters.CommonLetterSender;
+import edu.olivet.harvester.utils.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +22,10 @@ public class SendingGrayLabelLetterJob extends AbstractBackgroundJob {
 
     @Override
     public void execute() {
+
+        //check store name
+        Settings.load().validateAndFixStoreName();
+
         SystemSettings systemSettings = SystemSettings.load();
         if (!systemSettings.isEnableAutoSendGrayLabelLetters()) {
             LOGGER.info("Auto sending gray label letters was not enabled. To enable this function, go to Settings->System Settings->Common Letters");

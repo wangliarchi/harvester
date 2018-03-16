@@ -179,7 +179,7 @@ public class Migration {
                     }
 
                     cfg.setMwsCredential(new MarketWebServiceIdentity(sellerId, accessKey, secretKey, country.marketPlaceId()));
-                    cfg.setStoreName(mwsCredentialParts[mwsCredentialParts.length - 7 + 5].trim());
+                    cfg.setStoreName(mwsCredentialParts[mwsCredentialParts.length - 7 + 4].trim());
                 }
 
                 configs.add(cfg);

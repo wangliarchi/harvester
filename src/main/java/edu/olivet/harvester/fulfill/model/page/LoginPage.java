@@ -174,11 +174,12 @@ public class LoginPage extends FulfillmentPage implements PageObject {
                 if (StringUtils.length(enteredCode) >= 6) {
                     break;
                 }
-                times++;
                 WaitTime.Normal.execute();
                 if (times > 5) {
                     throw new BuyerAccountAuthenticationException("Fail to enter verification code");
                 }
+
+                times++;
             }
         }
 

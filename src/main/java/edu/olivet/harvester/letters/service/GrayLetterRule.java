@@ -32,8 +32,7 @@ public class GrayLetterRule {
     //b.检查两天内的status（sg）和remark，对于remark含有 检查已经confirm后 随即发灰条信
     //c.检查两天内的status和remark，对于status和remark标有ng，wc，hp，ph，lw，检查已经confirm后随即发灰条信（wc除外）
     //d.对于us的快递单灰条（运费为6.99），重新找单失败后，检查已经confirm后随即发灰条信
-
-    public static GrayRule getGrayRule(Order order) {
+    public static GrayRule getGrayRule(Order order, boolean huntSupplier) {
 
         if (!StringUtils.equalsAnyIgnoreCase(order.status, ArrayUtils.addAll(GRAY_LETTER_REMARKS, COMMON_GRAY_LETTER_REMARKS))) {
             return GrayRule.None;
@@ -43,11 +42,11 @@ public class GrayLetterRule {
             return GrayRule.None;
         }
 
-        if (needFindSupplier(order)) {
+        if (huntSupplier && needFindSupplier(order)) {
             return GrayRule.FindSupplier;
         }
 
-        if (needSendLetter(order)) {
+        if (needSendLetter(order, huntSupplier)) {
             return GrayRule.SendLetter;
         }
 
@@ -57,6 +56,11 @@ public class GrayLetterRule {
 
     public static boolean needFindSupplier(Order order) {
         if (!StringUtils.equalsAnyIgnoreCase(order.status, COMMON_GRAY_LETTER_REMARKS)) {
+            return false;
+        }
+
+        //检查两天内的status（sg）和remark，对于remark含有 检查已经confirm后 随即发灰条信
+        if (Strings.containsAnyIgnoreCase(order.remark, BLACKLIST_REMARKS)) {
             return false;
         }
 
@@ -70,14 +74,11 @@ public class GrayLetterRule {
 
         int days = Dates.daysBetween(orderDate, new Date());
 
-        if (days >= 7) {
-            return false;
-        }
-
-        return true;
+        return days < 7;
     }
 
-    public static boolean needSendLetter(Order order) {
+    @SuppressWarnings("RedundantIfStatement")
+    public static boolean needSendLetter(Order order, boolean waitToFindSupplier) {
 
         if (!StringUtils.equalsAnyIgnoreCase(order.status, ArrayUtils.addAll(GRAY_LETTER_REMARKS, COMMON_GRAY_LETTER_REMARKS))) {
             return false;
@@ -90,6 +91,10 @@ public class GrayLetterRule {
 
         //c.检查两天内的status和remark，对于status和remark标有ng，wc，hp，ph，lw，检查已经confirm后随即发灰条信（wc除外）
         if (StringUtils.equalsAnyIgnoreCase(order.status, GRAY_LETTER_REMARKS)) {
+            return true;
+        }
+
+        if(!waitToFindSupplier) {
             return true;
         }
 

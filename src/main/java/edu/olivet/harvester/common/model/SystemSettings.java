@@ -65,7 +65,7 @@ public class SystemSettings {
     }
 
     public boolean sendGrayLabelLettersViaASC() {
-        return Strings.containsAnyIgnoreCase(grayLabelLetterSendingMethod, "both", "amazon");
+        return Strings.containsAnyIgnoreCase(grayLabelLetterSendingMethod, "both", "amazon") && !isOrderSubmissionDebugModel();
     }
 
     public boolean sendGrayLabelLettersViaEmail() {

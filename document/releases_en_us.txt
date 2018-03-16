@@ -749,3 +749,22 @@ b. check if order sheet data is unbroken - columns deleted etc.
 
 更新内容：
 1. bug fixes
+
+======================================================================
+版本：1.0-2018-03-08.1-GA,1.0-2018-03-14.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. bug fixes & improvements
+
+======================================================================
+版本：1.0-2018-03-14.1-GA,1.0-2018-03-16.1-GA
+
+代号：Harvester
+性质：0
+
+更新内容：
+1. common letters
+2. bug fixes & improvements

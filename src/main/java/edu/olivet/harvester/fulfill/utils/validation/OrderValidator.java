@@ -27,6 +27,7 @@ import edu.olivet.harvester.common.model.OrderEnums;
 import edu.olivet.harvester.common.model.Remark;
 import edu.olivet.harvester.utils.Settings;
 import edu.olivet.harvester.utils.common.DateFormat;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.nutz.dao.Cnd;
@@ -614,6 +615,9 @@ public class OrderValidator {
                         .and("sku", "=", order.sku)
                         .and("quantityPurchased", "=", order.quantity_purchased));
 
+        if (CollectionUtils.isEmpty(list)) {
+            return "";
+        }
         List<OrderFulfillmentRecord> finalList = new ArrayList<>();
 
         //check remark, mark as duplicated if

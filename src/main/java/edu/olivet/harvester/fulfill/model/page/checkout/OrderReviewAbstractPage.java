@@ -37,6 +37,8 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderReviewAbstractPage.class);
     private static final List<String> SHIPPING_KEYWORDS =
             Lists.newArrayList("Shipping", "packing", "Verpackung", "Livraison", "Envío", "spedizione");
+    private static final List<String> GIFTCARD_KEYWORDS =
+            Lists.newArrayList("Gift Card", "Tarjeta de regalo", "Carta regalo", "Carte cadeau", "Geschenkkarte");
 
     OrderReviewAbstractPage(BuyerPanel buyerPanel) {
         super(buyerPanel);
@@ -44,14 +46,15 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
 
     public void checkTotalCost(Order order) {
         Money grandTotal = parseTotal();
-
+        Money giftCardCost = parseGiftCardCost();
+        float totalUSD = grandTotal.toUSDAmount().floatValue() + giftCardCost.toUSDAmount().floatValue();
         if (order.selfOrder) {
-            if (grandTotal.toUSDAmount().floatValue() > SystemSettings.load().getSelfOrderCostLimit()) {
+            if (totalUSD > SystemSettings.load().getSelfOrderCostLimit()) {
                 throw new OrderSubmissionException("Order cost " + grandTotal.usdText() + " exceed maximum limit");
             }
         } else {
 
-            if (!ProfitLostControl.canPlaceOrder(order, grandTotal.toUSDAmount().floatValue())) {
+            if (!ProfitLostControl.canPlaceOrder(order, totalUSD)) {
                 throw new OrderSubmissionException("Order cost " + grandTotal.usdText() + " exceed maximum limit");
             }
 
@@ -64,8 +67,8 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
             }
         }
 
-        order.orderTotalCost = grandTotal;
-        order.cost = grandTotal.toUSDAmount().toPlainString();
+        order.orderTotalCost = new Money(grandTotal.toUSDAmount().floatValue() + giftCardCost.toUSDAmount().floatValue(), Country.US);
+        order.cost = order.orderTotalCost.toUSDAmount().toPlainString();
     }
 
 
@@ -102,6 +105,28 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
             throw new BusinessException("Cant read shipping cost.");
         }
         return shippingCost;
+    }
+
+    public Money parseGiftCardCost() {
+        List<DOMElement> trs = JXBrowserHelper.selectElementsByCssSelector(browser, "#subtotals-marketplace-table tr");
+        Money giftCardCost = new Money(0, buyerPanel.getCountry());
+
+        for (DOMElement tr : trs) {
+            if (Strings.containsAnyIgnoreCase(JXBrowserHelper.textFromElement(tr), GIFTCARD_KEYWORDS.toArray(new String[GIFTCARD_KEYWORDS.size()]))) {
+                try {
+                    String shippingCostString = JXBrowserHelper.text(tr, ".a-text-right");
+                    if (StringUtils.isNotBlank(shippingCostString)) {
+                        giftCardCost = Money.fromText(shippingCostString, buyerPanel.getCountry());
+                        break;
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("Error reading gift card cost. ", e);
+                    //throw new BusinessException("Cant read shipping cost - " + e.getMessage());
+                }
+            }
+        }
+
+        return giftCardCost;
     }
 
     public boolean reviewPaymentMethod() {

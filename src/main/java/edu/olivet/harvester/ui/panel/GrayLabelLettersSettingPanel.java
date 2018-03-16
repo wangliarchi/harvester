@@ -168,6 +168,9 @@ public class GrayLabelLettersSettingPanel extends JPanel {
 
         systemSettings.setGrayLabelLetterSendingTime(sendingTimePicker.getTime());
         systemSettings.setGrayLabelLetterSendingAllowedRange((int) allowedRangeComBox.getSelectedItem());
+
+        systemSettings.setGrayLabelLetterMaxDays((int) maxDaysComBox.getSelectedItem());
+        systemSettings.setGrayLabelLetterSendingMethod((String) sendingMethodsComBox.getSelectedItem());
         systemSettings.save();
     }
 

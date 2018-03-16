@@ -7,7 +7,6 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.MessagePanel;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.ui.VirtualMessagePanel;
-import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.model.BuyerAccountSetting;
 import edu.olivet.harvester.common.model.BuyerAccountSettingUtils;
 import edu.olivet.harvester.finance.model.DownloadParams;

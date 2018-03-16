@@ -10,8 +10,9 @@ import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.exception.AuthenticationFailException;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.*;
-import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.common.service.LoginVerificationService;
+import edu.olivet.harvester.fulfill.exception.Exceptions.BuyerAccountAuthenticationException;
 import edu.olivet.harvester.fulfill.exception.Exceptions.RobotFoundException;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.Settings;
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -71,7 +73,7 @@ public class SellerPanel extends WebPanel {
 
         //load seller center page
         JXBrowserHelper.loadPage(browser, country.ascBaseUrl());
-        WaitTime.Long.execute();
+        WaitTime.Shorter.execute();
         DOMElement email = JXBrowserHelper.selectElementByCssSelector(browser, "#ap_email,input[name=email]");
         if (email == null) {
             LOGGER.warn("{} ASC可能已经登录：{} -> {}", country.name(), browser.getTitle(), browser.getURL());
@@ -106,20 +108,12 @@ public class SellerPanel extends WebPanel {
                 throw new RobotFoundException(errorMsg);
             }
 
-            int repeatTime = 0;
-            while (true) {
-                if (browser.getTitle().contains("Two-Step Verification") ||
-                        JXBrowserHelper.selectElementByCssSelector(browser, "#auth-mfa-otpcode,#auth-mfa-remember-device") != null) {
-                    WaitTime.Short.execute();
-                    repeatTime++;
-                    if (repeatTime > 20) {
-                        String errorMsg = String.format("尝试登录%s ASC失败，请输入%s对应Two-Step Verification Code继续", country.name(), sellerEmail);
-                        throw new RobotFoundException(errorMsg);
-                    }
-                } else {
-                    break;
-                }
+
+            if (browser.getTitle().contains("Two-Step Verification") ||
+                    JXBrowserHelper.selectElementByCssSelector(browser, "#auth-mfa-otpcode,#auth-mfa-remember-device") != null) {
+                enterVerificationCode();
             }
+
 
             if (JXBrowserHelper.selectElementByCssSelector(browser, "#ap_captcha_img") != null) {
                 WaitTime.Longest.execute();
@@ -166,7 +160,15 @@ public class SellerPanel extends WebPanel {
 
     private boolean isMarketplaceSelected(Country country) {
         Browser browser = browserView.getBrowser();
-        JXBrowserHelper.wait(browser, By.cssSelector(OPTION_SELECTOR));
+
+        try {
+            JXBrowserHelper.wait(browser, By.cssSelector(OPTION_SELECTOR));
+        } catch (Exception e) {
+            //some accounts only have one marketplace
+            //todo: validate
+            return true;
+        }
+
         String switcherId = "#sc-mkt-picker-switcher-select";
         DOMSelectElement selection = (DOMSelectElement) JXBrowserHelper.selectElementByCssSelector(browser, switcherId);
         if (selection == null) {
@@ -197,16 +199,18 @@ public class SellerPanel extends WebPanel {
         JXBrowserHelper.setValueForFormSelect(browser, "#commMgrCompositionSubject", "6");
         WaitTime.Shortest.execute();
         JXBrowserHelper.fillValueForFormField(browser, "#commMgrCompositionMessage", message);
-        WaitTime.Short.execute();
+        WaitTime.Shortest.execute();
 
         //
         //fetch buyer email address, vl0d7jmvtf30k52@marketplace.amazon.com)
 
-        List<DOMElement> lists = JXBrowserHelper.selectElementsByCssSelector(browser, "#toFromBox .tiny");
+        List<DOMElement> lists = JXBrowserHelper.selectElementsByCssSelector(browser, ".tiny");
         for (DOMElement element : lists) {
             String text = JXBrowserHelper.textFromElement(element);
-            String emailAddress = fetchAmazonEmailAddress(text);
-            order.buyer_email = emailAddress;
+            if (StringUtils.isNotBlank(fetchAmazonEmailAddress(text))) {
+                order.buyer_email = fetchAmazonEmailAddress(text);
+            }
+            break;
         }
 
         JXBrowserHelper.insertChecker(browser);
@@ -289,10 +293,88 @@ public class SellerPanel extends WebPanel {
         return false;
     }
 
+
+    @Repeat
+    private void enterVerificationCode() {
+
+        //fetch code from email
+        DOMElement codeField = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, "#auth-mfa-otpcode");
+
+        List<Account> accounts = new ArrayList<>();
+
+        if (country != Country.US) {
+            try {
+                Account emailAccount = Settings.load().getConfigByCountry(Country.US).getSellerEmail();
+                accounts.add(emailAccount);
+            } catch (Exception e) {
+                //
+            }
+        }
+        // 账号所在国家
+        try {
+            Account emailAccount = Settings.load().getConfigByCountry(country.europe() ? Country.UK : country).getSellerEmail();
+            accounts.add(emailAccount);
+        } catch (Exception e) {
+            //
+        }
+
+        if (!country.europe()) {
+            try {
+                Account emailAccount = Settings.load().getConfigByCountry(Country.UK).getSellerEmail();
+                accounts.add(emailAccount);
+            } catch (Exception e) {
+                //
+            }
+        }
+
+        for (Account account : accounts) {
+            try {
+                WaitTime.Short.execute();
+                String verificationCode = LoginVerificationService.readVerificationCodeFromGmail(account);
+                JXBrowserHelper.fillValueForFormField(browser, "#auth-mfa-otpcode", verificationCode);
+
+                DOMElement rememberMe = JXBrowserHelper.selectElementByName(browser, "rememberDevice");
+                if (rememberMe != null) {
+                    DOMInputElement element = (DOMInputElement) rememberMe;
+                    element.setChecked(true);
+                }
+                WaitTime.Short.execute();
+                break;
+            } catch (Exception e) {
+                LOGGER.error("Failed to fetch verification code.", e);
+            }
+        }
+
+        String codeFilled = JXBrowserHelper.getValueFromFormField(browser, "#auth-mfa-otpcode");
+        if (StringUtils.isBlank(codeFilled)) {
+            UITools.info("Please enter login verification code.");
+            WaitTime.Short.execute();
+            int times = 0;
+            while (true) {
+                String enteredCode = codeField.getAttribute("value");
+                if (StringUtils.length(enteredCode) >= 6) {
+                    break;
+                }
+                times++;
+                WaitTime.Normal.execute();
+                if (times > 5) {
+                    throw new BuyerAccountAuthenticationException("Fail to enter verification code");
+                }
+            }
+        }
+
+        WaitTime.Short.execute();
+        JXBrowserHelper.insertChecker(browser);
+        ((DOMFormControlElement) codeField).getForm().submit();
+        JXBrowserHelper.waitUntilNewPageLoaded(browser);
+        if (JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, "#auth-mfa-otpcode") != null) {
+            throw new BuyerAccountAuthenticationException("Fail to enter verification code");
+        }
+    }
+
     public static void main(String[] args) {
 
         //String email = SellerPanel.fetchAmazonEmailAddress(" (vl0d7jmvtf30k52@marketplace.amazon.com)");
-
         JFrame frame = new JFrame();
         frame.setMinimumSize(new Dimension(1400, 900));
         frame.setTitle("Seller Panel Demo");

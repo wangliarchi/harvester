@@ -2,11 +2,9 @@ package edu.olivet.harvester.job;
 
 import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.job.AbstractBackgroundJob;
-import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.harvester.common.model.CronjobLog;
-import edu.olivet.harvester.common.model.SystemSettings;
 import edu.olivet.harvester.finance.InvoiceDownloader;
 import edu.olivet.harvester.finance.model.InvoiceTask;
 import org.apache.commons.collections4.CollectionUtils;

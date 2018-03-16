@@ -1,13 +1,7 @@
 package edu.olivet.harvester.fulfill.model.page.checkout;
 
-import edu.olivet.foundations.utils.RegexUtils;
-import edu.olivet.harvester.common.model.Money;
-import edu.olivet.harvester.fulfill.utils.CreditCardUtils;
-import edu.olivet.harvester.common.model.CreditCard;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
-import edu.olivet.harvester.utils.JXBrowserHelper;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

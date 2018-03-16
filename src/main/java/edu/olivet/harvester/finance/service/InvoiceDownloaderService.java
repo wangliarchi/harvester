@@ -77,7 +77,7 @@ public class InvoiceDownloaderService {
             login(buyerPanel);
         } catch (Exception e) {
             LOGGER.error(Strings.getExceptionMsg(e));
-            TabbedBuyerPanel.getInstance().setNormalIcon(buyerPanel);
+            TabbedBuyerPanel.getInstance().removeTab(buyerPanel);
             return;
         }
 
@@ -260,12 +260,7 @@ public class InvoiceDownloaderService {
                 " from country " + country + ", took " + Strings.formatElapsedTime(start), InformationLevel.Positive);
 
 
-        if (totalDownloaded > 10 || TabbedBuyerPanel.getInstance().getTabCount() <= 3) {
-            TabbedBuyerPanel.getInstance().setNormalIcon(buyerPanel);
-        } else {
-            TabbedBuyerPanel.getInstance().removeTab(buyerPanel);
-        }
-
+        TabbedBuyerPanel.getInstance().removeTab(buyerPanel);
     }
 
 

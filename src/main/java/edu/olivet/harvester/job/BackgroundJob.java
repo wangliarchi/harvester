@@ -27,19 +27,12 @@ public enum BackgroundJob {
     SyncASIN("0 0 3 ? * MON,TUE,WED,THU,FRI,SAT *", SyncASINJob.class),
 
     SendingGrayLabelLetter("0 0 20 ? * MON,TUE,WED,THU,FRI,SAT *", SendingGrayLabelLetterJob.class),
-    /**
-     * check unshipped orders, and send notification to account owner
-     * run all weekdays and Saturday. random time between 17:00-18:00pm
-     */
-    //UnshippedOrderCheck("0 30 17 ? * MON,TUE,WED,THU,FRI,SAT *",UnshippedOrderCheckJob.class),
-
-    //ConfigUpload("0 0 5,13,21 1/1 * ? *", ConfigUploadJob.class),
 
     HarvesterAutoUpgrade("0 15 2 1/1 * ? *", AutoUpgradeJob.class),
 
     ContextUploadJob("0 0 5,13,21 1/1 * ? *", ContextUploadJob.class),
 
-    ProductTitleCheck("0 0 3 1/1 * ? *", ProductTitleCheckJob.class),
+    ProductTitleCheck("0 0 19 1/1 * ? *", ProductTitleCheckJob.class),
 
     LogUpload("0 45 8,18,23 1/1 * ? *", LogUploader.class);
 

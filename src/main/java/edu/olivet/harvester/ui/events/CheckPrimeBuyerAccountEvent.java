@@ -12,7 +12,7 @@ import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.model.BuyerAccountSetting;
 import edu.olivet.harvester.common.model.BuyerAccountSettingUtils;
 import edu.olivet.harvester.fulfill.model.page.LoginPage;
-import edu.olivet.harvester.ui.Actions;
+import edu.olivet.harvester.ui.menu.Actions;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.ui.panel.TabbedBuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;

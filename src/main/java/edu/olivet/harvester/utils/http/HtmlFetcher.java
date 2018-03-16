@@ -26,10 +26,10 @@ public class HtmlFetcher {
     private static final Logger LOGGER = LoggerFactory.getLogger(HtmlFetcher.class);
 
     @Setter
-    private boolean silentMode = true;
+    private static boolean silentMode = true;
 
     @Repeat(expectedExceptions = BusinessException.class)
-    public Document getDocument(String url) {
+    public static Document getDocument(String url) {
         if (silentMode) {
             try {
                 return getDocumentSilently(url);
@@ -57,14 +57,14 @@ public class HtmlFetcher {
      *
      * @param url url地址
      */
-    public Document getDocumentSilently(String url) {
+    public static Document getDocumentSilently(String url) {
         String html = HttpUtils.getHTML(url);
         checkResponse(html);
         return Jsoup.parse(html);
     }
 
     @Async
-    public Document getDocumentByBrowser(String url) {
+    public static Document getDocumentByBrowser(String url) {
         BrowserView browserView = JXBrowserHelper.getGeneralBrowser();
         JXBrowserHelper.loadPage(browserView.getBrowser(), url);
         String html = browserView.getBrowser().getHTML();
@@ -74,7 +74,7 @@ public class HtmlFetcher {
         return Jsoup.parse(html);
     }
 
-    public void checkResponse(String html) throws ItemNotAvailableException, RobotFoundException, ServerFailException {
+    public static void checkResponse(String html) throws ItemNotAvailableException, RobotFoundException, ServerFailException {
         if (StringUtils.isBlank(html)) {
             throw new ItemNotAvailableException(html);
         }

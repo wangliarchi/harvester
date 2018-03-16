@@ -1,9 +1,7 @@
 package edu.olivet.harvester.ui.panel;
 
-import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.mchange.lang.FloatUtils;
-import edu.olivet.foundations.google.GoogleServiceProvider;
 import edu.olivet.foundations.google.SpreadService;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;

@@ -5,7 +5,7 @@ import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.ListModel;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.fulfill.model.OrderFulfillmentRecord;
-import edu.olivet.harvester.ui.Actions;
+import edu.olivet.harvester.ui.menu.Actions;
 import org.nutz.dao.Cnd;
 
 import java.util.List;

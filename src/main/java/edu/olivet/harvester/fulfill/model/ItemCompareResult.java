@@ -113,6 +113,10 @@ public class ItemCompareResult implements Comparable<ItemCompareResult> {
                 ", manualCheckPass:" + manualCheckPass + "}";
     }
 
+    public String desc() {
+        return "row " + row + "(isbn:" + isbn + ") isbn Name: " + isbnName + ", item Name: " + itemName;
+    }
+
     @Override
     public int compareTo(@NotNull ItemCompareResult o) {
         return this.row - o.row;

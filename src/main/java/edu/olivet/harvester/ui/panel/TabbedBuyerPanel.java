@@ -40,15 +40,14 @@ public class TabbedBuyerPanel extends JTabbedPaneCloseButton {
 
     public void addTab(WebPanel webPanel) {
         String tabKey = webPanel.getKey();
-        this.addTab(tabKey, webPanel.getIcon() == null ? null : UITools.getIcon(webPanel.getIcon()), (Component) webPanel);
+        this.addTab(tabKey, webPanel.getIcon() == null ? null : UITools.getIcon(webPanel.getIcon()), webPanel);
         buyerPanels.put(tabKey, webPanel);
     }
 
 
     public WebPanel getWebPanel(String tabKey) {
         if (buyerPanels.containsKey(tabKey)) {
-            WebPanel buyerPanel = buyerPanels.get(tabKey);
-            return buyerPanel;
+            return buyerPanels.get(tabKey);
         }
 
         throw new BusinessException("No web panel found for key " + tabKey);
@@ -81,8 +80,7 @@ public class TabbedBuyerPanel extends JTabbedPaneCloseButton {
 
     public BuyerPanel getBuyerPanel(String tabKey) {
         if (buyerPanels.containsKey(tabKey)) {
-            BuyerPanel buyerPanel = (BuyerPanel) buyerPanels.get(tabKey);
-            return buyerPanel;
+            return (BuyerPanel) buyerPanels.get(tabKey);
         }
 
         throw new BusinessException("No buyer panel found for buyer account " + tabKey);
@@ -174,6 +172,10 @@ public class TabbedBuyerPanel extends JTabbedPaneCloseButton {
 
 
     public void removeTab(WebPanel webPanel) {
+        //don't remove if it's last tab
+        if (instance.getComponents().length == 1) {
+            return;
+        }
         String tabKey = webPanel.getKey();
         try {
             webPanel.killBrowser();
@@ -202,7 +204,7 @@ public class TabbedBuyerPanel extends JTabbedPaneCloseButton {
 
     @Override
     public void addNewTab() {
-        if (this.getTabCount() == 1) {
+        if (this.getTabCount() <= 1) {
             return;
         }
 
@@ -225,7 +227,7 @@ public class TabbedBuyerPanel extends JTabbedPaneCloseButton {
 
     @Override
     public boolean beforeTabRemoved(Component tab) {
-        if (this.getTabCount() == 2) {
+        if (this.getTabCount() <= 1) {
             return false;
         }
         WebPanel webPanel = (WebPanel) tab;

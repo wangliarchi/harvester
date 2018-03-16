@@ -4,7 +4,6 @@ import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.common.collect.Lists;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.harvester.common.model.Order;
-import edu.olivet.harvester.common.model.OrderEnums.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,17 +18,18 @@ public class LetterSheetService extends edu.olivet.harvester.fulfill.service.She
     private static final Logger LOGGER = LoggerFactory.getLogger(LetterSheetService.class);
 
     public void fillSuccessInfo(Order order) {
+        String status = order.status;
         order = reloadOrder(order);
         int row = order.row;
 
         List<ValueRange> dateToUpdate = new ArrayList<>();
 
 
-        ValueRange statusData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(Status.Finish.value())))
+        ValueRange statusData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(status)))
                 .setRange(String.format("%s!A%d", order.sheetName, row));
         dateToUpdate.add(statusData);
 
-        ValueRange infoData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList("emailed")))
+        ValueRange infoData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(order.order_number + " emailed")))
                 .setRange(String.format("%s!AD%d", order.sheetName, row));
         dateToUpdate.add(infoData);
 
@@ -48,7 +48,7 @@ public class LetterSheetService extends edu.olivet.harvester.fulfill.service.She
         List<ValueRange> dateToUpdate = new ArrayList<>();
 
 
-        ValueRange statusData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(msg)))
+        ValueRange statusData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(order.order_number + " " + msg)))
                 .setRange(String.format("%s!AD%d", order.sheetName, row));
         dateToUpdate.add(statusData);
 

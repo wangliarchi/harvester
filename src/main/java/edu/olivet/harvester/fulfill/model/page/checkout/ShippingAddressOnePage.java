@@ -1,6 +1,5 @@
 package edu.olivet.harvester.fulfill.model.page.checkout;
 
-import com.teamdev.jxbrowser.chromium.dom.By;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import com.teamdev.jxbrowser.chromium.dom.DOMInputElement;
 import edu.olivet.foundations.aop.Repeat;
@@ -15,9 +14,12 @@ import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.I18N;
 import edu.olivet.harvester.utils.JXBrowserHelper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/2/17 3:45 PM
@@ -95,6 +97,7 @@ public class ShippingAddressOnePage extends ShippingAddressAbstract {
             WaitTime.Shortest.execute();
         }
     }
+
     public void selectAddress(Order order) {
         JXBrowserHelper.waitUntilVisible(browser, ".a-row.address-row");
         //find recent address from address book
@@ -102,31 +105,35 @@ public class ShippingAddressOnePage extends ShippingAddressAbstract {
         orderCountryName = I18N_AMAZON.getText(orderCountryName, country);
         String translatedOrderCountryName = I18N_AMAZON.getText(orderCountryName, country);
         List<DOMElement> addressElements = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-row.address-row");
+        List<DOMElement> validAddressElements = new ArrayList<>();
+
         for (DOMElement addressElement : addressElements) {
             String addressText = JXBrowserHelper.text(addressElement, ".a-label.a-radio-label");
 
             if (Strings.containsAnyIgnoreCase(addressText, orderCountryName, translatedOrderCountryName)) {
-                DOMElement editLink = JXBrowserHelper.selectVisibleElement(addressElement, ".address-edit-link a");
-                if (editLink != null) {
-                    editLink.click();
-                    JXBrowserHelper.waitUntilVisible(browser, "#identity-add-new-address");
-                    order.recipient_name = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_FULL_NAME);
-                    order.ship_address_1 = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_ADDR1);
-                    order.ship_address_2 = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_ADDR2);
-                    order.ship_city = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_CITY);
-                    order.ship_state = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_STATE);
-                    order.ship_phone_number = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_PHONE);
-                    order.ship_zip = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_ZIP);
-                    order.ship_country = orderCountryName;
-
-                    WaitTime.Shortest.execute();
-                    break;
-                }
+                validAddressElements.add(addressElement);
             }
         }
 
-        if (StringUtils.isBlank(order.recipient_name)) {
+        if (CollectionUtils.isEmpty(validAddressElements)) {
             throw new OrderSubmissionException("No address for country " + orderCountryName + " found.");
+        }
+
+        Random rand = new Random();
+        DOMElement addressElement = validAddressElements.get(rand.nextInt(validAddressElements.size()));
+        DOMElement editLink = JXBrowserHelper.selectVisibleElement(addressElement, ".address-edit-link a");
+        if (editLink != null) {
+            editLink.click();
+            JXBrowserHelper.waitUntilVisible(browser, "#identity-add-new-address");
+            order.recipient_name = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_FULL_NAME);
+            order.ship_address_1 = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_ADDR1);
+            order.ship_address_2 = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_ADDR2);
+            order.ship_city = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_CITY);
+            order.ship_state = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_STATE);
+            order.ship_phone_number = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_PHONE);
+            order.ship_zip = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_ZIP);
+            order.ship_country = orderCountryName;
+            WaitTime.Shortest.execute();
         }
     }
 }

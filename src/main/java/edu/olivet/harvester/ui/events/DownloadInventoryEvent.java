@@ -8,7 +8,7 @@ import edu.olivet.foundations.ui.ProgressDetail;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.feeds.service.InventoryReportManager;
-import edu.olivet.harvester.ui.Actions;
+import edu.olivet.harvester.ui.menu.Actions;
 import edu.olivet.harvester.ui.dialog.ChooseMarketplaceDialog;
 
 import java.util.List;

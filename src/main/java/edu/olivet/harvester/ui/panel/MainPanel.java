@@ -1,10 +1,7 @@
-package edu.olivet.harvester.ui;
+package edu.olivet.harvester.ui.panel;
 
 import com.google.inject.Singleton;
 import edu.olivet.foundations.ui.UITools;
-import edu.olivet.harvester.ui.panel.ProgressLogsPanel;
-import edu.olivet.harvester.ui.panel.RightTabPanel;
-import edu.olivet.harvester.ui.panel.TabbedBuyerPanel;
 
 import javax.swing.*;
 import java.awt.*;

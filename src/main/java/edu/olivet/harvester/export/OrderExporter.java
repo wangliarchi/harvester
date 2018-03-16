@@ -17,7 +17,8 @@ import edu.olivet.harvester.export.service.SheetService;
 import edu.olivet.harvester.hunt.Hunter;
 import edu.olivet.harvester.message.ErrorAlertService;
 import edu.olivet.harvester.common.model.Order;
-import edu.olivet.harvester.ui.Actions;
+import edu.olivet.harvester.ui.menu.Actions;
+import edu.olivet.harvester.utils.MessageListener;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
@@ -49,6 +50,8 @@ public class OrderExporter {
     @Setter
     private MessagePanel messagePanel = new VirtualMessagePanel();
 
+    @Inject MessageListener messageListener;
+
     @Inject Hunter hunter;
 
     /**
@@ -70,6 +73,7 @@ public class OrderExporter {
      * triggered by export orders button
      */
     public void exportOrders(OrderExportParams params) {
+        setMessagePanel(new ProgressDetail(Actions.ExportOrders));
         messagePanel.displayMsg(String.format("Exporting orders from %s between %s and %s",
                 params.getMarketplaces(), params.getFromDate(), params.getToDate()), LOGGER, InformationLevel.Information);
         exportOrdersForMarketplaces(params.getMarketplaces(), params.getFromDate(), params.getToDate());
@@ -95,9 +99,9 @@ public class OrderExporter {
 
         //hunt sellers
         if (CollectionUtils.isNotEmpty(marketplacesExportedOrders)) {
-            messagePanel.addMsgSeparator();
-            messagePanel.displayMsg("Starting to hunt sellers");
-            hunter.setMessagePanel(messagePanel);
+            //messagePanel.addMsgSeparator();
+            //.displayMsg("Starting to hunt sellers");
+            hunter.setMessagePanel(messageListener);
             for (Country marketplace : marketplacesExportedOrders) {
                 List<String> spreadsheetIds = Settings.load().getConfigByCountry(marketplace).listSpreadsheetIds();
                 for (String spreadsheetId : spreadsheetIds) {

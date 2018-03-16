@@ -1,4 +1,4 @@
-package edu.olivet.harvester.ui;
+package edu.olivet.harvester.ui.menu;
 
 import edu.olivet.foundations.ui.AbstractUIContainer;
 import edu.olivet.foundations.ui.Action;
@@ -13,7 +13,7 @@ import java.util.Map;
 public class UIElements extends AbstractUIContainer {
     private static final UIElements instance = new UIElements();
 
-    static UIElements getInstance() {
+    public static UIElements getInstance() {
         return instance;
     }
 
@@ -77,7 +77,7 @@ public class UIElements extends AbstractUIContainer {
 
         map.put(Menu.ToolBox, new Action[] {
                 Actions.TitleChecker,
-                Actions.OrderChecker,
+                Actions.CheckStoreName,
                 Action.Separator,
                 Actions.OrderFulfillmentChecker,
                 Action.Separator,

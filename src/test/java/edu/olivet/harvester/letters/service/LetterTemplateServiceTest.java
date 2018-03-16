@@ -9,8 +9,6 @@ import org.testng.annotations.Test;
 
 import java.util.Date;
 
-import static org.testng.Assert.*;
-
 public class LetterTemplateServiceTest extends BaseTest {
     @Inject LetterTemplateService letterTemplateService;
 

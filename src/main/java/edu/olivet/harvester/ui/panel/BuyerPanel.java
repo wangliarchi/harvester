@@ -2,29 +2,24 @@ package edu.olivet.harvester.ui.panel;
 
 import com.teamdev.jxbrowser.chromium.Browser;
 import com.teamdev.jxbrowser.chromium.CustomProxyConfig;
-import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.UITools;
-import edu.olivet.foundations.utils.Configs;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Strings;
-import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.service.PSEventListener.Status;
 import edu.olivet.harvester.fulfill.service.RuntimePanelObserver;
 import edu.olivet.harvester.common.model.Order;
-import edu.olivet.harvester.ui.ProgressBarComponent;
+import edu.olivet.harvester.ui.utils.ProgressBarComponent;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Getter;
-import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 10/30/17 9:16 AM

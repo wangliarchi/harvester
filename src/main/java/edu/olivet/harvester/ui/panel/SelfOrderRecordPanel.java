@@ -8,7 +8,6 @@ import edu.olivet.harvester.selforder.model.SelfOrder;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Getter;
 import lombok.Setter;
-import org.elasticsearch.common.recycler.Recycler.C;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;

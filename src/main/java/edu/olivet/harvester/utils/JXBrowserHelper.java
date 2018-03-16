@@ -189,6 +189,7 @@ public class JXBrowserHelper {
         return new BrowserView(browser);
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static BrowserView init(String profileDirName) {
         return init(profileDirName, DEFAULT_ZOOM_OUT_LEVEL);
     }

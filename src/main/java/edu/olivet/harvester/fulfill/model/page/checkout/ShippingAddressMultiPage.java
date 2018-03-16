@@ -12,12 +12,15 @@ import edu.olivet.harvester.fulfill.utils.FwdAddressUtils;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.I18N;
 import edu.olivet.harvester.utils.JXBrowserHelper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/2/17 3:44 PM
@@ -101,35 +104,44 @@ public class ShippingAddressMultiPage extends ShippingAddressAbstract {
         String translatedOrderCountryName = I18N_AMAZON.getText(orderCountryName, country);
 
         List<DOMElement> addressElements = JXBrowserHelper.selectElementsByCssSelector(browser, ".address-book-entry");
+        List<DOMElement> validAddressElements = new ArrayList<>();
         for (DOMElement addressElement : addressElements) {
             String countryName = JXBrowserHelper.text(addressElement, ".displayAddressCountryName");
 
             //orderCountryName.equalsIgnoreCase(countryName)
             if (StringUtils.equalsAnyIgnoreCase(countryName, orderCountryName, translatedOrderCountryName)) {
-
-                Address address = parseEnteredAddress(addressElement);
-                order.recipient_name = address.getName();
-                order.ship_address_1 = address.getAddress1();
-                order.ship_address_2 = address.getAddress2();
-                order.ship_city = address.getCity();
-                order.ship_state = address.getState();
-                order.ship_phone_number = address.getPhoneNumber();
-                order.ship_zip = address.getZip();
-                order.ship_country = address.getCountry();
-
-                DOMElement continueBtn = JXBrowserHelper.selectVisibleElement(addressElement, ".ship-to-this-address.a-button .a-button-text");
-                if (continueBtn != null) {
-                    JXBrowserHelper.insertChecker(browser);
-                    continueBtn.click();
-                    WaitTime.Shortest.execute();
-                    JXBrowserHelper.waitUntilNewPageLoaded(browser);
-                    return;
-                }
+                validAddressElements.add(addressElement);
             }
         }
 
-        throw new OrderSubmissionException("No address for country " + orderCountryName + " found.");
+        if (CollectionUtils.isEmpty(validAddressElements)) {
+            throw new OrderSubmissionException("No address for country " + orderCountryName + " found.");
+        }
+
+        Random rand = new Random();
+        DOMElement addressElement = validAddressElements.get(rand.nextInt(validAddressElements.size()));
+        Address address = parseEnteredAddress(addressElement);
+
+        order.recipient_name = address.getName();
+        order.ship_address_1 = address.getAddress1();
+        order.ship_address_2 = address.getAddress2();
+        order.ship_city = address.getCity();
+        order.ship_state = address.getState();
+        order.ship_phone_number = address.getPhoneNumber();
+        order.ship_zip = address.getZip();
+        order.ship_country = address.getCountry();
+
+        DOMElement continueBtn = JXBrowserHelper.selectVisibleElement(addressElement, ".ship-to-this-address.a-button .a-button-text");
+
+        if (continueBtn != null) {
+            JXBrowserHelper.insertChecker(browser);
+            continueBtn.click();
+            WaitTime.Shortest.execute();
+            JXBrowserHelper.waitUntilNewPageLoaded(browser);
+        }
+
     }
+
 
     public Address parseEnteredAddress(DOMElement addressElement) {
         try {

@@ -5,8 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
-import edu.olivet.foundations.utils.RegexUtils.Regex;
-import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.common.model.SystemSettings;
 import edu.olivet.harvester.selforder.model.SelfOrder;
 import edu.olivet.harvester.selforder.utils.SelfOrderHelper;

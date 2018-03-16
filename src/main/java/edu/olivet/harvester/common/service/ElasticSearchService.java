@@ -4,11 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.WaitTime;
+import edu.olivet.harvester.message.ErrorAlertService;
 import edu.olivet.harvester.utils.common.Strings;
 import edu.olivet.harvester.utils.http.HttpUtils;
 import org.apache.commons.collections4.CollectionUtils;
@@ -173,6 +175,7 @@ public class ElasticSearchService {
         addIndex(PRODUCT_INDEX, id, params);
     }
 
+    @Inject ErrorAlertService errorAlertService;
     @Repeat
     public String request(String index, Map<String, Object> params) {
         String params4Url = params2Url(params);
@@ -181,6 +184,9 @@ public class ElasticSearchService {
             return HttpUtils.get(url);
         } catch (Exception e) {
             LOGGER.error("{} - ", url, e);
+            if(Strings.containsAnyIgnoreCase(e.getMessage(),"502")) {
+                errorAlertService.sendMessage("Error with elasticsearch server!!", Strings.getExceptionMsg(e));
+            }
             throw new BusinessException(e);
         }
     }

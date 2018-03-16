@@ -5,6 +5,7 @@ import edu.olivet.foundations.ui.BaseDialog;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.ui.panel.*;
+import edu.olivet.harvester.utils.Settings;
 
 import javax.swing.*;
 import javax.swing.LayoutStyle.ComponentPlacement;
@@ -93,6 +94,7 @@ public class SystemSettingsDialog extends BaseDialog {
     private SyncASINsSettingPanel syncASINsSettingPanel;
     private SelfOrderSettingPanel selfOrderSettingPanel;
     private GrayLabelLettersSettingPanel grayLabelLettersSettingPanel;
+
     @Override
     public void ok() {
         orderExportSettingPanel.collectData();
@@ -101,6 +103,8 @@ public class SystemSettingsDialog extends BaseDialog {
         syncASINsSettingPanel.collectData();
         orderSubmissionSettingPanel.collectData();
         selfOrderSettingPanel.collectData();
+        grayLabelLettersSettingPanel.collectData();
+        Settings.load().validateAndFixStoreName();
         UITools.info("System settings have been saved successfully.");
         ok = true;
         doClose();

@@ -15,8 +15,13 @@ import edu.olivet.harvester.ui.dialog.BankCardConfigDialog;
 import edu.olivet.harvester.ui.dialog.BuyerAccountConfigDialog;
 import edu.olivet.harvester.ui.dialog.SystemSettingsDialog;
 import edu.olivet.harvester.ui.events.*;
+import edu.olivet.harvester.ui.menu.Actions;
+import edu.olivet.harvester.ui.menu.UIElements;
+import edu.olivet.harvester.ui.panel.MainPanel;
 import edu.olivet.harvester.utils.LogViewer;
 import edu.olivet.harvester.utils.Settings;
+import edu.olivet.harvester.utils.Settings.Configuration;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +31,6 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 9/20/2017 11:59 AM
@@ -101,6 +105,35 @@ public class UIHarvester extends AbstractApplicationUI {
     @UIEvent
     public void orderConfirmationHistory() {
         orderConfirmationHistoryEvent.execute();
+    }
+
+    @UIEvent
+    public void checkStoreName() {
+        Settings settings = Settings.reload();
+
+        MessagePanel messagePanel = new ProgressDetail(Actions.CheckStoreName);
+        for (Configuration config : settings.getConfigs()) {
+            String storeName = config.getStoreNameFromWeb();
+
+
+            if (StringUtils.isNotBlank(storeName)) {
+                if (!storeName.equalsIgnoreCase(config.getStoreName())) {
+                    messagePanel.displayMsg(config.getCountry() + " store name: " + config.getStoreName() + ", name from web: " + storeName, InformationLevel.Negative);
+                    config.setStoreName(storeName);
+                    messagePanel.displayMsg("updated!", InformationLevel.Information);
+                } else {
+                    messagePanel.displayMsg(config.getCountry() + " store name " + config.getStoreName() + " is correct", InformationLevel.Information);
+                }
+            } else {
+                if (config.getStoreName().length() <= 3) {
+                    messagePanel.displayMsg(config.getCountry() + " store name: " + config.getStoreName() + " seems not valid, please double check.", InformationLevel.Negative);
+                } else {
+                    messagePanel.displayMsg(config.getCountry() + " store name: " + config.getStoreName() + ". Fail to get store name on website.", InformationLevel.Negative);
+                }
+            }
+        }
+
+        settings.saveToFile();
     }
 
     @Inject private

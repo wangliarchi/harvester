@@ -11,8 +11,10 @@ import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
+import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.utils.JXBrowserHelper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -46,7 +48,7 @@ public class LoginVerificationService {
                     return code;
                 }
 
-                WaitTime.Short.execute();
+                WaitTime.Shorter.execute();
 
             }
         } catch (IOException e) {
@@ -102,7 +104,8 @@ public class LoginVerificationService {
         //find the email
         List<DOMElement> lists = JXBrowserHelper.selectElementsByCssSelector(browser, "table.F.cf.zt td.xY.a4W .xS");
         for (DOMElement list : lists) {
-            if (JXBrowserHelper.text(list, ".bog").equals("Your Amazon verification code")) {
+            //
+            if (Strings.containsAnyIgnoreCase(JXBrowserHelper.textFromElement(list, ".bog"), "Your Amazon verification code", "New text message from")) {
                 list.click();
                 WaitTime.Short.execute();
                 break;
@@ -110,17 +113,31 @@ public class LoginVerificationService {
         }
 
         //
-        List<DOMElement> ps = JXBrowserHelper.selectElementsByCssSelector(browser, "td p");
+        List<DOMElement> tds = JXBrowserHelper.selectElementsByCssSelector(browser, "td");
         String code = "";
-        for (DOMElement p : ps) {
-            String t = p.getInnerHTML().trim();
-            if (t.length() == 6) {
-                code = t.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), "");
-                if (code.length() == 6) {
-                    break;
+        for (DOMElement td : tds) {
+            List<DOMElement> ps = JXBrowserHelper.selectElementsByCssSelector(td, "p");
+            if (CollectionUtils.isNotEmpty(ps)) {
+                for (DOMElement p : ps) {
+                    String t = p.getInnerHTML().trim();
+                    if (t.length() == 6) {
+                        code = t.replaceAll(Regex.NON_ALPHA_LETTER_DIGIT.val(), "");
+                        if (code.length() == 6) {
+                            break;
+                        }
+                    }
+                }
+            } else {
+                String t = JXBrowserHelper.textFromElement(td);
+                if (Strings.containsAnyIgnoreCase(t, "Amazon security code")) {
+                    String c = t.replaceAll(Regex.NON_DIGITS.val(), "");
+                    if (c.length() == 6) {
+                        code = c;
+                    }
                 }
             }
         }
+
 
         frame.setVisible(false); //you can't see me!
         frame.dispose();

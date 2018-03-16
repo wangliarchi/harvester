@@ -80,5 +80,13 @@ public class SettingsTest extends BaseTest {
 
     }
 
+    @Test
+    public void testConfigStoreName() {
+        String testConfigFilePath = basePath + "conf" + File.separator + "harvester-test-nomws.json";
+        Settings.Configuration config = Settings.load(testConfigFilePath).getConfigByCountry(Country.US);
+
+        System.out.println(config.getStoreNameFromWeb());
+    }
+
 
 }

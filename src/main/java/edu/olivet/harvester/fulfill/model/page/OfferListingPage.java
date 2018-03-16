@@ -44,26 +44,15 @@ public class OfferListingPage extends FulfillmentPage {
     }
 
     public void enter(Order order) {
-
-        //FR
-        if (country == Country.FR && order.selfOrder) {
-            setPostalCodeForFR();
-        } else if (country == Country.CA && order.selfOrder) {
-            setPostalCodeForCA();
-        }
-
         String url = OrderCountryUtils.getOfferListingUrl(order) + "&" + System.currentTimeMillis();
         LOGGER.info("Offer listing page {}", url);
         JXBrowserHelper.loadPage(browser, url);
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
-
-
     }
 
     public void addToCart(Order order) {
         long start = System.currentTimeMillis();
-        //go to offerlisting page
-        enter(order);
+
 
         //find seller
         Seller seller = findSeller(order);
@@ -86,7 +75,17 @@ public class OfferListingPage extends FulfillmentPage {
 
     }
 
+
     public Seller findSeller(Order order) {
+        //FR
+        if (country == Country.FR && order.selfOrder) {
+            setPostalCodeForFR();
+        } else if (country == Country.CA && order.selfOrder) {
+            setPostalCodeForCA();
+        }
+
+        //go to offerlisting page
+        enter(order);
         LOGGER.info("Finding seller for order {}", order.order_id);
         Country currentCountry = OrderCountryUtils.getFulfillmentCountry(order);
         while (true) {
@@ -112,6 +111,7 @@ public class OfferListingPage extends FulfillmentPage {
         }
 
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
+
         throw new SellerNotFoundException(String.format(Remark.SELLER_DISAPPEAR.text2Write(), order.seller, order.character));
     }
 
@@ -212,6 +212,7 @@ public class OfferListingPage extends FulfillmentPage {
     public void setPostalCodeForFR() {
         try {
             //75008 FR zip code
+            JXBrowserHelper.loadPage(browser, country.baseUrl());
             DOMElement trigger = JXBrowserHelper.selectVisibleElement(browser, "#nav-global-location-slot .a-popover-trigger");
             trigger.click();
             JXBrowserHelper.waitUntilVisible(browser, ".a-popover-wrapper input[type='text']");
@@ -234,6 +235,7 @@ public class OfferListingPage extends FulfillmentPage {
     public void setPostalCodeForCA() {
         try {
             //M1R
+            JXBrowserHelper.loadPage(browser, country.baseUrl());
             DOMElement trigger = JXBrowserHelper.selectVisibleElement(browser, "#nav-global-location-slot .a-popover-trigger");
             trigger.click();
             JXBrowserHelper.waitUntilVisible(browser, "#GLUXZipUpdateInput_0");

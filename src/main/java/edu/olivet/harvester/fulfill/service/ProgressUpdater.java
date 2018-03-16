@@ -1,7 +1,7 @@
 package edu.olivet.harvester.fulfill.service;
 
 import edu.olivet.foundations.utils.Strings;
-import edu.olivet.harvester.ui.ProgressBarComponent;
+import edu.olivet.harvester.ui.utils.ProgressBarComponent;
 
 import javax.swing.*;
 

@@ -48,7 +48,6 @@ public class SellerService {
 
     @Inject Now now;
     @Inject SellerFilter sellerFilter;
-    @Inject HtmlFetcher htmlFetcher;
     @Inject SellerHuntUtils sellerHuntUtils;
 
     @Inject
@@ -58,7 +57,7 @@ public class SellerService {
             wareHouseIdCache.put(entry.getValue(), true);
         }
         I18N_AMAZON = new I18N("i18n/Amazon");
-        htmlFetcher.setSilentMode(true);
+        HtmlFetcher.setSilentMode(true);
     }
 
     public List<Seller> getSellersForOrder(Order order) {
@@ -96,7 +95,7 @@ public class SellerService {
         for (int i = 0; i < MAX_PAGE; i++) {
             Document document;
             try {
-                document = htmlFetcher.getDocument(url);
+                document = HtmlFetcher.getDocument(url);
             } catch (Exception e) {
                 continue;
             }
@@ -151,7 +150,7 @@ public class SellerService {
 
         String url = getOfferListingPageUrl(country, asin, condition);
         for (int i = 0; i < MAX_PAGE; i++) {
-            Document document = htmlFetcher.getDocument(url);
+            Document document = HtmlFetcher.getDocument(url);
 
             List<Seller> sellersByPage = parseSellers(document, country);
 
@@ -365,7 +364,7 @@ public class SellerService {
             return;
         }
         try {
-            Document document = htmlFetcher.getDocument(seller.getRatingUrl());
+            Document document = HtmlFetcher.getDocument(seller.getRatingUrl());
             LOGGER.saveHtml(order, seller.getName() + " " + seller.getUuid(), document.outerHtml());
             Map<RatingType, Rating> ratings = getSellerRatings(document);
             seller.setRatings(ratings);

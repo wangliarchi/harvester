@@ -28,6 +28,7 @@ public class BuyerUtils {
     //    AccountPrimeCheckedCache.put(key, true);
     //}
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static synchronized boolean isValidPrime(Country country, Account buyer) {
         String key = country.name() + buyer.getEmail();
         //only check once
@@ -60,12 +61,7 @@ public class BuyerUtils {
         JXBrowserHelper.waitUntilVisible(browser, "#nav-link-prime");
         DOMElement primeLink = JXBrowserHelper.selectVisibleElement(browser, "#nav-link-prime");
         String href = primeLink.getAttribute("href");
-        boolean result;
-        if (Strings.containsAnyIgnoreCase(href, "nav_prime_try_btn")) {
-            result = false;
-        } else {
-            result = true;
-        }
+        boolean result = !Strings.containsAnyIgnoreCase(href, "nav_prime_try_btn");
         buyerAccountSetting.setValidPrime(result);
         buyerAccountSetting.setLastPrimeCheck(new Date());
         BuyerAccountSettingUtils.load().save(buyerAccountSetting);

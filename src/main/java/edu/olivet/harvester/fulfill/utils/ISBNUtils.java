@@ -12,7 +12,6 @@ import edu.olivet.harvester.utils.http.HttpUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.nutz.lang.Lang;
@@ -20,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -184,7 +182,7 @@ public class ISBNUtils {
         String correctedIsbn = ISBNUtils.correct(isbn);
         String pageUrl = String.format(PRODUCT_PAGE_URL, baseUrl, correctedIsbn);
 
-        Document doc = ApplicationContext.getBean(HtmlFetcher.class).getDocument(pageUrl);
+        Document doc = HtmlFetcher.getDocument(pageUrl);
         String title = HtmlParser.text(doc, "#productTitle");
         if (StringUtils.isBlank(title)) {
             title = HtmlParser.text(doc, "#btAsinTitle");

@@ -1,18 +1,13 @@
 package edu.olivet.harvester.fulfill.model.page.checkout;
 
 import com.teamdev.jxbrowser.chromium.dom.By;
-import edu.olivet.foundations.utils.RegexUtils;
-import edu.olivet.harvester.common.model.Money;
 import edu.olivet.harvester.fulfill.model.page.AmazonPage;
 import edu.olivet.harvester.fulfill.service.shipping.ShipOptionUtils;
-import edu.olivet.harvester.fulfill.utils.CreditCardUtils;
 import edu.olivet.harvester.fulfill.utils.pagehelper.GiftOptionHelper;
 import edu.olivet.harvester.fulfill.utils.pagehelper.QtyUtils;
-import edu.olivet.harvester.common.model.CreditCard;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

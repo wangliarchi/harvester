@@ -13,6 +13,7 @@ import edu.olivet.harvester.ui.panel.TasksAndProgressPanel;
 import edu.olivet.harvester.utils.BuyerUtils;
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 
@@ -33,13 +34,16 @@ public class AddOrderSubmissionTaskEvent extends Observable implements Harvester
     @Override
     public void saveTasks(List<OrderSubmissionTask> tasks) {
 
-
+        List<Account> checkedAccounts = new ArrayList<>();
         //check prime account
         for (OrderSubmissionTask task : tasks) {
             Account primeBuyerAccount = BuyerAccountSettingUtils.load().getByEmail(task.getPrimeBuyerAccount()).getBuyerAccount();
-            if (!BuyerUtils.isValidPrime(Country.fromCode(task.getMarketplaceName()), primeBuyerAccount)) {
-                if (!UITools.confirmed("Buyer account " + task.getPrimeBuyerAccount() + " is not a valid prime account. Are you sure to proceed?")) {
-                    return;
+            if(!checkedAccounts.contains(primeBuyerAccount)) {
+                checkedAccounts.add(primeBuyerAccount);
+                if (!BuyerUtils.isValidPrime(Country.fromCode(task.getMarketplaceName()), primeBuyerAccount)) {
+                    if (!UITools.confirmed("Buyer account " + task.getPrimeBuyerAccount() + " is not a valid prime account. Are you sure to proceed?")) {
+                        return;
+                    }
                 }
             }
         }

@@ -12,12 +12,15 @@ import edu.olivet.harvester.common.model.OrderEnums;
 import edu.olivet.harvester.spreadsheet.model.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.Harvester;
+import edu.olivet.harvester.utils.http.HtmlFetcher;
+import edu.olivet.harvester.utils.http.HtmlParser;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.jsoup.nodes.Document;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -59,9 +62,10 @@ public class Settings {
         }
     }
 
-    public static void reload() {
+    public static Settings reload() {
         File file = new File(getConfigPath());
         instance = Settings.load(file);
+        return instance;
     }
 
     private static String getConfigPath() {
@@ -90,6 +94,22 @@ public class Settings {
 
     public List<Country> listAllCountries() {
         return configs.stream().map(Configuration::getCountry).collect(Collectors.toList());
+    }
+
+    public void validateAndFixStoreName() {
+        try {
+            for (Configuration config : configs) {
+                String storeName = config.getStoreNameFromWeb();
+                if (StringUtils.isNotBlank(storeName) && !storeName.equalsIgnoreCase(config.storeName)) {
+                    config.storeName = storeName;
+                }
+            }
+
+            saveToFile();
+        } catch (Exception e) {
+            //silent
+            LOGGER.error("", e);
+        }
     }
 
     public Configuration getConfigByCountry(Country country) {
@@ -231,7 +251,15 @@ public class Settings {
 
             if (StringUtils.isAnyBlank(storeName, signature)) {
                 list.add("Both store name and email signature should be provided for contacting customer via email");
+            } else {
+                if (storeName.length() < 2) {
+                    list.add("Store name is invalid");
+                }
+                if (signature.length() < 2) {
+                    list.add("Email signature name should be a valid name.");
+                }
             }
+
 
             if (StringUtils.isAllBlank(bookDataSourceUrl, productDataSourceUrl)) {
                 list.add("Book and product order update spreadsheet url cannot be both empty");
@@ -323,6 +351,19 @@ public class Settings {
             return spreadIds;
         }
 
+        public String getStoreNameFromWeb() {
+            try {
+                String url = String.format("%s/sp?_encoding=UTF8&marketplaceID=%s&orderID=&seller=%s",
+                        country.baseUrl(), country.marketPlaceId(), mwsCredential.getSellerId());
+                Document html = HtmlFetcher.getDocument(url);
+                return HtmlParser.text(html, "#sellerName");
+            } catch (Exception e) {
+                LOGGER.error("", e);
+            }
+
+            return "";
+
+        }
     }
 
 }

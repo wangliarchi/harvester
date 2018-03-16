@@ -110,6 +110,7 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, SubmitResult> {
     }
 
     protected void done() {
+        TasksAndProgressPanel.getInstance().loadTasksToTable();
         //
     }
 

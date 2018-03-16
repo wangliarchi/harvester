@@ -14,7 +14,7 @@ import edu.olivet.harvester.hunt.service.SheetService;
 import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.utils.SheetUtils;
-import edu.olivet.harvester.ui.Actions;
+import edu.olivet.harvester.ui.menu.Actions;
 import edu.olivet.harvester.ui.panel.SimpleOrderSubmissionRuntimePanel;
 import edu.olivet.harvester.utils.MessageListener;
 import edu.olivet.harvester.utils.common.ThreadHelper;
@@ -47,8 +47,7 @@ public class Hunter {
 
     public void execute(String spreadsheetId) {
         while (PSEventListener.isRunning()) {
-            UITools.error("Other task is running, please try later.");
-            return;
+            WaitTime.Short.execute();
         }
 
         if (messagePanel == null) {
@@ -60,7 +59,7 @@ public class Hunter {
     }
 
     public void execute(RuntimeSettings runtimeSettings) {
-        while (PSEventListener.isRunning()) {
+        if (PSEventListener.isRunning()) {
             UITools.error("Other task is running, please try later.");
             return;
         }
@@ -78,7 +77,7 @@ public class Hunter {
     }
 
     public void huntForWorksheets(List<Worksheet> worksheets) {
-        while (PSEventListener.isRunning()) {
+        if (PSEventListener.isRunning()) {
             UITools.error("Other task is running, please try later.");
             return;
         }

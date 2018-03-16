@@ -150,19 +150,19 @@ public class OrderItemTypeHelperTest extends BaseTest {
 
         //B01N5L2SU4 book
         order.sku = "JiuXMZSMusbkAug22-2017-C657529";
-        assertEquals(helper.getItemTypeBySku(order), OrderEnums.OrderItemType.BOOK);
+        assertEquals(OrderItemTypeHelper.getItemTypeBySku(order), OrderEnums.OrderItemType.BOOK);
 
         //B015LYC2S2 kitchen -> product
         order.sku = "XinXMZukkitchenJune16-2017-P0021687";
-        assertEquals(helper.getItemTypeBySku(order), OrderEnums.OrderItemType.PRODUCT);
+        assertEquals(OrderItemTypeHelper.getItemTypeBySku(order), OrderEnums.OrderItemType.PRODUCT);
 
         //B01G47RQ5O cd -> book
         order.sku = "New700uk160527uscd-g85725";
-        assertEquals(helper.getItemTypeBySku(order), OrderEnums.OrderItemType.BOOK);
+        assertEquals(OrderItemTypeHelper.getItemTypeBySku(order), OrderEnums.OrderItemType.BOOK);
 
         //B0094KQG00
         order.sku = "new701CAusubanP160805ZD-P030969";
-        assertEquals(helper.getItemTypeBySku(order), OrderEnums.OrderItemType.PRODUCT);
+        assertEquals(OrderItemTypeHelper.getItemTypeBySku(order), OrderEnums.OrderItemType.PRODUCT);
 
 
     }

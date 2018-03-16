@@ -5,7 +5,7 @@ import edu.olivet.foundations.ui.ListModel;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.service.OrderSubmissionTaskService;
-import edu.olivet.harvester.ui.Actions;
+import edu.olivet.harvester.ui.menu.Actions;
 
 import java.util.List;
 

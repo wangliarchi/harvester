@@ -27,10 +27,14 @@ public class GmailWebPanel extends GeneralWebPanel {
     private Account gmailAccount;
 
     public GmailWebPanel(Account gmailAccount) {
-        super("Gmail-" + gmailAccount.getEmail());
+        super(getKey(gmailAccount));
         this.gmailAccount = gmailAccount;
     }
 
+
+    public static String getKey(Account gmailAccount) {
+        return "Email-" + gmailAccount.getKey();
+    }
 
     public void sendMessage(String recipient, String subject, String message) {
         Browser browser = getBrowserView().getBrowser();
