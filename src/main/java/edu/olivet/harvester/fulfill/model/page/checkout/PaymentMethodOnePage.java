@@ -85,7 +85,7 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
             JXBrowserHelper.selectVisibleElement(browser, "#gcApplyButtonId .a-button-inner,#new-giftcard-promotion .a-button-inner").click();
 
             JXBrowserHelper.waitUntilVisible(browser, "#gcApplyButtonId .a-button-inner,#new-giftcard-promotion .a-button-inner");
-            WaitTime.Shortest.execute();
+            WaitTime.Short.execute();
 
             DOMElement error = JXBrowserHelper.selectVisibleElement(browser, "#spc-gcpromoinput.a-form-error,#gcpromoinput.a-form-error");
             if (error != null) {
