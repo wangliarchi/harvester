@@ -53,9 +53,18 @@ public class OfferListingPage extends FulfillmentPage {
     public void addToCart(Order order) {
         long start = System.currentTimeMillis();
 
-
         //find seller
-        Seller seller = findSeller(order);
+        Seller seller;
+        try {
+            seller = findSeller(order);
+        } catch (Exception e) {
+            if (order.selfOrder) {
+                setPostalCode();
+                seller = findSeller(order);
+            } else {
+                throw e;
+            }
+        }
 
         //check if seller price lifted over maximum limit
         if (OrderValidator.needCheck(order, OrderValidator.SkipValidation.SellerPrice)) {
@@ -77,13 +86,6 @@ public class OfferListingPage extends FulfillmentPage {
 
 
     public Seller findSeller(Order order) {
-        //FR
-        if (country == Country.FR && order.selfOrder) {
-            setPostalCodeForFR();
-        } else if (country == Country.CA && order.selfOrder) {
-            setPostalCodeForCA();
-        }
-
         //go to offerlisting page
         enter(order);
         LOGGER.info("Finding seller for order {}", order.order_id);
@@ -209,14 +211,48 @@ public class OfferListingPage extends FulfillmentPage {
     }
 
 
-    public void setPostalCodeForFR() {
+    public String getDefaultPostalCode() {
+        switch (country) {
+            case US:
+                return "10001";
+            case FR:
+                return "75008";
+            case ES:
+                return "08001";
+            case IT:
+                return "08001";
+            case DE:
+                return "08001";
+            case UK:
+                return "WC2N 5DU";
+            case CA:
+                return "M1R 0E9";
+            default:
+                return "";
+        }
+    }
+
+    public void setPostalCode() {
         try {
+            String postalCode = getDefaultPostalCode();
+            if (StringUtils.isBlank(postalCode)) {
+                return;
+            }
             //75008 FR zip code
             JXBrowserHelper.loadPage(browser, country.baseUrl());
             DOMElement trigger = JXBrowserHelper.selectVisibleElement(browser, "#nav-global-location-slot .a-popover-trigger");
             trigger.click();
-            JXBrowserHelper.waitUntilVisible(browser, ".a-popover-wrapper input[type='text']");
-            JXBrowserHelper.fillValueForFormField(browser, ".a-popover-wrapper input[type='text']", "75008");
+
+            String[] parts = StringUtils.split(postalCode, " ");
+            if (parts.length == 2) {
+                JXBrowserHelper.waitUntilVisible(browser, "#GLUXZipUpdateInput_0");
+                JXBrowserHelper.fillValueForFormField(browser, "#GLUXZipUpdateInput_0", parts[0]);
+                JXBrowserHelper.fillValueForFormField(browser, "#GLUXZipUpdateInput_1", parts[1]);
+            } else {
+                JXBrowserHelper.waitUntilVisible(browser, ".a-popover-wrapper input[type='text']");
+                JXBrowserHelper.fillValueForFormField(browser, ".a-popover-wrapper input[type='text']", postalCode);
+            }
+
 
             WaitTime.Short.execute();
 
@@ -231,29 +267,4 @@ public class OfferListingPage extends FulfillmentPage {
             //
         }
     }
-
-    public void setPostalCodeForCA() {
-        try {
-            //M1R
-            JXBrowserHelper.loadPage(browser, country.baseUrl());
-            DOMElement trigger = JXBrowserHelper.selectVisibleElement(browser, "#nav-global-location-slot .a-popover-trigger");
-            trigger.click();
-            JXBrowserHelper.waitUntilVisible(browser, "#GLUXZipUpdateInput_0");
-            JXBrowserHelper.fillValueForFormField(browser, "#GLUXZipUpdateInput_0", "M1R");
-            JXBrowserHelper.fillValueForFormField(browser, "#GLUXZipUpdateInput_1", "0E9");
-            WaitTime.Short.execute();
-
-            JXBrowserHelper.selectVisibleElement(browser, ".a-button .a-button-inner.a-declarative").click();
-            JXBrowserHelper.waitUntilVisible(browser, ".a-button-inner .a-declarative");
-            DOMElement closeBtn = JXBrowserHelper.selectVisibleElement(browser, ".a-popover-footer .a-button-inner.a-declarative");
-            if (closeBtn != null) {
-                JXBrowserHelper.click(closeBtn);
-                WaitTime.Short.execute();
-            }
-        } catch (Exception e) {
-            //
-        }
-    }
-
-
 }
