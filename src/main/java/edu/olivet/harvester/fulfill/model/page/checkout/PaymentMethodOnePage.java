@@ -2,9 +2,11 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.aop.Repeat;
+import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.model.Money;
 import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import org.apache.commons.lang3.StringUtils;
@@ -70,6 +72,7 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
             JXBrowserHelper.waitUntilNotFound(browser, CONTINUE_BTN_SELECTOR);
         } else {
             LOGGER.error("Continue Btn not found on PaymentMethodOnePage");
+            throw new BusinessException("Something wrong with payment method. Please check gift card balance and/or credit card info");
         }
     }
 
@@ -83,9 +86,14 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
                 JXBrowserHelper.fillValueForFormField(browser, "#spc-gcpromoinput,#gcpromoinput", order.promotionCode);
                 WaitTime.Shortest.execute();
                 JXBrowserHelper.selectVisibleElement(browser, "#gcApplyButtonId .a-button-inner,#new-giftcard-promotion .a-button-inner").click();
-                WaitTime.Shortest.execute();
+
                 JXBrowserHelper.waitUntilVisible(browser, "#gcApplyButtonId .a-button-inner,#new-giftcard-promotion .a-button-inner");
-                WaitTime.Short.execute();
+                WaitTime.Shortest.execute();
+
+                DOMElement error = JXBrowserHelper.selectVisibleElement(browser, "#spc-gcpromoinput.a-form-error,#gcpromoinput.a-form-error");
+                if (error != null) {
+                    throw new OrderSubmissionException("Promotional code is not valid.");
+                }
             }
         } catch (Exception e) {
             //
