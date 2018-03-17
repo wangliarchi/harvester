@@ -46,8 +46,8 @@ public class PaymentMethodMultiPage extends PaymentMethodAbstractPage {
     @Repeat
     public void click() {
         //continue;
-        DOMElement continueBtn = JXBrowserHelper.selectElementByCssSelector(browser, CONTINUE_BTN_SELECTOR);
-        if (continueBtn != null && JXBrowserHelper.isVisible(continueBtn)) {
+        DOMElement continueBtn = JXBrowserHelper.selectVisibleElement(browser, CONTINUE_BTN_SELECTOR);
+        if (continueBtn != null) {
             //JXBrowserHelper.insertChecker(browser);
             continueBtn.click();
             WaitTime.Shortest.execute();
