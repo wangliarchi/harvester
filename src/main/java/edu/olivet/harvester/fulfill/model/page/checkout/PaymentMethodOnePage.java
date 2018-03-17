@@ -29,6 +29,7 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
     public void execute(Order order) {
         //enter promo code if any
         if (StringUtils.isNotBlank(order.promotionCode)) {
+            LOGGER.info("Self order, trying to enter promo code");
             enterPromoCode(order);
             String grandTotalText = JXBrowserHelper.text(browser, "#subtotals-marketplace-table .grand-total-price");
             try {
@@ -78,22 +79,17 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
 
     public void enterPromoCode(Order order) {
         try {
-            String grandTotalText = JXBrowserHelper.text(browser, "#subtotals-marketplace-table .grand-total-price");
-            Money total = Money.fromText(grandTotalText, buyerPanel.getCountry());
-            //DOMElement checkbox = JXBrowserHelper.selectVisibleElement(browser, "#pm_promo");
-            if (total.getAmount().floatValue() > 1) {
-                JXBrowserHelper.waitUntilVisible(browser, "#spc-gcpromoinput,#gcpromoinput");
-                JXBrowserHelper.fillValueForFormField(browser, "#spc-gcpromoinput,#gcpromoinput", order.promotionCode);
-                WaitTime.Shortest.execute();
-                JXBrowserHelper.selectVisibleElement(browser, "#gcApplyButtonId .a-button-inner,#new-giftcard-promotion .a-button-inner").click();
+            JXBrowserHelper.waitUntilVisible(browser, "#spc-gcpromoinput,#gcpromoinput");
+            JXBrowserHelper.fillValueForFormField(browser, "#spc-gcpromoinput,#gcpromoinput", order.promotionCode);
+            WaitTime.Shortest.execute();
+            JXBrowserHelper.selectVisibleElement(browser, "#gcApplyButtonId .a-button-inner,#new-giftcard-promotion .a-button-inner").click();
 
-                JXBrowserHelper.waitUntilVisible(browser, "#gcApplyButtonId .a-button-inner,#new-giftcard-promotion .a-button-inner");
-                WaitTime.Shortest.execute();
+            JXBrowserHelper.waitUntilVisible(browser, "#gcApplyButtonId .a-button-inner,#new-giftcard-promotion .a-button-inner");
+            WaitTime.Shortest.execute();
 
-                DOMElement error = JXBrowserHelper.selectVisibleElement(browser, "#spc-gcpromoinput.a-form-error,#gcpromoinput.a-form-error");
-                if (error != null) {
-                    throw new OrderSubmissionException("Promotional code is not valid.");
-                }
+            DOMElement error = JXBrowserHelper.selectVisibleElement(browser, "#spc-gcpromoinput.a-form-error,#gcpromoinput.a-form-error");
+            if (error != null) {
+                throw new OrderSubmissionException("Promotional code is not valid.");
             }
         } catch (Exception e) {
             //
