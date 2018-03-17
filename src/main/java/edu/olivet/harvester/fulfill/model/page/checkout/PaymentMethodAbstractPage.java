@@ -46,6 +46,11 @@ abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract {
                 WaitTime.Shortest.execute();
                 JXBrowserHelper.waitUntilNotFound(giftCardButton);
             }
+
+            DOMElement error = JXBrowserHelper.selectVisibleElement(browser, "#gcpromoinput.a-form-error");
+            if (error != null) {
+                throw new OrderSubmissionException("Promotional code is not valid.");
+            }
         }
     }
 
