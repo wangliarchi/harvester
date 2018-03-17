@@ -68,7 +68,7 @@ public class MarkStatusService {
         //remove if not valid
         List<Order> validOrders = new ArrayList<>();
         for (Order order : orders) {
-            String error = orderValidator.isValid(order, FulfillmentEnum.Action.UpdateStatus);
+            String error = orderValidator.canMarkStatus(order);
             if (StringUtils.isNotBlank(error)) {
                 if (showErrorMsg) {
                     messageListener.addMsg(order, error, InformationLevel.Negative);

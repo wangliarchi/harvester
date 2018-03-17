@@ -253,7 +253,7 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, SubmitResult> {
         buyerPanel.setOrder(order);
         try {
             //validate again!
-            String error = orderValidator.isValid(order, FulfillmentEnum.Action.SubmitOrder);
+            String error = orderValidator.canSubmitWithStatusCheck(order);
             if (StringUtils.isNotBlank(error)) {
                 if (messageListener != null) {
                     messageListener.addMsg(order, error, InformationLevel.Negative);

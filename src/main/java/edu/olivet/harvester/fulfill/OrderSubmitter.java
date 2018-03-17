@@ -7,20 +7,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.InformationLevel;
-import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.Strings;
-import edu.olivet.harvester.fulfill.exception.Exceptions.NoBudgetException;
-import edu.olivet.harvester.fulfill.model.FulfillmentEnum;
-import edu.olivet.harvester.fulfill.model.ItemCompareResult;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.OrderTaskStatus;
 import edu.olivet.harvester.fulfill.service.*;
-import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
-import edu.olivet.harvester.fulfill.utils.validation.PreValidator;
 import edu.olivet.harvester.common.model.Order;
-import edu.olivet.harvester.spreadsheet.service.AppScript;
-import edu.olivet.harvester.ui.dialog.ItemCheckResultDialog;
 import edu.olivet.harvester.utils.MessageListener;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -38,31 +30,21 @@ import java.util.*;
 public class OrderSubmitter {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderSubmitter.class);
 
-    @Inject private
-    AppScript appScript;
-    @Inject private
-    SheetService sheetService;
-    @Inject private
-    OrderValidator orderValidator;
-
-    @Inject private
-    MarkStatusService markStatusService;
-
-
-    @Inject private
-    MessageListener messageListener;
-
-    @Inject private
-    DailyBudgetHelper dailyBudgetHelper;
-
-    @Inject private
-    OrderSubmissionTaskService orderSubmissionTaskService;
-
+    @Inject private OrderValidator orderValidator;
+    @Inject private MarkStatusService markStatusService;
+    @Inject private MessageListener messageListener;
+    @Inject private DailyBudgetHelper dailyBudgetHelper;
+    @Inject private OrderSubmissionTaskService orderSubmissionTaskService;
     @Inject private OrderDispatcher orderDispatcher;
 
     private static final List<Country> SUPPORTED_MARKETPLACES =
             Lists.newArrayList(Country.US, Country.CA, Country.UK, Country.DE, Country.FR, Country.ES, Country.IT, Country.AU);
 
+    /**
+     * add task to order submission work queue
+     *
+     * @param task Order Submission Task
+     */
     public void execute(OrderSubmissionTask task) {
         List<Order> validOrders = prepareOrderSubmission(task);
         if (CollectionUtils.isEmpty(validOrders)) {
@@ -80,76 +62,33 @@ public class OrderSubmitter {
         orderDispatcher.dispatch(validOrders, task);
     }
 
-
-    public List<Order> validateOrders(List<Order> orders) {
-        List<Order> validOrders = new ArrayList<>();
-        for (Order order : orders) {
-            String error;
-            if (!SUPPORTED_MARKETPLACES.contains(OrderCountryUtils.getFulfillmentCountry(order))) {
-                error = String.format("Harvester can only support %s marketplaces at this moment. Sorry for inconvenience.",
-                        SUPPORTED_MARKETPLACES);
-            } else {
-                error = orderValidator.isValid(order, FulfillmentEnum.Action.SubmitOrder);
-            }
-
-            if (StringUtils.isBlank(error)) {
-                error = orderValidator.statusMarkedCorrectForSubmit(order);
-            }
-
-            if (StringUtils.isNotBlank(error)) {
-                messageListener.addMsg(order, error, InformationLevel.Negative);
-                LOGGER.error("{} - {}", order, error);
-            } else {
-                validOrders.add(order);
-            }
-        }
-
-        return validOrders;
-    }
-
     private List<Order> prepareOrderSubmission(OrderSubmissionTask task) {
-
-
         long start = System.currentTimeMillis();
 
-        if (!SUPPORTED_MARKETPLACES.contains(Country.valueOf(task.getMarketplaceName()))) {
-            messageListener.addMsg(String.format("Harvester can only support %s marketplaces at this moment. Sorry for inconvenience.",
-                    SUPPORTED_MARKETPLACES), InformationLevel.Negative);
-            task.setTaskStatus(OrderTaskStatus.Error);
-            task.setDateStarted(new Date());
-            orderSubmissionTaskService.saveTask(task);
+        //check if the marketplace is supported
+        if (!marketplaceSupported(task)) {
             return null;
         }
 
         //check daily budget
-        try {
-            dailyBudgetHelper.checkBudget(task.getSpreadsheetId());
-        } catch (Exception e) {
-            LOGGER.error("Error when fetch daily budget", e);
-            throw new NoBudgetException(e);
-        }
+        dailyBudgetHelper.checkBudget(task.getSpreadsheetId());
 
-        //checkDuplicates(settings.getSpreadsheetId());
         //mark status first
         markStatusService.execute(task.convertToRuntimeSettings(), false);
-        List<Order> orders = task.getOrderList();
-        if (CollectionUtils.isEmpty(orders)) {
-            orders = appScript.readOrders(task);
-            orders = titleCheck(orders);
-        }
 
-        orders = sheetService.reloadOrders(orders);
+        //load orders
+        List<Order> orders = orderSubmissionTaskService.loadOrdersForTask(task);
 
-        String resultSummary = String.format("Finished loading orders for %s, %d orders found, took %s",
-                task.convertToRuntimeSettings().toString(), orders.size(), Strings.formatElapsedTime(start));
-        LOGGER.info(resultSummary);
-        //messageListener.addLongMsg(resultSummary, orders.size() > 0 ? InformationLevel.Information : InformationLevel.Negative);
+        LOGGER.info("Finished loading orders for {}, {} orders found, took {}",
+                task.convertToRuntimeSettings(), orders.size(), Strings.formatElapsedTime(start));
 
         if (CollectionUtils.isEmpty(orders)) {
             return orders;
         }
 
+        //set task info for later use
         orders.forEach(order -> order.setTask(task));
+
         //remove if not valid
         List<Order> validOrders = validateOrders(orders);
 
@@ -157,34 +96,38 @@ public class OrderSubmitter {
             return validOrders;
         }
 
-        resultSummary = String.format("%d order(s) to be submitted.", validOrders.size());
-        LOGGER.info(resultSummary);
-        //messageListener.addMsg(resultSummary, validOrders.size() > 0 ? InformationLevel.Information : InformationLevel.Negative);
+        LOGGER.info("{} order(s) to be submitted.", validOrders.size());
 
         return validOrders;
     }
 
-    public List<Order> titleCheck(List<Order> orders) {
-        if (CollectionUtils.isEmpty(orders)) {
-            return orders;
-        }
+    public List<Order> validateOrders(List<Order> orders) {
+        List<Order> validOrders = new ArrayList<>();
+        for (Order order : orders) {
+            String error = orderValidator.canSubmitWithStatusCheck(order);
 
-        if (OrderValidator.needCheck(orders.get(0), OrderValidator.SkipValidation.ItemName)) {
-            List<ItemCompareResult> results = PreValidator.compareItemNames4Orders(orders);
-            ItemCheckResultDialog dialog = UITools.setDialogAttr(new ItemCheckResultDialog(null, true, results));
-
-            if (dialog.isValidReturn()) {
-                List<ItemCompareResult> sync = dialog.getIsbn2Sync();
-                sync.forEach(it -> {
-                    if (!it.isManualCheckPass()) {
-                        messageListener.addMsg(it.getOrder(), "Failed item name check. " + it.getPreCheckReport(),
-                                InformationLevel.Negative);
-                        orders.remove(it.getOrder());
-                    }
-                });
+            if (StringUtils.isNotBlank(error)) {
+                messageListener.addMsg(order, error, InformationLevel.Negative);
+                LOGGER.error("{} - {}", order, error);
+                continue;
             }
+
+            validOrders.add(order);
         }
 
-        return orders;
+        return validOrders;
+    }
+
+    public boolean marketplaceSupported(OrderSubmissionTask task) {
+        if (!SUPPORTED_MARKETPLACES.contains(Country.valueOf(task.getMarketplaceName()))) {
+            messageListener.addMsg(String.format("Harvester can only support %s marketplaces at this moment. Sorry for inconvenience.",
+                    SUPPORTED_MARKETPLACES), InformationLevel.Negative);
+            task.setTaskStatus(OrderTaskStatus.Error);
+            task.setDateStarted(new Date());
+            orderSubmissionTaskService.saveTask(task);
+            return false;
+        }
+
+        return true;
     }
 }

@@ -175,6 +175,15 @@ public class OrderValidator {
 
     }
 
+    public String canSubmitWithStatusCheck(Order order) {
+        String error = canSubmit(order);
+        if (StringUtils.isNotBlank(error)) {
+            return error;
+        }
+
+        return validWithValidators(order, Validator.StatusMarkedCorrectForSubmit);
+    }
+
     public String canSubmit(Order order) {
         String result = basicInfoValidation(order);
         if (StringUtils.isNotBlank(result)) {

@@ -1,13 +1,15 @@
 package edu.olivet.harvester.fulfill.service;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.Dates;
-import edu.olivet.harvester.fulfill.OrderSubmitter;import edu.olivet.harvester.fulfill.model.FulfillmentEnum.Action;
+import edu.olivet.harvester.fulfill.OrderSubmitter;
+import edu.olivet.harvester.fulfill.model.FulfillmentEnum.Action;
 import edu.olivet.harvester.fulfill.model.ItemCompareResult;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.OrderTaskStatus;
@@ -191,20 +193,14 @@ public class OrderSubmissionTaskService {
         return task;
     }
 
-    @Inject private
-    OrderSubmissionBuyerTaskService orderSubmissionBuyerTaskService;
 
     public void deleteTask(OrderSubmissionTask task) {
         task.setTaskStatus(OrderTaskStatus.Deleted);
         saveTask(task);
-        //delete buyer tasks as well
-        //orderSubmissionBuyerTaskService.deleteByTaskId(task.getId());
     }
 
     public void hardDeleteTask(OrderSubmissionTask task) {
         dbManager.deleteById(task.getId(), OrderSubmissionTask.class);
-        //delete buyer tasks as well
-        //orderSubmissionBuyerTaskService.deleteByTaskId(task.getId());
     }
 
     public void startTask(String id) {
@@ -227,8 +223,6 @@ public class OrderSubmissionTaskService {
         task.setTaskStatus(OrderTaskStatus.Stopped);
         task.setDateEnded(new Date());
         saveTask(task);
-
-        //orderSubmissionBuyerTaskService.stopByTaskId(task.getId());
     }
 
     public void completed(OrderSubmissionTask task) {
@@ -250,8 +244,21 @@ public class OrderSubmissionTaskService {
     @Inject private AppScript appScript;
     @Inject private OrderValidator orderValidator;
     @Inject MessageListener messageListener;
+    @Inject SheetService sheetService;
 
-    public void checkTitle(List<OrderSubmissionTask> tasks) {
+    public List<Order> loadOrdersForTask(OrderSubmissionTask task) {
+        List<Order> orders = task.getOrderList();
+        if (CollectionUtils.isEmpty(orders)) {
+            readOrderAndCheckTitle(Lists.newArrayList(task));
+            orders = task.getOrderList();
+        } else {
+            orders = sheetService.reloadOrders(orders);
+        }
+
+        return orders;
+    }
+
+    public void readOrderAndCheckTitle(List<OrderSubmissionTask> tasks) {
 
         List<Order> orders = new ArrayList<>();
         Map<String, List<String>> invalidOrders = new HashMap<>();
@@ -262,7 +269,7 @@ public class OrderSubmissionTaskService {
                 List<Order> sheetOrders = appScript.readOrders(task);
                 for (Iterator<Order> iter = sheetOrders.iterator(); iter.hasNext(); ) {
                     Order order = iter.next();
-                    String error = orderValidator.isValid(order, Action.SubmitOrder);
+                    String error = orderValidator.canSubmit(order);
                     if (StringUtils.isNotBlank(error)) {
                         messageListener.addMsg(order, error, InformationLevel.Negative);
                         iter.remove();
@@ -279,8 +286,6 @@ public class OrderSubmissionTaskService {
                 //UITools.error("Failed to create task ");
             }
         });
-
-        //orders.removeIf(order -> StringUtils.isNotBlank(orderValidator.canSubmit(order)));
 
         if (CollectionUtils.isNotEmpty(orders)) {
             List<ItemCompareResult> results = PreValidator.compareItemNames4Orders(orders);
@@ -307,7 +312,6 @@ public class OrderSubmissionTaskService {
         for (OrderSubmissionTask task : tasks) {
             List<Order> sheetValidOrders = validOrderMap.getOrDefault(task, new ArrayList<>());
             List<String> sheetInvalidOrders = invalidOrders.getOrDefault(task.getId(), new ArrayList<>());
-
 
             task.setTotalOrders(sheetValidOrders.size());
             task.setOrders(JSON.toJSONString(sheetValidOrders.stream().distinct().collect(Collectors.toList())));

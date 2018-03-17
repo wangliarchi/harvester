@@ -38,7 +38,7 @@ public class AddOrderSubmissionTaskEvent extends Observable implements Harvester
         //check prime account
         for (OrderSubmissionTask task : tasks) {
             Account primeBuyerAccount = BuyerAccountSettingUtils.load().getByEmail(task.getPrimeBuyerAccount()).getBuyerAccount();
-            if(!checkedAccounts.contains(primeBuyerAccount)) {
+            if (!checkedAccounts.contains(primeBuyerAccount)) {
                 checkedAccounts.add(primeBuyerAccount);
                 if (!BuyerUtils.isValidPrime(Country.fromCode(task.getMarketplaceName()), primeBuyerAccount)) {
                     if (!UITools.confirmed("Buyer account " + task.getPrimeBuyerAccount() + " is not a valid prime account. Are you sure to proceed?")) {
@@ -52,7 +52,7 @@ public class AddOrderSubmissionTaskEvent extends Observable implements Harvester
 
         UITools.info(tasks.size() + " task(s) been created. Please wait a moment for title check.");
         if (CollectionUtils.isNotEmpty(tasks)) {
-            orderSubmissionTaskService.checkTitle(tasks);
+            orderSubmissionTaskService.readOrderAndCheckTitle(tasks);
         }
 
         TasksAndProgressPanel.getInstance().loadTasksToTable();
