@@ -1,5 +1,6 @@
 package edu.olivet.harvester.fulfill.service.flowcontrol;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
@@ -11,6 +12,7 @@ import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionExceptio
 import edu.olivet.harvester.fulfill.exception.Exceptions.SellerNotFoundException;
 import edu.olivet.harvester.fulfill.exception.Exceptions.SellerPriceRiseTooHighException;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
+import edu.olivet.harvester.fulfill.service.MarkStatusService;
 import edu.olivet.harvester.fulfill.service.OrderSubmissionTaskService;
 import edu.olivet.harvester.fulfill.service.SheetService;
 import edu.olivet.harvester.fulfill.service.steps.ClearShoppingCart;
@@ -93,7 +95,6 @@ public class OrderFlowEngine extends FlowParent {
         throw new BusinessException(exception);
     }
 
-
     public void findNewSeller(FlowState state, String msg) {
         //try to find another seller
         messageListener.addMsg(state.getOrder(), msg + ", trying to find another seller...");
@@ -116,7 +117,7 @@ public class OrderFlowEngine extends FlowParent {
             throw new SellerNotFoundException(msg + ". New seller found");
         }
 
-
+        sheetService.updateStatus(state.getOrder().spreadsheetId, Lists.newArrayList(state.getOrder()));
         sheetService.reloadOrder(state.getOrder());
         messageListener.addMsg(state.getOrder(), "new seller found, resubmit again...");
     }
