@@ -98,6 +98,7 @@ public class OrderSubmitter {
 
             if (StringUtils.isNotBlank(error)) {
                 messageListener.addMsg(order, error, InformationLevel.Negative);
+                LOGGER.error("{} - {}", order, error);
             } else {
                 validOrders.add(order);
             }
@@ -142,7 +143,7 @@ public class OrderSubmitter {
         String resultSummary = String.format("Finished loading orders for %s, %d orders found, took %s",
                 task.convertToRuntimeSettings().toString(), orders.size(), Strings.formatElapsedTime(start));
         LOGGER.info(resultSummary);
-        messageListener.addLongMsg(resultSummary, orders.size() > 0 ? InformationLevel.Information : InformationLevel.Negative);
+        //messageListener.addLongMsg(resultSummary, orders.size() > 0 ? InformationLevel.Information : InformationLevel.Negative);
 
         if (CollectionUtils.isEmpty(orders)) {
             return orders;
