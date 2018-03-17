@@ -121,6 +121,7 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, SubmitResult> {
         if (latch.getCount() == 0) {
             i.remove();
         }
+        publish(new SubmitResult(null, "Task Done", ReturnCode.SUCCESS));
     }
 
     @Override
