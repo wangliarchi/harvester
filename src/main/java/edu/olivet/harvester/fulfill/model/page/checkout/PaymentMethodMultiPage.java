@@ -3,6 +3,7 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 import com.teamdev.jxbrowser.chromium.dom.By;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.aop.Repeat;
+import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
@@ -51,6 +52,8 @@ public class PaymentMethodMultiPage extends PaymentMethodAbstractPage {
             continueBtn.click();
             WaitTime.Shortest.execute();
             JXBrowserHelper.waitUntilNewPageLoaded(browser);
+        } else {
+            throw new BusinessException("Something wrong with payment method. Please check gift card balance and/or credit card info");
         }
     }
 
