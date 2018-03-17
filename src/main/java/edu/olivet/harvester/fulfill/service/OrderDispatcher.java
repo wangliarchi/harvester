@@ -11,8 +11,6 @@ import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.utils.OrderBuyerUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.common.model.Order;
-import edu.olivet.harvester.ui.panel.BuyerPanel;
-import org.nutz.aop.interceptor.async.Async;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +31,6 @@ public class OrderDispatcher {
 
     @Inject private OrderSubmissionBuyerTaskService orderSubmissionBuyerTaskService;
 
-    //private final static int MAX_WORKER_NUM = 3;
     private ExecutorService threadPool;
 
     @Inject
@@ -46,8 +43,7 @@ public class OrderDispatcher {
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    @Async
-    public boolean hasJobRunning() {
+    public synchronized boolean hasJobRunning() {
         for (BuyerPanelOrderWorker job : listJobs()) {
             if (!job.isDone()) {
                 return true;
@@ -66,17 +62,12 @@ public class OrderDispatcher {
             String key = buyer.getEmail() + Constants.HYPHEN + country.name();
             CountDownLatch latch = getLatch(key);
 
-            //BuyerPanelOrderWorker job = jobs.computeIfAbsent(key, k -> new BuyerPanelOrderWorker(country, buyer));
-            //job.addTask(buyerTask, latch);
-            //if (job.getState() == SwingWorker.StateValue.PENDING) {
-            //    job.execute();
-            //}
-
+            //if job not existed, or is done, create new worker, otherwise add task to existed worker
             if (!jobs.containsKey(key) || jobs.get(key).isDone()) {
                 BuyerPanelOrderWorker job = new BuyerPanelOrderWorker(country, buyer);
                 job.addTask(buyerTask, latch);
                 threadPool.submit(job);
-                jobs.put(key,job);
+                jobs.put(key, job);
             } else {
                 BuyerPanelOrderWorker job = jobs.get(key);
                 job.addTask(buyerTask, latch);
@@ -117,14 +108,5 @@ public class OrderDispatcher {
         }
 
         return latch;
-    }
-
-    private BuyerPanelOrderWorker getJob(String key, BuyerPanel buyerPanel, CountDownLatch latch) {
-        BuyerPanelOrderWorker job = jobs.computeIfAbsent(key, k -> new BuyerPanelOrderWorker(buyerPanel.getCountry(), buyerPanel.getBuyer()));
-        if (job.isDone()) {
-            job = new BuyerPanelOrderWorker(buyerPanel.getCountry(), buyerPanel.getBuyer());
-        }
-
-        return job;
     }
 }
