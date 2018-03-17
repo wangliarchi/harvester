@@ -4,8 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import edu.olivet.foundations.db.DBManager;
+import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.Dates;
+import edu.olivet.harvester.fulfill.OrderSubmitter;import edu.olivet.harvester.fulfill.model.FulfillmentEnum.Action;
 import edu.olivet.harvester.fulfill.model.ItemCompareResult;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.OrderTaskStatus;
@@ -18,6 +20,7 @@ import edu.olivet.harvester.spreadsheet.model.OrderRange;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.dialog.ItemCheckResultDialog;
 import edu.olivet.harvester.ui.panel.TasksAndProgressPanel;
+import edu.olivet.harvester.utils.MessageListener;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -244,10 +247,9 @@ public class OrderSubmissionTaskService {
     }
 
 
-    @Inject private
-    AppScript appScript;
-    @Inject private
-    OrderValidator orderValidator;
+    @Inject private AppScript appScript;
+    @Inject private OrderValidator orderValidator;
+    @Inject MessageListener messageListener;
 
     public void checkTitle(List<OrderSubmissionTask> tasks) {
 
@@ -256,18 +258,29 @@ public class OrderSubmissionTaskService {
         Map<OrderSubmissionTask, List<Order>> skippedValidationOrderMap = new HashMap<>();
 
         tasks.forEach(task -> {
+            try {
+                List<Order> sheetOrders = appScript.readOrders(task);
+                for (Iterator<Order> iter = sheetOrders.iterator(); iter.hasNext(); ) {
+                    Order order = iter.next();
+                    String error = orderValidator.isValid(order, Action.SubmitOrder);
+                    if (StringUtils.isNotBlank(error)) {
+                        messageListener.addMsg(order, error, InformationLevel.Negative);
+                        iter.remove();
+                    }
+                }
+                sheetOrders.forEach(order -> order.setTask(task));
 
-            List<Order> sheetOrders = appScript.readOrders(task);
-            sheetOrders.forEach(order -> order.setTask(task));
-
-            if (OrderValidator.needCheck(task, OrderValidator.SkipValidation.ItemName)) {
-                orders.addAll(sheetOrders);
-            } else {
-                skippedValidationOrderMap.put(task, sheetOrders);
+                if (OrderValidator.needCheck(task, OrderValidator.SkipValidation.ItemName)) {
+                    orders.addAll(sheetOrders);
+                } else {
+                    skippedValidationOrderMap.put(task, sheetOrders);
+                }
+            } catch (Exception e) {
+                //UITools.error("Failed to create task ");
             }
         });
 
-        orders.removeIf(order -> StringUtils.isNotBlank(orderValidator.canSubmit(order)));
+        //orders.removeIf(order -> StringUtils.isNotBlank(orderValidator.canSubmit(order)));
 
         if (CollectionUtils.isNotEmpty(orders)) {
             List<ItemCompareResult> results = PreValidator.compareItemNames4Orders(orders);
