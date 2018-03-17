@@ -50,16 +50,16 @@ public class SelfOrderRecordPanel extends JPanel {
         rowField.setEnabled(false);
 
         Country country = Country.fromCode(selfOrder.country);
+        Country settingCountry = country.europe() ? Country.UK : country;
         buyerAccountJCombox = new JComboBox<>();
 
-        List<Account> buyers = BuyerAccountSettingUtils.load().getAccounts(country);
+        List<Account> buyers = BuyerAccountSettingUtils.load().getAccounts(settingCountry);
         List<String> emails = buyers.stream().map(Account::getEmail).collect(Collectors.toList());
         emails.add(0, "");
         String[] buyerEmails = emails.toArray(new String[emails.size()]);
         buyerAccountJCombox.setModel(new DefaultComboBoxModel<>(buyerEmails));
 
         try {
-            Country settingCountry = country.europe() ? Country.UK : country;
             buyerAccountJCombox.setSelectedItem(Settings.load().getConfigByCountry(settingCountry).getPrimeBuyer().getEmail());
         } catch (Exception e) {
             //
