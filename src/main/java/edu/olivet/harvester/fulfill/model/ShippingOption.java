@@ -108,7 +108,7 @@ public class ShippingOption {
         try {
             return DatetimeHelper.parseEdd(eddText, country, now);
         } catch (Exception e) {
-            LOGGER.error("", e);
+            LOGGER.error("Cant parse shipping option edd {}", eddText);
         }
 
         if (shippingSpeed == ShippingSpeed.Standard) {

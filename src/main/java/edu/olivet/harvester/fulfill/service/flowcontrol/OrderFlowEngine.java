@@ -13,7 +13,6 @@ import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionExceptio
 import edu.olivet.harvester.fulfill.exception.Exceptions.SellerNotFoundException;
 import edu.olivet.harvester.fulfill.exception.Exceptions.SellerPriceRiseTooHighException;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
-import edu.olivet.harvester.fulfill.service.MarkStatusService;
 import edu.olivet.harvester.fulfill.service.OrderSubmissionTaskService;
 import edu.olivet.harvester.fulfill.service.SheetService;
 import edu.olivet.harvester.fulfill.service.steps.ClearShoppingCart;
