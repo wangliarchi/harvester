@@ -3,6 +3,7 @@ package edu.olivet.harvester.fulfill.service.steps;
 import com.google.inject.Inject;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.common.model.SystemSettings;
+import edu.olivet.harvester.fulfill.exception.Exceptions.OrderFulfilledException;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.model.page.checkout.CheckoutEnum;
 import edu.olivet.harvester.fulfill.model.page.checkout.OrderReviewMultiPage;
@@ -27,6 +28,9 @@ public class PlaceOrder extends Step {
         //
         if (!state.getOrder().selfOrder) {
             Order order = sheetService.reloadOrder(state.getOrder());
+            if(order.fulfilled()) {
+                throw new OrderFulfilledException("Already fulfilled");
+            }
             if (!order.fulfillable()) {
                 throw new OrderSubmissionException("Order status [" + order.status + "] is not marked for fulfillment.");
             }

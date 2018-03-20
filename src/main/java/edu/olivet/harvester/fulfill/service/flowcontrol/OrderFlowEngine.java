@@ -8,6 +8,7 @@ import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
+import edu.olivet.harvester.fulfill.exception.Exceptions.OrderFulfilledException;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.exception.Exceptions.SellerNotFoundException;
 import edu.olivet.harvester.fulfill.exception.Exceptions.SellerPriceRiseTooHighException;
@@ -62,6 +63,13 @@ public class OrderFlowEngine extends FlowParent {
 
         for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
             try {
+                //reload order before submission
+                //sometimes user may create duplicated tasks, order data here was loaded when task started, it may be outdated.
+                sheetService.reloadOrder(state.getOrder());
+                if (state.getOrder().fulfilled()) {
+                    throw new OrderFulfilledException("Already fulfilled");
+                }
+
                 processSteps(step, state);
                 return state;
             } catch (SellerNotFoundException | SellerPriceRiseTooHighException e) {
@@ -114,6 +122,10 @@ public class OrderFlowEngine extends FlowParent {
             OrderSubmissionTask task = state.getOrder().getTask();
             task.setRetryRequired();
             orderSubmissionTaskService.saveTask(task);
+            throw new SellerNotFoundException(msg + ". New seller found");
+        }
+
+        if (state.getOrder().isUKForward() || state.getOrder().isDirectShip() || state.getOrder().purchaseBack()) {
             throw new SellerNotFoundException(msg + ". New seller found");
         }
 

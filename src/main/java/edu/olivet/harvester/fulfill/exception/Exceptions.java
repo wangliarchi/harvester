@@ -172,6 +172,7 @@ public class Exceptions {
         }
     }
 
+
     /**
      * 价格过高异常，场景：寻找Seller时，找到时或找到之前价格已经过高，超出可以接受范围
      */
@@ -179,6 +180,14 @@ public class Exceptions {
         private static final long serialVersionUID = 7066003043572867801L;
 
         public PriceTooHighException(String message) {
+            super(message);
+        }
+    }
+
+    public static class OrderFulfilledException extends OrderSubmissionException {
+        private static final long serialVersionUID = 4834678253258681291L;
+
+        public OrderFulfilledException(String message) {
             super(message);
         }
     }

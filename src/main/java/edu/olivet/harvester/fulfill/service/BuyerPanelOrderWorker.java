@@ -7,7 +7,6 @@ import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.exception.Exceptions.*;
-import edu.olivet.harvester.fulfill.model.FulfillmentEnum;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionBuyerAccountTask;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.SubmitResult;
@@ -226,10 +225,14 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, SubmitResult> {
                 LOGGER.error("Error submit order {}", order.order_id, e);
                 String msg = Strings.parseErrorMsg(e.getMessage());
                 publish(new SubmitResult(order, msg + " - took " + Strings.formatElapsedTime(start), ReturnCode.FAILURE));
-                try {
-                    sheetService.fillUnsuccessfulMsg(order.spreadsheetId, order, msg);
-                } catch (Exception ex) {
-                    LOGGER.error("Fail to update error message for {} {} {} {}", order.spreadsheetId, order.order_id, order.row, msg);
+                if (e instanceof OrderFulfilledException) {
+                    //
+                } else {
+                    try {
+                        sheetService.fillUnsuccessfulMsg(order.spreadsheetId, order, msg);
+                    } catch (Exception ex) {
+                        LOGGER.error("Fail to update error message for {} {} {} {}", order.spreadsheetId, order.order_id, order.row, msg);
+                    }
                 }
 
                 if (e instanceof OutOfBudgetException || e instanceof BuyerAccountAuthenticationException) {
