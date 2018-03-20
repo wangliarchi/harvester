@@ -82,11 +82,11 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
             JXBrowserHelper.waitUntilVisible(browser, "#spc-gcpromoinput,#gcpromoinput");
             JXBrowserHelper.fillValueForFormField(browser, "#spc-gcpromoinput,#gcpromoinput", order.promotionCode);
             WaitTime.Shortest.execute();
+            //apply
             JXBrowserHelper.selectVisibleElement(browser, "#gcApplyButtonId .a-button-inner,#new-giftcard-promotion .a-button-inner").click();
 
-            JXBrowserHelper.waitUntilVisible(browser, "#gcApplyButtonId .a-button-inner,#new-giftcard-promotion .a-button-inner");
             WaitTime.Short.execute();
-
+            JXBrowserHelper.waitUntilVisible(browser, "#gcApplyButtonId .a-button-inner,#new-giftcard-promotion .a-button-inner");
             DOMElement error = JXBrowserHelper.selectVisibleElement(browser, "#spc-gcpromoinput.a-form-error,#gcpromoinput.a-form-error");
             if (error != null) {
                 throw new OrderSubmissionException("Promotional code is not valid.");
