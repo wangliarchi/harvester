@@ -60,7 +60,7 @@ public class SelfOrderRecordPanel extends JPanel {
         buyerAccountJCombox.setModel(new DefaultComboBoxModel<>(buyerEmails));
 
         try {
-            buyerAccountJCombox.setSelectedItem(Settings.load().getConfigByCountry(settingCountry).getPrimeBuyer().getEmail());
+            buyerAccountJCombox.setSelectedItem(Settings.load().getConfigByCountry(settingCountry).getBuyer().getEmail());
         } catch (Exception e) {
             //
         }
