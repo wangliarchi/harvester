@@ -474,9 +474,9 @@ public enum Remark {
         }
 
         String result = target;
-        for (String regex : NEED_REMOVE_AFTER_SUCCESS_REGEX) {
-            result = result.replaceAll(regex, StringUtils.EMPTY).trim();
-        }
+        //for (String regex : NEED_REMOVE_AFTER_SUCCESS_REGEX) {
+        //    result = result.replaceAll(regex, StringUtils.EMPTY).trim();
+        //}
 
         result = removeAll(result, NEED_REMOVE_AFTER_SUCCESS).trim();
         if (result.length() == 1) {
