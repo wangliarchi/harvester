@@ -33,12 +33,12 @@ public class CantShipToAddressPage extends FulfillmentPage {
                 "#changeQuantityFormId .a-button.primary-action-button input");
 
         if (shipToOneAddressLink != null) {
-            String currentAddress = JXBrowserHelper.text(browser, "#changeQuantityFormId .address-dropdown .a-dropdown-prompt").trim();
+            String currentAddress = JXBrowserHelper.text(browser, "#changeQuantityFormId .address-dropdown .a-dropdown-prompt").replaceAll("\\s","");
             if (StringUtils.isNotBlank(currentAddress) &&
                     useThisAddressBtn != null) {
 
                 if (StringUtils.isNotBlank(errorMsg) &&
-                        Strings.containsAnyIgnoreCase(currentAddress, OrderAddressUtils.orderShippingAddress(order).getName())) {
+                        Strings.containsAnyIgnoreCase(currentAddress, OrderAddressUtils.orderShippingAddress(order).getName().replaceAll("\\s",""))) {
                     throw new OrderSubmissionException(errorMsg);
                 }
                 //useThisAddressBtn.click();
