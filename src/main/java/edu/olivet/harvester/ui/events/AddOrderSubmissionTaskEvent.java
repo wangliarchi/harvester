@@ -12,6 +12,8 @@ import edu.olivet.harvester.ui.dialog.AddOrderSubmissionTaskDialog;
 import edu.olivet.harvester.ui.panel.TasksAndProgressPanel;
 import edu.olivet.harvester.utils.BuyerUtils;
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +23,7 @@ import java.util.Observable;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/12/17 12:14 PM
  */
 public class AddOrderSubmissionTaskEvent extends Observable implements HarvesterUIEvent, OrderSubmissionTaskHandler {
-    //private static final Logger LOGGER = LoggerFactory.getLogger(AddOrderSubmissionTaskEvent.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AddOrderSubmissionTaskEvent.class);
 
     @Inject private
     OrderSubmissionTaskService orderSubmissionTaskService;
@@ -39,11 +41,15 @@ public class AddOrderSubmissionTaskEvent extends Observable implements Harvester
         for (OrderSubmissionTask task : tasks) {
             Account primeBuyerAccount = BuyerAccountSettingUtils.load().getByEmail(task.getPrimeBuyerAccount()).getBuyerAccount();
             if (!checkedAccounts.contains(primeBuyerAccount)) {
-                checkedAccounts.add(primeBuyerAccount);
-                if (!BuyerUtils.isValidPrime(Country.fromCode(task.getMarketplaceName()), primeBuyerAccount)) {
-                    if (!UITools.confirmed("Buyer account " + task.getPrimeBuyerAccount() + " is not a valid prime account. Are you sure to proceed?")) {
-                        return;
+                try {
+                    checkedAccounts.add(primeBuyerAccount);
+                    if (!BuyerUtils.isValidPrime(Country.fromCode(task.getMarketplaceName()), primeBuyerAccount)) {
+                        if (!UITools.confirmed("Buyer account " + task.getPrimeBuyerAccount() + " is not a valid prime account. Are you sure to proceed?")) {
+                            return;
+                        }
                     }
+                } catch (Exception e) {
+                    LOGGER.error("", e);
                 }
             }
         }

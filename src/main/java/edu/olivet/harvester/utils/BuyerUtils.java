@@ -36,6 +36,11 @@ public class BuyerUtils {
             return AccountPrimeCheckedCache.get(key);
         }
 
+        if (country != Country.US && country != Country.UK) {
+            AccountPrimeCheckedCache.put(key, true);
+            return true;
+        }
+
         BuyerAccountSetting buyerAccountSetting = BuyerAccountSettingUtils.load().getByEmail(buyer.getEmail());
         if (buyerAccountSetting.getLastPrimeCheck() != null && buyerAccountSetting.getLastPrimeCheck().after(DateUtils.addDays(new Date(), -1))) {
             AccountPrimeCheckedCache.put(key, buyerAccountSetting.isValidPrime());
