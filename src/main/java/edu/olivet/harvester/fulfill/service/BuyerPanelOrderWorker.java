@@ -223,7 +223,7 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, SubmitResult> {
 
             } catch (Exception e) {
                 LOGGER.error("Error submit order {}", order.order_id, e);
-                String msg = Strings.parseErrorMsg(e.getMessage());
+                String msg = Strings.getExceptionMsg(e);
                 publish(new SubmitResult(order, msg + " - took " + Strings.formatElapsedTime(start), ReturnCode.FAILURE));
                 if (e instanceof OrderFulfilledException) {
                     //
