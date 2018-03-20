@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class QtyUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(QtyUtils.class);
 
-    @Repeat(expectedExceptions = BusinessException.class,times = 2)
+    @Repeat(expectedExceptions = BusinessException.class, times = 2)
     public static void updateQty(BuyerPanel buyerPanel, Order order) {
         Browser browser = buyerPanel.getBrowserView().getBrowser();
         if (StringUtils.isNotBlank(JXBrowserHelper.text(browser, ".quantity-display"))) {
@@ -79,7 +79,7 @@ public class QtyUtils {
                 if (CollectionUtils.isNotEmpty(errors)) {
                     LOGGER.error("Error updating qty - {}", errors.stream().map(DOMElement::getInnerText).collect(Collectors.toSet()));
                 }
-
+                WaitTime.Short.execute();
                 //get the qty now
                 order.quantity_fulfilled = JXBrowserHelper.text(browser, ".quantity-display");
 
@@ -115,15 +115,15 @@ public class QtyUtils {
                     break;
                 }
             }
-
+            WaitTime.Normal.execute();
             //get the qty now
             order.quantity_fulfilled = JXBrowserHelper.text(browser, ".quantity-dropdown .a-dropdown-prompt");
             JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
 
             //check errors
-            DOMElement errorContainer = JXBrowserHelper.selectElementByCssSelector(browser, ".a-row.update-quantity-error");
+            DOMElement errorContainer = JXBrowserHelper.selectVisibleElement(browser, ".a-row.update-quantity-error");
 
-            if (JXBrowserHelper.isVisible(errorContainer)) {
+            if (errorContainer != null) {
                 List<DOMElement> errors = JXBrowserHelper.selectElementsByCssSelector(browser,
                         ".a-row.update-quantity-error .error-message");
                 errors.removeIf(JXBrowserHelper::isHidden);
