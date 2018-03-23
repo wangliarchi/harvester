@@ -139,7 +139,7 @@ public enum Remark {
     /**
      * 客人修改了寄货地址，此时订单需要重做或调整寄送地址等
      */
-    ADDRESS_CHANGED(new String[] {"改变地址", "修改地址"}, new String[] {"Change Shipping Address"}, true),
+    ADDRESS_CHANGED(new String[] {"改变地址", "修改地址"}, new String[] {"Change Shipping Address", "Change Address"}, true),
     /**
      * 标识只退还运费
      */
