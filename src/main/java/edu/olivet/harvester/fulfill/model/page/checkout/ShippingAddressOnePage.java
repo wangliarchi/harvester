@@ -36,8 +36,6 @@ public class ShippingAddressOnePage extends ShippingAddressAbstract {
 
     @Repeat
     public void execute(Order order) {
-
-
         DOMElement changeAddressLink = JXBrowserHelper.selectElementByCssSelector(browser, "#addressChangeLinkId");
         if (changeAddressLink != null) {
             JXBrowserHelper.click(changeAddressLink);
