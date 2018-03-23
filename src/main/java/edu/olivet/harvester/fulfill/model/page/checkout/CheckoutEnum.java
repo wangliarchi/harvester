@@ -30,7 +30,7 @@ public class CheckoutEnum {
         ShippingMethod("#shippingOptionFormId"),
         ShippingMethodOnePage(".a-container.page-container #spc-orders"),
         OrderReview(".checkout.spc"),
-        AmazonPrimeAd("#mom-no-thanks,#checkout-student-signup-form,.prime-nothanks-button,#prime-no-thanks"),
+        AmazonPrimeAd("#mom-no-thanks,#checkout-student-signup-form #student_form_container,.prime-nothanks-button,#prime-no-thanks"),
         AmazonPrimeAdAfterPlaceOrderBtnClicked("#prime-piv-steps-container"),
         OrderPlacedSuccessPage("#a-page .a-box.a-alert.a-alert-success"),
         OrderDetailPage("#orderDetails"),
@@ -59,8 +59,8 @@ public class CheckoutEnum {
 
             for (CheckoutPage page : CheckoutPage.values()) {
                 for (String selector : StringUtils.split(page.getIdSelector(), ",")) {
-                    DOMElement element = JXBrowserHelper.selectElementByCssSelector(browser, selector.trim());
-                    if (element != null && JXBrowserHelper.isVisible(element)) {
+                    DOMElement element = JXBrowserHelper.selectVisibleElement(browser, selector.trim());
+                    if (element != null) {
                         return page;
                     }
                 }
