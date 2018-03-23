@@ -54,7 +54,12 @@ public class ShippingAddressOnePage extends ShippingAddressAbstract {
 
         fillAddress(order);
 
-        if (JXBrowserHelper.selectVisibleElement(browser, ".a-popover-footer .a-button-primary .a-button-input") != null) {
+        if (changeAddressLink != null) {
+            JXBrowserHelper.waitUntilVisible(browser, "#addressChangeLinkId");
+        }
+
+        DOMElement btn = JXBrowserHelper.selectVisibleElement(browser, ".a-popover-footer .a-button-primary .a-button-input");
+        if (btn != null) {
             JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
             throw new OrderSubmissionException("Error to enter shipping address " + Address.loadFromOrder(order));
         }
