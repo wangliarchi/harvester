@@ -23,6 +23,7 @@ public class CheckoutEnum {
     public enum CheckoutPage {
         ShippingAddress(".checkout.checkout-as"),
         ShippingAddressOnePage(".a-container.page-container #shipaddress #add-new-address-popover-link"),
+        AddressVerification("#AVS"),
         CantShipToAddressPage(
                 "#changeQuantityFormId .alertMessage,#changeQuantityFormId .lineitem-error-message,#changeQuantityFormId  a.pipeline-link"),
         PaymentMethod(".checkout.pay"),
