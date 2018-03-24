@@ -321,6 +321,22 @@ public class UIHarvester extends AbstractApplicationUI {
         });
     }
 
+
+    @UIEvent public void restart() {
+
+        if (PSEventListener.isRunning()) {
+            UITools.error("Order submission task is running. Please wait util it's finished, or stop the task first.");
+            return;
+        }
+        if (!UITools.confirmed("Are you sure to close Harvester? \nBackground jobs may be running.")) {
+            return;
+        }
+
+        orderSubmissionTaskService.cleanUp();
+
+        UITools.restart(this.getApplication(), this);
+    }
+
     @Inject OrderFulfillmentCheckerEvent orderFulfillmentCheckerEvent;
 
     @UIEvent
