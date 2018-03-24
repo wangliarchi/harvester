@@ -3,6 +3,7 @@ package edu.olivet.harvester.fulfill.utils;
 import com.google.inject.Singleton;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.Configs;
+import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.harvester.utils.Config;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -88,16 +89,23 @@ public class CountryStateUtils {
             return stateName.toUpperCase();
         }
 
+        String cleaned = stateName.replaceAll(Regex.NON_ALPHA_LETTERS.val(), "");
+        if (StringUtils.length(cleaned) == 2) {
+            return cleaned.toUpperCase();
+        }
         return usStates.get(stateName.toUpperCase()).toUpperCase();
     }
 
 
     public String getUSStateName(String stateAbbr) {
-        if (StringUtils.length(stateAbbr) > 2) {
+
+        String cleaned = stateAbbr.replaceAll(Regex.NON_ALPHA_LETTERS.val(), "");
+
+        if (StringUtils.length(cleaned) > 2) {
             return stateAbbr;
         }
 
-        return MapUtils.invertMap(usStates).get(stateAbbr.toUpperCase());
+        return MapUtils.invertMap(usStates).get(cleaned.toUpperCase());
     }
 
     public String getCAStateAbbr(String stateName) {
