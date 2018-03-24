@@ -176,10 +176,10 @@ public class SheetService extends SheetAPI {
             String actualStatus = newStatuses.get(order.row);
 
             if (StringUtils.equalsIgnoreCase(statusExpected, actualStatus)) {
-                success.add("Row " + order.row + " status updated to [" + actualStatus + "] successfully");
+                success.add("Row " + order.row + " status updated to " + actualStatus + " successfully");
             } else {
                 failed.add("Row " + order.row + " failed to updated status from " +
-                        order.status + " to [" + statusExpected + "], current is [" + actualStatus + "]");
+                        order.status + " to " + statusExpected + ", current is " + actualStatus);
             }
         }
         Map<String, List<String>> results = new HashMap<>();

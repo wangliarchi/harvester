@@ -18,7 +18,7 @@ import edu.olivet.harvester.fulfill.service.flowcontrol.OrderFlowEngine;
 import edu.olivet.harvester.selforder.model.SelfOrder;
 import edu.olivet.harvester.selforder.service.OrderFulfillmentRecordService;
 import edu.olivet.harvester.selforder.service.SelfOrderService;
-import edu.olivet.harvester.selforder.service.SheetService;
+import edu.olivet.harvester.selforder.service.SelfOrderSheetService;
 import edu.olivet.harvester.selforder.utils.SelfOrderHelper;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.ui.panel.SimpleOrderSubmissionRuntimePanel;
@@ -42,7 +42,7 @@ public class OrderSubmitter {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderSubmitter.class);
 
     @Inject OrderFlowEngine orderFlowEngine;
-    @Inject SheetService sheetService;
+    @Inject SelfOrderSheetService sheetService;
     @Inject MessageListener messageListener;
     @Inject OrderFulfillmentRecordService orderFulfillmentRecordService;
 

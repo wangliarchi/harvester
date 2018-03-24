@@ -222,9 +222,9 @@ public class OfferListingPage extends FulfillmentPage {
             case ES:
                 return "08001";
             case IT:
-                return "08001";
+                return "00194";
             case DE:
-                return "08001";
+                return "10115";
             case UK:
                 return "WC2N 5DU";
             case CA:
@@ -242,12 +242,21 @@ public class OfferListingPage extends FulfillmentPage {
             }
             //75008 FR zip code
             JXBrowserHelper.loadPage(browser, country.baseUrl());
+
+            String currentZip = JXBrowserHelper.textFromElement(browser, "#glow-ingress-line2");
+            if (Strings.containsAnyIgnoreCase(currentZip, postalCode)) {
+                return;
+            }
+            //
             DOMElement trigger = JXBrowserHelper.selectVisibleElement(browser, "#nav-global-location-slot .a-popover-trigger");
             trigger.click();
 
+            JXBrowserHelper.waitUntilVisible(browser, "#GLUXZipUpdate");
+
+            DOMElement input01 = JXBrowserHelper.selectVisibleElement(browser, "#GLUXZipUpdateInput_0");
             String[] parts = StringUtils.split(postalCode, " ");
-            if (parts.length == 2) {
-                JXBrowserHelper.waitUntilVisible(browser, "#GLUXZipUpdateInput_0");
+            if (parts.length == 2 && input01 != null) {
+
                 JXBrowserHelper.fillValueForFormField(browser, "#GLUXZipUpdateInput_0", parts[0]);
                 JXBrowserHelper.fillValueForFormField(browser, "#GLUXZipUpdateInput_1", parts[1]);
             } else {
@@ -259,12 +268,14 @@ public class OfferListingPage extends FulfillmentPage {
             WaitTime.Short.execute();
 
             JXBrowserHelper.selectVisibleElement(browser, ".a-button .a-button-inner.a-declarative").click();
-            JXBrowserHelper.waitUntilVisible(browser, ".a-button-inner .a-declarative");
-            DOMElement closeBtn = JXBrowserHelper.selectVisibleElement(browser, ".a-popover-footer .a-button-inner.a-declarative");
-            if (closeBtn != null) {
-                JXBrowserHelper.click(closeBtn);
-                WaitTime.Short.execute();
-            }
+            WaitTime.Shortest.execute();
+            return;
+            //JXBrowserHelper.waitUntilVisible(browser, ".a-button-inner.a-declarative");
+            //DOMElement closeBtn = JXBrowserHelper.selectVisibleElement(browser, ".a-popover-footer .a-button-inner.a-declarative");
+            //if (closeBtn != null) {
+            //    JXBrowserHelper.click(closeBtn);
+            //    WaitTime.Short.execute();
+            //}
         } catch (Exception e) {
             //
         }

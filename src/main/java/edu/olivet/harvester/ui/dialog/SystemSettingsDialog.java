@@ -104,7 +104,7 @@ public class SystemSettingsDialog extends BaseDialog {
         orderSubmissionSettingPanel.collectData();
         selfOrderSettingPanel.collectData();
         grayLabelLettersSettingPanel.collectData();
-        Settings.load().validateAndFixStoreName();
+        //Settings.load().validateAndFixStoreName();
         UITools.info("System settings have been saved successfully.");
         ok = true;
         doClose();

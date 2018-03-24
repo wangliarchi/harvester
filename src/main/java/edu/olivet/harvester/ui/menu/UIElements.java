@@ -113,14 +113,14 @@ public class UIElements extends AbstractUIContainer {
     @Override
     public Action[] getToolbarActions() {
         return new Action[] {
-                Actions.ExportOrders,
-                Actions.SubmitOrder,
-                Actions.FindSupplier,
-                Actions.ConfirmShipment,
-                Actions.SubmitSelfOrders,
-                Actions.CommonLetters,
                 Action.Settings,
                 Actions.SystemSettings,
+                Actions.ExportOrders,
+                Actions.ConfirmShipment,
+                Actions.FindSupplier,
+                Actions.SubmitOrder,
+                Actions.CommonLetters,
+                Actions.SubmitSelfOrders,
                 Actions.ReportBug
         };
     }

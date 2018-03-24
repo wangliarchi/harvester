@@ -25,7 +25,7 @@ import java.util.List;
 public class SelfOrderService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SelfOrderService.class);
 
-    @Inject SheetService sheetService;
+    @Inject SelfOrderSheetService selfOrderSheetService;
     @Inject SelfOrderHelper selfOrderHelper;
 
 
@@ -37,7 +37,7 @@ public class SelfOrderService {
 
         List<ValueRange> valueRanges;
         try {
-            valueRanges = sheetService.batchGetSpreadsheetValues(spreadsheetId, ranges);
+            valueRanges = selfOrderSheetService.batchGetSpreadsheetValues(spreadsheetId, ranges);
         } catch (BusinessException e) {
             LOGGER.error("error get batch sheet values for {} ranges {}. {}", spreadsheetId, ranges, e);
             throw e;

@@ -42,7 +42,8 @@ public class SubmitSelfOrdersEvent implements HarvesterUIEvent {
             Spreadsheet spreadsheet = appScript.getSpreadsheet(spreadsheetId);
             spreadsheets.add(spreadsheet);
         } catch (Exception e) {
-            LOGGER.error("", e.getMessage());
+            UITools.error("Self order spreadsheet is not valid. Please check under Settings->System Settings->Self-Orders");
+            return;
         }
 
         if (CollectionUtils.isEmpty(spreadsheets)) {

@@ -22,8 +22,8 @@ import java.util.stream.Collectors;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 3/1/2018 10:47 AM
  */
-public class SheetService extends SheetAPI {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SheetService.class);
+public class SelfOrderSheetService extends SheetAPI {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SelfOrderSheetService.class);
 
     @Inject SelfOrderService selfOrderService;
     @Inject AppScript appScript;
