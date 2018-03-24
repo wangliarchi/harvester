@@ -55,7 +55,7 @@ public class Money {
         String amt = RegexUtils.getMatched(text.replaceAll(" ", ""), RegexUtils.Regex.AMOUNT);
 
         if (StringUtils.isBlank(amt)) {
-            return 0;
+            throw new BusinessException("Failed to parse money from text " + text);
         }
 
         //for FR, amazon using different locale format!!!
