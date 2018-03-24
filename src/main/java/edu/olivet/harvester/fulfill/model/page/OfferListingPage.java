@@ -47,6 +47,11 @@ public class OfferListingPage extends FulfillmentPage {
         String url = OrderCountryUtils.getOfferListingUrl(order) + "&" + System.currentTimeMillis();
         LOGGER.info("Offer listing page {}", url);
         JXBrowserHelper.loadPage(browser, url);
+        try {
+            JXBrowserHelper.waitUntilVisible(browser, "#olpProductImage");
+        } catch (Exception e) {
+            //
+        }
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
     }
 
@@ -159,15 +164,12 @@ public class OfferListingPage extends FulfillmentPage {
 
         DOMElement addToCartBtn = JXBrowserHelper.selectElementByCssSelector(sellerRow, ".olpBuyColumn .a-button-input");
         if (addToCartBtn == null) {
-            //pe-olp-try-prime-buttons
             throw new BusinessException("Fail to add item to cart.");
         }
         JXBrowserHelper.insertChecker(browser);
         addToCartBtn.click();
         checkPopovers();
         JXBrowserHelper.waitUntilNewPageLoaded(browser);
-        //wait until new page loaded
-        //JXBrowserHelper.wait(browser, By.cssSelector("#hlb-ptc-btn-native"));
     }
 
 

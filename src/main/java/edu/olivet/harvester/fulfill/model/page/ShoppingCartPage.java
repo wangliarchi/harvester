@@ -32,8 +32,9 @@ public class ShoppingCartPage extends FulfillmentPage {
 
     public void enter() {
         LOGGER.info("Loading shopping cart page {}", cartUrl());
+        JXBrowserHelper.insertChecker(browser);
         JXBrowserHelper.loadPage(browser, cartUrl());
-
+        JXBrowserHelper.waitUntilNewPageLoaded(browser);
     }
 
 
@@ -45,7 +46,11 @@ public class ShoppingCartPage extends FulfillmentPage {
 
     public void processToCheckout() {
 
-
+        try {
+            JXBrowserHelper.waitUntilVisible(browser, "#hlb-ptc-btn-native");
+        } catch (Exception e) {
+            //
+        }
         DOMElement checkoutLink = JXBrowserHelper.selectElementByCssSelector(browser, "#hlb-ptc-btn-native");
         if (checkoutLink != null) {
             JXBrowserHelper.insertChecker(browser);
@@ -60,6 +65,11 @@ public class ShoppingCartPage extends FulfillmentPage {
             enter();
         }
         LOGGER.info("Current at {} - {}", browser.getTitle(), browser.getURL());
+        try {
+            JXBrowserHelper.waitUntilVisible(browser, "#sc-buy-box-ptc-button");
+        } catch (Exception e) {
+            //
+        }
         DOMElement checkoutBtn = JXBrowserHelper.selectElementByName(browser, "proceedToCheckout");
 
         if (checkoutBtn == null) {

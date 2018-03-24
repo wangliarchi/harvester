@@ -65,16 +65,18 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
     public void click(Order order) {
         //continue;
         //JXBrowserHelper.insertChecker(browser);
-        DOMElement continueBtn = JXBrowserHelper.selectElementByCssSelector(browser, CONTINUE_BTN_SELECTOR);
-        if (continueBtn != null) {
-            continueBtn.click();
+        try {
+            JXBrowserHelper.waitUntilVisible(browser, CONTINUE_BTN_SELECTOR);
+            DOMElement continueBtn = JXBrowserHelper.selectElementByCssSelector(browser, CONTINUE_BTN_SELECTOR);
+            JXBrowserHelper.click(continueBtn);
             JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
             //JXBrowserHelper.waitUntilNewPageLoaded(browser);
             JXBrowserHelper.waitUntilNotFound(browser, CONTINUE_BTN_SELECTOR);
-        } else {
+        } catch (Exception e) {
             LOGGER.error("Continue Btn not found on PaymentMethodOnePage");
             throw new BusinessException("Something wrong with payment method. Please check gift card balance and/or credit card info");
         }
+
     }
 
     public void enterPromoCode(Order order) {

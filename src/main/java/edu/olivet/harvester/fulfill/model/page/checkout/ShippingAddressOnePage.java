@@ -44,7 +44,6 @@ public class ShippingAddressOnePage extends ShippingAddressAbstract {
         if (StringUtils.isBlank(order.recipient_name) && order.selfOrder) {
             selectAddress(order);
             return;
-
         }
 
         DOMElement newAddressLink = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, NEW_ADDRESS_SELECTOR);

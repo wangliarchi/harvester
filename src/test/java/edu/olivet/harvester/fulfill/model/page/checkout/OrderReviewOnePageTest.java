@@ -109,7 +109,21 @@ public class OrderReviewOnePageTest extends BaseTest {
 
         orderReviewOnePage = new OrderReviewOnePage(buyerPanel);
         Money grandTotal = orderReviewOnePage.parseTotal();
-        assertEquals(grandTotal.toString(),"$13.03");
+        assertEquals(grandTotal.toString(), "$13.03");
+    }
+
+    @Test
+    public void testUKReviewTotalCostFail() {
+        Account buyer = new Account("jxiang@olivetuniversity.edu/q1w2e3AA", Account.AccountType.Buyer);
+        buyerPanel = new BuyerPanel(0, Country.UK, buyer, 1);
+        browser = buyerPanel.getBrowserView().getBrowser();
+        File file = new File(TEST_DATA_ROOT + File.separator + "pages" + File.separator + "Amazon.co.ukCheckout.html");
+        browser.loadHTML(Tools.readFileToString(file));
+        WaitTime.Shortest.execute();
+
+        orderReviewOnePage = new OrderReviewOnePage(buyerPanel);
+        Money grandTotal = orderReviewOnePage.parseTotal();
+        assertEquals(grandTotal.toString(), "$13.03");
     }
 
     @Test
@@ -123,7 +137,7 @@ public class OrderReviewOnePageTest extends BaseTest {
 
         orderReviewOnePage = new OrderReviewOnePage(buyerPanel);
         Money grandTotal = orderReviewOnePage.parseTotal();
-        assertEquals(grandTotal.toString(),"$12.73");
+        assertEquals(grandTotal.toString(), "$12.73");
     }
 
     @Test
@@ -137,12 +151,12 @@ public class OrderReviewOnePageTest extends BaseTest {
 
         orderReviewOnePage = new OrderReviewOnePage(buyerPanel);
         Money grandTotal = orderReviewOnePage.parseTotal();
-        assertEquals(grandTotal.toString(),"$12.24");
+        assertEquals(grandTotal.toString(), "$12.24");
     }
+
     @Test
     public void testReviewTotalCost() {
         prepareData();
-
 
 
         for (File dir : directories) {

@@ -31,8 +31,6 @@ public class EnterShippingAddress extends Step {
         }
 
         page.execute(state.getOrder());
-
-        WaitTime.Short.execute();
     }
 
     @Inject private

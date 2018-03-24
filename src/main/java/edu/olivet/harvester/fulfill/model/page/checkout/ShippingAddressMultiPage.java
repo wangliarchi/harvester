@@ -45,6 +45,7 @@ public class ShippingAddressMultiPage extends ShippingAddressAbstract {
         //fillAddress
         fillAddress(order);
 
+        WaitTime.Short.execute();
         //select original address if amazon recommends address..
         checkAddressSuggestion();
     }
@@ -82,6 +83,7 @@ public class ShippingAddressMultiPage extends ShippingAddressAbstract {
     public void checkAddressSuggestion() {
         //select original address if amazon recommends address..
         if (JXBrowserHelper.selectElementByCssSelector(browser, "#AVS") != null) {
+            LOGGER.info("AVS, to choose original address...");
             DOMInputElement selectOrigin = (DOMInputElement) JXBrowserHelper.selectElementByName(browser, "addr");
             if (selectOrigin != null && JXBrowserHelper.isVisible(selectOrigin)) {
                 selectOrigin.setChecked(true);
@@ -90,7 +92,7 @@ public class ShippingAddressMultiPage extends ShippingAddressAbstract {
             JXBrowserHelper.insertChecker(browser);
             DOMElement btn = JXBrowserHelper.selectElementByName(browser, "useSelectedAddress");
             if (btn != null) {
-                btn.click();
+                JXBrowserHelper.click(btn);
             }
 
             WaitTime.Shortest.execute();

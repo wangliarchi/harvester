@@ -56,9 +56,9 @@ public class MarkStatusService {
         String resultSummary = String.format("Finished loading orders to update status for %s, %d orders found, took %s",
                 settings.toString(), orders.size(), Strings.formatElapsedTime(start));
         LOGGER.info(resultSummary);
-        if (showErrorMsg) {
-            messageListener.addMsg(resultSummary);
-        }
+        //if (showErrorMsg) {
+        //    messageListener.addMsg(resultSummary);
+        //}
 
         if (CollectionUtils.isEmpty(orders)) {
             UITools.info(UIText.message("message.info.nostatus"), UIText.title("title.result"));
@@ -102,11 +102,15 @@ public class MarkStatusService {
 
             assert results != null;
             if (results.containsKey("s")) {
-                messageListener.addMsg(results.get("s"));
+                for (String r : results.get("s")) {
+                    messageListener.addMsg(r);
+                }
             }
 
             if (results.containsKey("f")) {
-                messageListener.addMsg(results.get("f"), InformationLevel.Negative);
+                for (String r : results.get("f")) {
+                    messageListener.addMsg(r, InformationLevel.Negative);
+                }
             }
         }
 

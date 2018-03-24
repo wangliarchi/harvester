@@ -7,6 +7,7 @@ import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.service.flowcontrol.FlowState;
 import edu.olivet.harvester.fulfill.service.flowcontrol.Step;
 import edu.olivet.harvester.fulfill.service.steps.*;
+import edu.olivet.harvester.utils.JXBrowserHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +61,7 @@ public class StepHelper {
 
     @Inject private GiftOption giftOption;
 
+    @Inject private AddressVerification addressVerification;
 
     public Step detectStep(FlowState state) {
 
@@ -76,6 +78,10 @@ public class StepHelper {
                 }
                 //if from shipping address page, then change payment method
                 if (EnterShippingAddress.class.getName().equals(state.getPrevStep().stepName)) {
+                    return reviewOrderChangePaymentMethod;
+                }
+
+                if (AddressVerification.class.getName().equals(state.getPrevStep().stepName)) {
                     return reviewOrderChangePaymentMethod;
                 }
 
@@ -131,6 +137,9 @@ public class StepHelper {
             case AmazonPrimeAdAfterPlaceOrderBtnClicked:
                 return amazonPrimeAd;
             case OrderPlacedSuccessPage:
+                if (AfterOrderPlaced.class.getName().equals(state.getPrevStep().stepName)) {
+                    return null;
+                }
                 return afterOrderPlaced;
             case OrderDetailPage:
                 return readOrderDetails;
@@ -138,7 +147,12 @@ public class StepHelper {
                 return login;
             case GiftOptionPage:
                 return giftOption;
+            case AddressVerification:
+                return addressVerification;
+
             default:
+                LOGGER.error("next step unknown.");
+                JXBrowserHelper.saveOrderScreenshot(state.getOrder(), state.getBuyerPanel(), "0");
                 return null;
         }
     }

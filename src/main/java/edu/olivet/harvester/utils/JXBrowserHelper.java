@@ -40,7 +40,7 @@ import static com.teamdev.jxbrowser.chromium.BrowserKeyEvent.KeyEventType.*;
  */
 public class JXBrowserHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(JXBrowserHelper.class);
-    private static final int TIME_OUT_SECONDS = 10;
+    private static final int TIME_OUT_SECONDS = 6;
     public static final String CHANNEL_CLOSED_MESSAGE = "Failed to send message. Channel is already closed";
     private static final Map<String, BrowserContext> BrowserContextMap = new ConcurrentHashMap<>();
 
@@ -198,7 +198,7 @@ public class JXBrowserHelper {
     public static void wait(Browser browser, By by) {
         for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
             try {
-                if (browser.getDocument().findElement(by) == null) {
+                if (getDocument(browser).findElement(by) == null) {
                     WaitTime.Shorter.execute();
                 } else {
                     break;
@@ -208,7 +208,7 @@ public class JXBrowserHelper {
             }
         }
 
-        if (browser.getDocument().findElement(by) == null) {
+        if (getDocument(browser).findElement(by) == null) {
             saveHTMLSourceFile(browser);
             throw new BusinessException(String.format("等待%d次，%d秒之后，期待的Dom元素%s(%s)仍未出现",
                     Constants.MAX_REPEAT_TIMES, Constants.MAX_REPEAT_TIMES * WaitTime.Shorter.val(), by.getValue(), by.getType()));
@@ -243,8 +243,19 @@ public class JXBrowserHelper {
             return;
         }
         //insert tracker
-        DOMDocument document = browser.getDocument();
-        DOMNode root = document.findElement(By.tagName("body"));
+        DOMDocument document = getDocument(browser);
+        DOMNode root = null;
+        int times = 0;
+        while (times < 3) {
+            root = document.findElement(By.tagName("body"));
+            if (root != null) {
+                break;
+            }
+            WaitTime.Shortest.execute();
+
+            times++;
+        }
+
         DOMNode textNode = document.createTextNode("Loading...");
         DOMElement paragraph = document.createElement("p");
         paragraph.setAttribute("id", "loading-checker");
@@ -262,6 +273,15 @@ public class JXBrowserHelper {
             waitUntilNotFound(browser, "#spinner-anchor");
         } else {
             waitUntilNotFound(browser, "#loading-checker");
+        }
+
+        while (true) {
+            String title = browser.getTitle();
+            if (StringUtils.isBlank(title)) {
+                WaitTime.Shortest.execute();
+            } else {
+                break;
+            }
         }
     }
 
@@ -381,6 +401,18 @@ public class JXBrowserHelper {
         }
     }
 
+    public static DOMDocument getDocument(Browser browser) {
+        for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
+            try {
+                return browser.getDocument();
+            } catch (Exception e) {
+                LOGGER.error("", e);
+                WaitTime.Short.execute();
+            }
+        }
+
+        return null;
+    }
 
     public static DOMElement selectElementByName(Browser browser, String name) {
         for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
@@ -398,10 +430,8 @@ public class JXBrowserHelper {
     public static DOMElement selectElementByCssSelector(Browser browser, String selector) {
         for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
             try {
-                if (browser.getDocument() == null) {
-                    browser.reload();
-                }
-                return selectElementByCssSelector(browser.getDocument(), selector);
+                DOMDocument domDocument = getDocument(browser);
+                return selectElementByCssSelector(domDocument, selector);
             } catch (Exception e) {
                 if (Strings.containsAnyIgnoreCase(e.getMessage(), CHANNEL_CLOSED_MESSAGE)) {
                     throw e;
@@ -449,7 +479,7 @@ public class JXBrowserHelper {
     }
 
     public static List<DOMElement> selectElementsByCssSelector(Browser browser, String selector) {
-        return selectElementsByCssSelector(browser.getDocument(), selector);
+        return selectElementsByCssSelector(getDocument(browser), selector);
     }
 
     public static List<DOMElement> selectElementsByCssSelector(DOMElement element, String selector) {
@@ -459,7 +489,7 @@ public class JXBrowserHelper {
 
     public static List<DOMElement> selectElementsByCssSelectors(Browser browser, String... selectors) {
         String selector = StringUtils.join(selectors, ",");
-        return selectElementsByCssSelector(browser.getDocument(), selector);
+        return selectElementsByCssSelector(getDocument(browser), selector);
     }
 
     public static List<DOMElement> selectElementsByCssSelectors(DOMDocument document, String... selectors) {
@@ -474,7 +504,7 @@ public class JXBrowserHelper {
     }
 
     public static DOMElement selectVisibleElement(Browser browser, String selector) {
-        return selectVisibleElement(browser.getDocument().getDocumentElement(), selector);
+        return selectVisibleElement(getDocument(browser).getDocumentElement(), selector);
     }
 
     public static DOMElement selectVisibleElement(DOMElement rootElement, String selector) {
@@ -616,12 +646,16 @@ public class JXBrowserHelper {
         }
     }
 
-
-    @Repeat
     public static void click(DOMElement element) {
-        element.click();
-        WaitTime.Shortest.execute();
-        waitUntilNotFound(element);
+        for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
+            try {
+                element.click();
+                waitUntilNotFound(element);
+                return;
+            } catch (Exception e) {
+                LOGGER.error("", e);
+            }
+        }
     }
 
     @Repeat
