@@ -218,6 +218,11 @@ public class Address {
                 (StringUtils.isNotBlank(address2) ? ", " + address2 : "") + ", " + city + ", " + state + " " + getZip() + ", " + country;
     }
 
+    public String switchAddresses() {
+        return getRecipient() + (StringUtils.isNotBlank(address2) ? ", " + address2 : "") +
+                (StringUtils.isNotBlank(address1) ? ", " + address1 : "") + ", " + city + ", " + state + " " + getZip() + ", " + country;
+    }
+
     public String withoutName() {
         return (StringUtils.isNotBlank(address1) ? ", " + address1 : "") + (StringUtils.isNotBlank(address2) ? ", " + address2 : "") +
                 ", " + city + ", " + getFullStateName() + " " + getZip() + ", " + country;

@@ -20,22 +20,22 @@ public class OrderManAddressValidatorTest  extends BaseTest {
         Address oldAddress = new Address();
         Address newAddress = new Address();
 
-        oldAddress.setName("test");
+        oldAddress.setName("MaryWKennedy");
         oldAddress.setCountry("United States");
-        newAddress.setName("test{No Invoice}");
+        newAddress.setName("MaryWKennedy");
         newAddress.setCountry("United States");
 
-        oldAddress.setAddress1("4350 N. 84 Place");
-        oldAddress.setAddress2("Apt 3c");
-        oldAddress.setCity("Scottsdale");
-        oldAddress.setState("AZ");
-        oldAddress.setZip("85251");
+        oldAddress.setAddress1("613 Rolling Hills Cirle");
+        oldAddress.setAddress2("Box 190");
+        oldAddress.setCity("Honey Brook");
+        oldAddress.setState("PA");
+        oldAddress.setZip("19344");
 
-        newAddress.setAddress1("4350 N 84TH PL");
-        newAddress.setAddress2("Apt c3");
-        newAddress.setCity(oldAddress.getCity());
-        newAddress.setState(oldAddress.getState());
-        newAddress.setZip(oldAddress.getZip());
+        newAddress.setAddress1("PO BOX 190");
+        newAddress.setAddress2("613 ROLLING HILLS CIRLE");
+        newAddress.setCity("HONEY BROOK");
+        newAddress.setState("PA");
+        newAddress.setZip("19344-0190");
 
         Assert.assertEquals(addressValidator.verify(oldAddress, newAddress), true);
     }

@@ -66,11 +66,12 @@ public class OrderManAddressValidator implements AddressValidator {
             }
             String finalOrAddr = applyRule2Addr(old.toString());
             String finalAddr = applyRule2Addr(entered.toString());
-
+            String finalAddr1 = applyRule2Addr(entered.switchAddresses());
             if (!finalOrAddr.equals(finalAddr)) {
                 //noinspection deprecation
                 double similarity = StringUtils.getJaroWinklerDistance(finalOrAddr, finalAddr);
-                if (similarity < MIN_SIMILARITY) {
+                double similarity1 = StringUtils.getJaroWinklerDistance(finalOrAddr, finalAddr1);
+                if (similarity < MIN_SIMILARITY && similarity1 < MIN_SIMILARITY) {
                     AddressValidatorService.logFailed(old.toString(), entered.toString(), finalOrAddr + ", " + finalAddr);
                     String msg = "OrderMan Address failed verification. Entered " + entered + ", original " + old +
                             ", Addresses after rules applied " + finalOrAddr + ", " + finalAddr;
@@ -97,8 +98,10 @@ public class OrderManAddressValidator implements AddressValidator {
 
         String orAddr = old.getAddress1() + StringUtils.SPACE + old.getAddress2();
         String addr = entered.getAddress1() + StringUtils.SPACE + entered.getAddress2();
+        String addr1 = entered.getAddress2() + StringUtils.SPACE + entered.getAddress1();
         String result = this.compareAddress(orAddr, addr);
-        if (StringUtils.isNotBlank(result)) {
+        String result1 = this.compareAddress(orAddr, addr1);
+        if (StringUtils.isNotBlank(result) && StringUtils.isNotBlank(result1)) {
             results.add(result);
         }
 

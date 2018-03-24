@@ -46,7 +46,7 @@ public class AddressValidatorService implements AddressValidator {
         //todo remove runtime settings
         String sid = Settings.load().getSid() + RuntimeSettings.load().getMarketplaceName();
         String url = FAILED_LOG_APP_SCRIPT_URL + "?s=" + Strings.encode(sid) + "&o=" + Strings.encode(original) +
-                "&e=" + entered + "&u=" + Strings.encode(uspsReturned);
+                "&e=" + Strings.encode(entered) + "&u=" + Strings.encode(uspsReturned);
         try {
             Jsoup.connect(url).ignoreContentType(true).timeout(12000).execute();
         } catch (IOException e) {
