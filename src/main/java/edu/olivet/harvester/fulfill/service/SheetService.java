@@ -244,6 +244,9 @@ public class SheetService extends SheetAPI {
     }
 
     public Order reloadOrder(Order order) {
+        if(order.selfOrder) {
+            return order;
+        }
         Order reloadedOrder = _reloadOrder(order);
         reloadedOrder.setContext(order.getContext());
         reloadedOrder.setTask(order.getTask());
