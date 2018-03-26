@@ -84,6 +84,7 @@ public class CommonLetterSender {
         Spreadsheet spreadsheet = sheetAPI.getSpreadsheet(spreadsheetId);
 
         List<Order> orders = orderService.fetchOrders(spreadsheet, minDate);
+        LOGGER.info("{} orders found from {}", orders.size(), spreadsheet.getProperties().getTitle());
         handleOrders(orders, true, spreadsheet.getProperties().getTitle());
     }
 
@@ -111,16 +112,16 @@ public class CommonLetterSender {
     public void executeForWorksheet(Worksheet worksheet) {
         long start = System.currentTimeMillis();
         messagePanel.addMsgSeparator();
-        messagePanel.displayMsg("Send gray label letters for " + worksheet);
+        messagePanel.displayMsg("Send gray label letters for " + worksheet, LOGGER);
         List<Order> orders = appScript.readOrders(worksheet.getSpreadsheet().getSpreadsheetId(), worksheet.getSheetName());
 
         if (CollectionUtils.isEmpty(orders)) {
-            messagePanel.displayMsg("No orders found.", InformationLevel.Negative);
+            messagePanel.displayMsg("No orders found.", LOGGER, InformationLevel.Negative);
             return;
         }
 
         handleOrders(orders, false, worksheet.toString());
-        messagePanel.displayMsg("Done sending gray label letters for " + worksheet + ", took " + Strings.formatElapsedTime(start), InformationLevel.Positive);
+        messagePanel.displayMsg("Done sending gray label letters for " + worksheet + ", took " + Strings.formatElapsedTime(start), LOGGER, InformationLevel.Positive);
     }
 
 
@@ -131,21 +132,21 @@ public class CommonLetterSender {
 
         List<Order> grayOrders = orders.stream().filter(it -> GrayLetterRule.getGrayRule(it, findSupplier) != GrayRule.None).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(grayOrders)) {
-            messagePanel.displayMsg("No orders need to send gray letters for " + title, InformationLevel.Negative);
+            messagePanel.displayMsg("No orders need to send gray letters for " + title, LOGGER, InformationLevel.Negative);
             return;
         }
 
-        messagePanel.displayMsg(grayOrders.size() + " order(s) to be processed for " + title);
+        messagePanel.displayMsg(grayOrders.size() + " order(s) to be processed for " + title, LOGGER);
 
         if (findSupplier) {
             List<Order> ordersToFindSupplier = grayOrders.stream().filter(GrayLetterRule::needFindSupplier).collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(ordersToFindSupplier)) {
-                messagePanel.displayMsg("Trying to find suppliers for " + ordersToFindSupplier.size() + " order(s).");
+                messagePanel.displayMsg("Trying to find suppliers for " + ordersToFindSupplier.size() + " order(s).", LOGGER);
                 for (Order order : ordersToFindSupplier) {
                     try {
                         findSupplier(order);
                     } catch (Exception e) {
-                        messagePanel.displayMsg(msgPrefix(order) + "failed to find seller - " + Strings.getExceptionMsg(e), InformationLevel.Negative);
+                        messagePanel.displayMsg(msgPrefix(order) + "failed to find seller - " + Strings.getExceptionMsg(e), LOGGER, InformationLevel.Negative);
                     }
                 }
                 messagePanel.addMsgSeparator();
@@ -154,7 +155,7 @@ public class CommonLetterSender {
 
 
         List<Order> ordersToSendLetters = grayOrders.stream().filter(it -> GrayLetterRule.needSendLetter(it, findSupplier)).collect(Collectors.toList());
-        messagePanel.displayMsg(ordersToSendLetters.size() + " order(s) to send letters. Messages will be sent via " + SystemSettings.load().getGrayLabelLetterSendingMethod());
+        messagePanel.displayMsg(ordersToSendLetters.size() + " order(s) to send letters. Messages will be sent via " + SystemSettings.load().getGrayLabelLetterSendingMethod(), LOGGER);
 
         if (CollectionUtils.isNotEmpty(ordersToSendLetters)) {
 
@@ -166,10 +167,10 @@ public class CommonLetterSender {
                 if (whiteOrders.contains(order.order_id)) {
                     try {
                         sendLetterToCS(order);
-                        messagePanel.displayMsg(msgPrefix(order) + "sent msg to cs successfully.", InformationLevel.Information);
+                        messagePanel.displayMsg(msgPrefix(order) + "sent msg to cs successfully.", LOGGER, InformationLevel.Information);
                     } catch (Exception e) {
                         LOGGER.error("", e);
-                        messagePanel.displayMsg(msgPrefix(order) + "Failed to send msg to cs.", InformationLevel.Negative);
+                        messagePanel.displayMsg(msgPrefix(order) + "Failed to send msg to cs.", LOGGER, InformationLevel.Negative);
                     }
                     continue;
                 }
@@ -194,7 +195,7 @@ public class CommonLetterSender {
                         }
                     }
                 } catch (Exception e) {
-                    messagePanel.displayMsg(msgPrefix(order) + Strings.getExceptionMsg(e), InformationLevel.Negative);
+                    messagePanel.displayMsg(msgPrefix(order) + Strings.getExceptionMsg(e), LOGGER, InformationLevel.Negative);
                 }
             });
         }
@@ -218,7 +219,7 @@ public class CommonLetterSender {
         try {
             amazonOrder = amazonOrderService.loadOrder(order);
             if (!"Shipped".equalsIgnoreCase(amazonOrder.getOrderStatus())) {
-                messagePanel.displayMsg(msgPrefix(order) + "Order not shipped yet.", InformationLevel.Negative);
+                messagePanel.displayMsg(msgPrefix(order) + "Order not shipped yet.", LOGGER, InformationLevel.Negative);
                 return;
             }
         } catch (Exception e) {
@@ -234,11 +235,11 @@ public class CommonLetterSender {
         if (systemSettings.sendGrayLabelLettersViaASC()) {
             try {
                 ascLetterSender.sendForOrder(order, letter);
-                messagePanel.displayMsg(msgPrefix(order) + "Message sent via ASC successfully.", InformationLevel.Information);
+                messagePanel.displayMsg(msgPrefix(order) + "Message sent via ASC successfully.", LOGGER, InformationLevel.Information);
                 finished = true;
             } catch (Exception e) {
                 LOGGER.error("Failed sending message via ASC ", e);
-                messagePanel.displayMsg(msgPrefix(order) + "Failed via ASC", InformationLevel.Negative);
+                messagePanel.displayMsg(msgPrefix(order) + "Failed via ASC", LOGGER, InformationLevel.Negative);
                 letterSheetService.fillFailedInfo(order, "Failed via ASC");
             }
         }
@@ -248,7 +249,7 @@ public class CommonLetterSender {
                 order.buyer_email = Constants.RND_EMAIL;
             } else {
                 if (amazonOrder == null) {
-                    messagePanel.displayMsg(msgPrefix(order) + "Cant find order email address", InformationLevel.Negative);
+                    messagePanel.displayMsg(msgPrefix(order) + "Cant find order email address", LOGGER, InformationLevel.Negative);
                     return;
                 }
                 order.buyer_email = amazonOrder.getEmail();
@@ -257,10 +258,10 @@ public class CommonLetterSender {
             try {
                 gmailLetterSender.sendForOrder(order, letter);
                 finished = true;
-                messagePanel.displayMsg(msgPrefix(order) + "Message sent via email successfully.", InformationLevel.Information);
+                messagePanel.displayMsg(msgPrefix(order) + "Message sent via email successfully.", LOGGER, InformationLevel.Information);
             } catch (Exception e) {
                 LOGGER.error("", e);
-                messagePanel.displayMsg(msgPrefix(order) + "Failed via Email", InformationLevel.Negative);
+                messagePanel.displayMsg(msgPrefix(order) + "Failed via Email", LOGGER, InformationLevel.Negative);
                 letterSheetService.fillFailedInfo(order, "Failed via Email");
             }
         }
@@ -284,17 +285,17 @@ public class CommonLetterSender {
             seller = huntService.huntForOrder(order);
         } catch (Exception e) {
             LOGGER.error("", e);
-            messagePanel.displayMsg(msgPrefix(order) + "failed to find seller - " + Strings.getExceptionMsg(e), InformationLevel.Negative);
+            messagePanel.displayMsg(msgPrefix(order) + "failed to find seller - " + Strings.getExceptionMsg(e), LOGGER, InformationLevel.Negative);
             return;
         }
 
         try {
             SellerHuntUtils.setSellerDataForOrder(order, seller);
             sheetService.fillSellerInfo(order);
-            messagePanel.displayMsg(msgPrefix(order) + "find seller  - " + seller.toSimpleString(), InformationLevel.Information);
+            messagePanel.displayMsg(msgPrefix(order) + "find seller  - " + seller.toSimpleString(), LOGGER, InformationLevel.Information);
         } catch (Exception e) {
             LOGGER.error("", e);
-            messagePanel.displayMsg(msgPrefix(order) + "failed to write seller info to sheet - " + Strings.getExceptionMsg(e), InformationLevel.Negative);
+            messagePanel.displayMsg(msgPrefix(order) + "failed to write seller info to sheet - " + Strings.getExceptionMsg(e), LOGGER, InformationLevel.Negative);
         }
     }
 
