@@ -28,7 +28,7 @@ public enum BackgroundJob {
 
     SendingGrayLabelLetter("0 0 20 ? * MON,TUE,WED,THU,FRI,SAT *", SendingGrayLabelLetterJob.class),
 
-    HarvesterAutoUpgrade("0 15 2 1/1 * ? *", AutoUpgradeJob.class),
+    HarvesterAutoUpgrade("0 15 2 1/1 * ? *", HarvesterAutoUpgrade.class),
 
     ContextUploadJob("0 0 5,13,21 1/1 * ? *", ContextUploadJob.class),
 
@@ -72,6 +72,13 @@ public enum BackgroundJob {
         if (this == SendingGrayLabelLetter) {
             LocalTime syncTime = systemSettings.getGrayLabelLetterSendingTime();
             int allowedRange = systemSettings.getGrayLabelLetterSendingAllowedRange();
+            LocalTime scheduledTime = DatetimeHelper.randomTimeBetween(syncTime, allowedRange);
+            return String.format("%d %d %d ? * MON,TUE,WED,THU,FRI,SAT *", scheduledTime.getSecond(), scheduledTime.getMinute(), scheduledTime.getHour());
+        }
+
+        if (this == InvoiceDownloading) {
+            LocalTime syncTime = systemSettings.getInvoiceDownloadTime();
+            int allowedRange = systemSettings.getInvoiceDownloadingAllowedRange();
             LocalTime scheduledTime = DatetimeHelper.randomTimeBetween(syncTime, allowedRange);
             return String.format("%d %d %d ? * MON,TUE,WED,THU,FRI,SAT *", scheduledTime.getSecond(), scheduledTime.getMinute(), scheduledTime.getHour());
         }
