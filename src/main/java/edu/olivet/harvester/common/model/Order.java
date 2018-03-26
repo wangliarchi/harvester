@@ -324,6 +324,12 @@ public class Order implements Keyable {
         return Remark.SELLER_CANCELED.isContainedByAny(cost, order_number);
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    @JSONField(serialize = false)
+    public boolean inSellerCanceledSheet() {
+        return StringUtils.equalsAnyIgnoreCase(sheetName, "Seller Canceled Orders", "Seller Cancelled Orders");
+    }
+
     /**
      * 部分情况下客人取消的订单会在新单号一列标注Buyer Cancel等字样，据此判定该条订单是否已被客人取消
      */
@@ -466,7 +472,7 @@ public class Order implements Keyable {
         }
 
         //seller canceled sheet may have no estimated_delivery_date, set a default
-        if (canceledBySeller() && StringUtils.isBlank(estimated_delivery_date)) {
+        if (inSellerCanceledSheet() && StringUtils.isBlank(estimated_delivery_date)) {
             return DateUtils.addDays(new Date(), 14);
         }
 
