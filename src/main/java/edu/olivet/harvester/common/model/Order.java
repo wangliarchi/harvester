@@ -465,6 +465,11 @@ public class Order implements Keyable {
             return DateUtils.addDays(new Date(), 60);
         }
 
+        //seller canceled sheet may have no estimated_delivery_date, set a default
+        if (canceledBySeller() && StringUtils.isBlank(estimated_delivery_date)) {
+            return DateUtils.addDays(new Date(), 14);
+        }
+
         String estimatedDeliveryDateString;
         if (Strings.containsAnyIgnoreCase(estimated_delivery_date, " - ")) {
             estimatedDeliveryDateString = estimated_delivery_date.split("\\s-\\s")[1];
