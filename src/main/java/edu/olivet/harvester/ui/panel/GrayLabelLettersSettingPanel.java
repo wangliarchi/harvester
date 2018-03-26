@@ -7,6 +7,7 @@ import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.harvester.common.model.SystemSettings;
 import edu.olivet.harvester.job.BackgroundJob;
+import edu.olivet.harvester.utils.MessageListener;
 
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
@@ -153,25 +154,25 @@ public class GrayLabelLettersSettingPanel extends JPanel {
             systemSettings.setEnableAutoSendGrayLabelLetters(false);
         }
 
-        if (oldData != systemSettings.isEnableAutoSendGrayLabelLetters()) {
-            TaskScheduler taskScheduler = ApplicationContext.getBean(TaskScheduler.class);
-            taskScheduler.deleteJob(BackgroundJob.SendingGrayLabelLetter.getClazz());
-            if (oldData) {
-                ProgressLogsPanel.getInstance().displayMsg("Auto sending gray label letters job was disabled successfully.");
-            } else {
-                Date nextTriggerTime = taskScheduler.startJob(BackgroundJob.SendingGrayLabelLetter.getCron(),
-                        BackgroundJob.SendingGrayLabelLetter.getClazz());
-                ProgressLogsPanel.getInstance().displayMsg(
-                        "Auto sending gray label letters job was enabled successfully. Next trigger time will be " + nextTriggerTime);
-            }
-        }
-
         systemSettings.setGrayLabelLetterSendingTime(sendingTimePicker.getTime());
         systemSettings.setGrayLabelLetterSendingAllowedRange((int) allowedRangeComBox.getSelectedItem());
 
         systemSettings.setGrayLabelLetterMaxDays((int) maxDaysComBox.getSelectedItem());
         systemSettings.setGrayLabelLetterSendingMethod((String) sendingMethodsComBox.getSelectedItem());
         systemSettings.save();
+
+        if (oldData != systemSettings.isEnableAutoSendGrayLabelLetters()) {
+            TaskScheduler taskScheduler = ApplicationContext.getBean(TaskScheduler.class);
+            taskScheduler.deleteJob(BackgroundJob.SendingGrayLabelLetter.getClazz());
+            if (oldData) {
+                ApplicationContext.getBean(MessageListener.class).addMsg("Auto sending gray label letters job was disabled successfully.");
+            } else {
+                Date nextTriggerTime = taskScheduler.startJob(BackgroundJob.SendingGrayLabelLetter.getCron(),
+                        BackgroundJob.SendingGrayLabelLetter.getClazz());
+                ApplicationContext.getBean(MessageListener.class).addMsg(
+                        "Auto sending gray label letters job was enabled successfully. Next trigger time will be " + nextTriggerTime);
+            }
+        }
     }
 
     public static void main(String[] args) {

@@ -38,6 +38,12 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
                     click(order);
                     return;
                 }
+
+                DOMElement continueBtn = JXBrowserHelper.selectElementByCssSelector(browser, CONTINUE_BTN_SELECTOR);
+                if (total.getAmount().floatValue() < 1 && continueBtn == null) {
+                    return;
+                }
+
             } catch (Exception e) {
                 LOGGER.error("Error reading grand total. ", e);
             }
@@ -80,6 +86,17 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
     }
 
     public void enterPromoCode(Order order) {
+
+        try {
+            String grandTotalText = JXBrowserHelper.text(browser, "#subtotals-marketplace-table .grand-total-price");
+            Money total = Money.fromText(grandTotalText, buyerPanel.getCountry());
+            if (total.getAmount().floatValue() < 1) {
+                return;
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error reading grand total. ", e);
+        }
+
         JXBrowserHelper.waitUntilVisible(browser, "#spc-gcpromoinput,#gcpromoinput");
         JXBrowserHelper.fillValueForFormField(browser, "#spc-gcpromoinput,#gcpromoinput", order.promotionCode);
         WaitTime.Shortest.execute();

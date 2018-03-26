@@ -78,7 +78,7 @@ abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract {
         }
 
         for (DOMElement paymentRow : cards) {
-            String cardInfoText = JXBrowserHelper.selectElementByCssSelector(paymentRow, ".card-info").getInnerText();
+            String cardInfoText = JXBrowserHelper.textFromElement(paymentRow, ".card-info");
             if (cardInfoText.contains(creditCard.lastDigits())) {
                 paymentRow.click();
                 WaitTime.Shortest.execute();

@@ -19,6 +19,7 @@ import edu.olivet.harvester.ui.menu.Actions;
 import edu.olivet.harvester.ui.menu.UIElements;
 import edu.olivet.harvester.ui.panel.MainPanel;
 import edu.olivet.harvester.utils.LogViewer;
+import edu.olivet.harvester.utils.MessageListener;
 import edu.olivet.harvester.utils.Settings;
 import edu.olivet.harvester.utils.Settings.Configuration;
 import org.apache.commons.lang3.StringUtils;
@@ -322,7 +323,8 @@ public class UIHarvester extends AbstractApplicationUI {
     }
 
 
-    @UIEvent public void restart() {
+    @UIEvent
+    public void restart() {
 
         if (PSEventListener.isRunning()) {
             UITools.error("Order submission task is running. Please wait util it's finished, or stop the task first.");
@@ -367,12 +369,17 @@ public class UIHarvester extends AbstractApplicationUI {
     @Inject
     private TaskScheduler taskScheduler;
 
+    @Inject MessageListener messageListener;
+
     void startBackgroundJobs() {
         for (BackgroundJob job : BackgroundJob.values()) {
             Date nextTriggerTime = taskScheduler.startJob(job.getCron(), job.getClazz());
             try {
                 AbstractBackgroundJob bg = ApplicationContext.getBean(job.getClazz());
                 bg.runIfMissed(nextTriggerTime);
+                if (bg.enabled()) {
+                    messageListener.addMsg("Next trigger time for background job " + job.name() + " will be " + nextTriggerTime);
+                }
             } catch (Exception e) {
                 LOGGER.error("Cant initialize job {}", job.getClazz().getName(), e);
             }

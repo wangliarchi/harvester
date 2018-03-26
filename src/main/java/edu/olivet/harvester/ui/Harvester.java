@@ -60,7 +60,6 @@ public class Harvester {
         UITools.setIconAndPosition(uiHarvester);
 
         uiHarvester.setVisible(true);
-        uiHarvester.startBackgroundJobs();
 
         ApplicationContext.getBean(ContextUploadJob.class).execute();
 
@@ -69,6 +68,8 @@ public class Harvester {
         messageListener.setContainer(ProgressLogsPanel.getInstance());
         messageListener.start();
         messageListener.addLongMsg("Harvester Started Successfully!", InformationLevel.Positive);
+
+        uiHarvester.startBackgroundJobs();
 
         Migration.migrateCreditCardSettings();
         try {

@@ -108,6 +108,10 @@ public class SyncASINsSettingPanel extends JPanel {
             systemSettings.setEnableASINsSyncing(false);
         }
 
+        systemSettings.setAsinSyncTime(exportTimePicker.getTime());
+        systemSettings.setAsinSyncAllowedRange((int) allowedRangeComBox.getSelectedItem());
+        systemSettings.save();
+
         if (oldData != systemSettings.isEnableASINsSyncing()) {
             TaskScheduler taskScheduler = ApplicationContext.getBean(TaskScheduler.class);
             taskScheduler.deleteJob(BackgroundJob.SyncASIN.getClazz());
@@ -121,9 +125,6 @@ public class SyncASINsSettingPanel extends JPanel {
             }
         }
 
-        systemSettings.setAsinSyncTime(exportTimePicker.getTime());
-        systemSettings.setAsinSyncAllowedRange((int) allowedRangeComBox.getSelectedItem());
-        systemSettings.save();
     }
 
     public static void main(String[] args) {

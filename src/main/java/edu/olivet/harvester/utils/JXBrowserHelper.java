@@ -40,7 +40,7 @@ import static com.teamdev.jxbrowser.chromium.BrowserKeyEvent.KeyEventType.*;
  */
 public class JXBrowserHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(JXBrowserHelper.class);
-    private static final int TIME_OUT_SECONDS = 6;
+    private static final int TIME_OUT_SECONDS = 12;
     public static final String CHANNEL_CLOSED_MESSAGE = "Failed to send message. Channel is already closed";
     private static final Map<String, BrowserContext> BrowserContextMap = new ConcurrentHashMap<>();
 

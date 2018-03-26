@@ -108,6 +108,10 @@ public class OrderConfirmationSettingPanel extends JPanel {
             systemSettings.setEnableOrderConfirmation(false);
         }
 
+        systemSettings.setOrderConfirmationTime(confirmationTimePicker.getTime());
+        systemSettings.setOrderConfirmationAllowedRange((int) allowedRangeComBox.getSelectedItem());
+        systemSettings.save();
+
         if (oldData != systemSettings.isEnableOrderConfirmation()) {
             TaskScheduler taskScheduler = ApplicationContext.getBean(TaskScheduler.class);
             taskScheduler.deleteJob(BackgroundJob.ShipmentConfirmation.getClazz());
@@ -122,9 +126,6 @@ public class OrderConfirmationSettingPanel extends JPanel {
         }
 
 
-        systemSettings.setOrderConfirmationTime(confirmationTimePicker.getTime());
-        systemSettings.setOrderConfirmationAllowedRange((int) allowedRangeComBox.getSelectedItem());
-        systemSettings.save();
     }
 
     public static void main(String[] args) {

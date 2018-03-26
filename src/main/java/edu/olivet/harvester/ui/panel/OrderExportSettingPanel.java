@@ -108,6 +108,10 @@ public class OrderExportSettingPanel extends JPanel {
             systemSettings.setEnableOrderExport(false);
         }
 
+        systemSettings.setOrderExportTime(exportTimePicker.getTime());
+        systemSettings.setOrderExportAllowedRange((int) allowedRangeComBox.getSelectedItem());
+        systemSettings.save();
+
         if (oldData != systemSettings.isEnableOrderExport()) {
             TaskScheduler taskScheduler = ApplicationContext.getBean(TaskScheduler.class);
             taskScheduler.deleteJob(BackgroundJob.OrderExporting.getClazz());
@@ -121,9 +125,6 @@ public class OrderExportSettingPanel extends JPanel {
             }
         }
 
-        systemSettings.setOrderExportTime(exportTimePicker.getTime());
-        systemSettings.setOrderExportAllowedRange((int) allowedRangeComBox.getSelectedItem());
-        systemSettings.save();
     }
 
     public static void main(String[] args) {

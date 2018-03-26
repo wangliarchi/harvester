@@ -21,8 +21,7 @@ public class DownloadInvoiceJob extends AbstractBackgroundJob {
 
     @Override
     public void execute() {
-        SystemSettings systemSettings = SystemSettings.load();
-        if (!systemSettings.isEnableInvoiceDownloading()) {
+        if (!enabled()) {
             LOGGER.info("Auto invoice downloading was not enabled. To enable this function, go to Settings->System Settings->Download Invoices");
             return;
         }
@@ -40,6 +39,12 @@ public class DownloadInvoiceJob extends AbstractBackgroundJob {
     @Override
     public void runIfMissed(Date nextTriggerTime) {
         //
+    }
+
+    @Override
+    public boolean enabled() {
+        SystemSettings systemSettings = SystemSettings.load();
+        return systemSettings.isEnableInvoiceDownloading();
     }
 
 

@@ -26,8 +26,7 @@ public class ShipmentConfirmationJob extends AbstractBackgroundJob {
 
     @Override
     public void execute() {
-        SystemSettings systemSettings = SystemSettings.load();
-        if (!systemSettings.isEnableOrderConfirmation()) {
+        if (!enabled()) {
             LOGGER.info("Auto order confirmation was not enabled. To enable this function, go to Settings->System Settings->Order Confirmation");
             return;
         }
@@ -39,6 +38,12 @@ public class ShipmentConfirmationJob extends AbstractBackgroundJob {
 
         DBManager dbManager = ApplicationContext.getBean(DBManager.class);
         dbManager.insert(log, CronjobLog.class);
+    }
+
+    @Override
+    public boolean enabled() {
+        SystemSettings systemSettings = SystemSettings.load();
+        return systemSettings.isEnableOrderConfirmation();
     }
 
     @Override

@@ -21,8 +21,7 @@ public class SyncASINJob extends AbstractBackgroundJob {
 
     @Override
     public void execute() {
-        SystemSettings systemSettings = SystemSettings.load();
-        if (!systemSettings.isEnableInvoiceDownloading()) {
+        if (!enabled()) {
             LOGGER.info("Auto ASIN sync was not enabled. To enable this function, go to Settings->System Settings->ASN Sync");
             return;
         }
@@ -35,6 +34,12 @@ public class SyncASINJob extends AbstractBackgroundJob {
 
         DBManager dbManager = ApplicationContext.getBean(DBManager.class);
         dbManager.insert(log, CronjobLog.class);
+    }
+
+    @Override
+    public boolean enabled() {
+        SystemSettings systemSettings = SystemSettings.load();
+        return systemSettings.isEnableInvoiceDownloading();
     }
 
     @Override

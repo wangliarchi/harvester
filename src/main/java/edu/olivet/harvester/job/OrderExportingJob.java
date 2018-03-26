@@ -21,8 +21,7 @@ public class OrderExportingJob extends AbstractBackgroundJob {
 
     @Override
     public void execute() {
-        SystemSettings systemSettings = SystemSettings.load();
-        if (!systemSettings.isEnableOrderExport()) {
+        if (!enabled()) {
             LOGGER.info("Auto order exporting was not enabled. To enable this function, go to Settings->System Settings->Order Export");
             return;
         }
@@ -40,6 +39,12 @@ public class OrderExportingJob extends AbstractBackgroundJob {
     @Override
     public void runIfMissed(Date nextTriggerTime) {
         //
+    }
+
+    @Override
+    public boolean enabled() {
+        SystemSettings systemSettings = SystemSettings.load();
+        return systemSettings.isEnableOrderExport();
     }
 
 

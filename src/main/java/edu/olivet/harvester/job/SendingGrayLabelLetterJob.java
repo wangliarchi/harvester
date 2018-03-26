@@ -25,9 +25,7 @@ public class SendingGrayLabelLetterJob extends AbstractBackgroundJob {
 
         //check store name
         Settings.load().validateAndFixStoreName();
-
-        SystemSettings systemSettings = SystemSettings.load();
-        if (!systemSettings.isEnableAutoSendGrayLabelLetters()) {
+        if (!enabled()) {
             LOGGER.info("Auto sending gray label letters was not enabled. To enable this function, go to Settings->System Settings->Common Letters");
             return;
         }
@@ -48,5 +46,10 @@ public class SendingGrayLabelLetterJob extends AbstractBackgroundJob {
         //
     }
 
+    @Override
+    public boolean enabled() {
+        SystemSettings systemSettings = SystemSettings.load();
+        return systemSettings.isEnableAutoSendGrayLabelLetters();
+    }
 
 }
