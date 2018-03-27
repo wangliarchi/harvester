@@ -462,7 +462,7 @@ public class SheetAPI {
 
 
         if (CollectionUtils.isEmpty(dateToUpdate)) {
-            LOGGER.error("No rows to update buyer canceled info {}", worksheet.toString());
+            LOGGER.info("No rows to update buyer canceled info {}", worksheet.toString());
             return;
         }
         try {
