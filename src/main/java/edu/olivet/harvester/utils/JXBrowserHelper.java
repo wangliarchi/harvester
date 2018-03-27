@@ -220,8 +220,8 @@ public class JXBrowserHelper {
 
         int timeConsumed = 0;
         while (true) {
-            DOMElement element = selectElementByCssSelector(browser, selector);
-            if (element == null || isHidden(element)) {
+            DOMElement element = selectVisibleElement(browser, selector);
+            if (element == null) {
                 WaitTime.Shortest.execute();
                 timeConsumed += WaitTime.Shortest.val();
 
