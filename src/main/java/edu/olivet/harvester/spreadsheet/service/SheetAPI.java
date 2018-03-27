@@ -105,7 +105,7 @@ public class SheetAPI {
         return Constants.RND_EMAIL;
     }
 
-    @Repeat(expectedExceptions = BusinessException.class, times = 10)
+    @Repeat(expectedExceptions = BusinessException.class)
     public Spreadsheet getSpreadsheet(String spreadsheetId) {
         try {
             final long start = System.currentTimeMillis();
@@ -116,9 +116,10 @@ public class SheetAPI {
             LOGGER.info("读取{} SHEETS，耗时{}", spreadsheetId, Strings.formatElapsedTime(start));
             return response;
         } catch (IOException e) {
-            if (StringUtils.containsIgnoreCase(e.getMessage(), "403 Forbidden")) {
+            if (StringUtils.containsIgnoreCase(Strings.getExceptionMsg(e), "403 Forbidden")) {
                 //authorize
                 sharePermissions(spreadsheetId, getSheetServiceEmail());
+                WaitTime.Short.execute();
                 throw new BusinessException(e);
             }
             throw googleAPIHelper.wrapException(e);
