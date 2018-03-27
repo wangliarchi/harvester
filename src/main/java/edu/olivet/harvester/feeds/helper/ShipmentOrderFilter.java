@@ -139,7 +139,7 @@ public class ShipmentOrderFilter {
                     !"Unshipped".equals(order.getAmazonOrderStatus()) && !"PartiallyShipped".equals(order.getAmazonOrderStatus())) {
                 messagePanel.displayMsg(
                         "Row " + order.getRow() + " " + order.order_id + " ignored. Order status is " + order.getAmazonOrderStatus(),
-                        LOGGER, InformationLevel.Negative
+                        LOGGER
                 );
 
                 if ("Shipped".equalsIgnoreCase(order.getAmazonOrderStatus())) {
