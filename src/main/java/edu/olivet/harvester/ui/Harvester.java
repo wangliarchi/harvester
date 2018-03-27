@@ -36,7 +36,7 @@ public class Harvester {
             new AutoUpgradeJob().execute();
         }
 
-        if (!new File(Settings.CONFIG_FILE_PATH).exists()) {
+        if (!Settings.existed()) {
 
             if (Migration.hasMigrationFile() &&
                     UITools.confirmed("OrderMan configuration is found. Do you want to migrate it to Harvester?")) {

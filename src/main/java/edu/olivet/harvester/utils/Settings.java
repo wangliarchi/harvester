@@ -42,6 +42,20 @@ public class Settings {
     public static final String TEST_CONFIG_FILE_PATH = "src/test/resources/conf/harvester-test.json";
     private static Settings instance;
 
+    public static boolean existed() {
+        File configFile = new File(Settings.CONFIG_FILE_PATH);
+        if (!configFile.exists()) {
+            return false;
+        }
+
+        Settings settings = load(Settings.CONFIG_FILE_PATH);
+        if (settings == null) {
+            return false;
+        }
+
+        return true;
+    }
+
     public static Settings load() {
         if (instance == null) {
             reload();

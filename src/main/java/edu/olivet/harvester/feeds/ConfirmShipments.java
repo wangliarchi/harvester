@@ -390,7 +390,7 @@ public class ConfirmShipments {
         } catch (NoOrdersFoundInWorksheetException e) {
             messagePanel.displayMsg("No order data found on worksheet " + worksheet.toString(),
                     InformationLevel.Negative);
-            LOGGER.error("No order data found on worksheet {}. {}", worksheet.toString(), e);
+            LOGGER.error("No order data found on worksheet {}.", worksheet.toString(), e);
 
             if (messagePanel instanceof VirtualMessagePanel) {
                 String subject = String.format("No order data found on worksheet %s ", worksheet.toString());
