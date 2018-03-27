@@ -19,6 +19,11 @@ public class ShippingOptionTest {
     @Inject private
     Now now;
 
+    @Test void testParsePrice() {
+        now.set(Dates.parseDate("11/18/2017"));
+        ShippingOption shippingOption = new ShippingOption("Two-Day Shipping — get it Wednesday, Nov 22", "— get it Wednesday, Nov 22", "FREE Economy Shipping", Country.US, now.get());
+        assertEquals(shippingOption.getPrice().usdText(), "$0.00");
+    }
     @Test
     public void testShippingOption() throws Exception {
         now.set(Dates.parseDate("11/18/2017"));
@@ -133,8 +138,6 @@ public class ShippingOptionTest {
         assertEquals(shippingOption.getPrice().toString(), "$14.99");
         assertEquals(Dates.format(shippingOption.getLatestDeliveryDate(), DateFormat.FULL_MONTH_DAY.pattern()), "12/05");
         assertFalse(shippingOption.isExpedited());
-
-
     }
 
 
