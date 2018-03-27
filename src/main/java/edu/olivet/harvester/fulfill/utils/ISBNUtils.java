@@ -93,6 +93,9 @@ public class ISBNUtils {
      * @param isbn 10位isbn
      */
     public static String getTitle(Country country, String isbn) {
+        if (StringUtils.isBlank(isbn)) {
+            return "";
+        }
         String key = isbn + Constants.HYPHEN + country.name();
         String title = getTitleFromCache(country, isbn);
         if (StringUtils.isNotBlank(title)) {
