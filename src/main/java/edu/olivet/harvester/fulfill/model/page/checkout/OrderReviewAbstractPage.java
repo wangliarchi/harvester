@@ -191,8 +191,9 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
             String[] parts = StringUtils.split(cityStateZip, ",");
             String city = parts[0].trim();
             String[] regionZip = StringUtils.split(parts[1].trim(), " ");
-            String zip = regionZip[regionZip.length - 1];
-            String state = StringUtils.join(Arrays.copyOf(regionZip, regionZip.length - 1), " ");
+            int zipLength = StringUtils.equalsAnyIgnoreCase(country, "Canada", "United Kingdom") ? 2 : 1;
+            String zip = StringUtils.join(Arrays.copyOfRange(regionZip, regionZip.length - zipLength, regionZip.length), " ");
+            String state = StringUtils.join(Arrays.copyOf(regionZip, regionZip.length - zipLength), " ");
 
             Address enteredAddress = new Address();
             enteredAddress.setName(name.replace(buyerPanel.getOrder().getRuntimeSettings().getNoInvoiceText(), ""));

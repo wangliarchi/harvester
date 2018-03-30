@@ -98,4 +98,8 @@ public class Money {
     private BigDecimal rounded(BigDecimal decimalNumber) {
         return decimalNumber.setScale(DECIMALS, ROUNDING_MODE);
     }
+
+    public static void main(String[] args) {
+        System.out.println(Money.getAmountFromText("53,56",Country.DE));
+    }
 }

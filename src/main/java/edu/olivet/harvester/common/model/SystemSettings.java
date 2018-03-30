@@ -39,13 +39,14 @@ public class SystemSettings {
 
     private String selfOrderSpreadsheetId = "";
     private float selfOrderCostLimit = 1f;
+    private String selfOrderFreeShippingTemplateName = "FreeShipping";
 
     private boolean enableAutoSendGrayLabelLetters = false;
     private LocalTime grayLabelLetterSendingTime = LocalTime.of(20, 0);
     private Integer grayLabelLetterSendingAllowedRange = 15;
     private Integer grayLabelLetterMaxDays = 7;
     private String grayLabelLetterSendingMethod = "Both ASC and Email";
-
+    private boolean grayLabelLetterDebugModel = false;
 
     public static final String SYSTEM_SETTINGS_FILE_PATH = Directory.Customize.path() + "/system-settings.json";
     public static final String TEST_SYSTEM_SETTINGS_FILE_PATH = "src/test/resources/conf/system-settings.json";

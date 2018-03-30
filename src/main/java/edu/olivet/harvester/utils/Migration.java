@@ -216,9 +216,13 @@ public class Migration {
             try {
                 CreditCard card = new CreditCard();
                 String[] parts = StringUtils.split(v.toString(), ",");
+
                 card.setAccountEmail(k.trim());
                 card.setCardNo(parts[0].trim());
-                card.setCvv(parts[1].trim());
+                if (parts.length >= 2) {
+                    card.setCvv(parts[1].trim());
+                }
+
                 creditCards.add(card);
             } catch (Exception e) {
                 LOGGER.error("Failed to migrate credit card info,", e);
