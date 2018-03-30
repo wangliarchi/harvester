@@ -8,8 +8,6 @@ import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.common.model.OrderEnums.OrderColor;
 import edu.olivet.harvester.common.model.OrderEnums.Status;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
-import edu.olivet.harvester.utils.common.RandomUtils;
-import org.apache.commons.collections4.CollectionUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,30 +53,5 @@ public class SheetService extends edu.olivet.harvester.fulfill.service.SheetServ
         }
     }
 
-    public void updateLastCode(String spreadsheetId, List<Order> orders) {
-        if (CollectionUtils.isEmpty(orders)) {
-            return;
-        }
-
-
-        List<ValueRange> dateToUpdate = new ArrayList<>();
-
-        for (Order order : orders) {
-            String randCode = RandomUtils.randomAlphaNumeric(8);
-            order.last_code = randCode;
-            ValueRange codeRowData = new ValueRange().setValues(Collections.singletonList(Collections.singletonList(randCode)))
-                    .setRange(order.getSheetName() + "!AF" + order.row);
-
-            dateToUpdate.add(codeRowData);
-        }
-
-
-        try {
-            this.batchUpdateValues(spreadsheetId, dateToUpdate);
-        } catch (BusinessException e) {
-            LOGGER.error("Fail to update order update sheet status {} - {}", spreadsheetId, e);
-            throw new BusinessException(e);
-        }
-    }
 
 }
