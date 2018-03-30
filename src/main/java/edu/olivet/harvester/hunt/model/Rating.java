@@ -80,13 +80,8 @@ public class Rating {
     }
 
     /**
-     * <summary >
      * Ratings
      * (Lower bound of Wilson score confidence interval for a Bernoulli parameter)
-     * </summary>
-     * <param name="positive">Positive ratings</param>
-     * <param name="negative">Negative ratings</param>
-     * <returns></returns>
      */
     public double ratingScore(int positive, int negative) {
         return (((positive + 1.9208) / (positive + negative) -

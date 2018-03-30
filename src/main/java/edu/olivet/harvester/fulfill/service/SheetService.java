@@ -244,7 +244,7 @@ public class SheetService extends SheetAPI {
     }
 
     public Order reloadOrder(Order order) {
-        if(order.selfOrder) {
+        if (order.selfOrder) {
             return order;
         }
         Order reloadedOrder = _reloadOrder(order);
@@ -349,7 +349,6 @@ public class SheetService extends SheetAPI {
             throw new BusinessException(e);
         }
     }
-
 
 
 }

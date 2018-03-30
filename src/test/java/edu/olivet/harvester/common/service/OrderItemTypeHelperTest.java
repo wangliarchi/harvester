@@ -173,7 +173,7 @@ public class OrderItemTypeHelperTest extends BaseTest {
 
         //B008KTVD90 -> exception
         order.sku = "usedAcptc-c0311201713941";
-        helper.getItemTypeBySku(order);
+        OrderItemTypeHelper.getItemTypeBySku(order);
 
     }
 

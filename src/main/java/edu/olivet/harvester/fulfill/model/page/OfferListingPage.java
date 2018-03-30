@@ -268,7 +268,6 @@ public class OfferListingPage extends FulfillmentPage {
 
             JXBrowserHelper.selectVisibleElement(browser, ".a-button .a-button-inner.a-declarative").click();
             WaitTime.Shortest.execute();
-            return;
             //JXBrowserHelper.waitUntilVisible(browser, ".a-button-inner.a-declarative");
             //DOMElement closeBtn = JXBrowserHelper.selectVisibleElement(browser, ".a-popover-footer .a-button-inner.a-declarative");
             //if (closeBtn != null) {

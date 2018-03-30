@@ -70,6 +70,7 @@ public class OrderManAddressValidator implements AddressValidator {
             if (!finalOrAddr.equals(finalAddr)) {
                 //noinspection deprecation
                 double similarity = StringUtils.getJaroWinklerDistance(finalOrAddr, finalAddr);
+                //noinspection deprecation
                 double similarity1 = StringUtils.getJaroWinklerDistance(finalOrAddr, finalAddr1);
                 if (similarity < MIN_SIMILARITY && similarity1 < MIN_SIMILARITY) {
                     AddressValidatorService.logFailed(old.toString(), entered.toString(), finalOrAddr + ", " + finalAddr);

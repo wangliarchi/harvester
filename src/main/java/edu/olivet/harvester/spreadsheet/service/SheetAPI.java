@@ -52,10 +52,10 @@ public class SheetAPI {
     protected Drive driveService;
 
 
-    private final static String TMM_EMAIL = "olivetrnd153.tmm@gmail.com";
-    private final static String SF_EMAIL = "olivetrnd153.sf@gmail.com";
-    private final static String SF_EMAIL_2 = "olivetrnd153.sf2@gmail.com";
-    private final static String RS_EMAIL = "olivetrnd153.rs@gmail.com";
+    private static final String TMM_EMAIL = "olivetrnd153.tmm@gmail.com";
+    private static final String SF_EMAIL = "olivetrnd153.sf@gmail.com";
+    private static final String SF_EMAIL_2 = "olivetrnd153.sf2@gmail.com";
+    private static final String RS_EMAIL = "olivetrnd153.rs@gmail.com";
 
     @Inject
     public void init() {

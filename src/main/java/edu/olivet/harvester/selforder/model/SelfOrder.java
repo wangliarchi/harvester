@@ -3,7 +3,6 @@ package edu.olivet.harvester.selforder.model;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.google.common.base.Objects;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
-import edu.olivet.harvester.common.model.Remark;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;

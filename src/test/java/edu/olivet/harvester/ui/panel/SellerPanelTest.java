@@ -4,19 +4,15 @@ import com.teamdev.jxbrowser.chromium.Browser;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import edu.olivet.foundations.amazon.Country;
-import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.common.model.Money;
 import edu.olivet.harvester.utils.JXBrowserHelper;
-import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.Test;
 
 import java.io.File;
 import java.util.List;
-
-import static org.testng.Assert.*;
 
 public class SellerPanelTest extends BaseTest {
     @Test

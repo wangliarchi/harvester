@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
  */
 public class OrderBuyerUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderBuyerUtils.class);
+
     public static Account getBuyer(Order order) {
         if (order.sellerIsPrime()) {
             String buyerEmail = order.getRuntimeSettings().getPrimeBuyerAccount();
@@ -21,9 +22,9 @@ public class OrderBuyerUtils {
         }
 
         BuyerAccountSetting buyerAccountSetting = BuyerAccountSettingUtils.load().getByEmail(order.getRuntimeSettings().getBuyerAccount());
-        if(buyerAccountSetting == null) {
-            LOGGER.error("No buyer account found for {}",order.getRuntimeSettings().getBuyerAccount());
-            throw new BusinessException("No buyer account found for "+order.getRuntimeSettings().getBuyerAccount());
+        if (buyerAccountSetting == null) {
+            LOGGER.error("No buyer account found for {}", order.getRuntimeSettings().getBuyerAccount());
+            throw new BusinessException("No buyer account found for " + order.getRuntimeSettings().getBuyerAccount());
         }
         return buyerAccountSetting.getBuyerAccount();
     }

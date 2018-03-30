@@ -73,7 +73,7 @@ public class SystemSettings {
         return Strings.containsAnyIgnoreCase(grayLabelLetterSendingMethod, "both", "mail");
     }
 
-    public synchronized static SystemSettings reload() {
+    public static synchronized SystemSettings reload() {
         File file = new File(getConfigPath());
         if (file.exists() && file.isFile()) {
             instance = JSON.parseObject(Tools.readFileToString(file), SystemSettings.class);

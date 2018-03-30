@@ -151,21 +151,6 @@ public class DailyBudgetHelper {
     public Float getCost(String spreadsheetId, Date date) {
         Map<DataType, Float> budgetData = getData(spreadsheetId, date);
         return budgetData.get(DataType.Cost);
-//        String key = spreadsheetId + dateToGoogleSheetName(date);
-//        if (!BUDGET_ROW_CACHE.containsKey(key)) {
-//            getData(spreadsheetId, date);
-//        }
-//
-//        int row = BUDGET_ROW_CACHE.getOrDefault(spreadsheetId + dateToGoogleSheetName(date), 2);
-//
-//        List<String> ranges = com.google.common.collect.Lists.newArrayList("Daily Cost!B" + row);
-//
-//        try {
-//            List<ValueRange> valueRanges = sheetService.batchGetSpreadsheetValues(spreadsheetId, ranges);
-//            return FloatUtils.parseFloat(valueRanges.get(0).getValues().get(0).get(0).toString(), 0);
-//        } catch (Exception e) {
-//            return 0f;
-//        }
     }
 
 

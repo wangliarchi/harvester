@@ -176,6 +176,7 @@ public class ElasticSearchService {
     }
 
     @Inject ErrorAlertService errorAlertService;
+
     @Repeat
     public String request(String index, Map<String, Object> params) {
         String params4Url = params2Url(params);
@@ -184,7 +185,7 @@ public class ElasticSearchService {
             return HttpUtils.get(url);
         } catch (Exception e) {
             LOGGER.error("{} - ", url, e);
-            if(Strings.containsAnyIgnoreCase(e.getMessage(),"502")) {
+            if (Strings.containsAnyIgnoreCase(e.getMessage(), "502")) {
                 errorAlertService.sendMessage("Error with elasticsearch server!!", Strings.getExceptionMsg(e));
             }
             throw new BusinessException(e);

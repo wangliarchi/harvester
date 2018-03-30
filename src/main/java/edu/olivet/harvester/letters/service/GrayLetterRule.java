@@ -94,7 +94,7 @@ public class GrayLetterRule {
             return true;
         }
 
-        if(!waitToFindSupplier) {
+        if (!waitToFindSupplier) {
             return true;
         }
 

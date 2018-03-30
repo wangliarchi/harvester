@@ -1,12 +1,8 @@
 package edu.olivet.harvester.ui.events;
 
 import com.google.inject.Inject;
-import edu.olivet.foundations.amazon.Account;
-import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.UITools;
-import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.model.SystemSettings;
-import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.selforder.OrderSubmitter;
 import edu.olivet.harvester.selforder.ProductManager;
 import edu.olivet.harvester.selforder.model.SelfOrder;
@@ -17,9 +13,6 @@ import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.dialog.ChooseSheetDialog;
 import edu.olivet.harvester.ui.dialog.SelectSelfOrderDialog;
-import edu.olivet.harvester.ui.panel.SellerPanel;
-import edu.olivet.harvester.ui.utils.SellerPanelManager;
-import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

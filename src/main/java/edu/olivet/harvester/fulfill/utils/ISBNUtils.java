@@ -123,7 +123,7 @@ public class ISBNUtils {
             if (StringUtils.isBlank(title)) {
                 title = getTitleAtOfferListPage(baseUrl, isbn);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOGGER.warn("在{}上面读取{}书名过程中出现异常:", baseUrl, isbn, e);
         }
 
@@ -176,7 +176,7 @@ public class ISBNUtils {
         }
     }
 
-    public static String getTitleAtProductPage(String baseUrl, String isbn) throws IOException {
+    public static String getTitleAtProductPage(String baseUrl, String isbn) {
         try {
             return getTitleAtESWeb(isbn);
         } catch (Exception e) {

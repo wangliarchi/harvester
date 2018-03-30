@@ -26,8 +26,8 @@ public class OrderFulfillmentRecordService {
         record.setCost(selfOrder.cost);
         record.setPrimoCode(selfOrder.promoCode);
         record.setFulfilledAddress(selfOrder.recipientName + "\n" + selfOrder.shippingAddress1 + "\n" +
-                selfOrder.shippingAddress2 + "\n" + selfOrder.shippingCity + "\n" + selfOrder.shippingState + ", " + selfOrder.shippingZipCode + "\n"
-                + selfOrder.shippingCountry);
+                selfOrder.shippingAddress2 + "\n" + selfOrder.shippingCity + "\n" + selfOrder.shippingState + ", " +
+                selfOrder.shippingZipCode + "\n" + selfOrder.shippingCountry);
         record.setFulfillDate(new Date());
         record.setId(DigestUtils.sha256Hex(selfOrder.toString()));
         record.setCountry(selfOrder.country);

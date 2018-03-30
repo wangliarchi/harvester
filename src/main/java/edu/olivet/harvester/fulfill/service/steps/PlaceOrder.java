@@ -28,7 +28,7 @@ public class PlaceOrder extends Step {
         //
         if (!state.getOrder().selfOrder) {
             Order order = sheetService.reloadOrder(state.getOrder());
-            if(order.fulfilled()) {
+            if (order.fulfilled()) {
                 throw new OrderFulfilledException("Already fulfilled");
             }
             if (!order.fulfillable()) {

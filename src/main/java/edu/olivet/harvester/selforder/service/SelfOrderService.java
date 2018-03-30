@@ -28,7 +28,7 @@ public class SelfOrderService {
     @Inject SelfOrderSheetService selfOrderSheetService;
     @Inject SelfOrderHelper selfOrderHelper;
 
-    public static enum OrderAction {
+    public enum OrderAction {
         Process,
         AddProduct,
         All

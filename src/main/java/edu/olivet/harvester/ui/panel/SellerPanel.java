@@ -241,8 +241,8 @@ public class SellerPanel extends WebPanel {
 
         if (existedPrice > 0) {
             String priceText = String.valueOf(existedPrice);
-            if (country.europe() && country != Country.UK) {
-                priceText = priceText.replaceAll(".", ",");
+            if (StringUtils.isNotBlank(priceText) && country.europe() && country != Country.UK) {
+                priceText = StringUtils.replaceAll(priceText, ".", ",");
             }
             JXBrowserHelper.setValueForFormSelect(browser, "#standard_price", priceText);
         } else {
@@ -253,7 +253,7 @@ public class SellerPanel extends WebPanel {
                 float price = Float.parseFloat(priceText) + 5;
                 priceText = String.valueOf(price);
                 if (country.europe() && country != Country.UK) {
-                    priceText = priceText.replaceAll(".", ",");
+                    priceText = StringUtils.replaceAll(priceText, ".", ",");;
                 }
                 JXBrowserHelper.setValueForFormSelect(browser, "#standard_price", priceText);
             } catch (Exception e) {
