@@ -8,7 +8,7 @@ import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.letters.model.Letter;
 import edu.olivet.harvester.ui.panel.SellerPanel;
-import edu.olivet.harvester.ui.panel.TabbedBuyerPanel;
+import edu.olivet.harvester.ui.utils.SellerPanelManager;
 import edu.olivet.harvester.utils.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +24,7 @@ public class ASCLetterSender {
         Country marketplaceCountry = OrderCountryUtils.getMarketplaceCountry(order);
         Country settingCountry = marketplaceCountry.europe() ? Country.UK : marketplaceCountry;
         Account seller = Settings.load().getConfigByCountry(settingCountry).getSeller();
-        SellerPanel sellerPanel = addTab(seller, settingCountry);
+        SellerPanel sellerPanel = SellerPanelManager.getTab(seller, settingCountry);
         sellerPanel.loginSellerCentral(marketplaceCountry);
 
         boolean result = sellerPanel.sendMessage(order, letter.toMessage());
@@ -33,28 +33,5 @@ public class ASCLetterSender {
             throw new BusinessException("Fail to send gray letter via asc");
         }
 
-    }
-
-
-    public SellerPanel addTab(Account seller, Country country) {
-        final long start = System.currentTimeMillis();
-
-        String tabKey = SellerPanel.getKey(country, seller);
-
-        SellerPanel sellerPanel;
-        try {
-            sellerPanel = (SellerPanel) TabbedBuyerPanel.getInstance().getWebPanel(tabKey);
-            LOGGER.info("Buyer account {} already initialized. ", tabKey);
-            return sellerPanel;
-        } catch (Exception e) {
-            //
-        }
-
-        sellerPanel = new SellerPanel(country, seller);
-        TabbedBuyerPanel.getInstance().addTab(sellerPanel);
-
-        LOGGER.info("Finished init panel {} ，took{}", sellerPanel.getKey(), Strings.formatElapsedTime(start));
-
-        return sellerPanel;
     }
 }
