@@ -6,6 +6,7 @@ import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.fulfill.exception.Exceptions.NoBudgetException;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import org.apache.commons.lang3.StringUtils;
@@ -53,7 +54,7 @@ public class PaymentMethodMultiPage extends PaymentMethodAbstractPage {
             WaitTime.Shortest.execute();
             JXBrowserHelper.waitUntilNewPageLoaded(browser);
         } else {
-            throw new BusinessException("Something wrong with payment method. Please check gift card balance and/or credit card info");
+            throw new NoBudgetException("Something wrong with payment method. Please check gift card balance and/or credit card info");
         }
     }
 
