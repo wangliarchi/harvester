@@ -52,7 +52,7 @@ public class HuntService {
             } catch (Exception e) {
                 LOGGER.error("", e);
                 i.remove();
-                HUNTING_LOGGER.setOrder(order).getLogger().info("Seller [{}] is not qualified as {}", e.getMessage());
+                HUNTING_LOGGER.setOrder(order).getLogger().info("Seller [{}] is not qualified as {}", seller.getName(), Strings.getExceptionMsg(e));
             }
         }
 
