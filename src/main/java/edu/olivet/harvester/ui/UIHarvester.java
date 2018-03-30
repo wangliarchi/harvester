@@ -205,6 +205,11 @@ public class UIHarvester extends AbstractApplicationUI {
         downloadInvoiceEvent.list();
     }
 
+    @UIEvent
+    public void invoiceDownloadStats() {
+        downloadInvoiceEvent.report();
+    }
+
     @Inject private
     SettingEvent settingEvent;
 
@@ -351,6 +356,11 @@ public class UIHarvester extends AbstractApplicationUI {
     @UIEvent
     public void submitSelfOrders() {
         submitSelfOrdersEvent.execute();
+    }
+
+    @UIEvent
+    public void addSelfOrderProduct() {
+        submitSelfOrdersEvent.addProducts();
     }
 
     @Override
