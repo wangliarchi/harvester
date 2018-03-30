@@ -5,7 +5,6 @@ import edu.olivet.foundations.ui.BaseDialog;
 import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.ui.panel.*;
-import edu.olivet.harvester.utils.Settings;
 
 import javax.swing.*;
 import javax.swing.LayoutStyle.ComponentPlacement;
