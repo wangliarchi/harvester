@@ -46,14 +46,27 @@ public class CheckoutEnum {
         }
 
         public static CheckoutPage detectPage(Browser browser) {
-            JXBrowserHelper.waitUntilNotFound(browser, ".section-overwrap");
-            JXBrowserHelper.waitUntilNotFound(browser, "#spinner-anchor");
-            JXBrowserHelper.waitUntilNotFound(browser, ".loading-img-text");
+            try {
+                JXBrowserHelper.waitUntilNotFound(browser, ".section-overwrap");
+                JXBrowserHelper.waitUntilNotFound(browser, "#spinner-anchor");
+                JXBrowserHelper.waitUntilNotFound(browser, "#first-pipeline-load-page-spinner");
+                JXBrowserHelper.waitUntilNotFound(browser, ".loading-img-text");
+            } catch (Exception e) {
+                //
+            }
 
+            //pet-checkout-button
 
             DOMElement primeAd = JXBrowserHelper.selectVisibleElement(browser, "#prime-acquisition-spc-popover-no-thanks");
             if (primeAd != null) {
                 primeAd.click();
+                WaitTime.Shorter.execute();
+                return detectPage(browser);
+            }
+
+            DOMElement pet = JXBrowserHelper.selectVisibleElement(browser, ".pet-checkout-button");
+            if (pet != null) {
+                pet.click();
                 WaitTime.Shorter.execute();
                 return detectPage(browser);
             }
