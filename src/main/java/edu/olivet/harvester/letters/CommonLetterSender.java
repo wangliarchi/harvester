@@ -80,7 +80,7 @@ public class CommonLetterSender {
     }
 
     public void execute(String spreadsheetId) {
-        Date minDate = DateUtils.addDays(new Date(), SystemSettings.load().getGrayLabelLetterMaxDays());
+        Date minDate = DateUtils.addDays(new Date(), -SystemSettings.load().getGrayLabelLetterMaxDays());
         Spreadsheet spreadsheet = sheetAPI.getSpreadsheet(spreadsheetId);
 
         List<Order> orders = orderService.fetchOrders(spreadsheet, minDate);
@@ -137,6 +137,8 @@ public class CommonLetterSender {
         }
 
         messagePanel.displayMsg(grayOrders.size() + " order(s) to be processed for " + title, LOGGER);
+
+        letterSheetService.updateLastCode(orders.get(0).spreadsheetId, orders);
 
         if (findSupplier) {
             List<Order> ordersToFindSupplier = grayOrders.stream().filter(GrayLetterRule::needFindSupplier).collect(Collectors.toList());
@@ -284,7 +286,7 @@ public class CommonLetterSender {
         try {
             seller = huntService.huntForOrder(order);
         } catch (Exception e) {
-            LOGGER.error("", e);
+            LOGGER.error("Error hunting seller for {}", msgPrefix(order), e);
             messagePanel.displayMsg(msgPrefix(order) + "failed to find seller - " + Strings.getExceptionMsg(e), LOGGER, InformationLevel.Negative);
             return;
         }
@@ -294,7 +296,7 @@ public class CommonLetterSender {
             sheetService.fillSellerInfo(order);
             messagePanel.displayMsg(msgPrefix(order) + "find seller  - " + seller.toSimpleString(), LOGGER, InformationLevel.Information);
         } catch (Exception e) {
-            LOGGER.error("", e);
+            LOGGER.error("Error hunting seller for {}", msgPrefix(order), e);
             messagePanel.displayMsg(msgPrefix(order) + "failed to write seller info to sheet - " + Strings.getExceptionMsg(e), LOGGER, InformationLevel.Negative);
         }
     }
