@@ -18,6 +18,7 @@ import edu.olivet.harvester.fulfill.service.flowcontrol.OrderFlowEngine;
 import edu.olivet.harvester.selforder.model.SelfOrder;
 import edu.olivet.harvester.selforder.service.OrderFulfillmentRecordService;
 import edu.olivet.harvester.selforder.service.SelfOrderService;
+import edu.olivet.harvester.selforder.service.SelfOrderService.OrderAction;
 import edu.olivet.harvester.selforder.service.SelfOrderSheetService;
 import edu.olivet.harvester.selforder.utils.SelfOrderHelper;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
@@ -81,7 +82,7 @@ public class OrderSubmitter {
             } catch (Exception e) {
                 ProgressUpdater.failed();
                 LOGGER.error("Error submit order {}", selfOrder, e);
-                String msg = Strings.parseErrorMsg(e.getMessage());
+                String msg = Strings.getExceptionMsg(e);
                 messageListener.addMsg("Row " + selfOrder.row + " " + msg + " - took " + Strings.formatElapsedTime(start), InformationLevel.Negative);
                 //
                 try {
@@ -208,7 +209,7 @@ public class OrderSubmitter {
     public static void main(String[] args) {
         String spreadsheetId = SystemSettings.reload().getSelfOrderSpreadsheetId();
         SelfOrderService selfOrderService = ApplicationContext.getBean(SelfOrderService.class);
-        List<SelfOrder> selfOrders = selfOrderService.fetchSelfOrders(spreadsheetId, "03/01");
+        List<SelfOrder> selfOrders = selfOrderService.fetchSelfOrders(spreadsheetId, "03/01", OrderAction.Process);
         SelfOrder selfOrder = selfOrders.get(0);
         selfOrder.buyerAccountEmail = "olivetrnd153.2@gmail.com";
 
