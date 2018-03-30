@@ -480,7 +480,8 @@ public class Order implements Keyable {
         if (Strings.containsAnyIgnoreCase(estimated_delivery_date, " - ")) {
             estimatedDeliveryDateString = estimated_delivery_date.split("\\s-\\s")[1];
         } else {
-            estimatedDeliveryDateString = StringUtils.split(estimated_delivery_date, " ")[1];
+            String[] parts = StringUtils.split(estimated_delivery_date, " ");
+            estimatedDeliveryDateString = parts[parts.length - 1];
         }
 
 
