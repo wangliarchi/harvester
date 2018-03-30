@@ -49,11 +49,7 @@ public class Settings {
         }
 
         Settings settings = load(Settings.CONFIG_FILE_PATH);
-        if (settings == null) {
-            return false;
-        }
-
-        return true;
+        return settings != null;
     }
 
     public static Settings load() {
