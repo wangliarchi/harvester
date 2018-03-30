@@ -137,13 +137,19 @@ public class HuntVariableService extends AppScript {
         return VARIABLE_MAP.computeIfAbsent(key, k -> getVariablesOnline(type, country, orderItemType));
     }
 
+    @Repeat(expectedExceptions = BusinessException.class)
     public JSONObject getVariablesOnline(Type type, Country country, OrderItemType orderItemType) {
         Map<String, String> params = new HashMap<>();
         params.put("method", type.name().toLowerCase());
         params.put("country", country.name());
         params.put("t", orderItemType.name());
-        String json = this.processResult(this.get(params));
-        return JSON.parseObject(json);
+        try {
+            String json = this.processResult(this.get(params));
+            return JSON.parseObject(json);
+        } catch (Exception e) {
+            LOGGER.error("Failed to get variables for {} {} {}", type, country, orderItemType);
+            throw new BusinessException(e);
+        }
     }
 
 
@@ -168,7 +174,7 @@ public class HuntVariableService extends AppScript {
         JSONObject sellerVariables = getVariables(Type.Seller, orderCountry, orderItemType);
         String key = seller.getOfferListingCountry().name() + " " + seller.getType().abbrev();
         String altKey = key;
-        if (seller.getOfferListingCountry() != Country.US && !seller.isIntlSeller(order)) {
+        if (seller.getOfferListingCountry() != Country.US && (!seller.isIntlSeller(order)) || orderCountry == seller.getOfferListingCountry()) {
             altKey = "Local " + seller.getType().abbrev();
         }
 
@@ -182,7 +188,7 @@ public class HuntVariableService extends AppScript {
 
         //JSONObject sellerVariablesByPrices = sellerVariables.getJSONObject(key);
         if (sellerVariablesByPrices == null) {
-            LOGGER.error("Fail to find seller variables for {}", key);
+            LOGGER.error("Fail to find seller variables for {} {} {} {}", key, order.order_id, orderCountry, order.type());
             throw new BusinessException("Fail to find seller variables for " + key);
         }
 
@@ -368,7 +374,7 @@ public class HuntVariableService extends AppScript {
             }
         }
 
-        throw new BusinessException("Fail to find shipping variables for " + countryType + " " + shipToCountry + " " + seller);
+        throw new BusinessException("Fail to find shipping variables for " + countryType + " to " + shipToCountry + " via " + seller.getFullType(order));
     }
 
 
