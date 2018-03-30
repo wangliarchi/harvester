@@ -9,6 +9,7 @@ import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.common.model.SystemSettings;
 import edu.olivet.harvester.letters.model.Letter;
 import edu.olivet.harvester.letters.service.LetterTemplateService;
 import edu.olivet.harvester.utils.JXBrowserHelper;
@@ -54,6 +55,9 @@ public class GmailWebPanel extends GeneralWebPanel {
         editor.appendChild(bodyElement);
         WaitTime.Short.execute();
 
+        if (SystemSettings.reload().isGrayLabelLetterDebugModel()) {
+            return;
+        }
         JXBrowserHelper.waitUntilVisible(browser, ".aoO");
         List<DOMElement> buttons = JXBrowserHelper.selectElementsByCssSelector(browser, "div.aoO");
         for (DOMElement button : buttons) {
