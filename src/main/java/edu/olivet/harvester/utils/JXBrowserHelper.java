@@ -267,13 +267,8 @@ public class JXBrowserHelper {
     @InvokedExternally
     //insert an element to page, and wait until it's gone
     public static void waitUntilNewPageLoaded(Browser browser) {
-        //check tracker
-        DOMElement checker = selectElementByCssSelector(browser, "#spinner-anchor");
-        if (checker != null && isVisible(checker)) {
-            waitUntilNotFound(browser, "#spinner-anchor");
-        } else {
-            waitUntilNotFound(browser, "#loading-checker");
-        }
+
+        waitUntilNotFound(browser, "#loading-checker");
 
         while (true) {
             String title = browser.getTitle();
@@ -283,6 +278,12 @@ public class JXBrowserHelper {
                 break;
             }
         }
+
+        DOMElement checker = selectVisibleElement(browser, "#spinner-anchor,#first-pipeline-load-page-spinner");
+        if (checker != null) {
+            waitUntilNotFound(browser, "#spinner-anchor,#first-pipeline-load-page-spinner");
+        }
+
     }
 
     @InvokedExternally
@@ -291,12 +292,8 @@ public class JXBrowserHelper {
         int timeConsumed = 0;
         while (true) {
 
-            DOMElement element = JXBrowserHelper.selectElementByCssSelector(browser, selector);
+            DOMElement element = JXBrowserHelper.selectVisibleElement(browser, selector);
             if (element != null) {
-                if (isHidden(element)) {
-                    break;
-                }
-
                 WaitTime.Shortest.execute();
                 timeConsumed += WaitTime.Shortest.val();
 
@@ -402,16 +399,19 @@ public class JXBrowserHelper {
     }
 
     public static DOMDocument getDocument(Browser browser) {
-        for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
+        Exception exception = null;
+        for (int i = 0; i < TIME_OUT_SECONDS; i++) {
             try {
                 return browser.getDocument();
             } catch (Exception e) {
+                exception = e;
                 LOGGER.error("", e);
-                WaitTime.Short.execute();
+                WaitTime.Shortest.execute();
             }
         }
 
-        return null;
+        LOGGER.error("Fail to get document {}", browser);
+        throw new BusinessException(exception);
     }
 
     public static DOMElement selectElementByName(Browser browser, String name) {
@@ -592,7 +592,16 @@ public class JXBrowserHelper {
     public static String getValueFromFormField(Browser browser, String selector) {
         try {
             DOMElement element = JXBrowserHelper.selectElementByCssSelector(browser, selector);
-            assert element != null;
+            return ((DOMFormControlElement) element).getValue();
+        } catch (Exception e) {
+            LOGGER.error("Error get value from {}", selector);
+        }
+        return "";
+    }
+
+    public static String getValueFromFormField(DOMElement domElement, String selector) {
+        try {
+            DOMElement element = JXBrowserHelper.selectElementByCssSelector(domElement, selector);
             return ((DOMFormControlElement) element).getValue();
         } catch (Exception e) {
             LOGGER.error("Error get value from {}", selector);
@@ -633,20 +642,25 @@ public class JXBrowserHelper {
                 DOMOptionElement option = (DOMOptionElement) optionElm;
                 if (value.equalsIgnoreCase(option.getAttribute("value"))) {
                     option.setSelected(true);
-                    break;
+                    return;
                 }
 
                 if (value.equalsIgnoreCase(option.getInnerText())) {
                     option.setSelected(true);
-                    break;
+                    return;
                 }
             } catch (Exception e) {
                 //ignore
             }
         }
+
+        throw new BusinessException("Cant set value " + value + " for selector " + selector);
     }
 
     public static void click(DOMElement element) {
+        if (element == null) {
+            return;
+        }
         for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
             try {
                 element.click();
