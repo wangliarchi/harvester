@@ -81,185 +81,189 @@ public class InvoiceDownloaderService {
             return;
         }
 
-        int lastPage = 0;
-        if (task != null) {
-            lastPage = task.getLastDownloadPage();
-        }
 
-        goToTheRightPage(buyerPanel, fromDate, toDate, lastPage);
-
-
-        int totalDownloaded = 0;
-        int pageNo = lastPage;
-        Date lastDownloadedDate = null;
-        boolean pageEnd = false;
-        outerloop:
-        while (true) {
-            if (PSEventListener.stopped()) {
-                break;
+        try {
+            int lastPage = 0;
+            if (task != null) {
+                lastPage = task.getLastDownloadPage();
             }
 
-            while (PSEventListener.paused()) {
-                WaitTime.Short.execute();
-            }
+            goToTheRightPage(buyerPanel, fromDate, toDate, lastPage);
 
-            if (LoginPage.needLoggedIn(browser)) {
-                try {
-                    login(buyerPanel);
-                    WaitTime.Normal.execute();
-                } catch (Exception e) {
-                    LOGGER.error(Strings.getExceptionMsg(e));
-                    TabbedBuyerPanel.getInstance().setNormalIcon(buyerPanel);
-                    return;
-                }
-            }
 
-            String pageUrl = browser.getURL();
-
-            List<DOMElement> orderBoxes = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-box-group.order");
-            String totalString = JXBrowserHelper.text(browser, "#controlsContainer .num-orders").replaceAll(Regex.NON_DIGITS.val(), "");
-            int totalOrders = IntegerUtils.parseInt(totalString, 0);
-            if (orderBoxes.size() < 10) {
-                //try reload
-                JXBrowserHelper.loadPage(browser, pageUrl);
-                if (totalOrders > 10) {
-                    JXBrowserHelper.waitUntilVisible(browser, ".a-pagination");
-                } else {
-                    WaitTime.Normal.execute();
-                }
-                orderBoxes = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-box-group.order");
-            }
-
-            pageNo = IntegerUtils.parseInt(JXBrowserHelper.text(browser, ".a-pagination a-selected"), pageNo);
-            LOGGER.info("\n{} - {} - {} - orders {}", buyer.getEmail(), pageNo, pageUrl, orderBoxes.size());
-            for (DOMElement orderElement : orderBoxes) {
-                String dateString = JXBrowserHelper.text(orderElement, ".order-info .a-col-left .a-span3 .value,.order-info .a-col-left .a-span4 .value");
-                if (StringUtils.isBlank(dateString)) {
-                    LOGGER.error("No date info found.");
-                    continue;
+            int totalDownloaded = 0;
+            int pageNo = lastPage;
+            Date lastDownloadedDate = null;
+            boolean pageEnd = false;
+            outerloop:
+            while (true) {
+                if (PSEventListener.stopped()) {
+                    break;
                 }
 
-                Date date = null;
-                try {
-                    date = parseOrderDate(dateString, country);
-                } catch (Exception e) {
-                    LOGGER.error("fail to parse date {}", dateString, e);
+                while (PSEventListener.paused()) {
+                    WaitTime.Short.execute();
                 }
 
-                if (date == null) {
-                    LOGGER.error("fail to parse date {}", dateString);
-                    messageListener.addMsg("fail to parse date " + dateString, InformationLevel.Negative);
-                    continue;
+                if (LoginPage.needLoggedIn(browser)) {
+                    try {
+                        login(buyerPanel);
+                        WaitTime.Normal.execute();
+                    } catch (Exception e) {
+                        LOGGER.error(Strings.getExceptionMsg(e));
+                        TabbedBuyerPanel.getInstance().setNormalIcon(buyerPanel);
+                        return;
+                    }
                 }
 
-                lastDownloadedDate = date;
+                String pageUrl = browser.getURL();
 
-                if (date.before(fromDate)) {
-                    LOGGER.error("{} before date {}", date, fromDate);
+                List<DOMElement> orderBoxes = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-box-group.order");
+                String totalString = JXBrowserHelper.text(browser, "#controlsContainer .num-orders").replaceAll(Regex.NON_DIGITS.val(), "");
+                int totalOrders = IntegerUtils.parseInt(totalString, 0);
+                if (orderBoxes.size() < 10) {
+                    //try reload
                     JXBrowserHelper.loadPage(browser, pageUrl);
-                    break outerloop;
+                    if (totalOrders > 10) {
+                        JXBrowserHelper.waitUntilVisible(browser, ".a-pagination");
+                    } else {
+                        WaitTime.Normal.execute();
+                    }
+                    orderBoxes = JXBrowserHelper.selectElementsByCssSelector(browser, ".a-box-group.order");
                 }
 
-                if (date.after(toDate)) {
-                    LOGGER.error("{} after date {}", date, toDate);
-                    continue;
-                }
-
-
-                try {
-                    String orderId = JXBrowserHelper.text(orderElement, ".order-info .a-col-right .a-size-mini .value");
-                    //String totalText = JXBrowserHelper.text(orderElement, ".order-info .a-col-left .a-span2 .value");
-                    BuyerOrderInvoice invoice = new BuyerOrderInvoice();
-                    invoice.setBuyerEmail(buyer.getEmail());
-                    invoice.setCountry(country.name());
-                    invoice.setPurchaseDate(date);
-                    invoice.setOrderId(orderId);
-                    String filePath = getLocalFilePath(invoice);
-                    File file = new File(filePath);
-                    if (file.exists()) {
-                        LOGGER.error("Invoice for order {} from {} {} already downloaded", orderId, buyer.getEmail(), country.name());
+                pageNo = IntegerUtils.parseInt(JXBrowserHelper.text(browser, ".a-pagination a-selected"), pageNo);
+                LOGGER.info("\n{} - {} - {} - orders {}", buyer.getEmail(), pageNo, pageUrl, orderBoxes.size());
+                for (DOMElement orderElement : orderBoxes) {
+                    String dateString = JXBrowserHelper.text(orderElement, ".order-info .a-col-left .a-span3 .value,.order-info .a-col-left .a-span4 .value");
+                    if (StringUtils.isBlank(dateString)) {
+                        LOGGER.error("No date info found.");
                         continue;
                     }
 
-                    invoice.setCardNo("");
-                    //Money total = Money.fromText(totalText, country);
-                    invoice.setOrderTotal(0);
+                    Date date = null;
+                    try {
+                        date = parseOrderDate(dateString, country);
+                    } catch (Exception e) {
+                        LOGGER.error("fail to parse date {}", dateString, e);
+                    }
+
+                    if (date == null) {
+                        LOGGER.error("fail to parse date {}", dateString);
+                        messageListener.addMsg("fail to parse date " + dateString, InformationLevel.Negative);
+                        continue;
+                    }
+
+                    lastDownloadedDate = date;
+
+                    if (date.before(fromDate)) {
+                        LOGGER.info("{} before date {}", date, fromDate);
+                        JXBrowserHelper.loadPage(browser, pageUrl);
+                        break outerloop;
+                    }
+
+                    if (date.after(toDate)) {
+                        LOGGER.info("{} after date {}", date, toDate);
+                        continue;
+                    }
 
 
-                    downloadInvoice(invoice, browser);
-                    totalDownloaded++;
-                } catch (Exception e) {
-                    LOGGER.error("", e);
+                    try {
+                        String orderId = JXBrowserHelper.text(orderElement, ".order-info .a-col-right .a-size-mini .value");
+                        //String totalText = JXBrowserHelper.text(orderElement, ".order-info .a-col-left .a-span2 .value");
+                        BuyerOrderInvoice invoice = new BuyerOrderInvoice();
+                        invoice.setBuyerEmail(buyer.getEmail());
+                        invoice.setCountry(country.name());
+                        invoice.setPurchaseDate(date);
+                        invoice.setOrderId(orderId);
+                        String filePath = getLocalFilePath(invoice);
+                        File file = new File(filePath);
+                        if (file.exists()) {
+                            LOGGER.info("Invoice for order {} from {} {} already downloaded", orderId, buyer.getEmail(), country.name());
+                            continue;
+                        }
+
+                        invoice.setCardNo("");
+                        //Money total = Money.fromText(totalText, country);
+                        invoice.setOrderTotal(0);
+
+
+                        downloadInvoice(invoice, browser);
+                        totalDownloaded++;
+                    } catch (Exception e) {
+                        LOGGER.error("", e);
+                    }
+
+                    WaitTime.Short.execute();
                 }
 
-                WaitTime.Short.execute();
+                if (task != null) {
+                    task.setLastDownloadPage(pageNo);
+                    if (lastDownloadedDate != null) {
+                        task.setLastDownloadDate(lastDownloadedDate);
+                    }
+
+                    dbManager.insertOrUpdate(task, InvoiceTask.class);
+                }
+
+                //next page
+                DOMElement nextPage = JXBrowserHelper.selectElementByCssSelector(browser, ".a-pagination .a-last a");
+                if (nextPage == null) {
+                    JXBrowserHelper.loadPage(browser, pageUrl);
+                    WaitTime.Normal.execute();
+                    //next page
+                    nextPage = JXBrowserHelper.selectElementByCssSelector(browser, ".a-pagination .a-last a");
+                    if (nextPage == null) {
+                        LOGGER.info("\n{} - page end", buyer.getEmail());
+                        pageEnd = true;
+                        break;
+                    }
+                }
+
+
+                JXBrowserHelper.insertChecker(browser);
+                String nextPageUrl = buyerPanel.getCountry().baseUrl() + nextPage.getAttribute("href");
+                nextPage.click();
+                JXBrowserHelper.waitUntilNewPageLoaded(browser);
+
+
+                if (LoginPage.needLoggedIn(browser)) {
+                    try {
+                        login(buyerPanel);
+                        JXBrowserHelper.loadPage(browser, nextPageUrl);
+                    } catch (Exception e) {
+                        LOGGER.error(Strings.getExceptionMsg(e));
+                        return;
+                    }
+                }
+
+                WaitTime.Normal.execute();
             }
 
+
+            //pageNo
             if (task != null) {
                 task.setLastDownloadPage(pageNo);
                 if (lastDownloadedDate != null) {
                     task.setLastDownloadDate(lastDownloadedDate);
+                    if (lastDownloadedDate.before(fromDate)) {
+                        task.setStatus("Done");
+                    }
+                }
+
+                if (pageEnd) {
+                    task.setStatus("Done");
                 }
 
                 dbManager.insertOrUpdate(task, InvoiceTask.class);
             }
 
-            //next page
-            DOMElement nextPage = JXBrowserHelper.selectElementByCssSelector(browser, ".a-pagination .a-last a");
-            if (nextPage == null) {
-                JXBrowserHelper.loadPage(browser, pageUrl);
-                WaitTime.Normal.execute();
-                //next page
-                nextPage = JXBrowserHelper.selectElementByCssSelector(browser, ".a-pagination .a-last a");
-                if (nextPage == null) {
-                    LOGGER.info("\n{} - page end", buyer.getEmail());
-                    pageEnd = true;
-                    break;
-                }
-            }
+            messageListener.addMsg("Total " + totalDownloaded + " invoices downloaded for " + buyer.getEmail() +
+                    " from country " + country + ", took " + Strings.formatElapsedTime(start), InformationLevel.Positive);
 
-
-            JXBrowserHelper.insertChecker(browser);
-            String nextPageUrl = buyerPanel.getCountry().baseUrl() + nextPage.getAttribute("href");
-            nextPage.click();
-            JXBrowserHelper.waitUntilNewPageLoaded(browser);
-
-
-            if (LoginPage.needLoggedIn(browser)) {
-                try {
-                    login(buyerPanel);
-                    JXBrowserHelper.loadPage(browser, nextPageUrl);
-                } catch (Exception e) {
-                    LOGGER.error(Strings.getExceptionMsg(e));
-                    return;
-                }
-            }
-
-            WaitTime.Normal.execute();
+        } catch (Exception e) {
+            LOGGER.error("", e);
         }
-
-
-        //pageNo
-        if (task != null) {
-            task.setLastDownloadPage(pageNo);
-            if (lastDownloadedDate != null) {
-                task.setLastDownloadDate(lastDownloadedDate);
-                if (lastDownloadedDate.before(fromDate)) {
-                    task.setStatus("Done");
-                }
-            }
-
-            if (pageEnd) {
-                task.setStatus("Done");
-            }
-
-            dbManager.insertOrUpdate(task, InvoiceTask.class);
-        }
-
-        messageListener.addMsg("Total " + totalDownloaded + " invoices downloaded for " + buyer.getEmail() +
-                " from country " + country + ", took " + Strings.formatElapsedTime(start), InformationLevel.Positive);
-
-
         TabbedBuyerPanel.getInstance().removeTab(buyerPanel);
     }
 
@@ -309,7 +313,7 @@ public class InvoiceDownloaderService {
         JXBrowserHelper.loadPage(browser, invoiceUrl);
 
         if (!Strings.containsAnyIgnoreCase(browser.getHTML(), "transaction", "Transaktionen", "Transacciones", "Transazioni")) {
-            LOGGER.error("No invoice available for {} yet", invoice.getOrderId());
+            LOGGER.info("No invoice available for {} yet", invoice.getOrderId());
             return;
         }
         browser.setPrintHandler(printJob -> {
