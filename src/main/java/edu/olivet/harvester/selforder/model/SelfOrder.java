@@ -3,6 +3,7 @@ package edu.olivet.harvester.selforder.model;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.google.common.base.Objects;
 import edu.olivet.foundations.utils.RegexUtils.Regex;
+import edu.olivet.harvester.common.model.Remark;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -40,6 +41,18 @@ public class SelfOrder {
 
     public boolean fulfilled() {
         return StringUtils.isNotBlank(orderNumber) && Regex.AMAZON_ORDER_NUMBER.isMatched(orderNumber);
+    }
+
+    public boolean asinAdded() {
+        if (fulfilled()) {
+            return true;
+        }
+
+        if (StringUtils.isBlank(ownerAccountSellerId) && StringUtils.isBlank(ownerAccountStoreName)) {
+            return false;
+        }
+
+        return true;
     }
 
     @JSONField(serialize = false)

@@ -28,12 +28,17 @@ public class SelfOrderService {
     @Inject SelfOrderSheetService selfOrderSheetService;
     @Inject SelfOrderHelper selfOrderHelper;
 
-
-    public List<SelfOrder> fetchSelfOrders(String spreadsheetId, String sheetName) {
-        return fetchSelfOrders(spreadsheetId, Lists.newArrayList(sheetName + "!A1:AZ"));
+    public static enum OrderAction {
+        Process,
+        AddProduct,
+        All
     }
 
-    public List<SelfOrder> fetchSelfOrders(String spreadsheetId, List<String> ranges) {
+    public List<SelfOrder> fetchSelfOrders(String spreadsheetId, String sheetName, OrderAction orderAction) {
+        return fetchSelfOrders(spreadsheetId, Lists.newArrayList(sheetName + "!A1:AZ"), orderAction);
+    }
+
+    public List<SelfOrder> fetchSelfOrders(String spreadsheetId, List<String> ranges, OrderAction orderAction) {
 
         List<ValueRange> valueRanges;
         try {
@@ -86,8 +91,19 @@ public class SelfOrderService {
                     }
                 }
 
-                if (!sid.equalsIgnoreCase(selfOrder.buyerAccountCode)) {
-                    continue;
+
+                if (orderAction == OrderAction.Process) {
+                    if (!sid.equalsIgnoreCase(selfOrder.buyerAccountCode)) {
+                        continue;
+                    }
+                } else if (orderAction == OrderAction.AddProduct) {
+                    if (!sid.equalsIgnoreCase(StringUtils.substring(selfOrder.ownerAccountCode, 0, selfOrder.ownerAccountCode.length() - 2))) {
+                        continue;
+                    }
+                } else {
+                    if (!sid.equalsIgnoreCase(selfOrder.buyerAccountCode) && !sid.equalsIgnoreCase(StringUtils.substring(selfOrder.ownerAccountCode, 0, selfOrder.ownerAccountCode.length() - 2))) {
+                        continue;
+                    }
                 }
 
                 selfOrder.setRow(row);
@@ -107,7 +123,7 @@ public class SelfOrderService {
     public static void main(String[] args) {
         String spreadsheetId = SystemSettings.reload().getSelfOrderSpreadsheetId();
         SelfOrderService selfOrderService = ApplicationContext.getBean(SelfOrderService.class);
-        List<SelfOrder> selfOrders = selfOrderService.fetchSelfOrders(spreadsheetId, "03/01");
+        List<SelfOrder> selfOrders = selfOrderService.fetchSelfOrders(spreadsheetId, "03/01", OrderAction.Process);
         System.out.println(selfOrders);
     }
 }

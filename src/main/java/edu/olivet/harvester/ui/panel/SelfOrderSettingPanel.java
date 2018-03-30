@@ -14,6 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +32,7 @@ public class SelfOrderSettingPanel extends JPanel {
 
     private JTextField spreadsheetIdField;
     private JTextField costLimitField;
+    private JTextField freeShippingTemplateField;
     private JList<String> searchResultList;
     private JButton searchButton;
     private List<File> searchResult = new ArrayList<>();
@@ -48,6 +51,11 @@ public class SelfOrderSettingPanel extends JPanel {
 
         final JLabel costLimitLabel = new JLabel("Cost Limit");
         costLimitField = new JTextField(String.valueOf(systemSettings.getSelfOrderCostLimit()));
+
+
+        final JLabel freeShippingTemplateLabel = new JLabel("Free Shipping Template Name");
+        freeShippingTemplateField = new JTextField(systemSettings.getSelfOrderFreeShippingTemplateName());
+
 
         searchResultList = new JList<>();
         searchResultList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -84,19 +92,15 @@ public class SelfOrderSettingPanel extends JPanel {
             searchButton.setEnabled(true);
         });
 
-        selectButton.addActionListener(e -> {
-            if (CollectionUtils.isEmpty(searchResult)) {
-                return;
+        searchResultList.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent mouseEvent) {
+                if (mouseEvent.getClickCount() == 2) {
+                    selectSheet();
+                }
             }
-
-            if (searchResultList.getSelectedIndex() < 0) {
-                return;
-            }
-            File selectedFile = searchResult.get(searchResultList.getSelectedIndex());
-            spreadsheetIdField.setText(selectedFile.getId());
-
-            hideSearchList();
         });
+
+        selectButton.addActionListener(e -> selectSheet());
 
         cancelButton.addActionListener(e -> hideSearchList());
 
@@ -129,6 +133,13 @@ public class SelfOrderSettingPanel extends JPanel {
                                 .addPreferredGap(ComponentPlacement.RELATED)
                                 .addComponent(costLimitField, 100, 100, 100)
                                 .addContainerGap()
+                        )
+                        .addGroup(Alignment.LEADING, layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(freeShippingTemplateLabel, labelWidth, labelWidth, labelWidth)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(freeShippingTemplateField)
+                                .addContainerGap()
                         ));
 
 
@@ -152,10 +163,28 @@ public class SelfOrderSettingPanel extends JPanel {
                                 .addGroup(layout.createParallelGroup(Alignment.BASELINE)
                                         .addComponent(costLimitLabel)
                                         .addComponent(costLimitField)
+                                ).addPreferredGap(ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(Alignment.BASELINE)
+                                        .addComponent(freeShippingTemplateLabel)
+                                        .addComponent(freeShippingTemplateField)
                                 )
                                 .addContainerGap()));
 
         UITools.addListener2Textfields(this);
+    }
+
+    public void selectSheet() {
+        if (CollectionUtils.isEmpty(searchResult)) {
+            return;
+        }
+
+        if (searchResultList.getSelectedIndex() < 0) {
+            return;
+        }
+        File selectedFile = searchResult.get(searchResultList.getSelectedIndex());
+        spreadsheetIdField.setText(selectedFile.getId());
+
+        hideSearchList();
     }
 
     public void hideSearchList() {
@@ -179,6 +208,7 @@ public class SelfOrderSettingPanel extends JPanel {
         SystemSettings systemSettings = SystemSettings.reload();
         systemSettings.setSelfOrderSpreadsheetId(AppScript.getSpreadId(spreadsheetIdField.getText().trim()));
         systemSettings.setSelfOrderCostLimit(FloatUtils.parseFloat(costLimitField.getText(), 1));
+        systemSettings.setSelfOrderFreeShippingTemplateName(freeShippingTemplateField.getText().trim());
         systemSettings.save();
     }
 

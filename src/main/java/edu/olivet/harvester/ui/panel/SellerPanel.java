@@ -10,13 +10,16 @@ import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.exception.AuthenticationFailException;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.*;
+import edu.olivet.harvester.common.model.Money;
 import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.common.model.SystemSettings;
 import edu.olivet.harvester.common.service.LoginVerificationService;
 import edu.olivet.harvester.fulfill.exception.Exceptions.BuyerAccountAuthenticationException;
 import edu.olivet.harvester.fulfill.exception.Exceptions.RobotFoundException;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import edu.olivet.harvester.utils.Settings;
 import edu.olivet.harvester.utils.Settings.Configuration;
+import edu.olivet.harvester.utils.common.RandomUtils;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -132,6 +135,12 @@ public class SellerPanel extends WebPanel {
      * @param country 给定卖场
      */
     private void selectMarketplace(Country country) {
+        try {
+            JXBrowserHelper.waitUntilVisible(browser, "#sc-mkt-picker-switcher-select");
+        } catch (Exception e) {
+            //
+        }
+
         if (this.isMarketplaceSelected(country)) {
             return;
         }
@@ -190,34 +199,139 @@ public class SellerPanel extends WebPanel {
         return false;
     }
 
+    @Repeat(expectedExceptions = BusinessException.class, times = 2)
+    public void addProduct(String asin, Country marketplaceCountry) {
+        String freeShippingTemplateName = SystemSettings.load().getSelfOrderFreeShippingTemplateName();
+        String url = String.format("%s/inventory/ref=ag_invmgr_dnav_xx_?tbla_myitable=search:%s", country.ascBaseUrl(), asin);
+        JXBrowserHelper.loadPage(browser, url);
+        WaitTime.Shorter.execute();
+        List<DOMElement> lists = JXBrowserHelper.selectElementsByCssSelector(browser, ".mt-table tr.mt-row");
+        float existedPrice = 0f;
+        for (DOMElement trElement : lists) {
+            //status
+            String status = JXBrowserHelper.textFromElement(trElement, "div[data-column=\"status\"] a,.mt-text-content");
+            String text = JXBrowserHelper.textFromElement(trElement, "div[data-column=\"shipping_template\"]");
+            String priceText = JXBrowserHelper.getValueFromFormField(trElement, "div[data-column=\"price\"] input");
+            LOGGER.info("{} {} {}", status, priceText, text);
+            try {
+                Money money = Money.fromText(priceText, marketplaceCountry);
+                existedPrice = money.getAmount().floatValue() + 5;
+            } catch (Exception e) {
+                //
+            }
+            //.equalsIgnoreCase(status)
+            if (StringUtils.equalsAnyIgnoreCase(status, "Active", "Incomplete") && Strings.containsAnyIgnoreCase(text, freeShippingTemplateName.split(","))) {
+                LOGGER.info("ASIN {} with {} template existed", asin, freeShippingTemplateName);
+                throw new RuntimeException("ASIN " + asin + " with " + freeShippingTemplateName + " template existed");
+            }
+        }
+
+        String sku = RandomUtils.randomAlphaNumeric(10) + "N" + marketplaceCountry.name();
+
+        url = String.format("%s/abis/Display/ItemSelected?asin=%s", country.ascBaseUrl(), asin);
+        JXBrowserHelper.loadPage(browser, url);
+        JXBrowserHelper.fillValueForFormField(browser, "#quantity", "3");
+
+        WaitTime.Shortest.execute();
+        JXBrowserHelper.setValueForFormSelect(browser, "#condition_type", "new, new");
+
+        JXBrowserHelper.fillValueForFormField(browser, "#item_sku", sku);
+        WaitTime.Shorter.execute();
+
+
+        if (existedPrice > 0) {
+            String priceText = String.valueOf(existedPrice);
+            if (country.europe() && country != Country.UK) {
+                priceText = priceText.replaceAll(".", ",");
+            }
+            JXBrowserHelper.setValueForFormSelect(browser, "#standard_price", priceText);
+        } else {
+            try {
+                JXBrowserHelper.selectElementByCssSelector(browser, ".secondaryAUIButton.matchLowPriceButton").click();
+                WaitTime.Short.execute();
+                String priceText = JXBrowserHelper.getValueFromFormField(browser, "#standard_price");
+                float price = Float.parseFloat(priceText) + 5;
+                priceText = String.valueOf(price);
+                if (country.europe() && country != Country.UK) {
+                    priceText = priceText.replaceAll(".", ",");
+                }
+                JXBrowserHelper.setValueForFormSelect(browser, "#standard_price", priceText);
+            } catch (Exception e) {
+                //
+            }
+        }
+
+        WaitTime.Shorter.execute();
+        //$("#gate").val('Gateway 2');
+        String freeShippingTemplate = freeShippingTemplateName.split(",")[0];
+        try {
+            DOMSelectElement select = (DOMSelectElement) JXBrowserHelper.selectElementByCssSelector(browser, "#merchant_shipping_group_name");
+            List<DOMOptionElement> options = select.getOptions();
+
+            for (DOMElement optionElm : options) {
+                try {
+                    DOMOptionElement option = (DOMOptionElement) optionElm;
+
+                    if (StringUtils.equalsAnyIgnoreCase(option.getAttribute("value"), freeShippingTemplateName.split(","))) {
+                        freeShippingTemplate = option.getAttribute("value");
+                        break;
+                    }
+
+                } catch (Exception e) {
+                    //ignore
+                }
+            }
+        } catch (Exception e) {
+            //
+        }
+        //JXBrowserHelper.setValueForFormSelect(browser, "#merchant_shipping_group_name", freeShippingTemplateName);
+        browser.executeJavaScript("$('#merchant_shipping_group_name').val('" + freeShippingTemplate + "').change();");
+
+        for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
+            WaitTime.Short.execute();
+            DOMElement submitBtn = JXBrowserHelper.selectElementByCssSelector(browser, "#main_submit_button");
+            if (!submitBtn.hasAttribute("disabled")) {
+                JXBrowserHelper.insertChecker(browser);
+                submitBtn.click();
+                JXBrowserHelper.waitUntilNewPageLoaded(browser);
+                return;
+            }
+        }
+
+        throw new BusinessException("Failed, submit button still disabled.");
+
+    }
 
     public boolean sendMessage(Order order, String message) {
         //https://sellercentral.amazon.com/111-4590317-0870612
         String url = String.format("%s/gp/help/contact/contact.html?orderID=%s&&marketplaceID=%s", country.ascBaseUrl(), order.order_id, country.marketPlaceId());
         JXBrowserHelper.loadPage(browser, url);
         LOGGER.info("contact form page loaded.");
-
+        JXBrowserHelper.waitUntilVisible(browser, "#commMgrCompositionMessage");
         WaitTime.Shortest.execute();
-        JXBrowserHelper.setValueForFormSelect(browser, "#commMgrCompositionSubject", "6");
+        //Additional Information Required
+        JXBrowserHelper.setValueForFormSelect(browser, "#commMgrCompositionSubject", "11");
         WaitTime.Shortest.execute();
         JXBrowserHelper.fillValueForFormField(browser, "#commMgrCompositionMessage", message);
         WaitTime.Shortest.execute();
 
         LOGGER.info("data filled.");
-        //
         //fetch buyer email address, vl0d7jmvtf30k52@marketplace.amazon.com)
-
         try {
             List<DOMElement> lists = JXBrowserHelper.selectElementsByCssSelector(browser, ".tiny");
             for (DOMElement element : lists) {
                 String text = JXBrowserHelper.textFromElement(element);
                 if (StringUtils.isNotBlank(fetchAmazonEmailAddress(text))) {
                     order.buyer_email = fetchAmazonEmailAddress(text);
+                    break;
                 }
-                break;
             }
         } catch (Exception e) {
             //
+        }
+
+        if (SystemSettings.load().isGrayLabelLetterDebugModel()) {
+            return true;
         }
 
         JXBrowserHelper.insertChecker(browser);

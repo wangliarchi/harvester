@@ -7,6 +7,7 @@ import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.harvester.common.model.OrderEnums.OrderColor;
 import edu.olivet.harvester.selforder.model.SelfOrder;
+import edu.olivet.harvester.selforder.service.SelfOrderService.OrderAction;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.utils.common.RandomUtils;
@@ -56,6 +57,33 @@ public class SelfOrderSheetService extends SheetAPI {
         }
     }
 
+
+    @Repeat(expectedExceptions = BusinessException.class)
+    public void fillSellerId(SelfOrder selfOrder) {
+        int row = selfOrder.row;
+        try {
+            SelfOrder reloadedOrder = reloadOrder(selfOrder);
+            row = reloadedOrder.row;
+        } catch (Exception e) {
+            //
+        }
+        List<ValueRange> dateToUpdate = new ArrayList<>();
+
+        //fulfilled order info
+        String range = String.format("%s!B%d:C%d", selfOrder.sheetName, row, row);
+
+        ValueRange rowData = new ValueRange()
+                .setValues(Collections.singletonList(Lists.newArrayList(selfOrder.ownerAccountStoreName, selfOrder.ownerAccountSellerId)))
+                .setRange(range);
+        dateToUpdate.add(rowData);
+
+        try {
+            this.batchUpdateValues(selfOrder.spreadsheetId, dateToUpdate);
+        } catch (BusinessException e) {
+            LOGGER.error("Fail to update order update sheet status {} - {}", selfOrder.spreadsheetId, e);
+            throw new BusinessException(e);
+        }
+    }
 
     @Repeat(times = 5, expectedExceptions = BusinessException.class)
     public void fillFailedOrderInfo(SelfOrder selfOrder, String msg) {
@@ -126,7 +154,7 @@ public class SelfOrderSheetService extends SheetAPI {
     @Repeat(expectedExceptions = BusinessException.class)
     protected SelfOrder _reloadOrder(SelfOrder order) {
         //id, sku, seller, price, remark
-        List<SelfOrder> orders = selfOrderService.fetchSelfOrders(order.spreadsheetId, order.sheetName);
+        List<SelfOrder> orders = selfOrderService.fetchSelfOrders(order.spreadsheetId, order.sheetName, OrderAction.All);
         List<SelfOrder> validOrders = orders.stream().filter(it -> it.equalsSuperLite(order) ||
                 (StringUtils.isNotBlank(order.uniqueCode) && StringUtils.equalsIgnoreCase(order.uniqueCode, it.uniqueCode))
         ).collect(Collectors.toList());
