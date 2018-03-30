@@ -11,8 +11,6 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 
-import static org.testng.Assert.*;
-
 public class JXBrowserHelperTest extends BaseTest {
 
     private BuyerPanel buyerPanel;
