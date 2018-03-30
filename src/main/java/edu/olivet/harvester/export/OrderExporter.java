@@ -73,7 +73,7 @@ public class OrderExporter {
      * triggered by export orders button
      */
     public void exportOrders(OrderExportParams params) {
-        setMessagePanel(new ProgressDetail(Actions.ExportOrders));
+        //setMessagePanel(new ProgressDetail(Actions.ExportOrders));
         messagePanel.displayMsg(String.format("Exporting orders from %s between %s and %s",
                 params.getMarketplaces(), params.getFromDate(), params.getToDate()), LOGGER, InformationLevel.Information);
         exportOrdersForMarketplaces(params.getMarketplaces(), params.getFromDate(), params.getToDate());
