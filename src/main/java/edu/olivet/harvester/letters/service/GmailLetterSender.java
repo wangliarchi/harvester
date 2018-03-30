@@ -32,7 +32,7 @@ public class GmailLetterSender {
         Account sellerEmailAccount = Settings.load().getConfigByCountry(settingCountry).getSellerEmail();
         GmailWebPanel webPanel = addTab(sellerEmailAccount);
 
-        if (SystemSettings.load().isOrderSubmissionDebugModel()) {
+        if (SystemSettings.reload().isOrderSubmissionDebugModel()) {
             order.buyer_email = Constants.RND_EMAIL;
         }
         webPanel.sendMessage(order.buyer_email, letter.getSubject(), letter.getBody());
