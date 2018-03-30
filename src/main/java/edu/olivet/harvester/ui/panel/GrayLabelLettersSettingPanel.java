@@ -27,6 +27,7 @@ public class GrayLabelLettersSettingPanel extends JPanel {
     private JComboBox<Integer> allowedRangeComBox;
     private JComboBox<Integer> maxDaysComBox;
     private JComboBox<String> sendingMethodsComBox;
+    private JComboBox<String> debugModeComboBox;
 
     private void initComponents() {
 
@@ -64,6 +65,15 @@ public class GrayLabelLettersSettingPanel extends JPanel {
         allowedRangeComBox.setSelectedItem(systemSettings.getGrayLabelLetterSendingAllowedRange());
         final JLabel unitLabel = new JLabel("minutes");
 
+
+        final JLabel debugModeLabel = new JLabel("Debug Mode?");
+        debugModeComboBox = new JComboBox<>();
+        debugModeComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"No", "Yes"}));
+        if (systemSettings.isGrayLabelLetterDebugModel()) {
+            debugModeComboBox.setSelectedItem("Yes");
+        } else {
+            debugModeComboBox.setSelectedItem("No");
+        }
 
         GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);
@@ -109,7 +119,14 @@ public class GrayLabelLettersSettingPanel extends JPanel {
                                 .addPreferredGap(ComponentPlacement.RELATED)
                                 .addComponent(unitLabel)
                                 .addContainerGap()
-                        ));
+                        ).addGroup(Alignment.LEADING, layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(debugModeLabel, labelWidth, labelWidth, labelWidth)
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addComponent(debugModeComboBox, 100, 100, 100)
+                        .addContainerGap()
+
+                ));
 
 
         layout.setVerticalGroup(
@@ -138,6 +155,11 @@ public class GrayLabelLettersSettingPanel extends JPanel {
                                         .addComponent(allowedRangeComBox)
                                         .addComponent(unitLabel)
                                 )
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(Alignment.BASELINE)
+                                        .addComponent(debugModeLabel)
+                                        .addComponent(debugModeComboBox)
+                                )
                                 .addContainerGap()));
 
         UITools.addListener2Textfields(this);
@@ -159,6 +181,14 @@ public class GrayLabelLettersSettingPanel extends JPanel {
 
         systemSettings.setGrayLabelLetterMaxDays((int) maxDaysComBox.getSelectedItem());
         systemSettings.setGrayLabelLetterSendingMethod((String) sendingMethodsComBox.getSelectedItem());
+
+
+        if ("Yes".equalsIgnoreCase(debugModeComboBox.getSelectedItem().toString())) {
+            systemSettings.setGrayLabelLetterDebugModel(true);
+        } else {
+            systemSettings.setGrayLabelLetterDebugModel(false);
+        }
+
         systemSettings.save();
 
         if (oldData != systemSettings.isEnableAutoSendGrayLabelLetters()) {
