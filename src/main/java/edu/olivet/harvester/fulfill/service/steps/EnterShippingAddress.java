@@ -1,7 +1,6 @@
 package edu.olivet.harvester.fulfill.service.steps;
 
 import com.google.inject.Inject;
-import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.model.page.FulfillmentPage;
 import edu.olivet.harvester.fulfill.model.page.checkout.CheckoutEnum;
 import edu.olivet.harvester.fulfill.model.page.checkout.CheckoutStepFactory;
