@@ -72,7 +72,9 @@ public class OrderFlowEngine extends FlowParent {
                     throw new OrderFulfilledException("Already fulfilled");
                 }
 
+                //start to process
                 processSteps(step, state);
+
                 return state;
             } catch (SellerNotFoundException | SellerPriceRiseTooHighException e) {
                 LOGGER.error("", e);
@@ -82,11 +84,14 @@ public class OrderFlowEngine extends FlowParent {
                 } else {
                     throw e;
                 }
+
+                exception = e;
             } catch (OrderSubmissionException e) {
                 clearShoppingCart.processStep(state);
                 throw e;
             } catch (Exception e) {
                 LOGGER.error("", e);
+                exception = e;
 
                 if (Strings.containsAnyIgnoreCase(e.getMessage(), JXBrowserHelper.CHANNEL_CLOSED_MESSAGE)) {
                     buyerPanel = TabbedBuyerPanel.getInstance().reInitTabForOrder(order, buyerPanel.getBuyer());
@@ -98,7 +103,7 @@ public class OrderFlowEngine extends FlowParent {
                 if (!order.selfOrder) {
                     sheetService.reloadOrder(state.getOrder());
                 }
-                exception = e;
+
             }
         }
 
