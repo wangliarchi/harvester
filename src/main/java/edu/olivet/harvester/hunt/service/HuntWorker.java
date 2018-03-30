@@ -66,7 +66,7 @@ public class HuntWorker extends SwingWorker<Void, HuntResult> {
         try {
             seller = huntService.huntForOrder(order);
         } catch (Exception e) {
-            LOGGER.error("", e);
+            LOGGER.error("Error hunting seller for {} {}", order.type(), order.order_id, e);
             publish(new HuntResult(order, "failed to find seller - " + Strings.getExceptionMsg(e), ReturnCode.FAILURE));
             return;
         }
@@ -76,7 +76,7 @@ public class HuntWorker extends SwingWorker<Void, HuntResult> {
             sheetService.fillSellerInfo(order);
             publish(new HuntResult(order, "find seller  - " + seller.toSimpleString(), ReturnCode.SUCCESS));
         } catch (Exception e) {
-            LOGGER.error("", e);
+            LOGGER.error("Error saving seller info for {} {}", order.type(), order.order_id, e);
             publish(new HuntResult(order, "failed to write seller info to sheet - " + Strings.getExceptionMsg(e), ReturnCode.SUCCESS));
         }
     }
