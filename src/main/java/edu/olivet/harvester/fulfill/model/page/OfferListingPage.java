@@ -44,7 +44,7 @@ public class OfferListingPage extends FulfillmentPage {
     }
 
     public void enter(Order order) {
-        String url = OrderCountryUtils.getOfferListingUrl(order) + "&" + System.currentTimeMillis();
+        String url = OrderCountryUtils.getOfferListingUrl(order);
         LOGGER.info("Offer listing page {}", url);
         JXBrowserHelper.loadPage(browser, url);
         try {
@@ -126,7 +126,7 @@ public class OfferListingPage extends FulfillmentPage {
     @SuppressWarnings("RedundantIfStatement")
     public boolean rightSeller(Seller seller, Order order) {
 
-        if (order.seller_free_shipping && seller.getShippingFee().getAmount().floatValue() > 0) {
+        if (order.selfOrder && seller.getShippingFee().getAmount().floatValue() > 0.1) {
             return false;
         }
 
@@ -176,11 +176,10 @@ public class OfferListingPage extends FulfillmentPage {
     private void checkPopovers() {
         //Protection Plan popup
         try {
-            WaitTime.Shortest.execute();
-            JXBrowserHelper.selectVisibleElement(browser, ".a-popover");
-            WaitTime.Shortest.execute();
+            WaitTime.Shorter.execute();
             DOMElement popoverElement = JXBrowserHelper.selectVisibleElement(browser, ".a-popover");
             if (popoverElement != null) {
+                WaitTime.Shorter.execute();
                 DOMElement closeBtn = JXBrowserHelper.selectElementByCssSelector(popoverElement, ".a-button-close.a-declarative");
                 JXBrowserHelper.click(closeBtn);
                 WaitTime.Short.execute();
