@@ -47,11 +47,14 @@ public class Actions {
     public static final Action DownloadInvoice = new Action("DownloadInvoice", "Download Order Invoices", null, "invoice.png");
     public static final Action RunDownloadInvoiceTask = new Action("RunDownloadInvoiceTask", "Run Invoice Downloading Tasks", null, "invoice.png");
     public static final Action InvoiceTasks = new Action("InvoiceTasks", "View Invoice Tasks", null, "list.png");
+    public static final Action InvoiceDownloadStats = new Action("InvoiceDownloadStats", "Invoice Downloading Report", null, "chart.png");
+
     public static final Action SyncASINs = new Action("SyncASINs", "Sync ASINs", null, null);
 
     public static final Action DownloadInventory = new Action("DownloadInventory", "Download Inventory", null, null);
 
-    public static final Action SubmitSelfOrders = new Action("SubmitSelfOrders", "Submit Self Orders", null, "start.png");
+    public static final Action SubmitSelfOrders = new Action("SubmitSelfOrders", "Submit Self Orders", null, "shua.png");
+    public static final Action AddSelfOrderProduct = new Action("AddSelfOrderProduct", "Add SelfOrder Products", null, null);
     public static final Action CheckPrimeBuyerAccount = new Action("CheckPrimeBuyerAccount", "Check Prime Buyer Account", null, "follow.png");
     public static final Action CommonLetters = new Action("CommonLetters", "Common Letters", null, "csletter.gif");
     public static final Action CheckStoreName = new Action("CheckStoreName", "Check & Fix Store Names", null, null);
