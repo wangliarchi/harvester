@@ -16,8 +16,6 @@ import edu.olivet.harvester.utils.SettingValidator;
 import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.lang3.SystemUtils;
 
-import java.io.File;
-
 /**
  * Harvester: The Automated Order Fulfillment Solution
  *
