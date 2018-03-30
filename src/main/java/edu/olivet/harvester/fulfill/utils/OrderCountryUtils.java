@@ -69,9 +69,12 @@ public class OrderCountryUtils {
     public static String getOfferListingUrl(Order order) {
         String urlTemplate;
         String result;
-        if (StringUtils.isBlank(order.condition)) {
+        if (order.selfOrder) {
             urlTemplate = NO_CONDITION_URL_PATTERN;
-            result = urlTemplate.replace("${ISBN}", order.isbn)+"&f_freeShipping=true";
+            result = urlTemplate.replace("${ISBN}", order.isbn);
+            if (OrderCountryUtils.getMarketplaceCountry(order) != Country.FR) {
+                result += "&f_freeShipping=true";
+            }
         } else {
             String condition = ConditionUtils.getMasterCondition(order.condition);
             order.isbn = Strings.fillMissingZero(order.isbn);
