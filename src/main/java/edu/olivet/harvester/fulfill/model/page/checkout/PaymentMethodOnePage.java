@@ -6,7 +6,6 @@ import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.model.Money;
 import edu.olivet.harvester.common.model.Order;
-import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +30,7 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
         if (StringUtils.isNotBlank(order.promotionCode)) {
             LOGGER.info("Self order, trying to enter promo code");
             enterPromoCode(order);
+            WaitTime.Shorter.execute();
             String grandTotalText = JXBrowserHelper.text(browser, "#subtotals-marketplace-table .grand-total-price");
             try {
                 Money total = Money.fromText(grandTotalText, buyerPanel.getCountry());
@@ -85,8 +85,15 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
 
     }
 
+    @Repeat(expectedExceptions = BusinessException.class)
     public void enterPromoCode(Order order) {
 
+        DOMElement promoRadio = JXBrowserHelper.selectElementByCssSelector(browser, "#pm_promo");
+        if (promoRadio != null) {
+            //by default, if promo balance available, it's checked
+            WaitTime.Shorter.execute();
+            return;
+        }
         try {
             String grandTotalText = JXBrowserHelper.text(browser, "#subtotals-marketplace-table .grand-total-price");
             Money total = Money.fromText(grandTotalText, buyerPanel.getCountry());
@@ -107,7 +114,7 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
         JXBrowserHelper.waitUntilVisible(browser, "#gcApplyButtonId .a-button-inner,#new-giftcard-promotion .a-button-inner");
         DOMElement error = JXBrowserHelper.selectVisibleElement(browser, "#spc-gcpromoinput.a-form-error,#gcpromoinput.a-form-error");
         if (error != null) {
-            throw new OrderSubmissionException("Promotional code is not valid.");
+            throw new BusinessException("Promotional code is not valid.");
         }
     }
 
