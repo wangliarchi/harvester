@@ -7,20 +7,15 @@ import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.model.Address;
-import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.fulfill.utils.FwdAddressUtils;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
-import edu.olivet.harvester.utils.I18N;
 import edu.olivet.harvester.utils.JXBrowserHelper;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/2/17 3:44 PM
@@ -28,11 +23,11 @@ import java.util.Random;
 public class ShippingAddressMultiPage extends ShippingAddressAbstract {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShippingAddressMultiPage.class);
-    private final I18N I18N_AMAZON;
+
 
     public ShippingAddressMultiPage(BuyerPanel buyerPanel) {
         super(buyerPanel);
-        I18N_AMAZON = new I18N("i18n/Amazon");
+
     }
 
     public void execute(Order order) {
@@ -101,27 +96,7 @@ public class ShippingAddressMultiPage extends ShippingAddressAbstract {
     }
 
     public void selectAddressForOrder(Order order) {
-        //find recent address from address book
-        String orderCountryName = CountryStateUtils.getInstance().getCountryName(country.code());
-        String translatedOrderCountryName = I18N_AMAZON.getText(orderCountryName, country);
-
-        List<DOMElement> addressElements = JXBrowserHelper.selectElementsByCssSelector(browser, ".address-book-entry");
-        List<DOMElement> validAddressElements = new ArrayList<>();
-        for (DOMElement addressElement : addressElements) {
-            String countryName = JXBrowserHelper.text(addressElement, ".displayAddressCountryName");
-
-            //orderCountryName.equalsIgnoreCase(countryName)
-            if (StringUtils.equalsAnyIgnoreCase(countryName, orderCountryName, translatedOrderCountryName)) {
-                validAddressElements.add(addressElement);
-            }
-        }
-
-        if (CollectionUtils.isEmpty(validAddressElements)) {
-            throw new OrderSubmissionException("No address for country " + orderCountryName + " found.");
-        }
-
-        Random rand = new Random();
-        DOMElement addressElement = validAddressElements.get(rand.nextInt(validAddressElements.size()));
+        DOMElement addressElement = getRandomAddressElement();
         Address address = parseEnteredAddress(addressElement);
 
         order.recipient_name = address.getName();
@@ -157,8 +132,11 @@ public class ShippingAddressMultiPage extends ShippingAddressAbstract {
             String[] parts = StringUtils.split(cityStateZip, ",");
             String city = parts[0].trim();
             String[] regionZip = StringUtils.split(parts[1].trim(), " ");
-            String zip = regionZip[regionZip.length - 1];
-            String state = StringUtils.join(Arrays.copyOf(regionZip, regionZip.length - 1), " ");
+
+            int zipLength = StringUtils.equalsAnyIgnoreCase(country, "Canada", "United Kingdom") ? 2 : 1;
+            String zip = StringUtils.join(Arrays.copyOfRange(regionZip, regionZip.length - zipLength, regionZip.length), " ");
+            String state = StringUtils.join(Arrays.copyOf(regionZip, regionZip.length - zipLength), " ");
+
 
             String phoneNumber = JXBrowserHelper.text(addressElement, ".displayAddressUL .displayAddressPhoneNumber");
             try {
@@ -185,8 +163,46 @@ public class ShippingAddressMultiPage extends ShippingAddressAbstract {
             return enteredAddress;
 
         } catch (Exception e) {
-
             throw new BusinessException("Error parse shipping address for " + buyerPanel.getOrder().order_id);
         }
+    }
+
+    @Override
+    public List<DOMElement> getAddressElementList() {
+        return JXBrowserHelper.selectElementsByCssSelector(browser, ".address-book-entry");
+    }
+
+    @Override
+    public String getAddressElementCountry(DOMElement addressElement) {
+        return JXBrowserHelper.text(addressElement, ".displayAddressCountryName");
+    }
+
+    public static void main(String[] args) {
+        String country = "Canada";
+        String cityStateZip = "Thompson, Manitoba R8N 0M2";
+        String[] parts = StringUtils.split(cityStateZip, ",");
+        String city = parts[0].trim();
+        String[] regionZip = StringUtils.split(parts[1].trim(), " ");
+
+        int zipLength = StringUtils.equalsAnyIgnoreCase(country, "Canada", "United Kingdom") ? 2 : 1;
+        String zip = StringUtils.join(Arrays.copyOfRange(regionZip, regionZip.length - zipLength, regionZip.length), " ");
+        String state = StringUtils.join(Arrays.copyOf(regionZip, regionZip.length - zipLength), " ");
+        System.out.println(zip);
+        System.out.println(city);
+        System.out.println(state);
+
+
+        country = "United States";
+        cityStateZip = "RIVERSIDE, IL 60546-2031";
+        parts = StringUtils.split(cityStateZip, ",");
+        city = parts[0].trim();
+        regionZip = StringUtils.split(parts[1].trim(), " ");
+
+        zipLength = StringUtils.equalsAnyIgnoreCase(country, "Canada", "United Kingdom") ? 2 : 1;
+        zip = StringUtils.join(Arrays.copyOfRange(regionZip, regionZip.length - zipLength, regionZip.length), " ");
+        state = StringUtils.join(Arrays.copyOf(regionZip, regionZip.length - zipLength), " ");
+        System.out.println(zip);
+        System.out.println(city);
+        System.out.println(state);
     }
 }

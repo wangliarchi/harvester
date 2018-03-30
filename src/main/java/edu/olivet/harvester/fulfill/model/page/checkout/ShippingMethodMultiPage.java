@@ -20,6 +20,8 @@ public class ShippingMethodMultiPage extends ShippingAddressAbstract {
         super(buyerPanel);
     }
 
+
+
     public void execute(Order order) {
         //handled on order review page
 

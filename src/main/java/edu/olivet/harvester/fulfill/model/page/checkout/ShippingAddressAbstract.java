@@ -1,14 +1,24 @@
 package edu.olivet.harvester.fulfill.model.page.checkout;
 
+import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.foundations.utils.Strings;
+import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.model.Address;
 import edu.olivet.harvester.fulfill.model.page.FulfillmentPage;
+import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.fulfill.utils.OrderAddressUtils;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
+import edu.olivet.harvester.utils.I18N;
 import edu.olivet.harvester.utils.JXBrowserHelper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/2/17 4:24 PM
@@ -26,9 +36,11 @@ public abstract class ShippingAddressAbstract extends FulfillmentPage {
     protected static final String SELECTOR_COUNTRY = "#enterAddressCountryCode";
     protected static final String SELECTOR_COUNTRY_JP = "#enterAddressAddressLine3";
     protected static final String SELECTOR_PHONE = "#enterAddressPhoneNumber";
+    protected final I18N I18N_AMAZON;
 
     public ShippingAddressAbstract(BuyerPanel buyerPanel) {
         super(buyerPanel);
+        I18N_AMAZON = new I18N("i18n/Amazon");
     }
 
     protected void fillNewAddressForm(Order order) {
@@ -36,10 +48,7 @@ public abstract class ShippingAddressAbstract extends FulfillmentPage {
         if (address == null) {
             throw new BusinessException("Order address is not valid");
         }
-
-
         _fillNewAddressForm(address);
-
     }
 
     private void _fillNewAddressForm(Address address) {
@@ -74,5 +83,45 @@ public abstract class ShippingAddressAbstract extends FulfillmentPage {
         }
     }
 
+    protected DOMElement getRandomAddressElement() {
+        String orderCountryName = CountryStateUtils.getInstance().getCountryName(country.code());
+        String translatedOrderCountryName = I18N_AMAZON.getText(orderCountryName, country);
+        String usCountryName = "United States";
+        String translatedUSCountryName = I18N_AMAZON.getText("country.us", country);
+        List<DOMElement> addressElements = getAddressElementList();
+        List<DOMElement> validAddressElements = new ArrayList<>();
+        List<DOMElement> usAddressElements = new ArrayList<>();
+        for (DOMElement addressElement : addressElements) {
+            String countryName = getAddressElementCountry(addressElement);
 
+            //orderCountryName.equalsIgnoreCase(countryName)
+            if (Strings.containsAnyIgnoreCase(countryName, orderCountryName, translatedOrderCountryName)) {
+                validAddressElements.add(addressElement);
+            }
+
+            if (Strings.containsAnyIgnoreCase(countryName, usCountryName, translatedUSCountryName)) {
+                usAddressElements.add(addressElement);
+            }
+
+        }
+        if (CollectionUtils.isEmpty(validAddressElements)) {
+            validAddressElements = usAddressElements;
+        }
+
+        if (CollectionUtils.isEmpty(validAddressElements)) {
+            throw new OrderSubmissionException("No address for country " + orderCountryName + " found.");
+        }
+
+        Random rand = new Random();
+        return validAddressElements.get(rand.nextInt(validAddressElements.size()));
+    }
+
+
+    public List<DOMElement> getAddressElementList() {
+        return null;
+    }
+
+    public String getAddressElementCountry(DOMElement addressElement) {
+        return null;
+    }
 }
