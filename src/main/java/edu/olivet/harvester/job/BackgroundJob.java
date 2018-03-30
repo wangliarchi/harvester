@@ -1,7 +1,6 @@
 package edu.olivet.harvester.job;
 
 import edu.olivet.foundations.job.AbstractBackgroundJob;
-import edu.olivet.foundations.job.AutoUpgradeJob;
 import edu.olivet.harvester.common.model.SystemSettings;
 import edu.olivet.harvester.utils.common.DatetimeHelper;
 import lombok.Getter;
