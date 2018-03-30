@@ -29,7 +29,7 @@ abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract {
         super(buyerPanel);
     }
 
-
+    @Repeat(expectedExceptions = BusinessException.class)
     public void enterPromoCode(Order order) {
         if (StringUtils.isBlank(order.promotionCode)) {
             return;
@@ -49,7 +49,7 @@ abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract {
 
             DOMElement error = JXBrowserHelper.selectVisibleElement(browser, "#gcpromoinput.a-form-error");
             if (error != null) {
-                throw new OrderSubmissionException("Promotional code is not valid.");
+                throw new BusinessException("Promotional code is not valid.");
             }
         }
     }
@@ -145,7 +145,9 @@ abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract {
         }
         WaitTime.Shortest.execute();
         DOMElement firstCurrency = JXBrowserHelper.selectVisibleElement(paymentRow, ".currency-list input.a-declarative");
-        firstCurrency.click();
+        if (firstCurrency != null) {
+            firstCurrency.click();
+        }
     }
 
 }
