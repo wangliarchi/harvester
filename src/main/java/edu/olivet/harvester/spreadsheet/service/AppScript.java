@@ -136,7 +136,7 @@ public class AppScript {
         return str.contains("/") ? str.substring(0, str.indexOf("/")) : str;
     }
 
-    @Repeat(expectedExceptions = {BusinessException.class, JSONException.class})
+    @Repeat(expectedExceptions = {BusinessException.class, JSONException.class, RuntimeException.class})
     private boolean markColor(String sheetUrl, String sheetName, int row, String notation, OrderColor color) {
         Map<String, String> params = new HashMap<>();
         String spreadId = getSpreadId(sheetUrl);
@@ -320,8 +320,15 @@ public class AppScript {
                 orderHelper.setColumnValue(j, columns[j - 1], order);
             }
 
-            if (!Regex.AMAZON_ORDER_NUMBER.isMatched(order.order_id)) {
+            if (StringUtils.length(order.order_id) < 6 || "order-id".equalsIgnoreCase(order.order_id)) {
                 continue;
+            }
+
+            if (StringUtils.isBlank(order.status)) {
+                continue;
+            }
+            if (!Regex.AMAZON_ORDER_NUMBER.isMatched(order.order_id)) {
+                //continue;
             }
 
             try {
