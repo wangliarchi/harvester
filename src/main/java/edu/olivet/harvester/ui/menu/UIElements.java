@@ -24,6 +24,7 @@ public class UIElements extends AbstractUIContainer {
     private final Menu submitOrder = new Menu("Submit Order", "O");
     private final Menu confirmShipment = new Menu("Confirm Shipment", "C");
     private final Menu finance = new Menu("Finance", "F");
+    private final Menu selforder = new Menu("Self Order", "S");
 
     @Override
     public Menu[] getMenus() {
@@ -32,6 +33,7 @@ public class UIElements extends AbstractUIContainer {
                 submitOrder,
                 confirmShipment,
                 Menu.Settings,
+                selforder,
                 finance,
                 Menu.ToolBox,
                 Menu.Help
@@ -67,11 +69,18 @@ public class UIElements extends AbstractUIContainer {
                 Actions.OrderConfirmationHistory
         });
 
-
+        map.put(selforder, new Action[] {
+                Actions.SubmitSelfOrders,
+                Action.Separator,
+                Actions.AddSelfOrderProduct,
+                Actions.SystemSettings
+        });
         map.put(finance, new Action[] {
                 Actions.DownloadInvoice,
                 Actions.RunDownloadInvoiceTask,
-                Actions.InvoiceTasks
+                Action.Separator,
+                Actions.InvoiceTasks,
+                Actions.InvoiceDownloadStats
 
         });
 
