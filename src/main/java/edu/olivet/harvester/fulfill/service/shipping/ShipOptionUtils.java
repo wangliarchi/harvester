@@ -3,11 +3,14 @@ package edu.olivet.harvester.fulfill.service.shipping;
 import com.teamdev.jxbrowser.chromium.Browser;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.aop.Repeat;
+import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.model.ShippingOption;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +23,7 @@ import java.util.List;
 public class ShipOptionUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShipOptionUtils.class);
 
-
+    @Repeat(expectedExceptions = BusinessException.class)
     public static void selectShipOption(BuyerPanel buyerPanel) {
         Browser browser = buyerPanel.getBrowserView().getBrowser();
         Order order = buyerPanel.getOrder();
@@ -31,6 +34,9 @@ public class ShipOptionUtils {
         //parse data
         List<ShippingOption> shippingOptions = listAllOptions(browser, buyerPanel.getCountry());
 
+        if (CollectionUtils.isEmpty(shippingOptions)) {
+            throw new BusinessException("No shipping options found.");
+        }
         //get valid option - edd, expedited, price...
         ShippingOption bestOne = ShippingHandlerFactory.getHandler(order).determineShipOption(order, shippingOptions);
         //set order shipping speed;
