@@ -8,8 +8,6 @@ import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.Dates;
-import edu.olivet.harvester.fulfill.OrderSubmitter;
-import edu.olivet.harvester.fulfill.model.FulfillmentEnum.Action;
 import edu.olivet.harvester.fulfill.model.ItemCompareResult;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.OrderTaskStatus;
