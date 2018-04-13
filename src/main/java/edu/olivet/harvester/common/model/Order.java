@@ -20,6 +20,7 @@ import edu.olivet.harvester.fulfill.utils.CountryStateUtils;
 import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.hunt.model.SellerEnums.SellerType;
 import edu.olivet.harvester.spreadsheet.utils.SheetUtils;
+import edu.olivet.harvester.utils.ServiceUtils;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Data;
 import lombok.Getter;
@@ -27,11 +28,15 @@ import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.Math.toIntExact;
@@ -44,6 +49,8 @@ import static java.lang.Math.toIntExact;
 @SuppressWarnings("CheckStyle")
 @Data
 public class Order implements Keyable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Order.class);
     public int row;
 
     public String status;
@@ -136,6 +143,11 @@ public class Order implements Keyable {
 
     public String estimated_delivery_date;
 
+    public String order_date = "";
+    public String seller_estimated_delivery_date = "";
+    public String carrier = "";
+    public String tracking_number = "";
+
     public String color = OrderColor.Finished.code();
 
     public boolean colorIsGray() {
@@ -143,6 +155,8 @@ public class Order implements Keyable {
     }
 
     public String spreadsheetId;
+
+    public String spreadsheetName = "";
 
     public String sheetName;
 
@@ -215,6 +229,9 @@ public class Order implements Keyable {
      */
     @JSONField(serialize = false)
     public String originalRemark;
+
+    @JSONField(serialize = false)
+    public String fulfilledDate = "";
 
     /**
      * 追加批注
@@ -335,7 +352,7 @@ public class Order implements Keyable {
      */
     @JSONField(serialize = false)
     public boolean buyerCanceled() {
-        return Remark.BUYER_CANCELLED.isContainedBy(this.order_number);
+        return Remark.BUYER_CANCELLED.isContainedBy(this.order_number) || Remark.BUYER_CANCELLED.isContainedBy(this.remark);
     }
 
     /**
@@ -448,6 +465,30 @@ public class Order implements Keyable {
 
     @JSONField(serialize = false)
     public Date getPurchaseDate() {
+        if (Strings.containsAllIgnoreCase(purchase_date, "T", "+")) {
+            SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+            try {
+                StringBuilder builder = new StringBuilder(purchase_date);
+                builder.deleteCharAt(purchase_date.lastIndexOf(":"));
+                return isoFormat.parse(builder.toString());
+            } catch (Exception e) {
+                LOGGER.error("unable to parse {}", purchase_date);
+                //e.printStackTrace();
+            }
+        }
+        if (Strings.containsAllIgnoreCase(purchase_date, "_", ":")) {
+            try {
+                Country country = OrderCountryUtils.getMarketplaceCountry(this);
+                TimeZone timeZone = ServiceUtils.getTimeZone(country);
+                SimpleDateFormat isoFormat = new SimpleDateFormat(DateFormat.DATE_TIME_STR.pattern());
+                isoFormat.setTimeZone(timeZone);
+                return isoFormat.parse(purchase_date);
+            } catch (Exception e) {
+                LOGGER.error("unable to parse {}", purchase_date);
+                //e.printStackTrace();
+            }
+        }
+
         return parsePurchaseDate(purchase_date);
     }
 
@@ -468,7 +509,7 @@ public class Order implements Keyable {
     @JSONField(serialize = false)
     public Date latestEdd() {
         if (selfOrder) {
-            return DateUtils.addDays(new Date(), 60);
+            return DateUtils.addDays(new Date(), 90);
         }
 
         //seller canceled sheet may have no estimated_delivery_date, set a default
