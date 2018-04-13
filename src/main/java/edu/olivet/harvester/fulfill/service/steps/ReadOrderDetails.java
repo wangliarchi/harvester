@@ -68,7 +68,7 @@ public class ReadOrderDetails extends Step {
 
 
     @Repeat(expectedExceptions = BusinessException.class)
-    private void readOrderInfo(FlowState state) {
+    void readOrderInfo(FlowState state) {
 
         if (SystemSettings.load().isOrderSubmissionDebugModel()) {
             return;
