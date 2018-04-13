@@ -45,7 +45,8 @@ public class CAHandler extends DefaultHandler implements ShippingHandler {
         List<ShippingOption> validOptions = getValidateOptions(order, shippingOptions);
 
         //国际直寄都选择快递
-        if (order.isIntl()) {
+        ShippingSpeed shippingSpeed = determineFinalSpeed(order);
+        if (shippingSpeed == ShippingSpeed.Expedited) {
             validOptions.removeIf(it -> !it.isExpedited());
         }
 
@@ -55,7 +56,6 @@ public class CAHandler extends DefaultHandler implements ShippingHandler {
             return freeShippingOptions.get(0);
         }
 
-        ShippingSpeed shippingSpeed = determineFinalSpeed(order);
 
         for (ShippingOption option : validOptions) {
 
@@ -70,6 +70,9 @@ public class CAHandler extends DefaultHandler implements ShippingHandler {
 
     @Override
     public ShippingSpeed determineFinalSpeed(Order order) {
+        if (order.selfOrder) {
+            return ShippingSpeed.Standard;
+        }
         //国际直寄都选择快递
         if (order.isIntl()) {
             return ShippingSpeed.Expedited;
@@ -81,8 +84,6 @@ public class CAHandler extends DefaultHandler implements ShippingHandler {
 
         return ShippingSpeed.Standard;
     }
-
-
 
 
 }
