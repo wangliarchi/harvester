@@ -49,6 +49,7 @@ public class Login extends Step {
             return stepHelper.detectStep(state);
         }
         //check if there are items in cart
+        JXBrowserHelper.waitUntilVisible(state.getBuyerPanel().getBrowserView().getBrowser(), "#nav-cart-count");
         DOMElement navCartCountSpan = JXBrowserHelper.selectElementByCssSelector(
                 state.getBuyerPanel().getBrowserView().getBrowser(), "#nav-cart-count");
 
