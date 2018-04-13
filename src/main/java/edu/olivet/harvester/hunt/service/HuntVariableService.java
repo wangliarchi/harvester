@@ -154,7 +154,7 @@ public class HuntVariableService extends AppScript {
 
 
     @Repeat(expectedExceptions = BusinessException.class)
-    protected String get(Map<String, String> params) {
+    public String get(Map<String, String> params) {
         String params4Url = this.params2Url(params);
         String url = APP_SCRIPT_URL + params4Url;
         try {
