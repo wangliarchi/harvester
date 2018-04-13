@@ -35,6 +35,11 @@ public class Money {
         this.currency = country.getCurrency();
     }
 
+    public Money(float amount, Currency currency) {
+        this.amount = new BigDecimal(Float.toString(amount));
+        this.currency = currency;
+    }
+
     public BigDecimal toUSDAmount() {
         if ("USD".equals(currency.getCurrencyCode())) {
             return rounded(amount);
@@ -100,6 +105,6 @@ public class Money {
     }
 
     public static void main(String[] args) {
-        System.out.println(Money.getAmountFromText("53,56",Country.DE));
+        System.out.println(Money.getAmountFromText("53,56", Country.DE));
     }
 }
