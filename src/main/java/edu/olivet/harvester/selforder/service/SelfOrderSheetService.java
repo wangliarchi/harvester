@@ -1,15 +1,18 @@
 package edu.olivet.harvester.selforder.service;
 
+import com.google.api.services.sheets.v4.model.SheetProperties;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.harvester.common.model.OrderEnums.OrderColor;
+import edu.olivet.harvester.common.model.SystemSettings;
 import edu.olivet.harvester.selforder.model.SelfOrder;
 import edu.olivet.harvester.selforder.service.SelfOrderService.OrderAction;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.spreadsheet.service.SheetAPI;
+
 import edu.olivet.harvester.utils.common.RandomUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -130,7 +133,10 @@ public class SelfOrderSheetService extends SheetAPI {
 
             ValueRange codeRowData = new ValueRange().setValues(Collections.singletonList(Collections.singletonList(randCode)))
                     .setRange(order.getSheetName() + "!U" + order.row);
+            ValueRange accountRowData = new ValueRange().setValues(Collections.singletonList(Collections.singletonList(order.buyerAccountEmail)))
+                    .setRange(order.getSheetName() + "!H" + order.row);
             dateToUpdate.add(codeRowData);
+            dateToUpdate.add(accountRowData);
         }
 
         try {
@@ -152,7 +158,7 @@ public class SelfOrderSheetService extends SheetAPI {
     }
 
     @Repeat(expectedExceptions = BusinessException.class)
-    protected SelfOrder _reloadOrder(SelfOrder order) {
+    SelfOrder _reloadOrder(SelfOrder order) {
         //id, sku, seller, price, remark
         List<SelfOrder> orders = selfOrderService.fetchSelfOrders(order.spreadsheetId, order.sheetName, OrderAction.All);
         List<SelfOrder> validOrders = orders.stream().filter(it -> it.equalsSuperLite(order) ||
@@ -198,5 +204,51 @@ public class SelfOrderSheetService extends SheetAPI {
 
         return null;
     }
+
+    public void fillStats(String sid, List<SelfOrder> selfOrders) {
+        String spreadsheetId = SystemSettings.load().getSelfOrderStatsSpreadsheetId();
+        fillStats(sid, selfOrders, spreadsheetId);
+    }
+
+    public void fillStats(String sid, List<SelfOrder> selfOrders, String spreadsheetId) {
+        SheetProperties sheetProperties = createOrGetOrderSheet(spreadsheetId, sid);
+        String sheetName = sheetProperties.getTitle();
+
+        List<List<Object>> values = convertOrdersToRangeValues(selfOrders);
+        try {
+            this.spreadsheetValuesAppend(spreadsheetId, sheetName, new ValueRange().setValues(values));
+        } catch (BusinessException e) {
+            throw new BusinessException(e);
+        }
+    }
+
+
+    public List<List<Object>> convertOrdersToRangeValues(List<SelfOrder> orders) {
+        List<List<Object>> values = new ArrayList<>();
+        orders.forEach(order -> {
+            Object[] row = new String[] {
+                    order.sheetName,
+                    order.ownerAccountStoreName,
+                    order.ownerAccountSellerId,
+                    order.country,
+                    order.asin,
+                    order.promoCode,
+                    order.buyerAccountCode,
+                    order.buyerAccountEmail,
+                    order.orderNumber,
+                    order.cost
+            };
+            values.add(Arrays.asList(row));
+        });
+
+        return values;
+    }
+
+    private static final String TEMPLATE_SHEET_NAME = "template";
+
+    public SheetProperties createOrGetOrderSheet(String spreadsheetId, String sid) {
+        return createNewSheetIfNotExisted(spreadsheetId, sid.toUpperCase(), TEMPLATE_SHEET_NAME);
+    }
+
 
 }

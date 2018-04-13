@@ -1,10 +1,13 @@
 package edu.olivet.harvester.ui.events;
 
 import com.google.inject.Inject;
+import edu.olivet.foundations.ui.MessagePanel;
+import edu.olivet.foundations.ui.ProgressDetail;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.common.model.SystemSettings;
 import edu.olivet.harvester.selforder.OrderSubmitter;
 import edu.olivet.harvester.selforder.ProductManager;
+import edu.olivet.harvester.selforder.StatsManager;
 import edu.olivet.harvester.selforder.model.SelfOrder;
 import edu.olivet.harvester.selforder.service.SelfOrderService;
 import edu.olivet.harvester.selforder.service.SelfOrderService.OrderAction;
@@ -13,6 +16,7 @@ import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
 import edu.olivet.harvester.ui.dialog.ChooseSheetDialog;
 import edu.olivet.harvester.ui.dialog.SelectSelfOrderDialog;
+import edu.olivet.harvester.ui.menu.Actions;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -28,10 +32,20 @@ import java.util.stream.Collectors;
 public class SubmitSelfOrdersEvent implements HarvesterUIEvent {
     private static final Logger LOGGER = LoggerFactory.getLogger(SubmitSelfOrdersEvent.class);
 
-    @Inject
-    private AppScript appScript;
+    @Inject private AppScript appScript;
     @Inject SelfOrderService selfOrderService;
     @Inject OrderSubmitter orderSubmitter;
+    @Inject StatsManager statsManager;
+
+    public void postFeedbacks() {
+        statsManager.postFeedbacks();
+    }
+
+    public void asyncSelfOrderStats() {
+        MessagePanel messagePanel = new ProgressDetail(Actions.AsyncSelfOrderStats);
+        statsManager.setMessagePanel(messagePanel);
+        statsManager.asyncSelfOrderStats();
+    }
 
     public void execute() {
         String spreadsheetId = SystemSettings.reload().getSelfOrderSpreadsheetId();
@@ -61,7 +75,8 @@ public class SubmitSelfOrdersEvent implements HarvesterUIEvent {
             List<SelfOrder> selfOrders = selfOrderService.fetchSelfOrders(spreadsheetId, sheetNames, OrderAction.Process);
 
             //remove fulfilled orders
-            selfOrders.removeIf(SelfOrder::fulfilled);
+            selfOrders.removeIf(it -> it.fulfilled() ||
+                    (StringUtils.isBlank(it.ownerAccountStoreName) && StringUtils.isBlank(it.ownerAccountSellerId)));
 
             if (CollectionUtils.isEmpty(selfOrders)) {
                 UITools.error("No self orders need to be processed.");

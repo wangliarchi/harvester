@@ -8,6 +8,7 @@ import edu.olivet.harvester.selforder.model.SelfOrder;
 import edu.olivet.harvester.utils.Settings;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -60,7 +61,17 @@ public class SelfOrderRecordPanel extends JPanel {
         buyerAccountJCombox.setModel(new DefaultComboBoxModel<>(buyerEmails));
 
         try {
-            buyerAccountJCombox.setSelectedItem(Settings.load().getConfigByCountry(settingCountry).getBuyer().getEmail());
+            String accountEmail = selfOrder.buyerAccountEmail;
+            if (StringUtils.isBlank(accountEmail) || !emails.contains(accountEmail)) {
+                Account buyer = Settings.load().getConfigByCountry(settingCountry).getBuyer();
+                if (buyer != null && StringUtils.isNotBlank(buyer.getEmail())) {
+                    accountEmail = buyer.getEmail();
+                } else {
+                    accountEmail = Settings.load().getConfigByCountry(settingCountry).getPrimeBuyer().getEmail();
+                }
+            }
+
+            buyerAccountJCombox.setSelectedItem(accountEmail);
         } catch (Exception e) {
             //
         }

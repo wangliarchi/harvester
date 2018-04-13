@@ -38,6 +38,7 @@ public class SystemSettings {
     private boolean orderSubmissionDebugModel = false;
 
     private String selfOrderSpreadsheetId = "";
+    private String selfOrderStatsSpreadsheetId = "";
     private float selfOrderCostLimit = 1f;
     private String selfOrderFreeShippingTemplateName = "FreeShipping";
 

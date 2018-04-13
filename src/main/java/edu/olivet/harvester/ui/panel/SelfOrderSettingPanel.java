@@ -31,6 +31,7 @@ public class SelfOrderSettingPanel extends JPanel {
     }
 
     private JTextField spreadsheetIdField;
+    private JTextField statsSpreadsheetIdField;
     private JTextField costLimitField;
     private JTextField freeShippingTemplateField;
     private JList<String> searchResultList;
@@ -49,6 +50,9 @@ public class SelfOrderSettingPanel extends JPanel {
         final JLabel spreadsheetIdLabel = new JLabel("Spreadsheet Id");
         spreadsheetIdField = new JTextField(systemSettings.getSelfOrderSpreadsheetId());
 
+        final JLabel statsSpreadsheetIdLabel = new JLabel("Stats Spreadsheet Id");
+        statsSpreadsheetIdField = new JTextField(systemSettings.getSelfOrderStatsSpreadsheetId());
+
         final JLabel costLimitLabel = new JLabel("Cost Limit");
         costLimitField = new JTextField(String.valueOf(systemSettings.getSelfOrderCostLimit()));
 
@@ -65,6 +69,97 @@ public class SelfOrderSettingPanel extends JPanel {
         cancelButton = new JButton("Cancel");
 
         searchResultScrollPane.setViewportView(searchResultList);
+
+        initEvents();
+
+        GroupLayout layout = new GroupLayout(this);
+        this.setLayout(layout);
+        int labelWidth = 160;
+        layout.setHorizontalGroup(
+                layout.createParallelGroup(Alignment.LEADING)
+                        .addGroup(Alignment.LEADING, layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(spreadsheetIdLabel, labelWidth, labelWidth, labelWidth)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup()
+                                        .addComponent(spreadsheetIdField, 320, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(searchResultScrollPane, 320, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(selectButton)
+                                                .addGap(10)
+                                                .addComponent(cancelButton)
+                                        )
+                                )
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(searchButton)
+
+                                .addContainerGap()
+                        )
+
+                        .addGroup(Alignment.LEADING, layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(statsSpreadsheetIdLabel, labelWidth, labelWidth, labelWidth)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(statsSpreadsheetIdField, 320, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(searchButton)
+                                .addContainerGap()
+                        )
+
+                        .addGroup(Alignment.LEADING, layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(costLimitLabel, labelWidth, labelWidth, labelWidth)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(costLimitField, 100, 100, 100)
+                                .addContainerGap()
+                        )
+                        .addGroup(Alignment.LEADING, layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(freeShippingTemplateLabel, labelWidth, labelWidth, labelWidth)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(freeShippingTemplateField, 320, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap()
+                        ));
+
+
+        layout.setVerticalGroup(
+                layout.createParallelGroup(Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(layout.createParallelGroup(Alignment.BASELINE)
+                                        .addComponent(spreadsheetIdLabel)
+                                        .addComponent(spreadsheetIdField)
+                                        .addComponent(searchButton)
+                                )
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(searchResultScrollPane, 80, 80, 80)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(Alignment.BASELINE)
+                                        .addComponent(selectButton)
+                                        .addComponent(cancelButton)
+                                )
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(Alignment.BASELINE)
+                                        .addComponent(statsSpreadsheetIdLabel)
+                                        .addComponent(statsSpreadsheetIdField)
+                                )
+
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(Alignment.BASELINE)
+                                        .addComponent(costLimitLabel)
+                                        .addComponent(costLimitField)
+                                ).addPreferredGap(ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(Alignment.BASELINE)
+                                        .addComponent(freeShippingTemplateLabel)
+                                        .addComponent(freeShippingTemplateField)
+                                )
+                                .addContainerGap()));
+
+        UITools.addListener2Textfields(this);
+    }
+
+
+    public void initEvents() {
         hideSearchList();
         searchButton.addActionListener(evt -> {
             showSearchList();
@@ -101,76 +196,7 @@ public class SelfOrderSettingPanel extends JPanel {
         });
 
         selectButton.addActionListener(e -> selectSheet());
-
         cancelButton.addActionListener(e -> hideSearchList());
-
-        GroupLayout layout = new GroupLayout(this);
-        this.setLayout(layout);
-        int labelWidth = 100;
-        layout.setHorizontalGroup(
-                layout.createParallelGroup(Alignment.LEADING)
-                        .addGroup(Alignment.LEADING, layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(spreadsheetIdLabel, labelWidth, labelWidth, labelWidth)
-                                .addPreferredGap(ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup()
-                                        .addComponent(spreadsheetIdField, 320, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(searchResultScrollPane, 320, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addComponent(selectButton)
-                                                .addGap(10)
-                                                .addComponent(cancelButton)
-                                        )
-                                )
-                                .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(searchButton)
-
-                                .addContainerGap()
-                        )
-                        .addGroup(Alignment.LEADING, layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(costLimitLabel, labelWidth, labelWidth, labelWidth)
-                                .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(costLimitField, 100, 100, 100)
-                                .addContainerGap()
-                        )
-                        .addGroup(Alignment.LEADING, layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(freeShippingTemplateLabel, labelWidth, labelWidth, labelWidth)
-                                .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(freeShippingTemplateField)
-                                .addContainerGap()
-                        ));
-
-
-        layout.setVerticalGroup(
-                layout.createParallelGroup(Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(layout.createParallelGroup(Alignment.BASELINE)
-                                        .addComponent(spreadsheetIdLabel)
-                                        .addComponent(spreadsheetIdField)
-                                        .addComponent(searchButton)
-                                )
-                                .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(searchResultScrollPane, 80, 80, 80)
-                                .addPreferredGap(ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(Alignment.BASELINE)
-                                        .addComponent(selectButton)
-                                        .addComponent(cancelButton)
-                                )
-                                .addPreferredGap(ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(Alignment.BASELINE)
-                                        .addComponent(costLimitLabel)
-                                        .addComponent(costLimitField)
-                                ).addPreferredGap(ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(Alignment.BASELINE)
-                                        .addComponent(freeShippingTemplateLabel)
-                                        .addComponent(freeShippingTemplateField)
-                                )
-                                .addContainerGap()));
-
-        UITools.addListener2Textfields(this);
     }
 
     public void selectSheet() {
@@ -207,6 +233,7 @@ public class SelfOrderSettingPanel extends JPanel {
     public void collectData() {
         SystemSettings systemSettings = SystemSettings.reload();
         systemSettings.setSelfOrderSpreadsheetId(AppScript.getSpreadId(spreadsheetIdField.getText().trim()));
+        systemSettings.setSelfOrderStatsSpreadsheetId(AppScript.getSpreadId(statsSpreadsheetIdField.getText().trim()));
         systemSettings.setSelfOrderCostLimit(FloatUtils.parseFloat(costLimitField.getText(), 1));
         systemSettings.setSelfOrderFreeShippingTemplateName(freeShippingTemplateField.getText().trim());
         systemSettings.save();
