@@ -85,7 +85,7 @@ public class ShippingOption {
     //FREE Two-Day Shipping
     //$3.99 - Standard Shipping
     public Money parsePrice(String priceText, Country country) {
-        if (Strings.containsAnyIgnoreCase(fullText + " " + priceText, "free ", "GRATUIT", "frei ", "gratis ", "gratuito ")) {
+        if (Strings.containsAnyIgnoreCase(fullText + " " + priceText, "free", "GRATUIT", "frei", "gratis", "gratuito")) {
             return new Money(0f, country);
         }
 
