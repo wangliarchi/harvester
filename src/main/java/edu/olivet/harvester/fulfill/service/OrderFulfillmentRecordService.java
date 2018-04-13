@@ -32,6 +32,18 @@ public class OrderFulfillmentRecordService {
         return (float) records.stream().mapToDouble(it -> Float.parseFloat(it.getCost())).sum();
     }
 
+    public OrderFulfillmentRecord getRecord(Order order) {
+        List<OrderFulfillmentRecord> list = dbManager.query(OrderFulfillmentRecord.class,
+                Cnd.where("orderId", "=", order.order_id)
+                        .and("sku", "=", order.sku)
+                        .and("quantityPurchased", "=", order.quantity_purchased)
+                        .asc("fulfillDate"));
+        if (list.size() == 0) {
+            return null;
+        }
+        return list.get(0);
+    }
+
     public void save(Order order) {
         OrderFulfillmentRecord record = new OrderFulfillmentRecord();
 
