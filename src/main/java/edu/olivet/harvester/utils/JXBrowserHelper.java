@@ -399,10 +399,13 @@ public class JXBrowserHelper {
     }
 
     public static DOMDocument getDocument(Browser browser) {
-        Exception exception = null;
+        Exception exception = new BusinessException("fail to load browser document");
         for (int i = 0; i < TIME_OUT_SECONDS; i++) {
             try {
-                return browser.getDocument();
+                DOMDocument rootDoc = browser.getDocument();
+                if (rootDoc != null && rootDoc.getDocumentElement() != null) {
+                    return rootDoc;
+                }
             } catch (Exception e) {
                 exception = e;
                 LOGGER.error("", e);
