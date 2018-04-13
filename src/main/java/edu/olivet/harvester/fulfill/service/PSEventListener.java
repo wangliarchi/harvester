@@ -30,9 +30,10 @@ public class PSEventListener {
 
     public static void start() {
         status = Status.Running;
-
-        eventHandler.showPauseBtn();
-        eventHandler.disableStartButton();
+        if (eventHandler != null) {
+            eventHandler.showPauseBtn();
+            eventHandler.disableStartButton();
+        }
     }
 
     public static void pause() {
@@ -54,9 +55,10 @@ public class PSEventListener {
 
     public static void end() {
         status = Status.Ended;
-
-        eventHandler.hidePauseBtn();
-        eventHandler.enableStartButton();
+        if (eventHandler != null) {
+            eventHandler.hidePauseBtn();
+            eventHandler.enableStartButton();
+        }
 
     }
 

@@ -1,9 +1,11 @@
 package edu.olivet.harvester.fulfill.service;
 
 import com.alibaba.fastjson.JSON;
+import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.WaitTime;
+import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.utils.Settings;
@@ -22,8 +24,8 @@ public class ProfitLostControl {
     private static final String APPSCRIPT_URL = "https://script.google.com/macros/s/AKfycbz92MpAp86yAfYkekA8eSv6gYyUrg0BCzW33i1VgnaBwOgK4THe/exec";
 
     @Repeat(expectedExceptions = BusinessException.class)
-    protected static String get() {
-        String url = APPSCRIPT_URL + "?account=" + Settings.load().getSid();
+    static String get(Country country) {
+        String url = APPSCRIPT_URL + "?account=" + Settings.load().getSid() + (country.europe() ? "EU" : country.name());
         try {
             return Jsoup.connect(url).timeout(WaitTime.Longer.valInMS()).ignoreContentType(true).execute().body();
         } catch (IOException e) {
@@ -40,10 +42,10 @@ public class ProfitLostControl {
 
     public static ProfitControlVariable profitControlVariable = null;
 
-    public static ProfitControlVariable getVariable() {
+    public static ProfitControlVariable getVariable(Country country) {
         if (profitControlVariable == null) {
             try {
-                String json = get();
+                String json = get(country);
                 profitControlVariable = JSON.parseObject(json, ProfitControlVariable.class);
             } catch (Exception e) {
                 //fail to load from service
@@ -101,7 +103,7 @@ public class ProfitLostControl {
 
 
     public static float getLostLimit(Order order, Float cost) {
-        ProfitControlVariable profitControlVariable = getVariable();
+        ProfitControlVariable profitControlVariable = getVariable(OrderCountryUtils.getMarketplaceCountry(order));
         float lostLimit;
         if (order.fulfilledFromUK()) {
             lostLimit = 0;
@@ -113,13 +115,17 @@ public class ProfitLostControl {
             } else {
                 lostLimit = cost * profitControlVariable.min2;
             }
+
+            if (order.purchaseBack()) {
+                lostLimit += 10;
+            }
         }
 
         return lostLimit;
     }
 
     public static void main(String[] args) {
-        ProfitLostControl.getVariable();
+        ProfitLostControl.getVariable(Country.US);
     }
 
 }
