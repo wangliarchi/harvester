@@ -8,10 +8,15 @@ import edu.olivet.harvester.common.model.CronjobLog;
 import edu.olivet.harvester.common.model.SystemSettings;
 import edu.olivet.harvester.letters.CommonLetterSender;
 import edu.olivet.harvester.utils.Settings;
+import org.apache.commons.collections4.CollectionUtils;
+import org.joda.time.DateTime;
+import org.nutz.dao.Cnd;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 9/20/2017 3:00 PM
@@ -43,7 +48,35 @@ public class SendingGrayLabelLetterJob extends AbstractBackgroundJob {
 
     @Override
     public void runIfMissed(Date nextTriggerTime) {
-        //
+
+        if (!enabled()) {
+            LOGGER.info("Auto sending gray label letters was not enabled. To enable this function, go to Settings->System Settings->Common Letters");
+            return;
+        }
+
+        Settings.load().validateAndFixStoreName();
+
+        Date now = new Date();
+
+        //if current hour is less than next trigger time, cron job has not run yet, since its daily job
+        if (Dates.getField(now, Calendar.HOUR_OF_DAY) < Dates.getField(nextTriggerTime, Calendar.HOUR_OF_DAY)) {
+            return;
+        }
+
+        if (nextTriggerTime.getTime() - now.getTime() < 2 * 3600 * 1000) {
+            return;
+        }
+
+        DBManager dbManager = ApplicationContext.getBean(DBManager.class);
+        List<CronjobLog> list = dbManager.query(CronjobLog.class,
+                Cnd.where("jobName", "=", this.getClass().getName())
+                        .and("runTime", ">", Dates.beginOfDay(new DateTime()).toDate())
+                        .desc("runTime"));
+
+        if (CollectionUtils.isEmpty(list)) {
+            LOGGER.info("{} executed at program startup.", this.getClass().getName());
+            execute();
+        }
     }
 
     @Override
