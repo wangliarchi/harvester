@@ -213,12 +213,18 @@ public class SellerPanel extends WebPanel {
             String text = JXBrowserHelper.textFromElement(trElement, "div[data-column=\"shipping_template\"]");
             String priceText = JXBrowserHelper.getValueFromFormField(trElement, "div[data-column=\"price\"] input");
             LOGGER.info("{} {} {}", status, priceText, text);
+
             try {
-                Money money = Money.fromText(priceText, marketplaceCountry);
-                existedPrice = money.getAmount().floatValue() + 5;
+                if (marketplaceCountry.europe() && marketplaceCountry != Country.UK) {
+                    existedPrice = Float.parseFloat(priceText.replace(",", ".")) + 5;
+                } else {
+                    Money money = Money.fromText(priceText, marketplaceCountry);
+                    existedPrice = money.getAmount().floatValue() + 5;
+                }
             } catch (Exception e) {
                 //
             }
+
             //.equalsIgnoreCase(status)
             if (StringUtils.equalsAnyIgnoreCase(status, "Active", "Incomplete") && Strings.containsAnyIgnoreCase(text, freeShippingTemplateName.split(","))) {
                 LOGGER.info("ASIN {} with {} template existed", asin, freeShippingTemplateName);
@@ -241,8 +247,8 @@ public class SellerPanel extends WebPanel {
 
         if (existedPrice > 0) {
             String priceText = String.valueOf(existedPrice);
-            if (StringUtils.isNotBlank(priceText) && country.europe() && country != Country.UK) {
-                priceText = StringUtils.replaceAll(priceText, ".", ",");
+            if (marketplaceCountry.europe() && marketplaceCountry != Country.UK) {
+                priceText = priceText.replace(".", ",");
             }
             JXBrowserHelper.setValueForFormSelect(browser, "#standard_price", priceText);
         } else {
@@ -250,10 +256,15 @@ public class SellerPanel extends WebPanel {
                 JXBrowserHelper.selectElementByCssSelector(browser, ".secondaryAUIButton.matchLowPriceButton").click();
                 WaitTime.Short.execute();
                 String priceText = JXBrowserHelper.getValueFromFormField(browser, "#standard_price");
-                float price = Float.parseFloat(priceText) + 5;
-                priceText = String.valueOf(price);
-                if (country.europe() && country != Country.UK) {
-                    priceText = StringUtils.replaceAll(priceText, ".", ",");;
+
+                if (marketplaceCountry.europe() && marketplaceCountry != Country.UK) {
+                    priceText = priceText.replace(",", ".");
+                    float price = Float.parseFloat(priceText) + 5;
+                    priceText = String.valueOf(price);
+                    priceText = priceText.replace(".", ",");
+                } else {
+                    float price = Float.parseFloat(priceText) + 5;
+                    priceText = String.valueOf(price);
                 }
                 JXBrowserHelper.setValueForFormSelect(browser, "#standard_price", priceText);
             } catch (Exception e) {
@@ -418,7 +429,7 @@ public class SellerPanel extends WebPanel {
 
 
     @Repeat
-    private void enterVerificationCode() {
+    void enterVerificationCode() {
 
         //fetch code from email
         DOMElement codeField = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, "#auth-mfa-otpcode");
@@ -496,6 +507,13 @@ public class SellerPanel extends WebPanel {
     }
 
     public static void main(String[] args) {
+        String priceText = "84,29";
+        Float existedPrice = Float.parseFloat(priceText.replace(",", ".")) + 5;
+
+        priceText = String.valueOf(existedPrice);
+
+        priceText = priceText.replace(".", ",");
+
 
         //String email = SellerPanel.fetchAmazonEmailAddress(" (vl0d7jmvtf30k52@marketplace.amazon.com)");
         JFrame frame = new JFrame();
