@@ -44,7 +44,6 @@ public class UKHandler extends DefaultHandler implements ShippingHandler {
     public ShippingOption determineShipOption(Order order, List<ShippingOption> shippingOptions) {
         List<ShippingOption> validOptions = getValidateOptions(order, shippingOptions);
 
-
         List<ShippingOption> freeShippingOptions = validOptions.stream().filter(ShippingOption::isFree).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(freeShippingOptions)) {
             freeShippingOptions.sort(Comparator.comparing(ShippingOption::getLatestDeliveryDate));
@@ -54,11 +53,9 @@ public class UKHandler extends DefaultHandler implements ShippingHandler {
         ShippingSpeed shippingSpeed = determineFinalSpeed(order);
 
         for (ShippingOption option : validOptions) {
-
             if (Strings.containsAnyIgnoreCase(option.getFullText(), shippingSpeed.getKeywords().split(","))) {
                 return option;
             }
-
         }
 
         throw new OrderSubmissionException("No valid shipping option found.");
@@ -66,6 +63,10 @@ public class UKHandler extends DefaultHandler implements ShippingHandler {
 
     @Override
     public ShippingSpeed determineFinalSpeed(Order order) {
+
+        if (order.selfOrder) {
+            return ShippingSpeed.Standard;
+        }
 
         if (order.expeditedShipping()) {
             return ShippingSpeed.Expedited;
