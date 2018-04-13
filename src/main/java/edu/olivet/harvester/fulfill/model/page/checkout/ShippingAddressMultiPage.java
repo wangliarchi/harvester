@@ -2,7 +2,9 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import com.teamdev.jxbrowser.chromium.dom.DOMInputElement;
+import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
@@ -59,6 +61,11 @@ public class ShippingAddressMultiPage extends ShippingAddressAbstract {
 
             JXBrowserHelper.insertChecker(browser);
             shipToBtn.click();
+
+            DOMElement errors = JXBrowserHelper.selectVisibleElement(browser,".enter-address-form  .a-alert-content");
+            if(errors != null) {
+                throw new OrderSubmissionException("Wrong address " + JXBrowserHelper.textFromElement(errors));
+            }
             JXBrowserHelper.waitUntilNewPageLoaded(browser);
 
             //check if error occur
@@ -95,28 +102,41 @@ public class ShippingAddressMultiPage extends ShippingAddressAbstract {
         }
     }
 
+
     public void selectAddressForOrder(Order order) {
-        DOMElement addressElement = getRandomAddressElement();
-        Address address = parseEnteredAddress(addressElement);
+        String errorMsg = "Fail to select shipping address";
+        for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
 
-        order.recipient_name = address.getName();
-        order.ship_address_1 = address.getAddress1();
-        order.ship_address_2 = address.getAddress2();
-        order.ship_city = address.getCity();
-        order.ship_state = address.getState();
-        order.ship_phone_number = address.getPhoneNumber();
-        order.ship_zip = address.getZip();
-        order.ship_country = address.getCountry();
+            DOMElement addressElement = getRandomAddressElement();
+            DOMElement continueBtn = JXBrowserHelper.selectVisibleElement(addressElement, ".ship-to-this-address.a-button .a-button-text");
 
-        DOMElement continueBtn = JXBrowserHelper.selectVisibleElement(addressElement, ".ship-to-this-address.a-button .a-button-text");
+            if (continueBtn != null) {
+                JXBrowserHelper.insertChecker(browser);
+                continueBtn.click();
+                WaitTime.Shortest.execute();
+                JXBrowserHelper.waitUntilNewPageLoaded(browser);
+            }
 
-        if (continueBtn != null) {
-            JXBrowserHelper.insertChecker(browser);
-            continueBtn.click();
-            WaitTime.Shortest.execute();
-            JXBrowserHelper.waitUntilNewPageLoaded(browser);
+            //check error msg
+            DOMElement errorMsgDom = JXBrowserHelper.selectVisibleElement(browser, ".a-box.a-alert.a-alert-error");
+            if (errorMsgDom != null) {
+                errorMsg = JXBrowserHelper.textFromElement(errorMsgDom);
+                continue;
+            }
+
+            Address address = parseEnteredAddress(addressElement);
+            order.recipient_name = address.getName();
+            order.ship_address_1 = address.getAddress1();
+            order.ship_address_2 = address.getAddress2();
+            order.ship_city = address.getCity();
+            order.ship_state = address.getState();
+            order.ship_phone_number = address.getPhoneNumber();
+            order.ship_zip = address.getZip();
+            order.ship_country = address.getCountry();
+            return;
         }
 
+        throw new BusinessException(errorMsg);
     }
 
 
