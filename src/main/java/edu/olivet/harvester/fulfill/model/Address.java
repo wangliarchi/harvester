@@ -34,6 +34,11 @@ public class Address {
 
 
     public void setZip(String zip) {
+        if (StringUtils.isBlank(zip)) {
+            this.zip = StringUtils.EMPTY;
+            return;
+        }
+
         this.zip = zip;
         String[] parts = StringUtils.split(zip, "-");
         if (parts.length > 1) {
