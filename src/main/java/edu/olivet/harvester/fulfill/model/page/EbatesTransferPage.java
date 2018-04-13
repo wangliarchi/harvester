@@ -87,7 +87,7 @@ public class EbatesTransferPage extends FulfillmentPage implements PageObject {
     }
 
     @Repeat(expectedExceptions = BusinessException.class)
-    private void login(Account ebatesBuyer) {
+    void login(Account ebatesBuyer) {
 
         JXBrowserHelper.loadPage(browser, TRANSFER_URL);
 
