@@ -83,7 +83,7 @@ public class ShoppingCartPage extends FulfillmentPage {
     }
 
     @Repeat(expectedExceptions = BusinessException.class)
-    private void clear() {
+    void clear() {
         long start = System.currentTimeMillis();
 
         try {
