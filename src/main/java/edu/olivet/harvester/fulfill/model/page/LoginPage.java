@@ -61,6 +61,8 @@ public class LoginPage extends FulfillmentPage implements PageObject {
         JXBrowserHelper.loadPage(browser, url);
         WaitTime.Shortest.execute();
 
+        JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "login");
+
         DOMElement email = JXBrowserHelper.selectElementByCssSelector(browser, EMAIL_SELECTOR);
         DOMElement password = JXBrowserHelper.selectElementByCssSelector(browser, PASSWORD_SELECTOR);
         return email == null && password == null;
@@ -156,7 +158,7 @@ public class LoginPage extends FulfillmentPage implements PageObject {
     }
 
     @Repeat
-    private void enterVerificationCode() {
+    void enterVerificationCode() {
 
         //fetch code from email
         DOMElement codeField = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, ".cvf-widget-input.cvf-widget-input-code");
