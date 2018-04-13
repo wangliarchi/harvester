@@ -15,6 +15,17 @@ public class Exceptions {
         }
     }
 
+    public static class ClearCardAndTryAgainException extends RuntimeException {
+
+        public ClearCardAndTryAgainException(String errorMsg) {
+            super(errorMsg);
+        }
+
+        public ClearCardAndTryAgainException(Throwable cause) {
+            super(cause);
+        }
+    }
+
     public static class BuyerAccountAuthenticationException extends OrderSubmissionException {
 
         public BuyerAccountAuthenticationException(String errorMsg) {
