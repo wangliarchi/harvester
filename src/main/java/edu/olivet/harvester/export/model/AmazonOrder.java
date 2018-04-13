@@ -95,6 +95,10 @@ public class AmazonOrder extends PrimaryKey {
     static final int COLUMN_COUNTS = OrderColumn.SALES_CHANEL.number() + 4;
     private static final String SEPARATOR = " - ";
 
+    public boolean isShipped() {
+        return "Shipped".equalsIgnoreCase(orderStatus);
+    }
+
     /**
      * <pre>
      * 订单对应Purchase Date：
