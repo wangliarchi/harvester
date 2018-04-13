@@ -8,10 +8,7 @@ import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
-import edu.olivet.harvester.fulfill.exception.Exceptions.OrderFulfilledException;
-import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
-import edu.olivet.harvester.fulfill.exception.Exceptions.SellerNotFoundException;
-import edu.olivet.harvester.fulfill.exception.Exceptions.SellerPriceRiseTooHighException;
+import edu.olivet.harvester.fulfill.exception.Exceptions.*;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.service.OrderSubmissionTaskService;
 import edu.olivet.harvester.fulfill.service.SheetService;
@@ -76,6 +73,10 @@ public class OrderFlowEngine extends FlowParent {
                 processSteps(step, state);
 
                 return state;
+            } catch (ClearCardAndTryAgainException e) {
+                LOGGER.error("", e);
+                clearShoppingCart.processStep(state);
+                //throw new BusinessException(e);
             } catch (SellerNotFoundException | SellerPriceRiseTooHighException e) {
                 LOGGER.error("", e);
                 if (state.getOrder().findNewSellerIfDisappeared) {
@@ -107,6 +108,8 @@ public class OrderFlowEngine extends FlowParent {
             }
         }
 
+        //clear shopping cart
+        clearShoppingCart.processStep(state);
         throw new BusinessException(exception);
     }
 
