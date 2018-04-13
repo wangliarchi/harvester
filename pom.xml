@@ -121,6 +121,11 @@
             <artifactId>generex</artifactId>
             <version>1.0.2</version>
         </dependency>
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>3.8</version>
+        </dependency>
 
     </dependencies>
 
