@@ -158,7 +158,7 @@ public class OrderService {
                     //LOGGER.error("", e);
                 }
 
-                if (StringUtils.isEmpty(order.order_id) || !RegexUtils.Regex.AMAZON_ORDER_NUMBER.isMatched(order.order_id)) {
+                if (StringUtils.length(order.order_id) < 6 || "order-id".equalsIgnoreCase(order.order_id)) {
                     continue;
                 }
 
