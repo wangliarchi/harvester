@@ -7,9 +7,11 @@ import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.db.DBManager;
 import edu.olivet.foundations.ui.InformationLevel;
+import edu.olivet.foundations.ui.UITools;
 import edu.olivet.harvester.fulfill.model.OrderFulfillmentRecord;
 import edu.olivet.harvester.fulfill.model.page.LoginPage;
 import edu.olivet.harvester.fulfill.model.page.checkout.PlacedOrderDetailPage;
+import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.service.ProgressUpdater;
 import edu.olivet.harvester.common.model.BuyerAccountSettingUtils;
 import edu.olivet.harvester.common.model.OrderEnums.OrderItemType;
@@ -35,9 +37,14 @@ public class OrderFulfillmentCheckerEvent implements HarvesterUIEvent {
     MessageListener messageListener;
 
     public void execute() {
+        if(PSEventListener.isRunning()) {
+            UITools.error("Other task is running, please wait or stop the task.");
+            return;
+        }
         new Thread(() -> {
             //MessagePanel messagePanel = new ProgressDetail(Actions.OrderFulfillmentChecker);
-
+            PSEventListener.reset(SimpleOrderSubmissionRuntimePanel.getInstance());
+            PSEventListener.start();
             List<OrderFulfillmentRecord> list = dbManager.query(OrderFulfillmentRecord.class,
                     Cnd.where("quantityPurchased", ">", 1).desc("fulfillDate"));
 
@@ -98,6 +105,8 @@ public class OrderFulfillmentCheckerEvent implements HarvesterUIEvent {
                 }
                 //break;
             }
+
+            PSEventListener.end();
         }).start();
     }
 }
