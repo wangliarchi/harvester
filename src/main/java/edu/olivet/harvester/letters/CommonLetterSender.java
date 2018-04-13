@@ -4,10 +4,7 @@ import com.google.api.services.sheets.v4.model.Spreadsheet;
 import com.google.inject.Inject;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.*;
-import edu.olivet.foundations.utils.BusinessException;
-import edu.olivet.foundations.utils.Constants;
-import edu.olivet.foundations.utils.Strings;
-import edu.olivet.foundations.utils.WaitTime;
+import edu.olivet.foundations.utils.*;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.common.model.OrderEnums.Status;
 import edu.olivet.harvester.common.model.SystemSettings;
@@ -19,6 +16,7 @@ import edu.olivet.harvester.hunt.model.Seller;
 import edu.olivet.harvester.hunt.service.HuntService;
 import edu.olivet.harvester.hunt.service.SheetService;
 import edu.olivet.harvester.hunt.utils.SellerHuntUtils;
+import edu.olivet.harvester.letters.model.GrayEnums.GrayLetterType;
 import edu.olivet.harvester.letters.model.Letter;
 import edu.olivet.harvester.letters.service.*;
 import edu.olivet.harvester.letters.service.GrayLetterRule.GrayRule;
@@ -74,7 +72,7 @@ public class CommonLetterSender {
             try {
                 execute(spreadId);
             } catch (Exception e) {
-                LOGGER.error("Error when confirm shipment for sheet {} {}", spreadId, e);
+                LOGGER.error("Error when sending common letters for sheet {} {}", spreadId, e);
             }
         }
     }
@@ -129,8 +127,12 @@ public class CommonLetterSender {
         while (PSEventListener.isRunning()) {
             WaitTime.Short.execute();
         }
+        //暂时不处理特殊sheet 里面的order
 
-        List<Order> grayOrders = orders.stream().filter(it -> GrayLetterRule.getGrayRule(it, findSupplier) != GrayRule.None).collect(Collectors.toList());
+        List<Order> grayOrders = orders.stream()
+                .filter(it -> RegexUtils.Regex.COMMON_ORDER_SHEET_NAME.isMatched(it.sheetName) &&
+                        GrayLetterRule.getGrayRule(it, findSupplier) != GrayRule.None)
+                .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(grayOrders)) {
             messagePanel.displayMsg("No orders need to send gray letters for " + title, LOGGER, InformationLevel.Negative);
             return;
@@ -166,7 +168,8 @@ public class CommonLetterSender {
 
             for (Order order : ordersToSendLetters) {
                 //如果发现有重复的白条订单（可做），将此单号发给客服(seller gmail)去处理，并在A列标记cs，
-                if (whiteOrders.contains(order.order_id)) {
+                //只针对灰条，lw之类白条订单不考虑
+                if (whiteOrders.contains(order.order_id) && order.colorIsGray()) {
                     try {
                         sendLetterToCS(order);
                         messagePanel.displayMsg(msgPrefix(order) + "sent msg to cs successfully.", LOGGER, InformationLevel.Information);
@@ -217,11 +220,21 @@ public class CommonLetterSender {
 
     public void sendLetter(Order order) {
 
+        GrayLetterType type = GrayLetterType.getTypeFromStatus(order.status);
+        if (type == null) {
+            messagePanel.displayMsg(msgPrefix(order) + "Order status [" + order.status + "] not valid.", LOGGER, InformationLevel.Negative);
+            return;
+        }
         AmazonOrder amazonOrder;
         try {
             amazonOrder = amazonOrderService.loadOrder(order);
-            if (!"Shipped".equalsIgnoreCase(amazonOrder.getOrderStatus())) {
-                messagePanel.displayMsg(msgPrefix(order) + "Order not shipped yet.", LOGGER, InformationLevel.Negative);
+            if (type.isShouldBeShipped() && !amazonOrder.isShipped()) {
+                messagePanel.displayMsg(msgPrefix(order) + "Order not shipped yet, gray type [" + type.name() + "].", LOGGER, InformationLevel.Negative);
+                return;
+            }
+
+            if (!type.isShouldBeShipped() && amazonOrder.isShipped()) {
+                messagePanel.displayMsg(msgPrefix(order) + "Order already shipped, gray type [" + type.name() + "].", LOGGER, InformationLevel.Negative);
                 return;
             }
         } catch (Exception e) {
