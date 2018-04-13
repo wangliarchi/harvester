@@ -6,6 +6,7 @@ import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.common.model.OrderEnums.OrderItemType;
 import edu.olivet.harvester.common.model.Remark;
+import edu.olivet.harvester.spreadsheet.utils.SheetUtils;
 import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.lang3.StringUtils;
 
@@ -28,9 +29,21 @@ public class OrderCountryUtils {
         try {
             return Country.fromSalesChanel(order.getSales_chanel());
         } catch (Exception e) {
+
+            if (StringUtils.isNotBlank(order.spreadsheetName)) {
+                try {
+                    return SheetUtils.getCountryFromSpreadsheetName(order.spreadsheetName);
+                } catch (Exception e1) {
+                    //
+                }
+            }
             //sale channel is missing, current country;
             if (StringUtils.isNotBlank(order.spreadsheetId)) {
-                return Settings.load().getSpreadsheetCountry(order.spreadsheetId);
+                try {
+                    return Settings.load().getSpreadsheetCountry(order.spreadsheetId);
+                } catch (Exception e1) {
+                    //
+                }
             }
             try {
                 return Country.fromCode(order.getRuntimeSettings().getMarketplaceName());
