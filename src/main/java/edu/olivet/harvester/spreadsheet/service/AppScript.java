@@ -137,7 +137,7 @@ public class AppScript {
     }
 
     @Repeat(expectedExceptions = {BusinessException.class, JSONException.class, RuntimeException.class})
-    private boolean markColor(String sheetUrl, String sheetName, int row, String notation, OrderColor color) {
+    boolean markColor(String sheetUrl, String sheetName, int row, String notation, OrderColor color) {
         Map<String, String> params = new HashMap<>();
         String spreadId = getSpreadId(sheetUrl);
         params.put(PARAM_SPREAD_ID, spreadId);
