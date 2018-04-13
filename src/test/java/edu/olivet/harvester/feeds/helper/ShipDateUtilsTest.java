@@ -1,17 +1,22 @@
 package edu.olivet.harvester.feeds.helper;
 
 import com.google.inject.Inject;
+import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Now;
 import edu.olivet.harvester.common.BaseTest;
 import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
 import edu.olivet.harvester.spreadsheet.model.Worksheet;
+import edu.olivet.harvester.utils.ServiceUtils;
+import edu.olivet.harvester.utils.common.DateFormat;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import static org.testng.Assert.assertEquals;
 
@@ -116,4 +121,25 @@ public class ShipDateUtilsTest extends BaseTest {
         shipDateUtils.getShipDate(order, Dates.parseDate(defaultDate));
     }
 
+    @Test
+    public void testGetShipDateKST() {
+        //April 6, 2018 1:27:04 PM KST"
+        Order order = prepareOrder();
+        now.set(Dates.parseDate("2018-04-06_00:33:22"));
+
+        order.purchase_date = "2018-04-04_17:33:22";
+        order.expected_ship_date = "2018-04-05 2018-04-06";
+        order.sheetName = "04/06";
+
+        Worksheet worksheet = new Worksheet(null, order.sheetName);
+        String defaultDate = worksheet.getOrderConfirmationDate();
+        Date nowDate = now.get();
+        Date shipDate = shipDateUtils.getShipDate(order, Dates.parseDate(defaultDate));
+        String dateString = shipDateUtils.getShipDateString(order, Dates.parseDate(defaultDate));
+        System.out.println(nowDate);
+        System.out.println(shipDate);
+        System.out.println(dateString);
+        //2018-04-04T15:00:00.000Z
+    }
+    //2018-04-04_17:33:22
 }

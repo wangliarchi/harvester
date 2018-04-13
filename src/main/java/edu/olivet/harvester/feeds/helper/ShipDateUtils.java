@@ -1,10 +1,13 @@
 package edu.olivet.harvester.feeds.helper;
 
 import com.google.inject.Inject;
+import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Now;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.fulfill.utils.OrderCountryUtils;
+import edu.olivet.harvester.utils.ServiceUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -63,6 +66,12 @@ public class ShipDateUtils {
         //if ship date is earlier than purchased date...
         try {
             Date purchaseDate = order.getPurchaseDate();
+            Country country = OrderCountryUtils.getMarketplaceCountry(order);
+            TimeZone timeZone = ServiceUtils.getTimeZone(country);
+            SimpleDateFormat isoFormat = new SimpleDateFormat(edu.olivet.foundations.utils.DateFormat.DATE_TIME.pattern());
+            isoFormat.setTimeZone(timeZone);
+            purchaseDate = isoFormat.parse(edu.olivet.foundations.utils.DateFormat.DATE_TIME.format(purchaseDate));
+
             if (purchaseDate.after(shipDate)) {
                 //shipDate = DateUtils.addHours(purchaseDate, 12);
                 shipDate = Dates.beginOfDay(new DateTime(purchaseDate)).toDate();
