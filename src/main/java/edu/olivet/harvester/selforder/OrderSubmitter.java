@@ -165,6 +165,11 @@ public class OrderSubmitter {
             return false;
         }
 
+        if (StringUtils.startsWithIgnoreCase(selfOrder.ownerAccountSellerId, selfOrder.buyerAccountCode)) {
+            messageListener.addMsg("Row " + selfOrder.row + " is invalid as it's on same account", InformationLevel.Negative);
+            return false;
+        }
+
         if (StringUtils.isEmpty(selfOrder.promoCode)) {
             messageListener.addMsg("Row " + selfOrder.row + " is invalid as promo code is not found.", InformationLevel.Negative);
             return false;
