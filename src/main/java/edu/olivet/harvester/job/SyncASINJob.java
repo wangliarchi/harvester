@@ -39,7 +39,7 @@ public class SyncASINJob extends AbstractBackgroundJob {
     @Override
     public boolean enabled() {
         SystemSettings systemSettings = SystemSettings.load();
-        return systemSettings.isEnableInvoiceDownloading();
+        return systemSettings.isEnableASINsSyncing();
     }
 
     @Override
