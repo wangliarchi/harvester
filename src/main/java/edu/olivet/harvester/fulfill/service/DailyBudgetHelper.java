@@ -178,13 +178,13 @@ public class DailyBudgetHelper {
     }
 
 
-    @Inject OrderFulfillmentRecordService orderFulfillmentRecordService;
+    //@Inject OrderFulfillmentRecordService orderFulfillmentRecordService;
 
     public synchronized void addSpending(String spreadsheetId, Date date, float spending) {
         float cost = getCost(spreadsheetId, date);
         cost += spending;
 
-        float localTotalCost = orderFulfillmentRecordService.totalCost(spreadsheetId, date);
+        //float localTotalCost = orderFulfillmentRecordService.totalCost(spreadsheetId, date);
 
         DecimalFormat df = new DecimalFormat("#.##");
         df.setRoundingMode(RoundingMode.CEILING);
@@ -208,7 +208,7 @@ public class DailyBudgetHelper {
 
         try {
             sheetService.batchUpdateValues(spreadsheetId, dateToUpdate);
-            LOGGER.info("Successfully updated spending {}， now total spent {}, local total {}", df.format(spending), df.format(cost), df.format(localTotalCost));
+            LOGGER.info("Successfully updated spending {}， now total spent {}", df.format(spending), df.format(cost));
             AtomicDouble costInBuffer = costBuffer.getOrDefault(spreadsheetId, null);
             if (costInBuffer != null) {
                 costBuffer.put(spreadsheetId, new AtomicDouble(costInBuffer.floatValue() - spending));
