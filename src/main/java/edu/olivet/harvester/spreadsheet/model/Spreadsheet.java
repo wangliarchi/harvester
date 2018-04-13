@@ -6,9 +6,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.harvester.common.model.OrderEnums;
 import edu.olivet.harvester.utils.Settings;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +19,8 @@ import java.util.stream.Collectors;
  */
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Spreadsheet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Spreadsheet.class);
