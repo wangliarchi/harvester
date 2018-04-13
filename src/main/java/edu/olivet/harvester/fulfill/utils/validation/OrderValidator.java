@@ -444,6 +444,10 @@ public class OrderValidator {
             return Strings.getExceptionMsg(e);
         }
 
+        if(OrderCountryUtils.getMarketplaceCountry(order) == Country.JP) {
+            return "";
+        }
+        //日本地址 需要翻译成英语 做us/uk 直寄单
         if (!skipCheck(order, SkipValidation.Address) && !Remark.ADDRESS_CHANGED.isContainedBy(order.remark)) {
             try {
                 Order reloadedOrder = amazonOrderService.reloadOrder(order);
@@ -663,15 +667,21 @@ public class OrderValidator {
 
         if (finalList.size() > 0) {
             OrderFulfillmentRecord record = list.get(0);
+            if (!order.fulfilled()) {
+                //restore from record
+                order.remark = Remark.RESTORE_FROM_LOG.appendTo(order.remark);
+                order.cost = record.getCost();
+                order.account = record.getBuyerAccount();
+                order.order_number = record.getOrderNumber();
+                order.last_code = record.getLastCode();
 
-            //restore from record
-            order.remark = Remark.RESTORE_FROM_LOG.appendTo(order.remark);
-            order.cost = record.getCost();
-            order.account = record.getBuyerAccount();
-            order.order_number = record.getOrderNumber();
-            order.last_code = record.getLastCode();
+                sheetService.fillFulfillmentOrderInfo(order.getSpreadsheetId(), order);
+            }
 
-            sheetService.fillFulfillmentOrderInfo(order.getSpreadsheetId(), order);
+            LOGGER.info("Order fulfilled at {} with order number %s by buyer account {}." +
+                            " Please check if this order is a duplicated record. If not, please update remark.",
+                    DateFormat.DATE_TIME.format(record.getFulfillDate()), record.getOrderNumber(), record.getBuyerAccount());
+
             return String.format("Order fulfilled at %s with order number %s by buyer account %s." +
                             " Please check if this order is a duplicated record. If not, please update remark.",
                     DateFormat.DATE_TIME.format(record.getFulfillDate()), record.getOrderNumber(), record.getBuyerAccount()
