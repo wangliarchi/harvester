@@ -1,5 +1,6 @@
 package edu.olivet.harvester.ui.panel;
 
+import com.google.api.services.drive.model.File;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.UIText;
@@ -7,6 +8,7 @@ import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.WaitTime;
+import edu.olivet.harvester.common.model.SystemSettings;
 import edu.olivet.harvester.fulfill.model.setting.AdvancedSubmitSetting;
 import edu.olivet.harvester.fulfill.model.setting.RuntimeSettings;
 import edu.olivet.harvester.fulfill.service.*;
@@ -18,6 +20,7 @@ import edu.olivet.harvester.common.model.OrderEnums.OrderItemType;
 import edu.olivet.harvester.spreadsheet.model.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
+import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.ui.utils.ProgressBarComponent;
 import edu.olivet.harvester.ui.dialog.ChooseSheetDialog;
 import edu.olivet.harvester.ui.dialog.SelectRangeDialog;
@@ -43,6 +46,7 @@ import java.awt.event.MouseEvent;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 /**
@@ -57,17 +61,19 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
 
     private static SimpleOrderSubmissionRuntimePanel instance;
 
+    private final SheetAPI sheetAPI;
     public static SimpleOrderSubmissionRuntimePanel getInstance() {
         if (instance == null) {
             instance = new SimpleOrderSubmissionRuntimePanel();
         }
 
-        return instance;
+       return instance;
     }
 
     private SimpleOrderSubmissionRuntimePanel() {
         initComponents();
 
+        sheetAPI = ApplicationContext.getBean(SheetAPI.class);
         //RuntimeSettings
         settings = RuntimeSettings.load();
 
@@ -465,7 +471,8 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
 
         AppScript appScript = new AppScript();
         Country selectedCountry = (Country) marketplaceComboBox.getSelectedItem();
-        List<Spreadsheet> spreadsheets = Settings.load().listSpreadsheets(selectedCountry, appScript);
+        List<Spreadsheet> spreadsheets = Settings.load().listSpreadsheetsForOrderSubmission(selectedCountry, appScript,sheetAPI);
+
 
         if (CollectionUtils.isEmpty(spreadsheets)) {
             UITools.error("No order update sheet found. Please make sure it's configured and shared with " + Constants.RND_EMAIL, "Error");

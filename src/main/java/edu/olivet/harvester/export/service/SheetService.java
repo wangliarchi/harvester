@@ -240,35 +240,6 @@ public class SheetService extends SheetAPI {
         return createNewSheetIfNotExisted(spreadsheetId, SheetUtils.getSheetNameByDate(date), TEMPLATE_SHEET_NAME);
     }
 
-    //todo check if template sheet has correct format
-    private SheetProperties createNewSheetIfNotExisted(String spreadsheetId, String sheetName, String templateSheetName) {
-        long start = System.currentTimeMillis();
 
-        //check if existed
-        try {
-            SheetProperties sheetProperties = getSheetProperties(spreadsheetId, sheetName);
-            LOGGER.info("Sheet {} already created.", sheetName);
-            return sheetProperties;
-        } catch (Exception e) {
-            //LOGGER.error("", e);
-        }
-
-        int templateSheetId;
-        try {
-            templateSheetId = getSheetProperties(spreadsheetId, templateSheetName).getSheetId();
-        } catch (Exception e) {
-            LOGGER.error("Error loading template sheet {} from {}", templateSheetName, spreadsheetId, e);
-            throw new BusinessException(e);
-        }
-
-        try {
-            SheetProperties sheetProperties = duplicateSheet(spreadsheetId, templateSheetId, sheetName);
-            LOGGER.info("Sheet {} created successfully, took {}.", sheetName, Strings.formatElapsedTime(start));
-            return sheetProperties;
-        } catch (Exception e) {
-            LOGGER.error("Fail to copy template sheet  {} {} {}", spreadsheetId, templateSheetName, sheetName, e);
-            throw new BusinessException(e);
-        }
-    }
 
 }

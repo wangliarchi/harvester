@@ -92,6 +92,28 @@ public class SheetService extends SheetAPI {
     }
 
 
+    @Repeat(times = 5, expectedExceptions = BusinessException.class)
+    public void fillTrackingInfo(String spreadsheetId, Order order) {
+        int row = order.row;
+        List<ValueRange> dataToUpdate = new ArrayList<>();
+
+        //fulfilled order info
+        String range = String.format("%s!AO%d:AQ%d", order.sheetName, row, row);
+
+        ValueRange rowData = new ValueRange()
+                .setValues(Collections.singletonList(Lists.newArrayList(order.seller_estimated_delivery_date, order.carrier, order.tracking_number)))
+                .setRange(range);
+        dataToUpdate.add(rowData);
+
+
+        try {
+            this.batchUpdateValues(spreadsheetId, dataToUpdate);
+        } catch (BusinessException e) {
+            LOGGER.error("Fail to update order tracking  info {} - {}", spreadsheetId, e);
+            throw new BusinessException(e);
+        }
+    }
+
     private void updateFulfilledOrderBackgroundColor(String spreadsheetId, Order order, int row) {
         if (Remark.quantityDiffered(order.remark)) {
             appScript.markColor(spreadsheetId, order.sheetName, row, OrderColor.InvalidByCode);
@@ -101,6 +123,9 @@ public class SheetService extends SheetAPI {
     }
 
     public void fillUnsuccessfulMsg(String spreadsheetId, Order order, String msg) {
+        if (order.fulfilled()) {
+            return;
+        }
         //need to relocate order row on google sheet, as it may be arranged during order fulfillment process.
         int row = locateOrder(order);
         order.addRemark(msg);
@@ -255,7 +280,7 @@ public class SheetService extends SheetAPI {
     }
 
     @Repeat(expectedExceptions = BusinessException.class)
-    protected Order _reloadOrder(Order order) {
+    Order _reloadOrder(Order order) {
         //id, sku, seller, price, remark
         List<Order> orders = appScript.readOrders(order.spreadsheetId, order.sheetName);
         List<Order> validOrders = orders.stream().filter(it -> it.equalsSuperLite(order) ||

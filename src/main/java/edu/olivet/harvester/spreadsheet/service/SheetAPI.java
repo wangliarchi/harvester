@@ -14,25 +14,27 @@ import com.google.inject.Inject;
 import com.mchange.lang.IntegerUtils;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.aop.Repeat;
+import edu.olivet.foundations.google.DataSource;
 import edu.olivet.foundations.google.GoogleAPIHelper;
 import edu.olivet.foundations.google.GoogleServiceProvider;
 import edu.olivet.foundations.google.SpreadService;
+import edu.olivet.foundations.ui.UIText;
 import edu.olivet.foundations.utils.*;
 import edu.olivet.harvester.common.model.Order;
 import edu.olivet.harvester.common.model.OrderEnums;
 import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.utils.Settings;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.Predicate;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -342,6 +344,16 @@ public class SheetAPI {
 
     }
 
+    public void deleteSheet(String sheetName, String spreadsheetId) {
+        try {
+            SheetProperties sheetProperties = getSheetProperties(spreadsheetId, sheetName);
+            deleteSheet(sheetProperties.getSheetId(), spreadsheetId);
+        } catch (Exception e) {
+            //LOGGER.error("", e);
+            LOGGER.info("Sheet {} not found.", sheetName);
+        }
+    }
+
     public void deleteSheet(int sheetId, String spreadsheetId) {
 
         List<Request> requests = new ArrayList<>();
@@ -480,23 +492,200 @@ public class SheetAPI {
     }
 
 
-    @Repeat(expectedExceptions = BusinessException.class, times = 10)
+    @Repeat(expectedExceptions = BusinessException.class, times = 5)
     public List<File> getAvailableSheets(String sid, Country country, String dataSourceId) {
         List<File> sheets = spreadService.getAvailableSheets(sid, country, dataSourceId, Constants.RND_EMAIL);
+        removeSpecialSheets(sheets);
+        return sheets;
+    }
 
-        List<String> toRemoveKeywordList = Stream.of("fba resale", "cancel", "test", "history", "histroy", "copy of", "grey", "gray", "pl",
+    @lombok.Setter
+    private boolean debugMode = false;
+
+    public void removeSpecialSheets(List<File> sheets) {
+        List<String> toRemoveKeywordList = Stream.of("fba resale", "cancel", "copy of", "grey", "gray", "pl",
                 "backup", "to white", "国际转运", "forward", "top reviewer", "german book", "special sheet")
                 .collect(Collectors.toList());
-
-        for (int i = 2011; i < Dates.getYear(new Date()); i++) {
-            toRemoveKeywordList.add(String.valueOf(i));
+        if (!debugMode) {
+            toRemoveKeywordList.add("test");
         }
+
+        //for (int i = 2011; i < Dates.getYear(new Date()); i++) {
+        //    toRemoveKeywordList.add(String.valueOf(i));
+        //}
 
         String[] toRemoveKeywords = toRemoveKeywordList.toArray(new String[toRemoveKeywordList.size()]);
 
         sheets.removeIf(it -> Strings.containsAnyIgnoreCase(it.getName().toLowerCase(), toRemoveKeywords));
+    }
 
-        return sheets;
+    /**
+     * Query cache. Key: ${search.term}, Value: ${spreadsheets.metadata}
+     */
+    private final Map<String, List<File>> spreadsCache = new HashMap<>();
+
+    public List<File> getAvailableOrderSheets(String sid, Country country, boolean debugMode) {
+        this.debugMode = debugMode;
+        return getAvailableOrderSheets(sid, country);
+    }
+
+    public List<File> getAvailableOrderSheets(String sid, Country country) {
+        List<Predicate<String>> predicates = new ArrayList<>();
+        predicates.add(new Identity(sid, country));
+        predicates.add(new Historical(false));
+        String key = StringUtils.join(predicates, ", ");
+        LOGGER.debug("Search term：{}", key);
+        List<File> list = spreadsCache.get(key);
+        if (CollectionUtils.isEmpty(list)) {
+            list = this._getAvailableOrderSheets(sid, predicates);
+            spreadsCache.put(key, list);
+        }
+        return list;
+    }
+
+    public List<File> getAllOrderSheets(String sid, Country country) {
+        List<Predicate<String>> predicates = new ArrayList<>();
+        predicates.add(new Identity(sid, country, true));
+        String key = StringUtils.join(predicates, ", ");
+        LOGGER.debug("Search term：{}", key);
+        List<File> list = spreadsCache.get(key);
+        if (CollectionUtils.isEmpty(list)) {
+            list = this._getAvailableOrderSheets(sid, predicates);
+            spreadsCache.put(key, list);
+        }
+        return list;
+    }
+
+    public List<File> _getAvailableOrderSheets(String sid, List<Predicate<String>> predicates) {
+        List<File> searchResult = new ArrayList<>();
+        String query = String.format("mimeType='application/vnd.google-apps.spreadsheet' and (name contains '%s' or name contains '%s' or name contains '%s')",
+                sid, "ACC" + sid, "ACC_" + sid);
+        try {
+            searchResult = spreadService.query(Constants.RND_EMAIL, query);
+        } catch (Exception e) {
+            //
+        }
+        removeSpecialSheets(searchResult);
+
+        List<File> result = new ArrayList<>();
+        for (File spread : searchResult) {
+            if (this.evaluate(spread.getName(), predicates)) {
+                result.add(spread);
+            }
+        }
+        return result;
+    }
+
+
+    private static final String NAME_PATTERN_ORDER = "ORDER";
+    private static final String NAME_PATTERN_UPDATE = "UPDATE";
+
+    /**
+     * <pre>
+     * Validate whether the given spreadsheet name matches given account number and marketplace.
+     *
+     * Tips:
+     * 1. The account number should match exactly, for example, 18 should match 18 only, while 718 and 918 not;
+     * 2. Cross account fulfillment should ignore, for example, "ACC81 US Order Update 101 111 126" will match 81 only.
+     * 101, 111, 126 should be skipped;
+     * </pre>
+     *
+     * @param spreadTitle spreadsheet title, eg: "ACC 716 US  Book Order Update 711"
+     * @param accSid account number. eg: 18, 24
+     * @param nation marketplace, eg: US, UK
+     * @return if all things go well <tt>null</tt> will be returned, otherwise the failure reason will be given
+     */
+    @Nullable String validateSpreadName(@NotNull String spreadTitle, String accSid, Country nation, boolean onlySelf) {
+        // Remove year also, or 201 might match 2017, 2016 and etc - too many to choose
+        String str = spreadTitle.toUpperCase().replaceAll("[0-9]{4}", StringUtils.EMPTY);
+
+        //Only process texts before "Update", content after it will be removed as noises
+        if (onlySelf) {
+            str = str.replaceFirst(NAME_PATTERN_UPDATE + ".*", NAME_PATTERN_UPDATE);
+        }
+        try {
+            validateCountry(str, nation);
+        } catch (IllegalStateException e) {
+            return UIText.message("error.appcfg.spread", spreadTitle, accSid, nation.toString());
+        }
+
+        String sidRegex = String.format("([^0-9]%s|^%s)($|[^0-9])", accSid, accSid);
+        if (!RegexUtils.containsRegex(str, sidRegex) ||
+                !Strings.containsAllIgnoreCase(str, accSid, NAME_PATTERN_ORDER, NAME_PATTERN_UPDATE)) {
+            return UIText.message("error.appcfg.spread", spreadTitle, accSid, nation.toString());
+        }
+
+        return null;
+    }
+
+    /**
+     * Validate whether spreadsheet is correctly mapped to a given country
+     */
+    void validateCountry(String spreadsheetTitle, Country country) {
+        // Example: 'EB00_MX Books Order Update us uk-18'. US, UK are noise and need to be removed
+        // 'Order' contains 'de' which is equal to country code of DE, needs to be removed
+        String str = StringUtils.defaultString(spreadsheetTitle).toUpperCase()
+                .replaceFirst(NAME_PATTERN_ORDER + ".*", StringUtils.EMPTY);
+        // EU spreadsheet might be named 'UK' or 'EU'
+        String regex = country.europe() ? "(UK|EU)" : country.name();
+        if (!RegexUtils.containsRegex(str, regex)) {
+            throw new IllegalStateException(String.format("Spreadsheet '%s' is not for %s.", spreadsheetTitle, country.name()));
+        }
+    }
+
+    private class Identity implements Predicate<String> {
+        private final String accSid;
+        private final Country country;
+        private final boolean onlySelf;
+
+        private Identity(String accSid, Country country) {
+            this(accSid, country, false);
+        }
+
+        private Identity(String accSid, Country country, boolean onlySelf) {
+            this.accSid = accSid;
+            this.country = country;
+            this.onlySelf = onlySelf;
+        }
+
+        @Override
+        public boolean evaluate(String spreadTitle) {
+            String result = validateSpreadName(spreadTitle, accSid, country, onlySelf);
+            return StringUtils.isBlank(result);
+        }
+
+        @Override
+        public String toString() {
+            return accSid + country.name();
+        }
+    }
+
+
+    private static class Historical implements Predicate<String> {
+        private boolean historical;
+
+        private Historical(boolean historical) {
+            this.historical = historical;
+        }
+
+        @Override
+        public boolean evaluate(String s) {
+            return historical == Strings.containsAnyIgnoreCase(s, DataSource.HISTORY, "Histroy");
+        }
+
+        @Override
+        public String toString() {
+            return historical ? DataSource.HISTORY : StringUtils.EMPTY;
+        }
+    }
+
+    private boolean evaluate(String spreadsheetTitle, List<Predicate<String>> predicates) {
+        for (Predicate<String> predicate : predicates) {
+            if (!predicate.evaluate(spreadsheetTitle)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 
@@ -507,8 +696,39 @@ public class SheetAPI {
     }
 
 
+    //todo check if template sheet has correct format
+    protected SheetProperties createNewSheetIfNotExisted(String spreadsheetId, String sheetName, String templateSheetName) {
+        long start = System.currentTimeMillis();
+
+        //check if existed
+        try {
+            SheetProperties sheetProperties = getSheetProperties(spreadsheetId, sheetName);
+            LOGGER.info("Sheet {} already created.", sheetName);
+            return sheetProperties;
+        } catch (Exception e) {
+            //LOGGER.error("", e);
+        }
+
+        int templateSheetId;
+        try {
+            templateSheetId = getSheetProperties(spreadsheetId, templateSheetName).getSheetId();
+        } catch (Exception e) {
+            LOGGER.error("Error loading template sheet {} from {}", templateSheetName, spreadsheetId, e);
+            throw new BusinessException(e);
+        }
+
+        try {
+            SheetProperties sheetProperties = duplicateSheet(spreadsheetId, templateSheetId, sheetName);
+            LOGGER.info("Sheet {} created successfully, took {}.", sheetName, Strings.formatElapsedTime(start));
+            return sheetProperties;
+        } catch (Exception e) {
+            LOGGER.error("Fail to copy template sheet  {} {} {}", spreadsheetId, templateSheetName, sheetName, e);
+            throw new BusinessException(e);
+        }
+    }
+
     public static void main(String[] args) {
         SheetAPI sheetAPI = ApplicationContext.getBean(SheetAPI.class);
-        sheetAPI.sharePermissions("1cPFBnjxwLd2AFNcuODIsVFi5eafYslBIVA0FN_3CJgs", "olivetrnd153.2@gmail.com");
+        List<File> sheets = sheetAPI.getAllOrderSheets("709", Country.US);
     }
 }

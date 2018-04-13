@@ -9,8 +9,10 @@ import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Directory;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.common.model.OrderEnums;
+import edu.olivet.harvester.common.model.SystemSettings;
 import edu.olivet.harvester.spreadsheet.model.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
+import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.ui.Harvester;
 import edu.olivet.harvester.utils.http.HtmlFetcher;
 import edu.olivet.harvester.utils.http.HtmlParser;
@@ -158,6 +160,21 @@ public class Settings {
         return spreadIds;
     }
 
+    public List<Spreadsheet> listSpreadsheetsForOrderSubmission(Country country, AppScript appScript, SheetAPI sheetAPI) {
+        List<String> spreadsheetIds = getConfigByCountry(country).listSpreadsheetIds();
+
+        boolean debugMode = SystemSettings.load().isOrderSubmissionDebugModel();
+        List<com.google.api.services.drive.model.File> sheets = sheetAPI.getAvailableOrderSheets(Settings.load().getSid(), country, debugMode);
+        for(com.google.api.services.drive.model.File file : sheets) {
+            if(!spreadsheetIds.contains(file.getId())) {
+                spreadsheetIds.add(file.getId());
+            }
+        }
+        List<Spreadsheet> spreadsheets = spreadsheetIds.stream().map(it-> appScript.getSpreadsheet(it)).collect(Collectors.toList());
+
+        return spreadsheets;
+
+    }
     public List<Spreadsheet> listSpreadsheets(Country country, AppScript appScript) {
         List<String> spreadsheetIds = listAllSpreadsheets();
         List<Spreadsheet> spreadsheets = new ArrayList<>();
