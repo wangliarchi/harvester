@@ -40,7 +40,7 @@ public class LogUploader extends AbstractBackgroundJob {
         }
     }
 
-    @Repeat
+
     private void executeWithoutWait() throws IOException, DbxException {
         File log = new File(Directory.Log.path(), "harvester." + Dates.today() + ".log");
         if (log.exists() && log.length() > ZERO_BYTES) {
