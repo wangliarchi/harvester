@@ -80,8 +80,7 @@ public class ReviewOrderMultiPage extends Step {
 
     }
 
-    @Repeat
-    private void reviewPayment(FlowState state) {
+    void reviewPayment(FlowState state) {
         for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
             OrderReviewMultiPage orderReviewMultiPage = new OrderReviewMultiPage(state.getBuyerPanel());
             if (orderReviewMultiPage.reviewPaymentMethod()) {
