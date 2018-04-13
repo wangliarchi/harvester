@@ -50,11 +50,16 @@ public abstract class WebPanel extends JPanel {
     public void killBrowser() {
         try {
             int pid = (int) browserView.getBrowser().getRenderProcessInfo().getPID();
-            browserView.getBrowser().dispose();
             killProcess(pid);
         } catch (Exception e) {
             //
-            LOGGER.error("", e);
+            //LOGGER.error("", e);
+        }
+
+        try {
+            browserView.getBrowser().dispose();
+        } catch (Exception e) {
+            //
         }
     }
 
