@@ -3,9 +3,11 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.common.model.Money;
 import edu.olivet.harvester.common.model.Order;
+import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.utils.JXBrowserHelper;
 import org.apache.commons.lang3.StringUtils;
@@ -26,26 +28,21 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
     }
 
     public void execute(Order order) {
+
         //enter promo code if any
         if (StringUtils.isNotBlank(order.promotionCode)) {
             LOGGER.info("Self order, trying to enter promo code");
+
+            if (checkCurrentGrandTotal(order)) {
+                LOGGER.info("current grand total passed review, no need to change payment method.");
+                return;
+            }
+
             enterPromoCode(order);
             WaitTime.Shorter.execute();
-            String grandTotalText = JXBrowserHelper.text(browser, "#subtotals-marketplace-table .grand-total-price");
-            try {
-                Money total = Money.fromText(grandTotalText, buyerPanel.getCountry());
-                if (total.getAmount().floatValue() == 0) {
-                    click(order);
-                    return;
-                }
 
-                DOMElement continueBtn = JXBrowserHelper.selectElementByCssSelector(browser, CONTINUE_BTN_SELECTOR);
-                if (total.getAmount().floatValue() < 1 && continueBtn == null) {
-                    return;
-                }
-
-            } catch (Exception e) {
-                LOGGER.error("Error reading grand total. ", e);
+            if (checkCurrentGrandTotal(order)) {
+                return;
             }
         }
 
@@ -67,6 +64,38 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
         click(order);
     }
 
+    public boolean checkCurrentGrandTotal(Order order) {
+
+        JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "100");
+
+        DOMElement promoRadio = JXBrowserHelper.selectVisibleElement(browser, "#pm_promo");
+        if (promoRadio != null && promoRadio.hasAttribute("type") && "radio".equalsIgnoreCase(promoRadio.getAttribute("type"))) {
+            JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "0");
+            click(order);
+            return true;
+        }
+        try {
+            String grandTotalText = JXBrowserHelper.text(browser, "#subtotals-marketplace-table .grand-total-price");
+            Money total = Money.fromText(grandTotalText, buyerPanel.getCountry());
+            if (total.getAmount().floatValue() == 0) {
+                JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "0");
+                click(order);
+                return true;
+            }
+
+            DOMElement continueBtn = JXBrowserHelper.selectElementByCssSelector(browser, CONTINUE_BTN_SELECTOR);
+            if (total.getAmount().floatValue() < 1 && continueBtn == null) {
+                JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "0");
+                return true;
+            }
+
+        } catch (Exception e) {
+            LOGGER.error("Error reading grand total. ", e);
+        }
+
+        return false;
+    }
+
     @Repeat
     public void click(Order order) {
         //continue;
@@ -85,38 +114,40 @@ public class PaymentMethodOnePage extends PaymentMethodAbstractPage {
 
     }
 
-    @Repeat(expectedExceptions = BusinessException.class)
+
     public void enterPromoCode(Order order) {
 
-        DOMElement promoRadio = JXBrowserHelper.selectElementByCssSelector(browser, "#pm_promo");
+        DOMElement promoRadio = JXBrowserHelper.selectVisibleElement(browser, "#pm_promo");
         if (promoRadio != null) {
+            LOGGER.info("promo balance existed, return.");
+            JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "0");
             //by default, if promo balance available, it's checked
             WaitTime.Shorter.execute();
             return;
         }
-        try {
-            String grandTotalText = JXBrowserHelper.text(browser, "#subtotals-marketplace-table .grand-total-price");
-            Money total = Money.fromText(grandTotalText, buyerPanel.getCountry());
-            if (total.getAmount().floatValue() < 1) {
+
+        LOGGER.info("trying to enter promo code");
+        String errorMsg = "";
+        for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
+            JXBrowserHelper.waitUntilVisible(browser, "#spc-gcpromoinput,#gcpromoinput");
+            JXBrowserHelper.fillValueForFormField(browser, "#spc-gcpromoinput,#gcpromoinput", order.promotionCode);
+            WaitTime.Shortest.execute();
+            //apply
+            JXBrowserHelper.selectVisibleElement(browser, "#gcApplyButtonId .a-button-inner,#new-giftcard-promotion .a-button-inner").click();
+
+            WaitTime.Short.execute();
+            JXBrowserHelper.waitUntilVisible(browser, "#gcApplyButtonId .a-button-inner,#new-giftcard-promotion .a-button-inner");
+            DOMElement error = JXBrowserHelper.selectVisibleElement(browser, "#spc-gcpromoinput.a-form-error,#gcpromoinput.a-form-error");
+            if (error == null) {
                 return;
             }
-        } catch (Exception e) {
-            LOGGER.error("Error reading grand total. ", e);
+            JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "0");
+            errorMsg = JXBrowserHelper.textFromElement(error);
+            LOGGER.error(errorMsg);
+
+            WaitTime.Shorter.execute();
         }
 
-        JXBrowserHelper.waitUntilVisible(browser, "#spc-gcpromoinput,#gcpromoinput");
-        JXBrowserHelper.fillValueForFormField(browser, "#spc-gcpromoinput,#gcpromoinput", order.promotionCode);
-        WaitTime.Shortest.execute();
-        //apply
-        JXBrowserHelper.selectVisibleElement(browser, "#gcApplyButtonId .a-button-inner,#new-giftcard-promotion .a-button-inner").click();
-
-        WaitTime.Short.execute();
-        JXBrowserHelper.waitUntilVisible(browser, "#gcApplyButtonId .a-button-inner,#new-giftcard-promotion .a-button-inner");
-        DOMElement error = JXBrowserHelper.selectVisibleElement(browser, "#spc-gcpromoinput.a-form-error,#gcpromoinput.a-form-error");
-        if (error != null) {
-            throw new BusinessException("Promotional code is not valid.");
-        }
+        throw new OrderSubmissionException("Promotional code is not valid." + errorMsg);
     }
-
-
 }
