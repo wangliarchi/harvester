@@ -96,14 +96,14 @@ public class SellerHuntUtils {
             return;
         }
 
-        if (order.eddDays(now.get()) < 2 * 7) {
-            return;
-        }
 
         if (orderItemTypeHelper.getItemType(order) == OrderItemType.BOOK) {
             addCountry(countries, Country.UK, SellerFullType.APDirect, SellerFullType.PrimeDirect, SellerFullType.PtDirect);
+
         } else {
-            addCountry(countries, Country.UK, SellerFullType.APExport, SellerFullType.PrimeExport, SellerFullType.PtExport);
+            if (order.eddDays(now.get()) >= 7) {
+                addCountry(countries, Country.UK, SellerFullType.APExport, SellerFullType.PrimeExport, SellerFullType.PtExport);
+            }
         }
 
     }
@@ -118,14 +118,16 @@ public class SellerHuntUtils {
             return;
         }
 
-        if (order.eddDays(now.get()) < 2 * 7) {
-            return;
-        }
 
         if (orderItemTypeHelper.getItemType(order) == OrderItemType.BOOK) {
-            addCountry(countries, Country.US, SellerFullType.APDirect, SellerFullType.PrimeDirect, SellerFullType.PtExport);
+            addCountry(countries, Country.US, SellerFullType.APDirect, SellerFullType.PrimeDirect);
+            if (order.eddDays(now.get()) >= 7) {
+                addCountry(countries, Country.US, SellerFullType.PtExport);
+            }
         } else {
-            addCountry(countries, Country.US, SellerFullType.APExport, SellerFullType.PrimeExport, SellerFullType.PtExport);
+            if (order.eddDays(now.get()) >= 7) {
+                addCountry(countries, Country.US, SellerFullType.APExport, SellerFullType.PrimeExport, SellerFullType.PtExport);
+            }
         }
     }
 
