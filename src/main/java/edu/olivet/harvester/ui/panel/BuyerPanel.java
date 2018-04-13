@@ -2,11 +2,16 @@ package edu.olivet.harvester.ui.panel;
 
 import com.teamdev.jxbrowser.chromium.Browser;
 import com.teamdev.jxbrowser.chromium.CustomProxyConfig;
+import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.exception.AuthenticationFailException;
 import edu.olivet.foundations.ui.UITools;
+import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.Strings;
+import edu.olivet.foundations.utils.WaitTime;
+import edu.olivet.harvester.fulfill.model.page.LoginPage;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.fulfill.service.PSEventListener.Status;
 import edu.olivet.harvester.fulfill.service.RuntimePanelObserver;
@@ -218,6 +223,72 @@ public class BuyerPanel extends WebPanel implements RuntimePanelObserver, Progre
         budgetInfoLabel.setText(String.format("%s / %s", spending, budget));
     }
 
+
+    public void login() {
+        LoginPage loginPage = new LoginPage(this);
+        loginPage.execute(null);
+        for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
+            if (LoginPage.needLoggedIn(browserView.getBrowser())) {
+                loginPage = new LoginPage(this);
+                loginPage.execute(null);
+                WaitTime.Short.execute();
+            } else {
+                return;
+            }
+        }
+
+        throw new AuthenticationFailException("Fail to log in");
+    }
+
+    public void postFeedback(String orderId, String feedbackContent) {
+
+        String url = String.format("%s/gp/feedback/leave-consolidated-feedback.html?ie=UTF8&orderID=%s", country.baseUrl(), orderId);
+        JXBrowserHelper.loadPage(browserView.getBrowser(), url);
+        WaitTime.Shorter.execute();
+        if (LoginPage.needLoggedIn(browserView.getBrowser())) {
+            login();
+            JXBrowserHelper.loadPage(browserView.getBrowser(), url);
+            WaitTime.Shorter.execute();
+        }
+
+        DOMElement feedbackTextarea = JXBrowserHelper.selectElementByCssSelector(browserView.getBrowser(), "#feedbackText");
+        if (feedbackTextarea == null) {
+            throw new BusinessException("Invalid order id");
+        }
+
+        JXBrowserHelper.selectVisibleElement(browserView.getBrowser(), ".starSprite.clickable.rating5").click();
+        try {
+            JXBrowserHelper.selectElementByName(browserView.getBrowser(), "fulfillmentAnswer").click();
+            WaitTime.Shortest.execute();
+        } catch (Exception e) {
+            //
+        }
+        try {
+            JXBrowserHelper.selectElementByName(browserView.getBrowser(), "itemAsDescribedAnswer").click();
+            WaitTime.Shortest.execute();
+        } catch (Exception e) {
+            //
+        }
+
+        try {
+            JXBrowserHelper.fillValueForFormField(browserView.getBrowser(), "#feedbackText", feedbackContent);
+            WaitTime.Shortest.execute();
+        } catch (Exception e) {
+            //
+        }
+
+        WaitTime.Shortest.execute();
+        JXBrowserHelper.selectVisibleElement(browserView.getBrowser(), ".a-button.a-button-primary.fb_submitbutton").click();
+
+        WaitTime.Shorter.execute();
+
+        DOMElement error = JXBrowserHelper.selectVisibleElement(browserView.getBrowser(), ".a-alert.a-alert-error.clientSideErrorMessages.cfb-message-box");
+        if (error != null) {
+            throw new BusinessException(JXBrowserHelper.textFromElement(error));
+        }
+    }
+
+
     private JPanel initInfoPanel() {
         progressBar = new JProgressBar();
         progressBar.setStringPainted(true);
@@ -358,9 +429,5 @@ public class BuyerPanel extends WebPanel implements RuntimePanelObserver, Progre
         frame.getContentPane().add(buyerPanel);
 
         UITools.setDialogAttr(frame, true);
-        //buyerPanel.toHomePage();
-
-
-        // System.exit(0);
     }
 }
