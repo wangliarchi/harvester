@@ -209,9 +209,18 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, SubmitResult> {
                 WaitTime.Short.execute();
             }
 
+            //reload
+            order = sheetService.reloadOrder(order);
+            order.setTask(task);
+
+            if (order.fulfilled()) {
+                publish(new SubmitResult(order, "order already fulfilled.", ReturnCode.FAILURE));
+                continue;
+            }
+
             long start = System.currentTimeMillis();
 
-            order.setTask(task);
+
             try {
                 submit(order);
 
