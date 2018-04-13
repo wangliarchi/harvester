@@ -50,7 +50,8 @@ public class ShippingAddressOnePage extends ShippingAddressAbstract {
         }
 
         if (changeAddressLink != null) {
-            JXBrowserHelper.waitUntilVisible(browser, "#addressChangeLinkId");
+            WaitTime.Shorter.execute();
+            //JXBrowserHelper.waitUntilVisible(browser, "#addressChangeLinkId");
         }
 
         DOMElement btn = JXBrowserHelper.selectVisibleElement(browser, ".a-popover-footer .a-button-primary .a-button-input");
@@ -103,23 +104,27 @@ public class ShippingAddressOnePage extends ShippingAddressAbstract {
         JXBrowserHelper.waitUntilVisible(browser, ".a-row.address-row");
         //find recent address from address book
         String orderCountryName = CountryStateUtils.getInstance().getCountryName(country.code());
+        for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
+            DOMElement addressElement = getRandomAddressElement();
 
-        DOMElement addressElement = getRandomAddressElement();
-
-        DOMElement editLink = JXBrowserHelper.selectVisibleElement(addressElement, ".address-edit-link a");
-        if (editLink != null) {
-            editLink.click();
-            JXBrowserHelper.waitUntilVisible(browser, "#identity-add-new-address");
-            WaitTime.Short.execute();
-            order.recipient_name = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_FULL_NAME);
-            order.ship_address_1 = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_ADDR1);
-            order.ship_address_2 = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_ADDR2);
-            order.ship_city = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_CITY);
-            order.ship_state = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_STATE);
-            order.ship_phone_number = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_PHONE);
-            order.ship_zip = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_ZIP);
-            order.ship_country = orderCountryName;
-            WaitTime.Short.execute();
+            DOMElement editLink = JXBrowserHelper.selectVisibleElement(addressElement, ".address-edit-link a");
+            if (editLink != null) {
+                editLink.click();
+                JXBrowserHelper.waitUntilVisible(browser, "#identity-add-new-address");
+                WaitTime.Short.execute();
+                order.recipient_name = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_FULL_NAME);
+                order.ship_address_1 = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_ADDR1);
+                order.ship_address_2 = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_ADDR2);
+                order.ship_city = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_CITY);
+                order.ship_state = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_STATE);
+                order.ship_phone_number = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_PHONE);
+                order.ship_zip = JXBrowserHelper.getValueFromFormField(browser, SELECTOR_ZIP);
+                order.ship_country = orderCountryName;
+                WaitTime.Short.execute();
+                if (StringUtils.isNotBlank(order.recipient_name)) {
+                    break;
+                }
+            }
         }
 
         submit();
