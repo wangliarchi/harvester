@@ -30,6 +30,8 @@ public class ReviewOrder extends Step {
     protected void process(FlowState state) {
         OrderReviewOnePage orderReviewOnePage = new OrderReviewOnePage(state.getBuyerPanel());
 
+        orderReviewOnePage.checkItems();
+
         if (OrderValidator.needCheck(state.getOrder(), OrderValidator.SkipValidation.Address)) {
             reviewAddress(state);
         }
@@ -55,7 +57,7 @@ public class ReviewOrder extends Step {
 
     }
 
-    @Repeat
+
     private void reviewAddress(FlowState state) {
         String errorMsg = "";
         for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
@@ -77,7 +79,7 @@ public class ReviewOrder extends Step {
         throw new BusinessException(errorMsg);
     }
 
-    @Repeat
+
     private void reviewPayment(FlowState state) {
         for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
             OrderReviewOnePage orderReviewOnePage = new OrderReviewOnePage(state.getBuyerPanel());
