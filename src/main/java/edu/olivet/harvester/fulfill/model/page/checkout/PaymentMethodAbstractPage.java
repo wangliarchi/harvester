@@ -3,6 +3,7 @@ package edu.olivet.harvester.fulfill.model.page.checkout;
 import com.teamdev.jxbrowser.chromium.dom.DOMElement;
 import edu.olivet.foundations.aop.Repeat;
 import edu.olivet.foundations.utils.BusinessException;
+import edu.olivet.foundations.utils.Constants;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.utils.CreditCardUtils;
@@ -29,28 +30,43 @@ abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract {
         super(buyerPanel);
     }
 
-    @Repeat(expectedExceptions = BusinessException.class)
+
     public void enterPromoCode(Order order) {
         if (StringUtils.isBlank(order.promotionCode)) {
             return;
         }
 
+
+        String errorMsg = "";
         DOMElement giftCardLink = JXBrowserHelper.selectVisibleElement(browser, "#wrapper-new-gc #gc-link-expander");
         if (giftCardLink != null) {
             giftCardLink.click();
             JXBrowserHelper.waitUntilVisible(browser, "#gcpromoinput");
-            JXBrowserHelper.fillValueForFormField(browser, "#gcpromoinput", order.promotionCode);
-            DOMElement giftCardButton = JXBrowserHelper.selectElementByCssSelector(browser, "#button-add-gcpromo");
-            if (giftCardButton != null) {
-                giftCardButton.click();
-                WaitTime.Shortest.execute();
-                JXBrowserHelper.waitUntilNotFound(giftCardButton);
-            }
+            for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
+                JXBrowserHelper.fillValueForFormField(browser, "#gcpromoinput", order.promotionCode.trim());
+                DOMElement giftCardButton = JXBrowserHelper.selectElementByCssSelector(browser, "#button-add-gcpromo");
+                if (giftCardButton != null) {
+                    giftCardButton.click();
+                    WaitTime.Shortest.execute();
+                    JXBrowserHelper.waitUntilNotFound(giftCardButton);
+                } else {
+                    continue;
+                }
 
-            DOMElement error = JXBrowserHelper.selectVisibleElement(browser, "#gcpromoinput.a-form-error");
-            if (error != null) {
-                throw new BusinessException("Promotional code is not valid.");
+                DOMElement error = JXBrowserHelper.selectVisibleElement(browser, "#gcpromoerrorblock .error-message,#gcpromoinput.a-form-error");
+                if (error == null) {
+                    return;
+                }
+                JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "0");
+                errorMsg = JXBrowserHelper.textFromElement(error);
+                LOGGER.error(errorMsg);
+
+                WaitTime.Short.execute();
             }
+        }
+        DOMElement promoBalanceExists = JXBrowserHelper.selectVisibleElement(browser, "#pm_promo");
+        if (promoBalanceExists == null) {
+            throw new OrderSubmissionException("Promotional code is not valid." + errorMsg);
         }
     }
 
@@ -81,6 +97,11 @@ abstract class PaymentMethodAbstractPage extends ShippingAddressAbstract {
             String cardInfoText = JXBrowserHelper.textFromElement(paymentRow, ".card-info");
             if (cardInfoText.contains(creditCard.lastDigits())) {
                 paymentRow.click();
+                try {
+                    JXBrowserHelper.selectVisibleElement(paymentRow, "input[type='radio']").click();
+                } catch (Exception e) {
+                    //L
+                }
                 WaitTime.Shortest.execute();
                 //sometime amazon requires reenter cc number
                 reenterCCNumber(paymentRow);
