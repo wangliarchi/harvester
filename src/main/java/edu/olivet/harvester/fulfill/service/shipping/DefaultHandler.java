@@ -54,6 +54,9 @@ public class DefaultHandler implements ShippingHandler {
 
     @Override
     public ShippingSpeed determineFinalSpeed(Order order) {
+        if (order.selfOrder) {
+            return ShippingSpeed.Standard;
+        }
         return null;
     }
 
