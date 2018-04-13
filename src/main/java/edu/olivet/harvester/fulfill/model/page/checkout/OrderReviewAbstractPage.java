@@ -6,6 +6,7 @@ import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.utils.*;
 import edu.olivet.harvester.common.model.CreditCard;
 import edu.olivet.harvester.common.model.SystemSettings;
+import edu.olivet.harvester.fulfill.exception.Exceptions.ClearCardAndTryAgainException;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OrderSubmissionException;
 import edu.olivet.harvester.fulfill.exception.Exceptions.OutOfBudgetException;
 import edu.olivet.harvester.fulfill.model.Address;
@@ -227,6 +228,15 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         }
     }
 
+    public void checkItems() {
+        //shipment
+        List<DOMElement> items = JXBrowserHelper.selectElementsByCssSelector(browser, ".shipment .shipping-group .item-row .a-col-left img");
+        if (items.size() > 1) {
+            JXBrowserHelper.saveOrderScreenshot(buyerPanel.getOrder(), buyerPanel, "review");
+            throw new ClearCardAndTryAgainException("More than items （" + items.size() + "）in the cart. Clear cart and try again.");
+        }
+    }
+
 
     public void placeOrder(Order order) {
         //checkTotalCost(order);
@@ -252,5 +262,6 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
 
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
     }
+
 
 }
