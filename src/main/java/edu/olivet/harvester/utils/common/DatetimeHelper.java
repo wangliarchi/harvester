@@ -189,6 +189,18 @@ public class DatetimeHelper {
         return LocalDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), ZoneId.systemDefault());
     }
 
+    public static Date firstDayOfCurrentYear() {
+        return firstDayOfYear(Calendar.getInstance().get(Calendar.YEAR));
+    }
+
+    public static Date firstDayOfYear(int year) {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, year);
+        cal.set(Calendar.DAY_OF_YEAR, 1);
+        return cal.getTime();
+    }
+
+
     public static void main(String[] args) {
         LocalTime from = LocalTime.of(12, 0);
         LocalTime to = LocalTime.of(12, 10);
