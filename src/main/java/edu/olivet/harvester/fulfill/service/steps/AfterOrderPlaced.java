@@ -3,6 +3,7 @@ package edu.olivet.harvester.fulfill.service.steps;
 import com.google.inject.Inject;
 import com.mchange.lang.FloatUtils;
 import edu.olivet.foundations.aop.Repeat;
+import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.harvester.common.model.Remark;
 import edu.olivet.harvester.common.model.SystemSettings;
@@ -16,6 +17,7 @@ import edu.olivet.harvester.fulfill.service.flowcontrol.Step;
 import edu.olivet.harvester.logger.SuccessLogger;
 import edu.olivet.harvester.message.ErrorAlertService;
 import edu.olivet.harvester.common.model.Order;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,6 +81,7 @@ public class AfterOrderPlaced extends Step {
                 updateSpending(order.getSpreadsheetId(), order);
             } catch (Exception e) {
                 LOGGER.error("Failed to update spending.", e);
+                UITools.error("Failed to update spending.");
             }
         }).start();
 
@@ -89,11 +92,7 @@ public class AfterOrderPlaced extends Step {
 
     @Override
     public Step createDynamicInstance(FlowState state) {
-        state.setPrevStep(this);
-        if (SystemSettings.load().isOrderSubmissionDebugModel()) {
-            return readOrderDetails;
-        }
-        return stepHelper.detectStep(state);
+        return null;
     }
 
     @Inject private
@@ -106,6 +105,7 @@ public class AfterOrderPlaced extends Step {
 
 
     @Inject OrderFulfillmentRecordService orderFulfillmentRecordService;
+
     @Repeat(expectedExceptions = BusinessException.class)
     private void saveToDB(Order order) {
         orderFulfillmentRecordService.save(order);
