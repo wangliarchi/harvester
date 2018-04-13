@@ -60,7 +60,6 @@ public class UIElements extends AbstractUIContainer {
                 Action.Separator,
                 Actions.OrderSuccessLog,
                 Actions.OrderStatisticLog
-
         });
 
         map.put(confirmShipment, new Action[] {
@@ -72,7 +71,10 @@ public class UIElements extends AbstractUIContainer {
         map.put(selforder, new Action[] {
                 Actions.SubmitSelfOrders,
                 Action.Separator,
+                Actions.AsyncSelfOrderStats,
                 Actions.AddSelfOrderProduct,
+                Actions.PostSelfOrderFeedbacks,
+                Action.Separator,
                 Actions.SystemSettings
         });
         map.put(finance, new Action[] {
@@ -80,7 +82,8 @@ public class UIElements extends AbstractUIContainer {
                 Actions.RunDownloadInvoiceTask,
                 Action.Separator,
                 Actions.InvoiceTasks,
-                Actions.InvoiceDownloadStats
+                Actions.InvoiceDownloadStats,
+                Actions.FetchUnprocessedOrders
 
         });
 
@@ -93,7 +96,8 @@ public class UIElements extends AbstractUIContainer {
                 Actions.DownloadInventory,
                 Actions.SyncASINs,
                 Action.Separator,
-                Actions.CheckPrimeBuyerAccount
+                Actions.CheckPrimeBuyerAccount,
+                Actions.FetchTrackingNumbers
         });
 
         map.put(Menu.Settings, new Action[] {

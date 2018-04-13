@@ -7,6 +7,7 @@ import edu.olivet.foundations.job.TaskScheduler;
 import edu.olivet.foundations.ui.*;
 import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.harvester.bugreport.service.ReportBugEvent;
+import edu.olivet.harvester.finance.OrderStats;
 import edu.olivet.harvester.fulfill.service.OrderSubmissionTaskService;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
 import edu.olivet.harvester.job.BackgroundJob;
@@ -361,6 +362,30 @@ public class UIHarvester extends AbstractApplicationUI {
     @UIEvent
     public void addSelfOrderProduct() {
         submitSelfOrdersEvent.addProducts();
+    }
+
+    @UIEvent
+    public void asyncSelfOrderStats() {
+        submitSelfOrdersEvent.asyncSelfOrderStats();
+    }
+
+    @UIEvent
+    public void postSelfOrderFeedbacks() {
+        submitSelfOrdersEvent.postFeedbacks();
+    }
+
+    @Inject OrderStats orderStats;
+
+    @UIEvent
+    public void fetchUnprocessedOrders() {
+        orderStats.setMessagePanel(new ProgressDetail(Actions.FetchUnprocessedOrders));
+        orderStats.execute();
+    }
+
+    @Inject FetchTrackingNumbersEvent fetchTrackingNumbersEvent;
+    @UIEvent
+    public void fetchTrackingNumbers() {
+        fetchTrackingNumbersEvent.execute();
     }
 
     @Override

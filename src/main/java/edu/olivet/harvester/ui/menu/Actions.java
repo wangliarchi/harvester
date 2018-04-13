@@ -55,8 +55,12 @@ public class Actions {
 
     public static final Action SubmitSelfOrders = new Action("SubmitSelfOrders", "Submit Self Orders", null, "shua.png");
     public static final Action AddSelfOrderProduct = new Action("AddSelfOrderProduct", "Add SelfOrder Products", null, null);
+    public static final Action AsyncSelfOrderStats = new Action("AsyncSelfOrderStats", "Sync SelfOrder Stats", null, "chart.png");
+    public static final Action PostSelfOrderFeedbacks = new Action("PostSelfOrderFeedbacks", "Write Feedbacks", null, null);
     public static final Action CheckPrimeBuyerAccount = new Action("CheckPrimeBuyerAccount", "Check Prime Buyer Account", null, "follow.png");
     public static final Action CommonLetters = new Action("CommonLetters", "Common Letters", null, "csletter.gif");
     public static final Action CheckStoreName = new Action("CheckStoreName", "Check & Fix Store Names", null, null);
 
+    public static final Action FetchUnprocessedOrders = new Action("FetchUnprocessedOrders", "Fetch Unprocessed Orders Data", null, null);
+    public static final Action FetchTrackingNumbers = new Action("FetchTrackingNumbers", "Fetch Tracking Numbers", null, null);
 }
