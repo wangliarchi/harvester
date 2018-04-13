@@ -38,7 +38,8 @@ public class OrderSubmitter {
     @Inject private OrderDispatcher orderDispatcher;
 
     private static final List<Country> SUPPORTED_MARKETPLACES =
-            Lists.newArrayList(Country.US, Country.CA, Country.UK, Country.DE, Country.FR, Country.ES, Country.IT, Country.AU);
+            Lists.newArrayList(Country.US, Country.CA, Country.UK, Country.DE, Country.FR, Country.ES, Country.IT, Country.AU,
+                    Country.JP, Country.MX);
 
     /**
      * add task to order submission work queue
@@ -46,6 +47,10 @@ public class OrderSubmitter {
      * @param task Order Submission Task
      */
     public void execute(OrderSubmissionTask task) {
+        LOGGER.info("adding order submission task " + task.toString());
+        task.setTaskStatus(OrderTaskStatus.Queued);
+        orderSubmissionTaskService.saveTask(task);
+
         List<Order> validOrders = prepareOrderSubmission(task);
         if (CollectionUtils.isEmpty(validOrders)) {
             task.setTaskStatus(OrderTaskStatus.Completed);

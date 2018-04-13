@@ -1,10 +1,14 @@
 package edu.olivet.harvester.ui.panel;
 
+import com.google.api.services.drive.model.File;
 import edu.olivet.foundations.amazon.Account;
 import edu.olivet.foundations.amazon.Country;
+import edu.olivet.foundations.google.DataSource.DataSourceCategory;
 import edu.olivet.foundations.ui.UITools;
+import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.BusinessException;
 import edu.olivet.foundations.utils.Constants;
+import edu.olivet.harvester.common.model.SystemSettings;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.setting.OrderSubmissionSettings;
 import edu.olivet.harvester.fulfill.utils.validation.OrderValidator;
@@ -14,6 +18,7 @@ import edu.olivet.harvester.spreadsheet.model.OrderRange;
 import edu.olivet.harvester.spreadsheet.model.Spreadsheet;
 import edu.olivet.harvester.spreadsheet.model.Worksheet;
 import edu.olivet.harvester.spreadsheet.service.AppScript;
+import edu.olivet.harvester.spreadsheet.service.SheetAPI;
 import edu.olivet.harvester.ui.dialog.ChooseSheetDialog;
 import edu.olivet.harvester.utils.FinderCodeUtils;
 import edu.olivet.harvester.utils.Settings;
@@ -49,6 +54,7 @@ public class OrderSubmissionSettingsPanel extends JPanel {
     private List<String> sheetNames = new ArrayList<>();
     private int fieldWidth = 200;
     private int labelMinWidth = 80;
+    private final SheetAPI sheetAPI;
 
     public OrderSubmissionSettingsPanel(Window parentFrame) {
         this.parentFrame = parentFrame;
@@ -61,6 +67,7 @@ public class OrderSubmissionSettingsPanel extends JPanel {
             selectedMarketplace = orderSubmissionSettings.getCurrentCountry();
         }
 
+        sheetAPI = ApplicationContext.getBean(SheetAPI.class);
         initData();
         initEvents();
     }
@@ -117,7 +124,10 @@ public class OrderSubmissionSettingsPanel extends JPanel {
         OrderSubmissionSettings orderSubmissionSettings = OrderSubmissionSettings.load();
         AppScript appScript = new AppScript();
         Country selectedCountry = (Country) marketplaceComboBox.getSelectedItem();
-        List<Spreadsheet> spreadsheets = Settings.load().listSpreadsheets(selectedCountry, appScript);
+
+
+        //List<Spreadsheet> spreadsheets = Settings.load().listSpreadsheets(selectedCountry, appScript);
+        List<Spreadsheet> spreadsheets = Settings.load().listSpreadsheetsForOrderSubmission(selectedCountry, appScript,sheetAPI);
 
         if (CollectionUtils.isEmpty(spreadsheets)) {
             UITools.error("No order update sheet found. Please make sure it's configured and shared with " + Constants.RND_EMAIL, "Error");
