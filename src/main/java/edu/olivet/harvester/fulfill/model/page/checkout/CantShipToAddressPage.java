@@ -41,8 +41,11 @@ public class CantShipToAddressPage extends FulfillmentPage {
                         Strings.containsAnyIgnoreCase(currentAddress, OrderAddressUtils.orderShippingAddress(order).getName().replaceAll("\\s",""))) {
                     throw new OrderSubmissionException(errorMsg);
                 }
-                //useThisAddressBtn.click();
-                shipToOneAddressLink.click();
+                if(StringUtils.isBlank(errorMsg)) {
+                    useThisAddressBtn.click();
+                } else {
+                    shipToOneAddressLink.click();
+                }
             } else {
                 shipToOneAddressLink.click();
             }
