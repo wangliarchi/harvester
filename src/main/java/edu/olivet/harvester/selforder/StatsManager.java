@@ -48,6 +48,20 @@ public class StatsManager {
     private MessagePanel messagePanel = new VirtualMessagePanel();
     @Inject MessageListener messageListener;
 
+    public void postFeedbackJob() {
+        if (PSEventListener.isRunning()) {
+            messageListener.displayMsg("Other process is running, please submit when it's done.");
+            return;
+        }
+
+        List<SelfOrderRecord> records = selfOrderRecordService.getRecordToPostFeedbacks();
+        if (CollectionUtils.isEmpty(records)) {
+            messageListener.displayMsg("No feedbacks to post.");
+            return;
+        }
+        _postFeedbacks(records);
+    }
+
     public void postFeedbacks() {
 
         if (PSEventListener.isRunning()) {
@@ -64,6 +78,11 @@ public class StatsManager {
         if (!UITools.confirmed(records.size() + " feedback(s) to be post, please confirm to proceed.")) {
             return;
         }
+
+        _postFeedbacks(records);
+    }
+
+    private void _postFeedbacks(List<SelfOrderRecord> records) {
         try {
             selfOrderRecordService.updateUniqueCode(records.get(0).spreadsheetId, records);
         } catch (Exception e) {
@@ -106,7 +125,6 @@ public class StatsManager {
 
         PSEventListener.end();
     }
-
     public void postFeedback(SelfOrderRecord record) {
         Country country = Country.fromCode(record.country);
         Account buyer;

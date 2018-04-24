@@ -127,7 +127,7 @@ public class OrderSubmissionSettingsPanel extends JPanel {
 
 
         //List<Spreadsheet> spreadsheets = Settings.load().listSpreadsheets(selectedCountry, appScript);
-        List<Spreadsheet> spreadsheets = Settings.load().listSpreadsheetsForOrderSubmission(selectedCountry, appScript,sheetAPI);
+        List<Spreadsheet> spreadsheets = Settings.load().listSpreadsheetsForOrderSubmission(selectedCountry, appScript, sheetAPI);
 
         if (CollectionUtils.isEmpty(spreadsheets)) {
             UITools.error("No order update sheet found. Please make sure it's configured and shared with " + Constants.RND_EMAIL, "Error");
@@ -254,7 +254,7 @@ public class OrderSubmissionSettingsPanel extends JPanel {
                 orderSubmissionTask.setMarketplaceName(((Country) marketplaceComboBox.getSelectedItem()).name());
             }
             //noinspection ConstantConditions
-            orderSubmissionTask.setLostLimit(lostLimitComboBox.getSelectedItem().toString());
+            orderSubmissionTask.setExpeditedEddLimit(expeditedEddLimitComboBox.getSelectedItem().toString());
             //noinspection ConstantConditions
             orderSubmissionTask.setPriceLimit(priceLimitComboBox.getSelectedItem().toString());
             //noinspection ConstantConditions
@@ -321,8 +321,8 @@ public class OrderSubmissionSettingsPanel extends JPanel {
 
         googleSheetLabel = new JLabel();
 
-        lostLimitLabel = new JLabel();
-        lostLimitComboBox = new JComboBox<>();
+        expeditedEddLimitLabel = new JLabel();
+        expeditedEddLimitComboBox = new JComboBox<>();
         priceLimitLabel = new JLabel();
         priceLimitComboBox = new JComboBox<>();
         noInvoiceLabel = new JLabel();
@@ -344,7 +344,7 @@ public class OrderSubmissionSettingsPanel extends JPanel {
         buyerLabel.setText("Buyer");
         primeBuyerLabel.setText("Prime Buyer");
         googleSheetLabel.setText("Google Sheet");
-        lostLimitLabel.setText("Lost Limit");
+        expeditedEddLimitLabel.setText("Expedited Edd Limit");
         priceLimitLabel.setText("Price Limit");
         noInvoiceLabel.setText("No Invoice");
         codeFinderLabel.setText("Finder Code");
@@ -503,13 +503,13 @@ public class OrderSubmissionSettingsPanel extends JPanel {
                 .addGroup(panelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(panelLayout.createSequentialGroup()
                                 .addGroup(panelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(lostLimitLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(noInvoiceLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
                                         .addComponent(maxEddLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
                                         .addComponent(codeFinderLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
 
                                 )
                                 .addGroup(panelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(lostLimitComboBox, labelMinWidth, fieldWidth, fieldWidth)
+                                        .addComponent(noInvoiceTextField, labelMinWidth, fieldWidth, fieldWidth)
                                         .addComponent(maxDaysOverEddComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                         .addComponent(finderCodeTextField, labelMinWidth, fieldWidth, fieldWidth)
 
@@ -517,13 +517,13 @@ public class OrderSubmissionSettingsPanel extends JPanel {
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(panelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addComponent(priceLimitLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
-                                        .addComponent(noInvoiceLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                                        .addComponent(expeditedEddLimitLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
                                         .addComponent(skipCheckLabel, labelMinWidth, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
 
                                 )
                                 .addGroup(panelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addComponent(priceLimitComboBox, labelMinWidth, fieldWidth, fieldWidth)
-                                        .addComponent(noInvoiceTextField, labelMinWidth, fieldWidth, fieldWidth)
+                                        .addComponent(expeditedEddLimitComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                         .addComponent(skipCheckComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                 )
                         )
@@ -537,8 +537,8 @@ public class OrderSubmissionSettingsPanel extends JPanel {
 
 
                 .addGroup(panelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(lostLimitLabel)
-                        .addComponent(lostLimitComboBox)
+                        .addComponent(noInvoiceTextField)
+                        .addComponent(noInvoiceLabel)
                         .addComponent(priceLimitLabel)
                         .addComponent(priceLimitComboBox)
                 )
@@ -546,8 +546,8 @@ public class OrderSubmissionSettingsPanel extends JPanel {
                 .addGroup(panelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(maxEddLabel)
                         .addComponent(maxDaysOverEddComboBox)
-                        .addComponent(noInvoiceLabel)
-                        .addComponent(noInvoiceTextField)
+                        .addComponent(expeditedEddLimitLabel)
+                        .addComponent(expeditedEddLimitComboBox)
                 )
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
@@ -579,8 +579,8 @@ public class OrderSubmissionSettingsPanel extends JPanel {
 
         noInvoiceTextField.setText("{No Invoice}");
 
-        lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"5", "7"}));
-
+        expeditedEddLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}));
+        expeditedEddLimitComboBox.setSelectedItem("3");
         priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"3", "5"}));
 
         setOrderFinder();
@@ -602,7 +602,7 @@ public class OrderSubmissionSettingsPanel extends JPanel {
     private JComboBox<Account> buyerComboBox;
     private JComboBox<Account> primeBuyerComboBox;
 
-    private JComboBox<String> lostLimitComboBox;
+    private JComboBox<String> expeditedEddLimitComboBox;
     private JComboBox<String> priceLimitComboBox;
     private JTextField noInvoiceTextField;
     private JTextField finderCodeTextField;
@@ -613,7 +613,7 @@ public class OrderSubmissionSettingsPanel extends JPanel {
     private JComboBox<OrderValidator.SkipValidation> skipCheckComboBox;
     private JLabel buyerLabel;
     private JLabel primeBuyerLabel;
-    private JLabel lostLimitLabel;
+    private JLabel expeditedEddLimitLabel;
     private JLabel priceLimitLabel;
     private JLabel noInvoiceLabel;
     private JLabel codeFinderLabel;

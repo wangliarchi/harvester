@@ -214,6 +214,25 @@ public class SellerPanel extends WebPanel {
             String priceText = JXBrowserHelper.getValueFromFormField(trElement, "div[data-column=\"price\"] input");
             LOGGER.info("{} {} {}", status, priceText, text);
 
+            //free shipping
+            if (Strings.containsAnyIgnoreCase(text, freeShippingTemplateName.split(","))) {
+                if (StringUtils.equalsAnyIgnoreCase(status, "Active", "Incomplete")) {
+                    LOGGER.info("ASIN {} with {} template existed", asin, freeShippingTemplateName);
+                    throw new RuntimeException("ASIN " + asin + " with " + freeShippingTemplateName + " template existed");
+                }
+
+                if (Strings.containsAnyIgnoreCase(status, "Out of Stock")) {
+                    //
+                    // JXBrowserHelper.fillValueForFormField(trElement, "", "10");
+                    String id = trElement.getAttribute("id");
+                    browser.executeJavaScript("$('#" + id + " div[data-column=\"quantity\"] input').val('10').change();");
+                    WaitTime.Shorter.execute();
+                    JXBrowserHelper.selectElementByCssSelector(browser, "#saveall-floating .a-button.a-button-primary").click();
+                    JXBrowserHelper.waitUntilVisible(browser, ".mt-message-text");
+                    return;
+                }
+            }
+            //(
             try {
                 if (marketplaceCountry.europe() && marketplaceCountry != Country.UK) {
                     existedPrice = Float.parseFloat(priceText.replace(",", ".")) + 5;
@@ -225,18 +244,14 @@ public class SellerPanel extends WebPanel {
                 //
             }
 
-            //.equalsIgnoreCase(status)
-            if (StringUtils.equalsAnyIgnoreCase(status, "Active", "Incomplete") && Strings.containsAnyIgnoreCase(text, freeShippingTemplateName.split(","))) {
-                LOGGER.info("ASIN {} with {} template existed", asin, freeShippingTemplateName);
-                throw new RuntimeException("ASIN " + asin + " with " + freeShippingTemplateName + " template existed");
-            }
+
         }
 
         String sku = RandomUtils.randomAlphaNumeric(10) + "N" + marketplaceCountry.name();
 
         url = String.format("%s/abis/Display/ItemSelected?asin=%s", country.ascBaseUrl(), asin);
         JXBrowserHelper.loadPage(browser, url);
-        JXBrowserHelper.fillValueForFormField(browser, "#quantity", "3");
+        JXBrowserHelper.fillValueForFormField(browser, "#quantity", "10");
 
         WaitTime.Shortest.execute();
         JXBrowserHelper.setValueForFormSelect(browser, "#condition_type", "new, new");

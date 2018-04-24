@@ -59,7 +59,9 @@ public class UIElements extends AbstractUIContainer {
                 Actions.OrderSubmissionLog,
                 Action.Separator,
                 Actions.OrderSuccessLog,
-                Actions.OrderStatisticLog
+                Actions.OrderStatisticLog,
+                Action.Separator,
+                Actions.CloseAllWebTabs
         });
 
         map.put(confirmShipment, new Action[] {
@@ -73,6 +75,7 @@ public class UIElements extends AbstractUIContainer {
                 Action.Separator,
                 Actions.AsyncSelfOrderStats,
                 Actions.AddSelfOrderProduct,
+                //Actions.ReloadSelfOrderProduct,
                 Actions.PostSelfOrderFeedbacks,
                 Action.Separator,
                 Actions.SystemSettings

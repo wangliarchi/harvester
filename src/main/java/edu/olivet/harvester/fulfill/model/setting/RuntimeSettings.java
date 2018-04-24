@@ -28,6 +28,7 @@ public class RuntimeSettings {
     private String lostLimit = "5";
     private String priceLimit = "3";
     private String eddLimit = "7";
+    private String expeditedEddLimit = "3";
     private String noInvoiceText = "{No Invoice}";
     private String finderCode = "";
     private String buyerEmail;

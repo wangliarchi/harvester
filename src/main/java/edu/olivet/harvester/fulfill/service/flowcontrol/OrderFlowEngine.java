@@ -61,7 +61,7 @@ public class OrderFlowEngine extends FlowParent {
             try {
                 //reload order before submission
                 //sometimes user may create duplicated tasks, order data here was loaded when task started, it may be outdated.
-                if (!state.getOrder().selfOrder) {
+                if (!state.getOrder().selfOrder && i > 0) {
                     sheetService.reloadOrder(state.getOrder());
                 }
 

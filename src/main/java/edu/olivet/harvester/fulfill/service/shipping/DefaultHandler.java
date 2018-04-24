@@ -70,7 +70,8 @@ public class DefaultHandler implements ShippingHandler {
         }
 
         Date orderEdd = order.latestEdd();
-        int maxDays = order.buyerExpeditedShipping() ? 3 : IntegerUtils.parseInt(order.getRuntimeSettings().getEddLimit(), 7);
+        int maxDays = order.buyerExpeditedShipping() ?
+                IntegerUtils.parseInt(order.getRuntimeSettings().getExpeditedEddLimit(), 3) : IntegerUtils.parseInt(order.getRuntimeSettings().getEddLimit(), 7);
 
         DateTime start = new DateTime(orderEdd.getTime());
 

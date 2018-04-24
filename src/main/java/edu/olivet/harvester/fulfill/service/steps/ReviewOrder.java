@@ -94,7 +94,7 @@ public class ReviewOrder extends Step {
             }
         }
 
-        throw new BusinessException("Payment did not pass review");
+        throw new OrderSubmissionException("Payment did not pass review");
     }
 
     @Inject private

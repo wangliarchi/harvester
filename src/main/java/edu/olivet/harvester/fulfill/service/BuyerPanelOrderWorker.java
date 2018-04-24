@@ -244,7 +244,8 @@ class BuyerPanelOrderWorker extends SwingWorker<Void, SubmitResult> {
                     }
                 }
 
-                if (e instanceof OutOfBudgetException || e instanceof BuyerAccountAuthenticationException) {
+                if ((e instanceof OutOfBudgetException && ((OutOfBudgetException) e).getRemainingBudget() < 10) ||
+                        e instanceof BuyerAccountAuthenticationException) {
                     //UITools.error("No more money to spend :(");
                     //messageListener.addMsg(order, "No more money to spend :(", InformationLevel.Negative);
                     orderSubmissionBuyerTaskService.stopTask(buyerAccountTask);

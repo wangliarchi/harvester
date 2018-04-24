@@ -123,12 +123,12 @@ public class OrderService {
                     continue;
                 }
 
-                if (CollectionUtils.isEmpty(objects)) {
+                if (CollectionUtils.isEmpty(objects) || objects.size() < 5) {
                     //LOGGER.info("Row {} is empty for {} {}.", row, spreadTitle, sheetName);
                     continue;
                 }
 
-                if (StringUtils.isBlank(objects.get(0).toString())) {
+                if (StringUtils.isBlank(objects.get(0).toString()) && StringUtils.isBlank(objects.get(2).toString())) {
                     continue;
                 }
 

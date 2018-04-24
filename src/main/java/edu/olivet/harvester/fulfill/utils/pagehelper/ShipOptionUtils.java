@@ -81,7 +81,9 @@ public class ShipOptionUtils {
     public static List<ShippingOption> getValidateOptions(Order order, List<ShippingOption> shippingOptions) {
 
         Date orderEdd = order.latestEdd();
-        int maxDays = IntegerUtils.parseInt(order.getRuntimeSettings().getEddLimit(), 7);
+        //int maxDays = IntegerUtils.parseInt(order.getRuntimeSettings().getEddLimit(), 7);
+        int maxDays = order.buyerExpeditedShipping() ?
+                IntegerUtils.parseInt(order.getRuntimeSettings().getExpeditedEddLimit(), 3) : IntegerUtils.parseInt(order.getRuntimeSettings().getEddLimit(), 7);
 
         DateTime start = new DateTime(orderEdd.getTime());
 

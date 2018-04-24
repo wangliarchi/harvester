@@ -66,17 +66,22 @@ public class DailyBudgetHelper {
         if (costBuffer.containsKey(spreadsheetId)) {
             costInBuffer = costBuffer.get(spreadsheetId).floatValue();
         }
-
-        Float remaining = budgetData.get(DataType.Budget) - budgetData.get(DataType.Cost) - costInBuffer;
-
+        if (costInBuffer < 0) {
+            costInBuffer = 0;
+        }
+        float remaining = budgetData.get(DataType.Budget) - budgetData.get(DataType.Cost) - costInBuffer;
+        LOGGER.info("Current budget {}, cost {}, cost in buffer {}, to spend {}",
+                budgetData.get(DataType.Budget), budgetData.get(DataType.Cost), costInBuffer, costToSpend);
 
         if (remaining <= 0) {
             throw new OutOfBudgetException("You have exceed today's budget limit. ");
         }
 
         if (remaining < costToSpend) {
-            throw new OutOfBudgetException("You don't have enough fund to process this order. Need $" +
+            OutOfBudgetException e = new OutOfBudgetException("You don't have enough fund to process this order. Need $" +
                     costToSpend + ", only have $" + String.format("%.2f", remaining));
+            e.setRemainingBudget(remaining);
+            throw e;
         }
 
         costBuffer.put(spreadsheetId, new AtomicDouble(costToSpend + costInBuffer));

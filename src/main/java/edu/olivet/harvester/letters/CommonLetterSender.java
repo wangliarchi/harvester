@@ -78,7 +78,7 @@ public class CommonLetterSender {
     }
 
     public void execute(String spreadsheetId) {
-        Date minDate = DateUtils.addDays(new Date(), -SystemSettings.load().getGrayLabelLetterMaxDays());
+        Date minDate = DateUtils.addDays(new Date(), -SystemSettings.load().getGrayLabelLetterMaxDays() - 1);
         Spreadsheet spreadsheet = sheetAPI.getSpreadsheet(spreadsheetId);
 
         List<Order> orders = orderService.fetchOrders(spreadsheet, minDate);

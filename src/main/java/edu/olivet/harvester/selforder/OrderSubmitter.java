@@ -20,6 +20,7 @@ import edu.olivet.harvester.selforder.service.OrderFulfillmentRecordService;
 import edu.olivet.harvester.selforder.service.SelfOrderService;
 import edu.olivet.harvester.selforder.service.SelfOrderService.OrderAction;
 import edu.olivet.harvester.selforder.service.SelfOrderSheetService;
+import edu.olivet.harvester.selforder.service.SelfOrderWorker;
 import edu.olivet.harvester.selforder.utils.SelfOrderHelper;
 import edu.olivet.harvester.ui.panel.BuyerPanel;
 import edu.olivet.harvester.ui.panel.SimpleOrderSubmissionRuntimePanel;
@@ -29,12 +30,19 @@ import edu.olivet.harvester.utils.Settings;
 import edu.olivet.harvester.utils.common.Strings;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.nutz.aop.interceptor.async.Async;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 3/1/2018 8:48 AM
@@ -42,10 +50,14 @@ import java.util.List;
 public class OrderSubmitter {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderSubmitter.class);
 
-    @Inject OrderFlowEngine orderFlowEngine;
     @Inject SelfOrderSheetService sheetService;
-    @Inject MessageListener messageListener;
-    @Inject OrderFulfillmentRecordService orderFulfillmentRecordService;
+
+    private ExecutorService threadPool;
+
+    @Inject
+    public void init() {
+        threadPool = Executors.newFixedThreadPool(SystemSettings.reload().getMaxOrderProcessingThread());
+    }
 
     public void submit(List<SelfOrder> selfOrders) {
         if (CollectionUtils.isEmpty(selfOrders)) {
@@ -70,146 +82,38 @@ public class OrderSubmitter {
         PSEventListener.reset(SimpleOrderSubmissionRuntimePanel.getInstance());
         PSEventListener.start();
 
+        Map<String, List<SelfOrder>> ordersByBuyer = new HashMap<>();
         for (SelfOrder selfOrder : selfOrders) {
-            if (PSEventListener.stopped()) {
-                messageListener.addMsg("process stopped", InformationLevel.Negative);
-                break;
+            List<SelfOrder> s = ordersByBuyer.getOrDefault(selfOrder.buyerAccountEmail, new ArrayList<>());
+            s.add(selfOrder);
+            ordersByBuyer.put(selfOrder.buyerAccountEmail, s);
+        }
+
+        final CountDownLatch latch = new CountDownLatch(selfOrders.size());
+        ordersByBuyer.forEach((buyerEmail, orders) -> {
+            SelfOrderWorker job = new SelfOrderWorker(orders, latch);
+            threadPool.submit(job);
+        });
+
+        // 负责监视是否所有找线程都完成的线程。
+        new SwingWorker<Void, String>() {
+            @Override
+            @Async
+            protected Void doInBackground() throws Exception {
+                latch.await();
+                return null;
             }
-            long start = System.currentTimeMillis();
-            try {
-                submitSelfOrder(selfOrder);
-                ProgressUpdater.success();
-            } catch (Exception e) {
-                ProgressUpdater.failed();
-                LOGGER.error("Error submit order {}", selfOrder, e);
-                String msg = Strings.getExceptionMsg(e);
-                messageListener.addMsg("Row " + selfOrder.row + " " + msg + " - took " + Strings.formatElapsedTime(start), InformationLevel.Negative);
-                //
-                try {
-                    sheetService.fillFailedOrderInfo(selfOrder, msg);
-                } catch (Exception e1) {
-                    //
-                }
 
-                if (e instanceof BuyerAccountAuthenticationException) {
-                    break;
-                }
+            @Override
+            @Async
+            protected void done() {
+                PSEventListener.end();
             }
-        }
+        }.execute();
 
-        PSEventListener.end();
+
     }
 
-    public void submitSelfOrder(SelfOrder selfOrder) {
-
-        if (!selfOrderIsValid(selfOrder)) {
-            return;
-        }
-
-        Order order = SelfOrderHelper.convertToOrder(selfOrder);
-        Country country = Country.fromCode(selfOrder.country);
-        Account buyer = BuyerAccountSettingUtils.load().getByEmail(selfOrder.buyerAccountEmail).getBuyerAccount();
-        BuyerPanel buyerPanel = TabbedBuyerPanel.getInstance().getOrAddTab(country, buyer);
-
-        Long start = System.currentTimeMillis();
-        if (PSEventListener.stopped()) {
-            buyerPanel.stop();
-            messageListener.addMsg("Row " + order.row + " process stopped", InformationLevel.Negative);
-            return;
-        }
-
-        while (PSEventListener.paused()) {
-            buyerPanel.paused();
-            WaitTime.Short.execute();
-        }
-
-        TabbedBuyerPanel.getInstance().setRunningIcon(buyerPanel);
-
-        try {
-            orderFlowEngine.process(order, buyerPanel);
-
-            if (StringUtils.isNotBlank(order.order_number)) {
-                messageListener.addMsg("Row " + order.row + " fulfilled successfully. " + order.basicSuccessRecord() + ", took " + Strings.formatElapsedTime(start));
-                //update sheet
-                selfOrder.orderNumber = order.order_number;
-                if (order.orderTotalCost != null) {
-                    selfOrder.cost = order.orderTotalCost.toUSDAmount().toPlainString();
-                } else {
-                    selfOrder.cost = order.cost;
-                }
-
-                updateInfoToSheet(selfOrder);
-
-                //save to log
-                try {
-                    orderFulfillmentRecordService.save(selfOrder);
-                } catch (Exception e) {
-                    LOGGER.error("", e);
-                }
-            } else {
-                messageListener.addMsg("Row " + order.row + " submission failed. " + " - took " + Strings.formatElapsedTime(start), InformationLevel.Negative);
-            }
-        } finally {
-            TabbedBuyerPanel.getInstance().setNormalIcon(buyerPanel);
-        }
-    }
-
-    public boolean selfOrderIsValid(SelfOrder selfOrder) {
-        if (StringUtils.isEmpty(selfOrder.getAsin()) || !Regex.ASIN.isMatched(selfOrder.getAsin())) {
-            messageListener.addMsg("Row " + selfOrder.row + " is invalid as ASIN is not found.", InformationLevel.Negative);
-            return false;
-        }
-
-        if (StringUtils.isBlank(selfOrder.ownerAccountStoreName) && StringUtils.isBlank(selfOrder.ownerAccountSellerId)) {
-            messageListener.addMsg("Row " + selfOrder.row + " is invalid as both store name and id are not found.", InformationLevel.Negative);
-            return false;
-        }
-
-        if (StringUtils.startsWithIgnoreCase(selfOrder.ownerAccountSellerId, selfOrder.buyerAccountCode)) {
-            messageListener.addMsg("Row " + selfOrder.row + " is invalid as it's on same account", InformationLevel.Negative);
-            return false;
-        }
-
-        if (StringUtils.isEmpty(selfOrder.promoCode)) {
-            messageListener.addMsg("Row " + selfOrder.row + " is invalid as promo code is not found.", InformationLevel.Negative);
-            return false;
-        }
-
-        if (StringUtils.isEmpty(selfOrder.country)) {
-            messageListener.addMsg("Row " + selfOrder.row + " is invalid as sales channel is not found.", InformationLevel.Negative);
-            return false;
-        }
-
-        try {
-            Country.fromCode(selfOrder.country);
-        } catch (Exception e) {
-            messageListener.addMsg("Row " + selfOrder.row + " is invalid as country is not valid.", InformationLevel.Negative);
-            return false;
-        }
-
-
-        if (StringUtils.isEmpty(selfOrder.buyerAccountEmail)) {
-            messageListener.addMsg("Row " + selfOrder.row + " is invalid as buyer account is not found.", InformationLevel.Negative);
-            return false;
-        }
-
-        try {
-            BuyerAccountSettingUtils.load().getByEmail(selfOrder.buyerAccountEmail).getBuyerAccount();
-        } catch (Exception e) {
-            messageListener.addMsg("Row " + selfOrder.row + " is invalid as buyer account " + selfOrder.buyerAccountEmail + " is not found.", InformationLevel.Negative);
-            return false;
-        }
-
-        return true;
-    }
-
-    public void updateInfoToSheet(SelfOrder order) {
-        try {
-            sheetService.fillFulfillmentOrderInfo(order);
-        } catch (Exception e) {
-            LOGGER.error("", e);
-        }
-    }
 
     public static void main(String[] args) {
         String spreadsheetId = SystemSettings.reload().getSelfOrderSpreadsheetId();
@@ -228,7 +132,7 @@ public class OrderSubmitter {
 
         UITools.setDialogAttr(frame, true);
 
-        OrderSubmitter orderSubmitter = ApplicationContext.getBean(OrderSubmitter.class);
-        orderSubmitter.submitSelfOrder(selfOrder);
+        //OrderSubmitter orderSubmitter = ApplicationContext.getBean(OrderSubmitter.class);
+        //orderSubmitter.submitSelfOrder(selfOrder);
     }
 }

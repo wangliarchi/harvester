@@ -62,12 +62,13 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
     private static SimpleOrderSubmissionRuntimePanel instance;
 
     private final SheetAPI sheetAPI;
+
     public static SimpleOrderSubmissionRuntimePanel getInstance() {
         if (instance == null) {
             instance = new SimpleOrderSubmissionRuntimePanel();
         }
 
-       return instance;
+        return instance;
     }
 
     private SimpleOrderSubmissionRuntimePanel() {
@@ -129,9 +130,9 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         noInvoiceTextField.setText(settings.getNoInvoiceText());
 
 
-        lostLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"5", "7"}));
+        expeditedEddLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}));
         if (StringUtils.isNotBlank(settings.getLostLimit())) {
-            lostLimitComboBox.setSelectedItem(settings.getLostLimit());
+            expeditedEddLimitComboBox.setSelectedItem(settings.getExpeditedEddLimit());
         }
 
         priceLimitComboBox.setModel(new DefaultComboBoxModel<>(new String[] {"3", "5"}));
@@ -245,9 +246,9 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         noInvoiceTextField.addActionListener(e -> noInvoiceTextFieldActionPerformed());
 
 
-        lostLimitComboBox.addItemListener(e -> {
+        expeditedEddLimitComboBox.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
-                settings.setLostLimit(e.getItem().toString());
+                settings.setExpeditedEddLimit(e.getItem().toString());
                 settings.save();
             }
         });
@@ -432,7 +433,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
     private void disableAllBtns() {
         marketplaceComboBox.setEnabled(false);
         googleSheetTextField.setEnabled(false);
-        lostLimitComboBox.setEnabled(false);
+        expeditedEddLimitComboBox.setEnabled(false);
         maxDaysOverEddComboBox.setEnabled(false);
         priceLimitComboBox.setEnabled(false);
         selectRangeButton.setEnabled(false);
@@ -452,7 +453,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         marketplaceComboBox.setEnabled(true);
         googleSheetTextField.setEnabled(true);
         maxDaysOverEddComboBox.setEnabled(true);
-        lostLimitComboBox.setEnabled(true);
+        expeditedEddLimitComboBox.setEnabled(true);
         priceLimitComboBox.setEnabled(true);
         selectRangeButton.setEnabled(true);
         markStatusButton.setEnabled(true);
@@ -471,7 +472,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
 
         AppScript appScript = new AppScript();
         Country selectedCountry = (Country) marketplaceComboBox.getSelectedItem();
-        List<Spreadsheet> spreadsheets = Settings.load().listSpreadsheetsForOrderSubmission(selectedCountry, appScript,sheetAPI);
+        List<Spreadsheet> spreadsheets = Settings.load().listSpreadsheetsForOrderSubmission(selectedCountry, appScript, sheetAPI);
 
 
         if (CollectionUtils.isEmpty(spreadsheets)) {
@@ -652,7 +653,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
 
         settings.setSkipValidation((OrderValidator.SkipValidation) skipCheckComboBox.getSelectedItem());
         settings.setEddLimit((String) maxDaysOverEddComboBox.getSelectedItem());
-        settings.setLostLimit((String) lostLimitComboBox.getSelectedItem());
+        settings.setExpeditedEddLimit((String) expeditedEddLimitComboBox.getSelectedItem());
         settings.setPriceLimit((String) priceLimitComboBox.getSelectedItem());
         settings.save();
     }
@@ -708,7 +709,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
     private JComboBox<Account> primeBuyerComboBox;
 
     private JButton selectRangeButton;
-    private JComboBox<String> lostLimitComboBox;
+    private JComboBox<String> expeditedEddLimitComboBox;
     private JComboBox<String> priceLimitComboBox;
     private JLabel selectedRangeLabel;
     private JTextField googleSheetTextField;
@@ -755,8 +756,8 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
         googleSheetTextField = new JTextField();
         JLabel selectRangeLabel = new JLabel("Select Range");
         selectRangeButton = new JButton();
-        JLabel lostLimitLabel = new JLabel("Lost Limit");
-        lostLimitComboBox = new JComboBox<>();
+        JLabel expeditedEddLimitLabel = new JLabel("Expedited Edd Limit");
+        expeditedEddLimitComboBox = new JComboBox<>();
         JLabel priceLimitLabel = new JLabel("Price Limit");
         priceLimitComboBox = new JComboBox<>();
         JLabel noInvoiceLabel = new JLabel("No Invoice");
@@ -841,11 +842,12 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
                                                                 labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                         .addComponent(selectRangeLabel,
                                                                 labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(lostLimitLabel,
-                                                                labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+
                                                         .addComponent(priceLimitLabel,
                                                                 labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                         .addComponent(maxEddLabel,
+                                                                labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(expeditedEddLimitLabel,
                                                                 labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                                         .addComponent(noInvoiceLabel,
                                                                 labelMinWidth, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
@@ -877,9 +879,10 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
                                                                 .addComponent(selectedRangeLabel)
                                                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                                         )
-                                                        .addComponent(lostLimitComboBox, labelMinWidth, fieldWidth, fieldWidth)
+
                                                         .addComponent(priceLimitComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(maxDaysOverEddComboBox, labelMinWidth, fieldWidth, fieldWidth)
+                                                        .addComponent(expeditedEddLimitComboBox, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(noInvoiceTextField, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(finderCodeTextField, labelMinWidth, fieldWidth, fieldWidth)
                                                         .addComponent(skipCheckComboBox, labelMinWidth, fieldWidth, fieldWidth)
@@ -954,10 +957,7 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
                                         .addComponent(selectRangeLabel)
                                         .addComponent(selectRangeButton)
                                         .addComponent(selectedRangeLabel))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(lostLimitLabel)
-                                        .addComponent(lostLimitComboBox))
+
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(priceLimitLabel)
@@ -966,6 +966,10 @@ public class SimpleOrderSubmissionRuntimePanel extends JPanel implements PSEvent
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(maxEddLabel)
                                         .addComponent(maxDaysOverEddComboBox))
+                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                        .addComponent(expeditedEddLimitLabel)
+                                        .addComponent(expeditedEddLimitComboBox))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                         .addComponent(noInvoiceLabel)

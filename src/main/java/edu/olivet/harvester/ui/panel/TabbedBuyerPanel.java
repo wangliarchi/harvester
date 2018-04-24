@@ -16,8 +16,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.List;
+import java.util.Map.Entry;
 
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 10/30/17 9:14 AM
@@ -173,7 +174,7 @@ public class TabbedBuyerPanel extends JTabbedPaneCloseButton {
 
     public void removeTab(WebPanel webPanel) {
         //don't remove if it's last tab
-        if (instance.getComponents().length == 1) {
+        if (getTabCount() < 3) {
             return;
         }
         String tabKey = webPanel.getKey();
@@ -190,6 +191,19 @@ public class TabbedBuyerPanel extends JTabbedPaneCloseButton {
             //other stuff
         }
         removeFromIndex(webPanel);
+    }
+
+    public void removeAllTabs() {
+        List<WebPanel> webPanels = new ArrayList<>(buyerPanels.values());
+        for (WebPanel webPanel : webPanels) {
+            try {
+                removeTab(webPanel);
+            } catch (Exception e) {
+                //
+            }
+        }
+
+        setSelectedIndex(0);
     }
 
     public BuyerPanel reInitTabForOrder(Order order, Account buyer) {

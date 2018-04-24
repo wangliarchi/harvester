@@ -1,5 +1,9 @@
 package edu.olivet.harvester.fulfill.exception;
 
+import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/1/17 2:21 PM
  */
@@ -151,6 +155,9 @@ public class Exceptions {
      */
     public static class OutOfBudgetException extends OrderSubmissionException {
         private static final long serialVersionUID = 548234872567663633L;
+        @Getter
+        @Setter
+        private float remainingBudget = 0;
 
         public OutOfBudgetException(String message) {
             super(message);
@@ -162,6 +169,9 @@ public class Exceptions {
      */
     public static class NoBudgetException extends OrderSubmissionException {
         private static final long serialVersionUID = 548234872567663633L;
+        @Getter
+        @Setter
+        private OrderSubmissionTask task;
 
         public NoBudgetException(String message) {
             super(message);

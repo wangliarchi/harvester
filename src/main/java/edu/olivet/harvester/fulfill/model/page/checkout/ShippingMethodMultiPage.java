@@ -21,20 +21,16 @@ public class ShippingMethodMultiPage extends ShippingAddressAbstract {
     }
 
 
-
     public void execute(Order order) {
         //handled on order review page
-
-        DOMElement continueBtn = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, CONTINUE_BTN_SELECTOR);
-
-        JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
-
-        if (continueBtn == null) {
+        try {
+            DOMElement continueBtn = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser, CONTINUE_BTN_SELECTOR);
+            JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
+            JXBrowserHelper.click(continueBtn);
+        } catch (Exception e) {
             JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
             throw new BusinessException(String.format("Continue button on select shipping option page not found. Current at %s- %s",
                     browser.getTitle(), browser.getURL()));
         }
-
-        JXBrowserHelper.click(continueBtn);
     }
 }

@@ -46,6 +46,8 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
     }
 
     public void checkTotalCost(Order order) {
+        JXBrowserHelper.waitUntilNotFound(browser, ".section-overwrap");
+        JXBrowserHelper.saveOrderScreenshot(order,buyerPanel,"overview-cost");
         Money grandTotal = parseTotal();
         Money giftCardCost = parseGiftCardCost();
         float totalUSD = grandTotal.toUSDAmount().floatValue() + giftCardCost.toUSDAmount().floatValue();
@@ -56,7 +58,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
         } else {
 
             if (!ProfitLostControl.canPlaceOrder(order, totalUSD)) {
-                throw new OrderSubmissionException("Order cost " + grandTotal.usdText() + " exceed maximum limit");
+                throw new OrderSubmissionException("Order cost " + totalUSD + " exceed maximum limit");
             }
 
             float remainingBudget = ApplicationContext.getBean(DailyBudgetHelper.class)
@@ -74,6 +76,8 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
 
 
     public void checkShippingCost(Order order) {
+        JXBrowserHelper.waitUntilNotFound(browser, ".section-overwrap");
+        JXBrowserHelper.saveOrderScreenshot(order,buyerPanel,"shipping-cost");
         Money shippingCost = parseShippingFee();
 
         if (!FeeLimitChecker.getInstance().notExceed(order, shippingCost.getAmount().floatValue())) {

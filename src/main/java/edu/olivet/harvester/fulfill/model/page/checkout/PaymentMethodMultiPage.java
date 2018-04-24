@@ -40,11 +40,18 @@ public class PaymentMethodMultiPage extends PaymentMethodAbstractPage {
         } else {
             selectCreditCard(order);
         }
+
         click();
     }
 
     @Repeat
     public void click() {
+        try {
+            JXBrowserHelper.waitUntilVisible(browser, CONTINUE_BTN_SELECTOR);
+        } catch (Exception e) {
+            throw new NoBudgetException("Something wrong with payment method. Please check gift card balance and/or credit card info");
+        }
+
         //continue;
         DOMElement continueBtn = JXBrowserHelper.selectVisibleElement(browser, CONTINUE_BTN_SELECTOR);
         if (continueBtn != null) {

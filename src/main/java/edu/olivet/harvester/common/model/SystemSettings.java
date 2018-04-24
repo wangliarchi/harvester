@@ -41,6 +41,7 @@ public class SystemSettings {
     private String selfOrderStatsSpreadsheetId = "";
     private float selfOrderCostLimit = 1f;
     private String selfOrderFreeShippingTemplateName = "FreeShipping";
+    private boolean postFeedback = true;
 
     private boolean enableAutoSendGrayLabelLetters = false;
     private LocalTime grayLabelLetterSendingTime = LocalTime.of(20, 0);

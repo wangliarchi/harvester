@@ -32,7 +32,7 @@ import java.util.List;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/11/17 1:45 PM
  */
 @Data
-@Table(value = "order_submission_tasks_new")
+@Table(value = "order_submission_tasks_new2")
 @AllArgsConstructor
 @NoArgsConstructor
 @SuppressWarnings("DefaultAnnotationParam")
@@ -59,6 +59,10 @@ public class OrderSubmissionTask extends PrimaryKey implements ArrayConvertable 
     private String priceLimit = "3";
     @Column
     private String eddLimit = "7";
+
+    @Column
+    private String expeditedEddLimit = "3";
+
     @Column
     private String noInvoiceText = "{No Invoice}";
     @Column
@@ -67,7 +71,6 @@ public class OrderSubmissionTask extends PrimaryKey implements ArrayConvertable 
     private SkipValidation skipValidation = SkipValidation.None;
     @Column
     String skipValidationCol;
-
 
     @Column
     String orders;
@@ -178,7 +181,7 @@ public class OrderSubmissionTask extends PrimaryKey implements ArrayConvertable 
         runtimeSettings.setSkipValidation(skipValidation);
         runtimeSettings.setBuyerEmail(buyerAccount);
         runtimeSettings.setPrimeBuyerEmail(primeBuyerAccount);
-
+        runtimeSettings.setExpeditedEddLimit(expeditedEddLimit);
         AdvancedSubmitSetting advancedSubmitSetting = new AdvancedSubmitSetting();
         advancedSubmitSetting.setAutoLoop(false);
         advancedSubmitSetting.setCountLimit(0);
@@ -243,6 +246,7 @@ public class OrderSubmissionTask extends PrimaryKey implements ArrayConvertable 
         task.lostLimit = lostLimit;
         task.priceLimit = priceLimit;
         task.eddLimit = eddLimit;
+        task.expeditedEddLimit = expeditedEddLimit;
         task.noInvoiceText = noInvoiceText;
         task.skipValidationCol = skipValidationCol;
         task.finderCode = finderCode;

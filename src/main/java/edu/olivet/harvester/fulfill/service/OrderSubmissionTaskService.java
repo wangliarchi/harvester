@@ -86,6 +86,7 @@ public class OrderSubmissionTaskService {
         orderSubmissionTask.setPriceLimit(settings.getPriceLimit());
         //noinspection ConstantConditions
         orderSubmissionTask.setEddLimit(settings.getEddLimit());
+        orderSubmissionTask.setExpeditedEddLimit(settings.getExpeditedEddLimit());
         orderSubmissionTask.setNoInvoiceText(settings.getNoInvoiceText());
         orderSubmissionTask.setFinderCode(settings.getFinderCode());
         orderSubmissionTask.setSkipValidation(settings.getSkipValidation());

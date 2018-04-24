@@ -144,6 +144,44 @@ INSERT INTO order_submission_tasks_new (id, sid, marketplaceName, spreadsheetId,
   SELECT *
   FROM order_submission_tasks;
 
+
+/* order submission record new 2 */
+CREATE TABLE IF NOT EXISTS order_submission_tasks_new2 (
+  id                VARCHAR(40) PRIMARY KEY NOT NULL,
+  sid               VARCHAR(5)              NOT NULL,
+  marketplaceName   VARCHAR(2)              NOT NULL,
+  spreadsheetId     VARCHAR(100)            NOT NULL,
+  spreadsheetName   VARCHAR(255)            NOT NULL,
+  orderRangeCol     VARCHAR(255)            NOT NULL,
+  lostLimit         VARCHAR(3)              NOT NULL,
+  priceLimit        VARCHAR(3)              NOT NULL,
+  eddLimit          VARCHAR(3)              NOT NULL,
+  expeditedEddLimit VARCHAR(3)              NOT NULL,
+  noInvoiceText     VARCHAR(30)             NOT NULL,
+  skipValidationCol VARCHAR(255)            NOT NULL,
+  finderCode        VARCHAR(255)            NOT NULL,
+  buyerAccount      VARCHAR(255)            NOT NULL,
+  primeBuyerAccount VARCHAR(255)            NOT NULL,
+  status            VARCHAR(255)            NOT NULL,
+  orders            TEXT                    NULL,
+  invalidOrders     TEXT                    NULL,
+  summary           TEXT                    NULL,
+  totalOrders       INT(5)                  NULL,
+  success           INT(5)                  NULL,
+  failed            INT(5)                  NULL,
+  timeTaken         VARCHAR(255)            NULL,
+  dateCreated       DATETIME                NOT NULL,
+  dateStarted       DATETIME                NULL,
+  dateEnded         DATETIME                NULL
+);
+
+INSERT INTO order_submission_tasks_new2 (id, sid, marketplaceName, spreadsheetId, spreadsheetName, orderRangeCol, lostLimit, priceLimit,
+                                         eddLimit, noInvoiceText, skipValidationCol, finderCode, buyerAccount, primeBuyerAccount, status,
+                                         orders, invalidOrders, summary, totalOrders,
+                                         success, failed, timeTaken, dateCreated, dateStarted, dateEnded)
+  SELECT *
+  FROM order_submission_tasks_new;
+
 /* order submission record by buyer account */
 CREATE TABLE IF NOT EXISTS order_submission_tasks_by_buyer_accounts (
   id                 VARCHAR(100) PRIMARY KEY NOT NULL,

@@ -94,6 +94,44 @@ public class SubmitSelfOrdersEvent implements HarvesterUIEvent {
 
     @Inject ProductManager productManager;
 
+    public void reloadSelfOrderProducts(){
+        String spreadsheetId = SystemSettings.reload().getSelfOrderSpreadsheetId();
+        if (StringUtils.isBlank(spreadsheetId)) {
+            UITools.error("Self order spreadsheet id not entered. Please config under Settings->System Settings->Self-Orders");
+            return;
+        }
+        List<Spreadsheet> spreadsheets = new ArrayList<>();
+        try {
+            Spreadsheet spreadsheet = appScript.getSpreadsheet(spreadsheetId);
+            spreadsheets.add(spreadsheet);
+        } catch (Exception e) {
+            UITools.error("Self order spreadsheet is not valid. Please check under Settings->System Settings->Self-Orders");
+            return;
+        }
+
+        if (CollectionUtils.isEmpty(spreadsheets)) {
+            UITools.error("Self order spreadsheet id not entered. Please config under Settings->System Settings->Self-Orders");
+            return;
+        }
+
+        ChooseSheetDialog dialog = UITools.setDialogAttr(new ChooseSheetDialog(spreadsheets, appScript));
+        if (dialog.isOk()) {
+            List<Worksheet> selectedWorksheets = dialog.getSelectedWorksheets();
+            List<String> sheetNames = selectedWorksheets.stream().map(Worksheet::getSheetName).collect(Collectors.toList());
+            spreadsheetId = selectedWorksheets.get(0).getSpreadsheet().getSpreadsheetId();
+            List<SelfOrder> selfOrders = selfOrderService.fetchSelfOrders(spreadsheetId, sheetNames, OrderAction.AddProduct);
+
+            if (CollectionUtils.isEmpty(selfOrders)) {
+                UITools.error("No self order asins need to be added.");
+                return;
+            }
+
+            if (UITools.confirmed(selfOrders.size() + " ASIN(s) to be updated. Please confirm to continue.")) {
+                productManager.submit(selfOrders);
+            }
+
+        }
+    }
     public void addProducts() {
         String spreadsheetId = SystemSettings.reload().getSelfOrderSpreadsheetId();
         if (StringUtils.isBlank(spreadsheetId)) {

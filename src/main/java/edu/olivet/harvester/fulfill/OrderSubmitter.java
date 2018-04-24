@@ -8,6 +8,7 @@ import com.google.inject.Singleton;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.InformationLevel;
 import edu.olivet.foundations.utils.Strings;
+import edu.olivet.harvester.fulfill.exception.Exceptions.NoBudgetException;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.fulfill.model.OrderTaskStatus;
 import edu.olivet.harvester.fulfill.service.*;
@@ -47,7 +48,7 @@ public class OrderSubmitter {
      * @param task Order Submission Task
      */
     public void execute(OrderSubmissionTask task) {
-        LOGGER.info("adding order submission task " + task.toString());
+        LOGGER.info("adding order submission task " + task.getId());
         task.setTaskStatus(OrderTaskStatus.Queued);
         orderSubmissionTaskService.saveTask(task);
 
@@ -76,8 +77,12 @@ public class OrderSubmitter {
         }
 
         //check daily budget
-        dailyBudgetHelper.checkBudget(task.getSpreadsheetId());
-
+        try {
+            dailyBudgetHelper.checkBudget(task.getSpreadsheetId());
+        } catch (NoBudgetException e) {
+            e.setTask(task);
+            throw e;
+        }
         //mark status first
         markStatusService.execute(task.convertToRuntimeSettings(), false);
 

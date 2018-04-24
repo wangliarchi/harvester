@@ -325,7 +325,7 @@ public class AppScript {
             }
 
             if (StringUtils.isBlank(order.status)) {
-                continue;
+                //continue;
             }
             if (!Regex.AMAZON_ORDER_NUMBER.isMatched(order.order_id)) {
                 //continue;

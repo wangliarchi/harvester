@@ -75,6 +75,14 @@ public class ProgressUpdater {
                 progressTextLabel.setText(String.format("%d of %d, %d success, %d failed, took %s",
                         total, progressBar.getMaximum(), successCount, failedCount, Strings.formatElapsedTime(start)));
             }
+
+            if (progressBar.getPercentComplete() == 1) {
+                try {
+                    PSEventListener.end();
+                } catch (Exception e) {
+                    //
+                }
+            }
         }
 
 

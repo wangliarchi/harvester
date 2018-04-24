@@ -67,7 +67,7 @@ public class UnfulfilledOrder {
             float total = 0;
             for (Refund refund : refunds) {
                 try {
-                    total += refund.getAmount().getAmount().floatValue() * Float.parseFloat(refund.getQuantity());
+                    total += refund.getAmount().getAmount().floatValue();
                 } catch (Exception e) {
                     //
                 }

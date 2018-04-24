@@ -351,7 +351,7 @@ public class InvoiceDownloaderService {
     }
 
 
-    public Date parseOrderDate(String dateString, Country country) {
+    public static Date parseOrderDate(String dateString, Country country) {
         dateString = dateString.replaceAll("[^\\p{L}\\p{Nd} ]+", "").trim();
         dateString = dateString.replace(" de ", " ");
         String[] dateStringParts = dateString.split(" ");

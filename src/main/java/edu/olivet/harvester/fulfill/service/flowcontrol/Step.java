@@ -1,5 +1,6 @@
 package edu.olivet.harvester.fulfill.service.flowcontrol;
 
+import edu.olivet.harvester.utils.common.Strings;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +30,8 @@ public abstract class Step {
 
     // Step children override with unique processing
     public Step processStep(FlowState state) {
-        LOGGER.info("Starting " + this.getClass().getName());
+        long start = System.currentTimeMillis();
+        LOGGER.info("Starting {}", this.getClass().getName());
         if (StringUtils.isBlank(stepName)) {
             stepName = this.getClass().getName();
         }
@@ -41,6 +43,7 @@ public abstract class Step {
         state.saveScreenshot();
 
         this.nextStep = createDynamicInstance(state);
+        LOGGER.info("Finished {}, took {}", this.getClass().getName(), Strings.formatElapsedTime(start));
         return this.nextStep;
     }
 

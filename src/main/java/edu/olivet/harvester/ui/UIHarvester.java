@@ -19,6 +19,7 @@ import edu.olivet.harvester.ui.events.*;
 import edu.olivet.harvester.ui.menu.Actions;
 import edu.olivet.harvester.ui.menu.UIElements;
 import edu.olivet.harvester.ui.panel.MainPanel;
+import edu.olivet.harvester.ui.panel.TabbedBuyerPanel;
 import edu.olivet.harvester.utils.LogViewer;
 import edu.olivet.harvester.utils.MessageListener;
 import edu.olivet.harvester.utils.Settings;
@@ -365,6 +366,11 @@ public class UIHarvester extends AbstractApplicationUI {
     }
 
     @UIEvent
+    public void reloadSelfOrderProduct() {
+        submitSelfOrdersEvent.reloadSelfOrderProducts();
+    }
+
+    @UIEvent
     public void asyncSelfOrderStats() {
         submitSelfOrdersEvent.asyncSelfOrderStats();
     }
@@ -386,6 +392,11 @@ public class UIHarvester extends AbstractApplicationUI {
     @UIEvent
     public void fetchTrackingNumbers() {
         fetchTrackingNumbersEvent.execute();
+    }
+
+    @UIEvent
+    public void closeAllWebTabs() {
+        TabbedBuyerPanel.getInstance().removeAllTabs();
     }
 
     @Override

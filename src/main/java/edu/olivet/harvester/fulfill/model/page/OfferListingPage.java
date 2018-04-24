@@ -86,7 +86,6 @@ public class OfferListingPage extends FulfillmentPage {
                 browser.getTitle(), browser.getURL(), Strings.formatElapsedTime(start));
 
         JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
-
     }
 
 

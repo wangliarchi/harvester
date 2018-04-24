@@ -6,7 +6,9 @@ import edu.olivet.foundations.utils.ApplicationContext;
 import edu.olivet.foundations.utils.Strings;
 import edu.olivet.foundations.utils.WaitTime;
 import edu.olivet.harvester.fulfill.OrderSubmitter;
+import edu.olivet.harvester.fulfill.exception.Exceptions.NoBudgetException;
 import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
+import edu.olivet.harvester.fulfill.model.OrderTaskStatus;
 import edu.olivet.harvester.fulfill.service.OrderDispatcher;
 import edu.olivet.harvester.fulfill.service.OrderSubmissionTaskService;
 import edu.olivet.harvester.fulfill.service.PSEventListener;
@@ -47,6 +49,14 @@ public class StartOrderSubmissionTasksEvent implements HarvesterUIEvent {
                         break;
                     }
                     WaitTime.Normal.execute();
+                } catch (NoBudgetException e) {
+                    LOGGER.error("", e);
+                    UITools.error(Strings.getExceptionMsg(e));
+                    if (e.getTask() != null) {
+                        e.getTask().setStatus(OrderTaskStatus.Scheduled.name());
+                        orderSubmissionTaskService.saveTask(e.getTask());
+                    }
+                    break;
                 } catch (Exception e) {
                     LOGGER.error("", e);
                     UITools.error(Strings.getExceptionMsg(e));
@@ -58,6 +68,7 @@ public class StartOrderSubmissionTasksEvent implements HarvesterUIEvent {
                 orderSubmissionTaskService.cleanUp();
             }
             WaitTime.Short.execute();
+            TasksAndProgressPanel.getInstance().loadTasksToTable();
             PSEventListener.end();
         }).start();
     }
