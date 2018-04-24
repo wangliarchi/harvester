@@ -33,10 +33,11 @@ public class CreditCard {
             errors.add("CVV not provided");
         }
 
-        return  errors;
+        return errors;
     }
 
     public String lastDigits() {
+        cardNo = cardNo.replaceAll("\\s","");
         return cardNo.substring(cardNo.length() - 4);
     }
 }
