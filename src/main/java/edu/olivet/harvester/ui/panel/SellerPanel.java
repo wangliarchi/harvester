@@ -199,67 +199,34 @@ public class SellerPanel extends WebPanel {
         return false;
     }
 
+    //sku中要包含：-s,不要有-a,-b,-c,-g,-p
+    public String generateSelfOrderAsinSku(Country marketplaceCountry) {
+        String sku = RandomUtils.randomAlphaNumeric(10) + "N" + marketplaceCountry.name() + "-s";
+        return sku;
+    }
+
     @Repeat(expectedExceptions = BusinessException.class, times = 2)
     public void addProduct(String asin, Country marketplaceCountry) {
-        String freeShippingTemplateName = SystemSettings.load().getSelfOrderFreeShippingTemplateName();
-        String url = String.format("%s/inventory/ref=ag_invmgr_dnav_xx_?tbla_myitable=search:%s", country.ascBaseUrl(), asin);
+        float existedPrice = checkIfASINExisted(asin, marketplaceCountry);
+        String sku = generateSelfOrderAsinSku(marketplaceCountry);
+
+        //go to add product page
+        String url = String.format("%s/abis/Display/ItemSelected?asin=%s", country.ascBaseUrl(), asin);
         JXBrowserHelper.loadPage(browser, url);
-        WaitTime.Shorter.execute();
-        List<DOMElement> lists = JXBrowserHelper.selectElementsByCssSelector(browser, ".mt-table tr.mt-row");
-        float existedPrice = 0f;
-        for (DOMElement trElement : lists) {
-            //status
-            String status = JXBrowserHelper.textFromElement(trElement, "div[data-column=\"status\"] a,.mt-text-content");
-            String text = JXBrowserHelper.textFromElement(trElement, "div[data-column=\"shipping_template\"]");
-            String priceText = JXBrowserHelper.getValueFromFormField(trElement, "div[data-column=\"price\"] input");
-            LOGGER.info("{} {} {}", status, priceText, text);
 
-            //free shipping
-            if (Strings.containsAnyIgnoreCase(text, freeShippingTemplateName.split(","))) {
-                if (StringUtils.equalsAnyIgnoreCase(status, "Active", "Incomplete")) {
-                    LOGGER.info("ASIN {} with {} template existed", asin, freeShippingTemplateName);
-                    throw new RuntimeException("ASIN " + asin + " with " + freeShippingTemplateName + " template existed");
-                }
-
-                if (Strings.containsAnyIgnoreCase(status, "Out of Stock")) {
-                    //
-                    // JXBrowserHelper.fillValueForFormField(trElement, "", "10");
-                    String id = trElement.getAttribute("id");
-                    browser.executeJavaScript("$('#" + id + " div[data-column=\"quantity\"] input').val('10').change();");
-                    WaitTime.Shorter.execute();
-                    JXBrowserHelper.selectElementByCssSelector(browser, "#saveall-floating .a-button.a-button-primary").click();
-                    JXBrowserHelper.waitUntilVisible(browser, ".mt-message-text");
-                    return;
-                }
-            }
-            //(
-            try {
-                if (marketplaceCountry.europe() && marketplaceCountry != Country.UK) {
-                    existedPrice = Float.parseFloat(priceText.replace(",", ".")) + 5;
-                } else {
-                    Money money = Money.fromText(priceText, marketplaceCountry);
-                    existedPrice = money.getAmount().floatValue() + 5;
-                }
-            } catch (Exception e) {
-                //
-            }
-
-
-        }
-
-        String sku = RandomUtils.randomAlphaNumeric(10) + "N" + marketplaceCountry.name();
-
-        url = String.format("%s/abis/Display/ItemSelected?asin=%s", country.ascBaseUrl(), asin);
-        JXBrowserHelper.loadPage(browser, url);
+        //fill qty
         JXBrowserHelper.fillValueForFormField(browser, "#quantity", "10");
-
         WaitTime.Shortest.execute();
-        JXBrowserHelper.setValueForFormSelect(browser, "#condition_type", "new, new");
 
+        //select condition, all new
+        JXBrowserHelper.setValueForFormSelect(browser, "#condition_type", "new, new");
+        WaitTime.Shortest.execute();
+
+        //fill sku
         JXBrowserHelper.fillValueForFormField(browser, "#item_sku", sku);
         WaitTime.Shorter.execute();
 
-
+        //fill price
         if (existedPrice > 0) {
             String priceText = String.valueOf(existedPrice);
             if (marketplaceCountry.europe() && marketplaceCountry != Country.UK) {
@@ -288,7 +255,9 @@ public class SellerPanel extends WebPanel {
         }
 
         WaitTime.Shorter.execute();
-        //$("#gate").val('Gateway 2');
+
+        //select free shipping template
+        String freeShippingTemplateName = SystemSettings.load().getSelfOrderFreeShippingTemplateName();
         String freeShippingTemplate = freeShippingTemplateName.split(",")[0];
         try {
             DOMSelectElement select = (DOMSelectElement) JXBrowserHelper.selectElementByCssSelector(browser, "#merchant_shipping_group_name");
@@ -310,9 +279,11 @@ public class SellerPanel extends WebPanel {
         } catch (Exception e) {
             //
         }
-        //JXBrowserHelper.setValueForFormSelect(browser, "#merchant_shipping_group_name", freeShippingTemplateName);
+
+        //trigger change
         browser.executeJavaScript("$('#merchant_shipping_group_name').val('" + freeShippingTemplate + "').change();");
 
+        //submit
         for (int i = 0; i < Constants.MAX_REPEAT_TIMES; i++) {
             WaitTime.Short.execute();
             DOMElement submitBtn = JXBrowserHelper.selectElementByCssSelector(browser, "#main_submit_button");
@@ -325,7 +296,56 @@ public class SellerPanel extends WebPanel {
         }
 
         throw new BusinessException("Failed, submit button still disabled.");
+    }
 
+
+    public float checkIfASINExisted(String asin, Country marketplaceCountry) {
+        String freeShippingTemplateName = SystemSettings.load().getSelfOrderFreeShippingTemplateName();
+        String url = String.format("%s/inventory/ref=ag_invmgr_dnav_xx_?tbla_myitable=search:%s", country.ascBaseUrl(), asin);
+        JXBrowserHelper.loadPage(browser, url);
+        WaitTime.Shorter.execute();
+        List<DOMElement> lists = JXBrowserHelper.selectElementsByCssSelector(browser, ".mt-table tr.mt-row");
+        float existedPrice = 0f;
+        for (DOMElement trElement : lists) {
+            //status
+            String status = JXBrowserHelper.textFromElement(trElement, "div[data-column=\"status\"] a,.mt-text-content");
+            String text = JXBrowserHelper.textFromElement(trElement, "div[data-column=\"shipping_template\"]");
+            String priceText = JXBrowserHelper.getValueFromFormField(trElement, "div[data-column=\"price\"] input");
+            LOGGER.info("{} {} {}", status, priceText, text);
+
+            //free shipping
+            if (Strings.containsAnyIgnoreCase(text, freeShippingTemplateName.split(","))) {
+                if (StringUtils.equalsAnyIgnoreCase(status, "Active", "Incomplete")) {
+                    LOGGER.info("ASIN {} with {} template existed", asin, freeShippingTemplateName);
+                    throw new RuntimeException("ASIN " + asin + " with " + freeShippingTemplateName + " template existed");
+                }
+
+                if (Strings.containsAnyIgnoreCase(status, "Out of Stock")) {
+                    //
+                    // JXBrowserHelper.fillValueForFormField(trElement, "", "10");
+                    String id = trElement.getAttribute("id");
+                    browser.executeJavaScript("$('#" + id + " div[data-column=\"quantity\"] input').val('10').change();");
+                    WaitTime.Shorter.execute();
+                    JXBrowserHelper.selectElementByCssSelector(browser, "#saveall-floating .a-button.a-button-primary").click();
+                    JXBrowserHelper.waitUntilVisible(browser, ".mt-message-text");
+
+                    throw new RuntimeException("ASIN " + asin + " with " + freeShippingTemplateName + " template existed, re-stocked");
+                }
+            }
+            //(
+            try {
+                if (marketplaceCountry.europe() && marketplaceCountry != Country.UK) {
+                    existedPrice = Float.parseFloat(priceText.replace(",", ".")) + 5;
+                } else {
+                    Money money = Money.fromText(priceText, marketplaceCountry);
+                    existedPrice = money.getAmount().floatValue() + 5;
+                }
+            } catch (Exception e) {
+                //
+            }
+        }
+
+        return existedPrice;
     }
 
     public boolean sendMessage(Order order, String message) {
