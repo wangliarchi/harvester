@@ -64,7 +64,15 @@ public class ProductManager {
             }
 
             if (addedASINs.contains(selfOrder.asin)) {
-                messageListener.addMsg("Row " + selfOrder.row + " " + selfOrder.asin + " already added", InformationLevel.Negative);
+                messageListener.addMsg("Row " + selfOrder.row + " " + selfOrder.asin + " already added");
+                ProgressUpdater.success();
+
+                Country country = Country.fromCode(selfOrder.country);
+                Country settingCountry = country.europe() ? Country.UK : country;
+                Configuration configuration = Settings.load().getConfigByCountry(settingCountry);
+                selfOrder.ownerAccountSellerId = configuration.getMwsCredential().getSellerId();
+                selfOrder.ownerAccountStoreName = configuration.getStoreName();
+                sheetService.fillSellerId(selfOrder);
                 continue;
             }
             long start = System.currentTimeMillis();
