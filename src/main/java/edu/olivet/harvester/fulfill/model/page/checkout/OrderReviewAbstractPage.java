@@ -47,7 +47,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
 
     public void checkTotalCost(Order order) {
         JXBrowserHelper.waitUntilNotFound(browser, ".section-overwrap");
-        JXBrowserHelper.saveOrderScreenshot(order,buyerPanel,"overview-cost");
+        JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "overview-cost");
         Money grandTotal = parseTotal();
         Money giftCardCost = parseGiftCardCost();
         float totalUSD = grandTotal.toUSDAmount().floatValue() + giftCardCost.toUSDAmount().floatValue();
@@ -77,7 +77,7 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
 
     public void checkShippingCost(Order order) {
         JXBrowserHelper.waitUntilNotFound(browser, ".section-overwrap");
-        JXBrowserHelper.saveOrderScreenshot(order,buyerPanel,"shipping-cost");
+        JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "shipping-cost");
         Money shippingCost = parseShippingFee();
 
         if (!FeeLimitChecker.getInstance().notExceed(order, shippingCost.getAmount().floatValue())) {
@@ -248,23 +248,36 @@ public abstract class OrderReviewAbstractPage extends FulfillmentPage {
             throw new OrderSubmissionException("Process stopped as requested.");
         }
 
-        DOMElement placeOrderBtn = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser,
-                "#submitOrderButtonId .a-button-input, .place-your-order-button");
+        for (int i = 0; i < 3; i++) {
+            try {
+                DOMElement placeOrderBtn = JXBrowserHelper.selectElementByCssSelectorWaitUtilLoaded(browser,
+                        "#submitOrderButtonId .a-button-input, .place-your-order-button");
 
-        JXBrowserHelper.insertChecker(browser);
-        placeOrderBtn.click();
-        JXBrowserHelper.waitUntilNewPageLoaded(browser);
-        WaitTime.Shorter.execute();
-        DOMElement forceDuplicate = JXBrowserHelper.selectElementByName(browser, "forcePlaceOrder");
-        if (forceDuplicate != null) {
-            JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
-            JXBrowserHelper.insertChecker(browser);
-            forceDuplicate.click();
-            JXBrowserHelper.waitUntilNewPageLoaded(browser);
-            WaitTime.Shorter.execute();
+                JXBrowserHelper.insertChecker(browser);
+                placeOrderBtn.click();
+                JXBrowserHelper.waitUntilNewPageLoaded(browser);
+                WaitTime.Shorter.execute();
+                DOMElement forceDuplicate = JXBrowserHelper.selectElementByName(browser, "forcePlaceOrder");
+                if (forceDuplicate != null) {
+                    JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
+                    JXBrowserHelper.insertChecker(browser);
+                    forceDuplicate.click();
+                    JXBrowserHelper.waitUntilNewPageLoaded(browser);
+                    WaitTime.Shorter.execute();
+                }
+
+                JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
+
+                return;
+            } catch (Exception e) {
+                LOGGER.error("", e);
+                JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
+            }
         }
 
-        JXBrowserHelper.saveOrderScreenshot(order, buyerPanel, "1");
+        DailyBudgetHelper dailyBudgetHelper = ApplicationContext.getBean(DailyBudgetHelper.class);
+        dailyBudgetHelper.removeCostFromBuffer(order.getSpreadsheetId(), order.orderTotalCost.toUSDAmount().floatValue());
+        throw new BusinessException("Fail to place order");
     }
 
 

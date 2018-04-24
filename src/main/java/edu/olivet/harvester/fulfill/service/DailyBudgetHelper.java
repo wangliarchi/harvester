@@ -214,16 +214,19 @@ public class DailyBudgetHelper {
         try {
             sheetService.batchUpdateValues(spreadsheetId, dateToUpdate);
             LOGGER.info("Successfully updated spending {}， now total spent {}", df.format(spending), df.format(cost));
-            AtomicDouble costInBuffer = costBuffer.getOrDefault(spreadsheetId, null);
-            if (costInBuffer != null) {
-                costBuffer.put(spreadsheetId, new AtomicDouble(costInBuffer.floatValue() - spending));
-            }
+            removeCostFromBuffer(spreadsheetId, spending);
         } catch (BusinessException e) {
             LOGGER.error("Fail to update cost error msg {} - {}", spreadsheetId, e);
             throw new BusinessException(e);
         }
     }
 
+    public void removeCostFromBuffer(String spreadsheetId, float spending) {
+        AtomicDouble costInBuffer = costBuffer.getOrDefault(spreadsheetId, null);
+        if (costInBuffer != null) {
+            costBuffer.put(spreadsheetId, new AtomicDouble(costInBuffer.floatValue() - spending));
+        }
+    }
 
     public void updateBudget(String spreadsheetId, Date date, float budget) {
 
