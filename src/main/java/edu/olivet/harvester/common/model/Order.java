@@ -367,8 +367,12 @@ public class Order implements Keyable {
         }
 
         // 产品目前默认都是US买回转运，Remark 没有标记。产品单如果不是直寄或UK FWD，都是US FWD
-        return (type() == OrderEnums.OrderItemType.PRODUCT && !isDirectShip() && !isUKForward());
+        Country marketplaceCountry = OrderCountryUtils.getMarketplaceCountry(this);
+        if (marketplaceCountry == Country.US) {
+            return false;
+        }
 
+        return (type() == OrderEnums.OrderItemType.PRODUCT && !isDirectShip() && !isUKForward());
     }
 
     /**
