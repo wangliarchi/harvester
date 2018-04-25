@@ -86,7 +86,9 @@ public class SubmitSelfOrdersEvent implements HarvesterUIEvent {
             SelectSelfOrderDialog selectSelfOrderDialog = UITools.setDialogAttr(new SelectSelfOrderDialog(selfOrders), true);
 
             if (selectSelfOrderDialog.isOk()) {
-                selfOrders.removeIf(it -> StringUtils.isEmpty(it.buyerAccountEmail));
+                selfOrders.removeIf(it -> StringUtils.isEmpty(it.buyerAccountEmail) ||
+                it.buyerAccountCode.trim().equalsIgnoreCase(it.ownerAccountCode.substring(0,it.buyerAccountCode.trim().length()))
+                );
                 orderSubmitter.submit(selfOrders);
             }
         }
@@ -172,5 +174,9 @@ public class SubmitSelfOrdersEvent implements HarvesterUIEvent {
             }
 
         }
+    }
+
+    public static void main(String[] args) {
+        System.out.println("725".equalsIgnoreCase("725UK".substring(0,"725".length())));
     }
 }
