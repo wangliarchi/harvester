@@ -11,6 +11,7 @@ import edu.olivet.foundations.ui.MessagePanel;
 import edu.olivet.foundations.ui.UITools;
 import edu.olivet.foundations.ui.VirtualMessagePanel;
 import edu.olivet.foundations.utils.*;
+import edu.olivet.foundations.utils.RegexUtils.Regex;
 import edu.olivet.harvester.feeds.helper.ConfirmShipmentEmailSender;
 import edu.olivet.harvester.feeds.helper.FeedGenerator;
 import edu.olivet.harvester.feeds.helper.FeedGenerator.BatchFileType;
@@ -176,7 +177,7 @@ public class ConfirmShipments {
 
         //get orders from google spreadsheet, all errors are handled.
         List<Order> orders = getOrdersFromWorksheet(worksheet, country);
-
+        orders.removeIf(it -> !Regex.AMAZON_ORDER_NUMBER.isMatched(it.order_id));
         messagePanel.displayMsg(orders.size() + "  order(s) found on the worksheet. ");
 
         resultSummary.append("Total ").append(orders.size()).append(" found; ");
