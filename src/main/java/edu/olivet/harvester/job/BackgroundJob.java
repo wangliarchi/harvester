@@ -25,7 +25,7 @@ public enum BackgroundJob {
 
     SyncASIN("0 0 3 ? * MON,TUE,WED,THU,FRI,SAT *", SyncASINJob.class),
 
-    SendingGrayLabelLetter("0 0 20 ? * MON,TUE,WED,THU,FRI,SAT *", SendingGrayLabelLetterJob.class),
+    SendingGrayLabelLetter("0 0 20 ? * * *", SendingGrayLabelLetterJob.class),
 
     HarvesterAutoUpgrade("0 15 2 1/1 * ? *", HarvesterAutoUpgrade.class),
 
