@@ -87,7 +87,8 @@ public class SubmitSelfOrdersEvent implements HarvesterUIEvent {
 
             if (selectSelfOrderDialog.isOk()) {
                 selfOrders.removeIf(it -> StringUtils.isEmpty(it.buyerAccountEmail) ||
-                it.buyerAccountCode.trim().equalsIgnoreCase(it.ownerAccountCode.substring(0,it.buyerAccountCode.trim().length()))
+                        (StringUtils.length(it.buyerAccountCode) < StringUtils.length(it.ownerAccountCode) &&
+                                it.buyerAccountCode.trim().equalsIgnoreCase(it.ownerAccountCode.substring(0, it.buyerAccountCode.trim().length())))
                 );
                 orderSubmitter.submit(selfOrders);
             }
@@ -96,7 +97,7 @@ public class SubmitSelfOrdersEvent implements HarvesterUIEvent {
 
     @Inject ProductManager productManager;
 
-    public void reloadSelfOrderProducts(){
+    public void reloadSelfOrderProducts() {
         String spreadsheetId = SystemSettings.reload().getSelfOrderSpreadsheetId();
         if (StringUtils.isBlank(spreadsheetId)) {
             UITools.error("Self order spreadsheet id not entered. Please config under Settings->System Settings->Self-Orders");
@@ -134,6 +135,7 @@ public class SubmitSelfOrdersEvent implements HarvesterUIEvent {
 
         }
     }
+
     public void addProducts() {
         String spreadsheetId = SystemSettings.reload().getSelfOrderSpreadsheetId();
         if (StringUtils.isBlank(spreadsheetId)) {
@@ -177,6 +179,6 @@ public class SubmitSelfOrdersEvent implements HarvesterUIEvent {
     }
 
     public static void main(String[] args) {
-        System.out.println("725".equalsIgnoreCase("725UK".substring(0,"725".length())));
+        System.out.println("725".equalsIgnoreCase("725UK".substring(0, "725".length())));
     }
 }
