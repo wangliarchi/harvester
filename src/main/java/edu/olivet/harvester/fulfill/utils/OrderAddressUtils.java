@@ -22,6 +22,7 @@ public class OrderAddressUtils {
         }
 
         if (order.purchaseBack()) {
+            LOGGER.info("{} is us fwd", order.order_id);
             Address address = FwdAddressUtils.getUSFwdAddress();
             address.setName(FwdAddressUtils.getFwdRecipient(order));
             return address;

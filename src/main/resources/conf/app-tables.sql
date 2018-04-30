@@ -178,8 +178,10 @@ CREATE TABLE IF NOT EXISTS order_submission_tasks_new2 (
 INSERT INTO order_submission_tasks_new2 (id, sid, marketplaceName, spreadsheetId, spreadsheetName, orderRangeCol, lostLimit, priceLimit,
                                          eddLimit, noInvoiceText, skipValidationCol, finderCode, buyerAccount, primeBuyerAccount, status,
                                          orders, invalidOrders, summary, totalOrders,
-                                         success, failed, timeTaken, dateCreated, dateStarted, dateEnded)
-  SELECT *
+                                         success, failed, timeTaken, dateCreated, dateStarted, dateEnded, expeditedEddLimit)
+  SELECT
+    order_submission_tasks_new.*,
+    3
   FROM order_submission_tasks_new;
 
 /* order submission record by buyer account */
