@@ -28,4 +28,9 @@ public class ConfirmationFailedLogService {
     public static void main(String[] args) {
         logFailed(Country.US, "12/21", "test error msg");
     }
+
+
+
+
+
 }

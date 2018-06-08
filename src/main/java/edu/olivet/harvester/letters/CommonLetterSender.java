@@ -186,7 +186,6 @@ public class CommonLetterSender {
                 ordersToSendLettersMap.put(order.order_id, list);
             }
 
-
             //发信前，在当天表格里面搜索一下要发灰条信的订单号，如果发现有重复的单号，并且都是灰条，重复的单号只发一次灰条信，都标记发信完成。
             ordersToSendLettersMap.forEach((orderId, os) -> {
                 Order order = os.get(0);

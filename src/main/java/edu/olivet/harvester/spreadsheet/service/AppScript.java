@@ -180,6 +180,21 @@ public class AppScript {
         }
     }
 
+    @Repeat(expectedExceptions = {BusinessException.class, JSONException.class})
+    public void selfOrderRefundLog(String spreadId, String sheetName, int row, String log) {
+        Map<String, String> params = new HashMap<>();
+        params.put(PARAM_SPREAD_ID, spreadId);
+        params.put(PARAM_SHEET_NAME, sheetName);
+        params.put(PARAM_ROW, String.valueOf(row));
+        params.put("log", log);
+        params.put(PARAM_METHOD, "CommitShippingConfirmationLog");
+        String result = this.processResult(this.get(params));
+        if (!SUCCESS.equals(result)) {
+            throw new BusinessException(String.format("Failed to commit selfOrder refund log to row %d of sheet %s: %s",
+                    row, sheetName, result));
+        }
+    }
+
     protected String processResult(String result) {
         if (Strings.containsAnyIgnoreCase(StringUtils.defaultString(result), "<html")) {
             Document doc = Jsoup.parse(result);

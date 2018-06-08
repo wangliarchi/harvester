@@ -25,6 +25,7 @@ import java.util.Observable;
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 11/8/17 10:15 AM
  */
 public class CommonLettersEvent extends Observable implements HarvesterUIEvent {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonLettersEvent.class);
 
     @Inject private
@@ -65,6 +66,5 @@ public class CommonLettersEvent extends Observable implements HarvesterUIEvent {
             mailer.executeForWorksheets(selectedWorksheets);
         }
     }
-
 
 }

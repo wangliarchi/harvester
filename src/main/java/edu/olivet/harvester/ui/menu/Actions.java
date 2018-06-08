@@ -65,4 +65,6 @@ public class Actions {
     public static final Action FetchUnprocessedOrders = new Action("FetchUnprocessedOrders", "Fetch Unprocessed Orders Data", null, null);
     public static final Action FetchTrackingNumbers = new Action("FetchTrackingNumbers", "Fetch Tracking Numbers", null, null);
     public static final Action CloseAllWebTabs = new Action("CloseAllWebTabs", "Close Web Tabs", null, "cancel.png");
+
+    public static final Action RefundOrder = new Action("RefundOrder", "Refund Order", null, "cancel.png");
 }

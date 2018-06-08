@@ -103,6 +103,14 @@ public class UIHarvester extends AbstractApplicationUI {
     }
 
     @Inject private
+    RefundOrderEvent refundOrderEvent;
+
+    @UIEvent
+    public void refundOrder() {
+        refundOrderEvent.execute();
+    }
+
+    @Inject private
     OrderConfirmationHistoryEvent orderConfirmationHistoryEvent;
 
     @UIEvent

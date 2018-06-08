@@ -31,7 +31,6 @@ public class ShipmentOrderFilter {
      */
     public List<Order> filterOrders(List<Order> orders, Worksheet worksheet, StringBuilder resultSummary, StringBuilder resultDetail) {
 
-
         //if order purchased date is over maxDaysBack days, ignore???
 
         Date minDate = DateUtils.addDays(new Date(), -30);
@@ -45,7 +44,7 @@ public class ShipmentOrderFilter {
                 return orders;
             }
         } catch (Exception e) {
-            LOGGER.error("Fail to check first order for {}",worksheet,e);
+            LOGGER.error("Fail to check first order for {}", worksheet,e);
         }
 
         orders.removeIf(it -> {

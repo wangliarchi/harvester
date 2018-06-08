@@ -17,9 +17,9 @@ import java.io.File;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 2/21/2018 3:45 PM
  */
+
 public class FeedUploadService extends FeedUploader {
     private static final Logger LOGGER = LoggerFactory.getLogger(FeedUploadService.class);
-
 
     public String submitFeedAllZoneCountries(File feedFile, BatchFileType fileType, Country country) {
         String result = "";

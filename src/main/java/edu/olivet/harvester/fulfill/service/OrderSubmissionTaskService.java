@@ -239,7 +239,6 @@ public class OrderSubmissionTaskService {
         return saveTask(newTask);
     }
 
-
     @Inject private AppScript appScript;
     @Inject private OrderValidator orderValidator;
     @Inject MessageListener messageListener;

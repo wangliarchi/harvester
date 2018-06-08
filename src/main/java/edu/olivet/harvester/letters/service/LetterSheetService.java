@@ -24,12 +24,34 @@ public class LetterSheetService extends edu.olivet.harvester.fulfill.service.She
 
         List<ValueRange> dateToUpdate = new ArrayList<>();
 
-
         ValueRange statusData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(status)))
                 .setRange(String.format("%s!A%d", order.sheetName, row));
         dateToUpdate.add(statusData);
 
         ValueRange infoData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(order.order_number + " emailed")))
+                .setRange(String.format("%s!AD%d", order.sheetName, row));
+        dateToUpdate.add(infoData);
+
+        try {
+            this.batchUpdateValues(order.spreadsheetId, dateToUpdate);
+        } catch (BusinessException e) {
+            LOGGER.error("Fail to update order error msg {} - {}", order.spreadsheetId, e);
+            throw new BusinessException(e);
+        }
+    }
+
+    public void fillRefundSuccessInfo(Order order) {
+        String status = order.status;
+        order = reloadOrder(order);
+        int row = order.row;
+
+        List<ValueRange> dateToUpdate = new ArrayList<>();
+
+        ValueRange statusData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(status)))
+                .setRange(String.format("%s!A%d", order.sheetName, row));
+        dateToUpdate.add(statusData);
+
+        ValueRange infoData = new ValueRange().setValues(Collections.singletonList(Lists.newArrayList(order.order_number + " refunded")))
                 .setRange(String.format("%s!AD%d", order.sheetName, row));
         dateToUpdate.add(infoData);
 
@@ -59,4 +81,5 @@ public class LetterSheetService extends edu.olivet.harvester.fulfill.service.She
             throw new BusinessException(e);
         }
     }
+
 }

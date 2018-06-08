@@ -75,6 +75,7 @@ public class UIElements extends AbstractUIContainer {
                 Actions.AddSelfOrderProduct,
                 //Actions.ReloadSelfOrderProduct,
                 Actions.PostSelfOrderFeedbacks,
+                Actions.RefundOrder,
 
         });
         map.put(finance, new Action[] {

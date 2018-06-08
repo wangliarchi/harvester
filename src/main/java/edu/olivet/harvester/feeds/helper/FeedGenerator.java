@@ -1,5 +1,6 @@
 package edu.olivet.harvester.feeds.helper;
 
+import com.amazonservices.mws.orders._2013_09_01.model.OrderItem;
 import com.google.inject.Singleton;
 import edu.olivet.foundations.amazon.Country;
 import edu.olivet.foundations.ui.UIText;
@@ -8,6 +9,7 @@ import edu.olivet.foundations.utils.Dates;
 import edu.olivet.foundations.utils.Directory;
 import edu.olivet.foundations.utils.Tools;
 import edu.olivet.harvester.common.model.OrderEnums;
+import edu.olivet.harvester.common.model.OrderEnums.OrderItemType;
 import edu.olivet.harvester.feeds.model.InventoryUpdateRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +46,11 @@ public class FeedGenerator {
          */
         ShippingConfirmation("ShippingConfirmation", "order-id\tcarrier-code\tcarrier-name\tship-date",
                 "_POST_FLAT_FILE_FULFILLMENT_DATA_"),
+        /**
+         * Refund self order 文件
+         */
+        SelfOrderRefund("SelfOrderRefund", "order-id\torder-item-id\tadjustment-reason-code\tcurrency\titem-price-adj", "_POST_FLAT_FILE_PAYMENT_ADJUSTMENT_DATA_"),
+
         /**
          * 更改库存数量文件
          */
@@ -159,6 +166,27 @@ public class FeedGenerator {
         return file;
     }
 
+    public File generateSelfOrdersRefund(List<String[]> orders, Country country, OrderEnums.OrderItemType sheetType){
+
+        List<String> contents = new ArrayList<>(orders.size() + 1);
+        contents.add(BatchFileType.SelfOrderRefund.headers());
+
+        for (String[] row : orders){
+            contents.add(String.format("%s\t%s\t%s\t%s\t%s", row[0], row[1], row[2], row[3], row[4]));
+        }
+
+        File file;
+        try {
+            file = this.initReportFile(BatchFileType.SelfOrderRefund.uploadTypeCode, country, sheetType);
+        } catch (Exception e){
+            LOGGER.error(" ", e);
+            throw new BusinessException(e);
+        }
+
+        Tools.writeLines(file, contents);
+        return file;
+
+    }
 
     /**
      * initialize feed file.

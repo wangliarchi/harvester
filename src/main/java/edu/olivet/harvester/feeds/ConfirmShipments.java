@@ -116,7 +116,6 @@ public class ConfirmShipments {
         }
     }
 
-
     private void confirmShipmentForSpreadsheetId(String spreadsheetId, String sheetName) {
         //set spreadsheet id, check if the given spreadsheet id is valid
         Spreadsheet workingSpreadsheet;
@@ -135,7 +134,6 @@ public class ConfirmShipments {
 
         confirmShipmentForWorksheet(selectedWorksheet);
     }
-
 
     private void confirmShipmentForWorksheet(Worksheet worksheet) {
         StringBuilder resultSummary = new StringBuilder();
@@ -211,7 +209,7 @@ public class ConfirmShipments {
         orders = shipmentOrderFilter.filterOrders(orders, worksheet, resultSummary, resultDetail);
 
         if (orders.isEmpty()) {
-            messagePanel.displayMsg("No  orders need to be confirmed for sheet " + worksheet.toString(), LOGGER, InformationLevel.Positive);
+            messagePanel.displayMsg("No orders need to be confirmed for sheet " + worksheet.toString(), LOGGER, InformationLevel.Positive);
 
             if (messagePanel instanceof VirtualMessagePanel) {
                 String subject = String.format("No  orders need to be confirmed for sheet %s", worksheet.toString());
@@ -224,6 +222,7 @@ public class ConfirmShipments {
         messagePanel.displayMsg(orders.size() + "  order(s) found to be confirmed. ", InformationLevel.Important);
         resultDetail.append(orders.size()).append(" submitted.").append("\n");
         resultSummary.append(orders.size()).append(" submitted. ");
+
         //create feed file
         File feedFile;
         try {
@@ -233,11 +232,6 @@ public class ConfirmShipments {
         } catch (Exception e) {
             messagePanel.displayMsg("Error when generating feed file. " + e.getMessage(), InformationLevel.Negative);
             LOGGER.error("Error when generating feed file. " + e);
-            if (messagePanel instanceof VirtualMessagePanel) {
-                String subject = String.format("Error when generating feed file for sheet %s", worksheet.toString());
-                confirmShipmentEmailSender.sendErrorFoundEmail(subject,
-                        "Error when generating feed file. " + e.getMessage(), country);
-            }
 
             ConfirmationFailedLogService.logFailed(country, worksheet.getSheetName(), e.getMessage());
 
@@ -273,7 +267,6 @@ public class ConfirmShipments {
             LOGGER.error("Fail to log confirmation ", e);
         }
 
-
     }
 
     @Repeat
@@ -290,7 +283,6 @@ public class ConfirmShipments {
         //if (messagePanel instanceof VirtualMessagePanel) {
         confirmShipmentEmailSender.sendSuccessEmail(result, feedFile, country);
         //}
-
 
     }
 
@@ -346,7 +338,6 @@ public class ConfirmShipments {
 
             }
         }
-
 
     }
 
@@ -414,10 +405,8 @@ public class ConfirmShipments {
 
         }
 
-
         return orders;
     }
-
 
     private File generateFeedFile(Worksheet worksheet, List<Order> orders) {
 
@@ -461,6 +450,7 @@ public class ConfirmShipments {
         //create feed file
         return this.feedGenerator.generateConfirmShipmentFeedFromRows(ordersToBeConfirmed,
                 worksheet.getSpreadsheet().getSpreadsheetCountry(), worksheet.getSpreadsheet().getSpreadsheetType());
+
     }
 
 
@@ -480,8 +470,10 @@ public class ConfirmShipments {
             try {
 
                 LOGGER.info("Load Unshipped or PartiallyShipped orders between {} and {}", createAfter, createBefore);
+
                 List<com.amazonservices.mws.orders._2013_09_01.model.Order> orders =
                         mwsOrderClient.listUnshippedOrders(country, createBefore, createAfter);
+
                 //todo timezone? should be fine since there should be at lest one day between EarliestShipDate and LatestShipDate
                 orders.removeIf(order -> order.getEarliestShipDate().toGregorianCalendar().getTime().after(now));
                 LOGGER.info("{} unshipped or partiallyShipped order(s) founded  between {} and {}", createAfter, createBefore);
@@ -555,7 +547,6 @@ public class ConfirmShipments {
         //wait for 2 minutes, then check unshipped orders.
         Tools.sleep(2, TimeUnit.MINUTES);
         notConfirmedOrderNotification();
-
 
     }
 

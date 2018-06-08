@@ -31,7 +31,7 @@ public class Harvester {
         UITools.init(APP);
 
         if (SystemUtils.IS_OS_WINDOWS) {
-            new AutoUpgradeJob().execute();
+            //new AutoUpgradeJob().execute();
         }
 
         if (!Settings.existed()) {

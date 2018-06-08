@@ -65,7 +65,6 @@ public class ExportOrderService extends OrderClient {
             return null;
         }
 
-
         //remove exported orders
         orders = removeExportedOrders(orders, lastExportedDate, country);
         if (CollectionUtils.isEmpty(orders)) {
@@ -219,8 +218,8 @@ public class ExportOrderService extends OrderClient {
         for (Order order : orders) {
             i++;
 
-
             List<OrderItem> items = orderFetcher.readItems(order.getAmazonOrderId(), Settings.load().getConfigByCountry(country).getMwsCredential());
+
             for (OrderItem item : items) {
                 AmazonOrder amazonOrder = new AmazonOrder();
                 amazonOrder.setOrderId(order.getAmazonOrderId());

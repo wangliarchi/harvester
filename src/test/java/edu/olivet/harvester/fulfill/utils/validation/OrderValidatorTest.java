@@ -23,5 +23,23 @@ public class OrderValidatorTest extends BaseTest {
         assertTrue(StringUtils.isNotBlank(result));
 
     }
+    @Test
+    public void isSupplierHunted() {
+        Order order = prepareOrder();
+
+
+        order.seller = "AP";
+        order.seller_id = "";
+        order.seller_price = "9.94";
+        order.url = "/";
+        order.condition = "New";
+        order.character = "cancelled";
+
+        String result = orderValidator.isSupplierHunted(order);
+        System.out.println(result);
+
+        assertTrue(StringUtils.isNotBlank(result));
+
+    }
 
 }

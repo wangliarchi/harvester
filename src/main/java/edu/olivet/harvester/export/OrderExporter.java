@@ -58,6 +58,7 @@ public class OrderExporter {
      * triggered by cronjob
      */
     public void execute() {
+
         setMessagePanel(new ProgressDetail(Actions.ExportOrders));
         //list all marketplaces
         Settings settings = Settings.load();
@@ -66,7 +67,9 @@ public class OrderExporter {
             messagePanel.displayMsg("No marketplace found. please check if you have correct settings.", LOGGER, InformationLevel.Negative);
             return;
         }
+
         exportOrdersForMarketplaces(marketplaces, null, null);
+
     }
 
     /**

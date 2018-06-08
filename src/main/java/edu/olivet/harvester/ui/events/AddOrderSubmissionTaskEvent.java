@@ -22,6 +22,7 @@ import java.util.Observable;
 /**
  * @author <a href="mailto:rnd@olivetuniversity.edu">OU RnD</a> 12/12/17 12:14 PM
  */
+
 public class AddOrderSubmissionTaskEvent extends Observable implements HarvesterUIEvent, OrderSubmissionTaskHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(AddOrderSubmissionTaskEvent.class);
 
@@ -64,6 +65,5 @@ public class AddOrderSubmissionTaskEvent extends Observable implements Harvester
         TasksAndProgressPanel.getInstance().loadTasksToTable();
 
     }
-
 
 }

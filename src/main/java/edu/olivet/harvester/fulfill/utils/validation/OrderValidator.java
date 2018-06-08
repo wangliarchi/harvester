@@ -19,6 +19,7 @@ import edu.olivet.harvester.fulfill.model.OrderSubmissionTask;
 import edu.olivet.harvester.hunt.model.Seller;
 import edu.olivet.harvester.fulfill.service.AmazonOrderService;
 import edu.olivet.harvester.fulfill.service.DailyBudgetHelper;
+import edu.olivet.harvester.hunt.model.SellerEnums.SellerType;
 import edu.olivet.harvester.hunt.service.ForbiddenSellerService;
 import edu.olivet.harvester.fulfill.service.SheetService;
 import edu.olivet.harvester.fulfill.utils.*;
@@ -314,10 +315,19 @@ public class OrderValidator {
     public String isSupplierHunted(Order order) {
         //no seller or seller price info
         String errorMsg = "Order supplier has not been hunted yet.";
+        String errorMsgAbnormalSupplier = "Order supplier is not normal.";
+
         if ((StringUtils.isBlank(order.seller) && StringUtils.isBlank(order.seller_id)) ||
                 StringUtils.isBlank(order.seller_price) ||
                 StringUtils.isBlank(order.character)) {
             return errorMsg;
+        }
+
+        try {
+            SellerType.getByCharacter(order.character);
+        }catch (Exception e) {
+            LOGGER.error("supplier info is not normal", e);
+            return Strings.getExceptionMsg(e);
         }
 
         //not checked yet
